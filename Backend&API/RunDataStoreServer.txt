@@ -1,0 +1,3 @@
+Powershell:
+cd 'C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\platform\cloud-datastore-emulator'
+cmd /c .\cloud_datastore_emulator.cmd start --host=localhost --port=8081 --store_on_disk=True --allow_remote_shutdown --consistency=0.9 'C:\Users\Francisco Freitas\AppData\Roaming\gcloud\emulators\datastore'

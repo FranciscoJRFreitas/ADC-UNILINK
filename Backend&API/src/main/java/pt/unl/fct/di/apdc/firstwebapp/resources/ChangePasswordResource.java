@@ -1,0 +1,75 @@
+package pt.unl.fct.di.apdc.firstwebapp.resources;
+
+import java.util.logging.Logger;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+import com.google.cloud.datastore.*;
+
+import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
+
+@Path("/changePwd")
+@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+public class ChangePasswordResource {
+
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private static final Logger LOG = Logger.getLogger(ChangePasswordResource.class.getName());
+
+    public ChangePasswordResource() {
+    }
+
+    @POST
+    @Path("/")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response changePassword(ChangePasswordData data) {
+        LOG.fine("Attempt to change password for user: " + data.username);
+
+        String validationResult = data.validChangePassword();
+        if (!validationResult.equals("OK"))
+            return Response.status(Status.BAD_REQUEST).entity(validationResult).build();
+
+        Transaction txn = datastore.newTransaction();
+        try {
+            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+            Entity user = txn.get(userKey);
+
+            if (user == null) {
+                txn.rollback();
+                return Response.status(Status.BAD_REQUEST).entity("User not found.").build();
+            }
+
+            String storedPassword = user.getString("user_pwd");
+            String providedPassword = DigestUtils.sha512Hex(data.currentPwd);
+
+            if (!storedPassword.equals(providedPassword)) {
+                txn.rollback();
+                return Response.status(Status.UNAUTHORIZED).entity("Incorrect current password.").build();
+            }
+
+            String storedToken = user.getString("user_token");
+            long storedTokenExpiration = user.getLong("user_token_expiration");
+            if (!storedToken.equals(data.token) || System.currentTimeMillis() > storedTokenExpiration) {
+                txn.rollback();
+                return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
+            }
+
+            Entity updatedUser = Entity.newBuilder(user)
+                    .set("user_pwd", DigestUtils.sha512Hex(data.newPwd))
+                    .build();
+
+            txn.put(updatedUser);
+            txn.commit();
+            return Response.ok("{}").build();
+
+        } finally {
+            if (txn.isActive()) txn.rollback();
+        }
+    }
+}

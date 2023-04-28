@@ -1,0 +1,137 @@
+Registered super-user:
+POST    http://localhost:8080/rest/register/
+{
+    "displayName": "Francisco",
+    "username": "fj.freitas",
+    "email": "fj.freitas@campus.fct.unl.pt",
+    "password": "Password123!",
+    "confirmPwd": "Password123!",
+    "role": "SU"
+}
+
+Register user:
+POST    http://localhost:8080/rest/register/
+{
+    "displayName": "Francisco",
+    "username": "fj.freitas2",
+    "email": "fj.freitas@campus.fct.unl.pt",
+    "password": "Password123!",
+    "confirmPwd": "Password123!"
+}
+
+Register a user with additional optional fields:
+POST http://localhost:8080/rest/register/
+{
+    "displayName": "Joana",
+    "username": "joana123",
+    "email": "joana123@example.com",
+    "password": "JoanaPassword123!",
+    "confirmPwd": "JoanaPassword123!",
+    "role": "USER",
+    "landlinePhone": "123456789",
+    "mobilePhone": "987654321",
+    "occupation": "Graphic Designer",
+    "workplace": "Design Studio",
+    "address": "123 Main Street",
+    "additionalAddress": "Apt 4B",
+    "locality": "New York",
+    "postalCode": "10001",
+    "taxIdentificationNumber": "123456789"
+}
+
+Target user delete:
+DELETE   http://localhost:8080/rest/remove/
+{
+    "username": "fj.freitas2",
+    "password": "Password123!",
+    "targetUsername": "joana123"
+}
+
+Target user delete:
+DELETE   http://localhost:8080/rest/remove/
+{
+    "username": "fj.freitas",
+    "password": "Password123!",
+    "targetUsername": "fj.freitas2"
+}
+
+Delete user:
+DELETE   http://localhost:8080/rest/remove/
+{
+    "username": "fj.freitas",
+    "password": "Password123!"
+}
+
+List users SU:
+GET http://localhost:8080/rest/list/
+{
+    "username": "fj.freitas",
+    "password": "Password123!"
+}
+
+List users:
+GET http://localhost:8080/rest/list/
+{
+    "username": "fj.freitas2",
+    "password": "Password123!"
+}
+
+Modify attributes for the user (own attributes):
+POST http://localhost:8080/rest/modify/
+{
+    "username": "fj.freitas",
+    "password": "Password123!",
+    "displayName": "Francisco Updated",
+    "email": "fj.freitas@campus.fct.unl.pt",
+    "mobilePhone": "912345678",
+    "occupation": "Software Developer"
+}
+
+Modify attributes of another user (target user) as an admin or superuser:
+POST http://localhost:8080/rest/modify/
+{
+    "username": "fj.freitas",
+    "password": "Password123!",
+    "targetUsername": "fj.freitas2",
+    "displayName": "Francisco2 Updated",
+    "email": "fj.freitas2@campus.fct.unl.pt",
+    "mobilePhone": "912345679",
+    "occupation": "Software Engineer"
+}
+
+Attempt to modify attributes of another user without admin or superuser privileges:
+POST http://localhost:8080/rest/modify/
+{
+    "username": "fj.freitas2",
+    "password": "Password123!",
+    "targetUsername": "fj.freitas",
+    "displayName": "Francisco Not Updated",
+    "email": "fj.freitas@campus.fct.unl.pt",
+    "mobilePhone": "912345678",
+    "occupation": "Software Developer"
+}
+
+Change password for a user with incorrect current password:
+POST http://localhost:8080/rest/changePwd/
+{
+    "username": "fj.freitas",
+    "currentPwd": "WrongPassword",
+    "newPwd": "Password1234!",
+    "confirmPwd": "Password1234!"
+}
+
+Change password:
+POST http://localhost:8080/rest/changePwd/
+{
+    "username": "fj.freitas",
+    "currentPwd": "Password123!",
+    "newPwd": "Password1234!",
+    "confirmPwd": "Password1234!"
+}
+
+User login:
+POST http://localhost:8080/rest/login/
+{
+    "username": "fj.freitas",
+    "password": "Password1234!"
+}

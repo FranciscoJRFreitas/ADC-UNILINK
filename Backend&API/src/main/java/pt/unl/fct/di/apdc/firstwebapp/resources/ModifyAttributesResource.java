@@ -1,0 +1,173 @@
+package pt.unl.fct.di.apdc.firstwebapp.resources;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+import com.google.cloud.datastore.*;
+
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
+import pt.unl.fct.di.apdc.firstwebapp.util.ModifyAttributesData;
+import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
+
+@Path("/modify")
+@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+public class ModifyAttributesResource {
+
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private static final Logger LOG = Logger.getLogger(ModifyAttributesResource.class.getName());
+
+    private final Gson g = new Gson();
+
+    public ModifyAttributesResource() {
+    }
+
+    @POST
+    @Path("/")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response modifyAttributes(ModifyAttributesData data) {
+        LOG.fine("Attempt to modify attributes for user:" + data.username);
+
+        boolean targetUserChange = StringUtils.isNotEmpty(data.targetUsername);
+
+        if(!targetUserChange)
+            data.targetUsername = data.username;
+
+        // Checks input data
+        String validationResult = data.validModifyAttributes();
+        if (!validationResult.equals("OK"))
+            return Response.status(Status.BAD_REQUEST).entity(validationResult).build();
+
+        Transaction txn = datastore.newTransaction();
+        try {
+            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+            Entity user = txn.get(userKey);
+
+            if (user == null) {
+                txn.rollback();
+                return Response.status(Status.BAD_REQUEST).entity("User not found: " + data.username).build();
+            }
+
+            String storedPassword = user.getString("user_pwd");
+            String providedPassword = DigestUtils.sha512Hex(data.password);
+
+            if (!storedPassword.equals(providedPassword)) {
+                return Response.status(Status.UNAUTHORIZED).entity("Incorrect password for user: " + data.username).build();
+            }
+
+            String storedToken = user.getString("user_token");
+            long storedTokenExpiration = user.getLong("user_token_expiration");
+            if (!storedToken.equals(data.token) || System.currentTimeMillis() > storedTokenExpiration) {
+                txn.rollback();
+                return Response.status(Status.UNAUTHORIZED).entity("Session Expired.").build();
+            }
+
+            UserRole userRole = UserRole.valueOf(user.getString("user_role"));
+
+            if (targetUserChange) {
+
+                Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(data.targetUsername);
+                Entity targetUser = txn.get(targetUserKey);
+
+                if (targetUser == null) {
+                    txn.rollback();
+                    return Response.status(Status.BAD_REQUEST).entity("Target user not found: " + data.username).build();
+                }
+
+                UserRole targetUserRole = UserRole.valueOf(targetUser.getString("user_role"));
+
+                if (!canModifyAttributes(userRole, targetUserRole, data)) {
+                    txn.rollback();
+                    return Response.status(Status.FORBIDDEN).entity("You do not have the required permissions for this action.").build();
+                }
+
+                Entity targetUserUpdated = updateOptionalFields(userRole, targetUser, data);
+                txn.put(targetUserUpdated);
+                LOG.info("Target User attributes modified: " + data.targetUsername);
+                txn.commit();
+                return Response.ok("{}").build();
+            }
+
+            Entity userUpdated = updateOptionalFields(userRole, user, data);
+            txn.put(userUpdated);
+            LOG.info("User attributes modified: " + data.username);
+            txn.commit();
+
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("displayName", user.getString("user_displayName"));
+            responseData.put("username", user.getString("user_username"));
+            responseData.put("email", user.getString("user_email"));
+            responseData.put("role", user.getString("user_role"));
+            responseData.put("profileVisibility", user.getString("user_profileVisibility"));
+            responseData.put("state", user.getString("user_state"));
+            responseData.put("landlinePhone", user.getString("user_landlinePhone"));
+            responseData.put("mobilePhone", user.getString("user_mobilePhone"));
+            responseData.put("occupation", user.getString("user_occupation"));
+            responseData.put("workplace", user.getString("user_workplace"));
+            responseData.put("address", user.getString("user_address"));
+            responseData.put("additionalAddress", user.getString("user_additionalAddress"));
+            responseData.put("locality", user.getString("user_locality"));
+            responseData.put("postalCode", user.getString("user_postalCode"));
+            responseData.put("nif", user.getString("user_taxIdentificationNumber"));
+            responseData.put("photo", user.getString("user_photo"));
+
+            return Response.ok(g.toJson(responseData)).build();
+
+        } finally {
+            if (txn.isActive()) txn.rollback();
+        }
+    }
+
+    private Entity updateOptionalFields(UserRole userRole, Entity user, ModifyAttributesData data) {
+        Entity.Builder userBuilder = Entity.newBuilder(user);
+
+        if (!userRole.equals(UserRole.USER)) {
+            if (StringUtils.isNotEmpty(data.displayName)) userBuilder.set("user_displayName", data.displayName);
+            if (StringUtils.isNotEmpty(data.email)) userBuilder.set("user_email", data.email);
+            if (StringUtils.isNotEmpty(data.role)) userBuilder.set("user_role", data.role);
+            if (StringUtils.isNotEmpty(data.activityState)) userBuilder.set("user_state", data.activityState);
+        }
+        if (StringUtils.isNotEmpty(data.profileVisibility)) userBuilder.set("user_profileVisibility", data.profileVisibility);
+        if (StringUtils.isNotEmpty(data.landlinePhone)) userBuilder.set("user_landlinePhone", data.landlinePhone);
+        if (StringUtils.isNotEmpty(data.mobilePhone)) userBuilder.set("user_mobilePhone", data.mobilePhone);
+        if (StringUtils.isNotEmpty(data.occupation)) userBuilder.set("user_occupation", data.occupation);
+        if (StringUtils.isNotEmpty(data.workplace)) userBuilder.set("user_workplace", data.workplace);
+        if (StringUtils.isNotEmpty(data.address)) userBuilder.set("user_address", data.address);
+        if (StringUtils.isNotEmpty(data.additionalAddress)) userBuilder.set("user_additionalAddress", data.additionalAddress);
+        if (StringUtils.isNotEmpty(data.locality)) userBuilder.set("user_locality", data.locality);
+        if (StringUtils.isNotEmpty(data.postalCode)) userBuilder.set("user_postalCode", data.postalCode);
+        if (StringUtils.isNotEmpty(data.taxIdentificationNumber)) userBuilder.set("user_taxIdentificationNumber", data.taxIdentificationNumber);
+        if (StringUtils.isNotEmpty(data.photo)) userBuilder.set("user_photo", data.photo);
+
+        return userBuilder.build();
+    }
+
+
+    private boolean canModifyAttributes(UserRole userRole, UserRole targetUserRole, ModifyAttributesData data) {
+        switch (userRole) {
+            case USER:
+                return data.username.equals(data.targetUsername);
+            case GBO:
+                return targetUserRole == UserRole.USER;
+            case GA:
+                return targetUserRole == UserRole.USER || targetUserRole == UserRole.GBO;
+            case GS:
+                return targetUserRole == UserRole.USER || targetUserRole == UserRole.GBO || targetUserRole == UserRole.GA;
+            case SU:
+                return true;
+            default:
+                return false;
+        }
+    }
+}
+

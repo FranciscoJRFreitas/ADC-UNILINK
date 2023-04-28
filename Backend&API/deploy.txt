@@ -1,0 +1,2 @@
+Remoto: mvn package appengine:deploy -Dapp.deploy.projectId=ai-60313 -Dapp.deploy.version=1
+Local: mvn clean install appengine:run
