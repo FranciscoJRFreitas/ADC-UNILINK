@@ -21,7 +21,6 @@ import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUti
 import com.google.cloud.datastore.*;
 
 import com.google.gson.Gson;
-import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -35,10 +34,13 @@ public class LoginResource {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response doLogin(LoginData data,
-                            @Context HttpServletRequest request,
-                            @Context HttpHeaders headers) {
+    public Response doLogin(LoginData data, @Context HttpServletRequest request, @Context HttpHeaders headers) {
         LOG.fine("Attempt to login user: " + data.username);
+
+        Key ctrskey = createUserStatsKey(data.username);
+        Key logKey = createLogKey(data.username);
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", data.username))
+                .setKind("User Token").newKey(data.username);
 
         Transaction txn = datastore.newTransaction();
         try {
@@ -56,27 +58,26 @@ public class LoginResource {
             QueryResults<Entity> resultsByEmail = datastore.run(queryByEmail);
 
             Entity user = null;
-
-            if (resultsByUsername.hasNext()) user = resultsByUsername.next();
-            else if (resultsByEmail.hasNext()) user = resultsByEmail.next();
+            if (resultsByUsername.hasNext())
+                user = resultsByUsername.next();
+            else if (resultsByEmail.hasNext())
+                user = resultsByEmail.next();
 
             if (user == null) {
                 LOG.warning("Failed login attempt for username/email: " + data.username);
                 return Response.status(Status.FORBIDDEN).build();
             }
 
-            String username = user.getString("user_username");
-            Key userKey = user.getKey();
-            Key ctrskey = createUserStatsKey(username);
-            Key logKey = createLogKey(username);
-
             Entity stats = getOrCreateUserStats(txn, ctrskey);
+            Entity log = createLogEntity(request, headers, logKey);
+
             String hashedPWD = user.getString("user_pwd");
 
             if (hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
-                return handleSuccessfulLogin(username, request, headers, txn, logKey, stats, ctrskey, userKey);
+                Entity ustats = updateStatsForSuccessfulLogin(stats, ctrskey);
+                return handleSuccessfulLogin(user,  txn, log, ustats, tokenKey);
             } else {
-                return handleFailedLogin(username, txn, stats, ctrskey);
+                return handleFailedLogin(data.username, txn, stats, ctrskey);
             }
         } catch (Exception e) {
             txn.rollback();
@@ -111,20 +112,14 @@ public class LoginResource {
         return stats;
     }
 
-    private Response handleSuccessfulLogin(String username, HttpServletRequest request, HttpHeaders headers, Transaction txn, Key logKey, Entity stats, Key ctrskey, Key userKey) {
-        Entity log = createLogEntity(request, headers, logKey);
-        Entity ustats = updateStatsForSuccessfulLogin(stats, ctrskey);
-        txn.put(log, ustats);
+    private Response handleSuccessfulLogin(Entity user, Transaction txn, Entity log,  Entity ustats, Key tokenKey) {
 
-        AuthToken token = new AuthToken(username);
-        Entity user = txn.get(userKey);
-        Entity updatedUser = Entity.newBuilder(user)
-                .set("user_token", token.getTokenID())
-                .set("user_token_expiration", token.getExpirationDate())
-                .set("user_state", UserActivityState.ACTIVE.toString())
+        AuthToken token = new AuthToken(user.getString("user_username"));
+        Entity user_token = Entity.newBuilder(tokenKey)
+                .set("tokenID", token.tokenID)
+                .set("user_token_creation_data", token.creationDate)
+                .set("user_token_expiration_data", token.expirationDate)
                 .build();
-        txn.put(updatedUser);
-        txn.commit();
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("tokenID", token.getTokenID());
@@ -145,9 +140,11 @@ public class LoginResource {
         responseData.put("nif", user.getString("user_taxIdentificationNumber"));
         responseData.put("photo", user.getString("user_photo"));
 
-        LOG.info("User " + username + " logged in successfully.");
+        LOG.info("User " + user.getString("user_username") + " logged in successfully.");
         //OP7
         LOG.info("The tokenID for the current session is " + token.getTokenID() + "\n  Creation time: " + token.getCreationDate() + "\n  Expiration time: " + token.getExpirationDate());
+        txn.put(log, ustats, user_token);
+        txn.commit();
         return Response.ok(g.toJson(responseData)).build();
     }
 
