@@ -74,8 +74,8 @@ public class LoginResource {
             String hashedPWD = user.getString("user_pwd");
 
             if (hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
-                Entity ustats = updateStatsForSuccessfulLogin(stats, ctrskey);
-                return handleSuccessfulLogin(user,  txn, log, ustats, tokenKey);
+                Entity uStats = updateStatsForSuccessfulLogin(stats, ctrskey);
+                return handleSuccessfulLogin(user,  txn, log, uStats, tokenKey);
             } else {
                 return handleFailedLogin(data.username, txn, stats, ctrskey);
             }
@@ -112,11 +112,12 @@ public class LoginResource {
         return stats;
     }
 
-    private Response handleSuccessfulLogin(Entity user, Transaction txn, Entity log,  Entity ustats, Key tokenKey) {
+    private Response handleSuccessfulLogin(Entity user, Transaction txn, Entity log,  Entity uStats, Key tokenKey) {
 
         AuthToken token = new AuthToken(user.getString("user_username"));
         Entity user_token = Entity.newBuilder(tokenKey)
                 .set("tokenID", token.tokenID)
+                //.set("token_username", token.username)
                 .set("user_token_creation_data", token.creationDate)
                 .set("user_token_expiration_data", token.expirationDate)
                 .build();
@@ -143,7 +144,7 @@ public class LoginResource {
         LOG.info("User " + user.getString("user_username") + " logged in successfully.");
         //OP7
         LOG.info("The tokenID for the current session is " + token.getTokenID() + "\n  Creation time: " + token.getCreationDate() + "\n  Expiration time: " + token.getExpirationDate());
-        txn.put(log, ustats, user_token);
+        txn.put(log, uStats, user_token);
         txn.commit();
         return Response.ok(g.toJson(responseData)).build();
     }

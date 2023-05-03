@@ -3,7 +3,7 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -30,7 +30,7 @@ public class ChangePasswordResource {
     public ChangePasswordResource() {
     }
 
-    @POST
+    @PATCH
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response changePassword(ChangePasswordData data, @Context HttpHeaders headers) {

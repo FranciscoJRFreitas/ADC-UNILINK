@@ -2,12 +2,15 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.*;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ public class SearchUsersResource {
 
     private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
     private static final Logger LOG = Logger.getLogger(SearchUsersResource.class.getName());
+    private final Gson g = new Gson();
 
     public SearchUsersResource() {
     }
@@ -27,13 +31,17 @@ public class SearchUsersResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response searchUsers(SearchUsersData data) {
+    public Response searchUsers(SearchUsersData data, @Context HttpHeaders headers) {
         LOG.info("Searching: " + data.searchQuery + " " + data.username);
 
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
         Transaction txn = datastore.newTransaction();
         try {
 
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
             Entity user = txn.get(userKey);
 
             if (user == null) {

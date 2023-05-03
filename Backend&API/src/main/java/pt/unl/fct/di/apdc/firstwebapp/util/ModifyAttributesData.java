@@ -22,15 +22,13 @@ public class ModifyAttributesData {
     public String postalCode;
     public String taxIdentificationNumber;
     public String photo;
-    public String token;
 
     public ModifyAttributesData() {
     }
 
-    public ModifyAttributesData(String username, String password, String token) {
+    public ModifyAttributesData(String username, String password) {
         this.username = username;
         this.password = password;
-        this.token = token;
     }
 
     public String validModifyAttributes() {

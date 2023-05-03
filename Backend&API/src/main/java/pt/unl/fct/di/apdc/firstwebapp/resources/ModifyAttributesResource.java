@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -17,6 +19,7 @@ import com.google.cloud.datastore.*;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
+import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.ModifyAttributesData;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
 
@@ -32,10 +35,10 @@ public class ModifyAttributesResource {
     public ModifyAttributesResource() {
     }
 
-    @POST
+    @PATCH
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response modifyAttributes(ModifyAttributesData data) {
+    public Response modifyAttributes(ModifyAttributesData data, @Context HttpHeaders headers) {
         LOG.fine("Attempt to modify attributes for user:" + data.username);
 
         boolean targetUserChange = StringUtils.isNotEmpty(data.targetUsername);
@@ -48,9 +51,16 @@ public class ModifyAttributesResource {
         if (!validationResult.equals("OK"))
             return Response.status(Status.BAD_REQUEST).entity(validationResult).build();
 
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.getUsername()))
+                .setKind("User Token").newKey(token.username);
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+
             Entity user = txn.get(userKey);
 
             if (user == null) {
