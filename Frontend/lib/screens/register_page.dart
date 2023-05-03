@@ -224,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             selectedValue: _selectedProfileVisibility,
                             hintText: 'Profile Visibility',
                             items: ['Profile Visibility', 'Public', 'Private'],
-                            onChanged: (String newValue) {
+                            onChanged: (dynamic newValue) {
                               setState(() {
                                 _selectedProfileVisibility = newValue;
                               });

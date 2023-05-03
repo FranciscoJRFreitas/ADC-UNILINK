@@ -12,7 +12,7 @@ class MainScreen extends StatefulWidget {
   final User user;
   final Token token;
 
-  MainScreen({@required this.user, @required this.token});
+  MainScreen({required this.user, required this.token});
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -20,8 +20,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  String _title;
-  User _currentUser;
+  late String _title;
+  late User _currentUser;
 
   @override
   void initState() {
@@ -71,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
               color: roleColor == Colors.yellow ? Colors.black : Colors.white,
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
-                String token = prefs.getString('token');
+                String? token = prefs.getString('token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -180,7 +180,7 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('Logout'),
               onTap: () async {
                 final prefs = await SharedPreferences.getInstance();
-                String token = prefs.getString('token');
+                String? token = prefs.getString('token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);

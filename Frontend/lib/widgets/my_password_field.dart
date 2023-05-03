@@ -4,12 +4,11 @@ import '../constants.dart';
 class MyPasswordField extends StatelessWidget {
 
   const MyPasswordField({
-    Key key,
-    @required this.isPasswordVisible,
-    @required this.onTap,
-    @required this.controller,
-    this.hintText,
-  }) : super(key: key);
+    required this.isPasswordVisible,
+    required this.onTap,
+    required this.controller,
+    required this.hintText,
+  });
 
   final bool isPasswordVisible;
   final Function onTap;

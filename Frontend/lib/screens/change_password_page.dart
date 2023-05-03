@@ -9,7 +9,8 @@ class ChangePasswordPage extends StatefulWidget {
   final User user;
   final Token token;
 
-  ChangePasswordPage({@required this.user, @required this.token});
+  
+  ChangePasswordPage({required this.user, required this.token});
 
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
@@ -22,6 +23,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool currentPwdVisibility = true;
   bool newPwdVisibility = true;
   bool confirmNewPwdVisibility = true;
+
 
   @override
   Widget build(BuildContext context) {

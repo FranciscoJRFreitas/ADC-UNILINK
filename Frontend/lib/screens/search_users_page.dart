@@ -10,7 +10,7 @@ class SearchUsersPage extends StatefulWidget {
   final User user;
   final Token token;
 
-  SearchUsersPage({@required this.user, @required this.token});
+  SearchUsersPage({required this.user, required this.token});
 
   @override
   _SearchUsersPageState createState() => _SearchUsersPageState();

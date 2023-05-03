@@ -3,14 +3,13 @@ import '../constants.dart';
 
 class MyTextButton extends StatelessWidget {
   const MyTextButton({
-    Key key,
-    @required this.buttonName,
-    @required this.onTap,
-    @required this.bgColor,
-    @required this.textColor,
-  }) : super(key: key);
+    required this.buttonName,
+    required this.onTap,
+    required this.bgColor,
+    required this.textColor,
+  });
   final String buttonName;
-  final Function onTap;
+  final Function()? onTap;
   final Color bgColor;
   final Color textColor;
 

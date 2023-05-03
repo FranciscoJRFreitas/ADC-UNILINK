@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
         photoUrl: responseBody['photo'],
       );
 
-      await storeTokenAndExpiration(tokenID);
+      storeTokenAndExpiration(tokenID);
 
       Navigator.push(
         context,
@@ -174,6 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                                     });
                                   },
                                   controller: passwordController,
+                                  hintText: 'Password',
                                 ),
                               ],
                             ),

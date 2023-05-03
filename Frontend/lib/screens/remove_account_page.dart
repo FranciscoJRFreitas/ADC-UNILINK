@@ -10,7 +10,7 @@ class RemoveAccountPage extends StatefulWidget {
   final User user;
   final Token token;
 
-  RemoveAccountPage({@required this.user, @required this.token});
+  RemoveAccountPage({required this.user, required this.token});
 
   @override
   _RemoveAccountPageState createState() => _RemoveAccountPageState();
@@ -20,6 +20,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController targetUsernameController = TextEditingController();
   bool passwordVisibility = true;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +34,10 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             ),
             if (widget.user.role != 'USER') ...[
               MyTextField(
+
                 small: true,
                 controller: targetUsernameController,
-                hintText: "Target username (leave empty for your account)",
+                hintText: "Target username (leave empty for your account)", inputType: TextInputType.name,
               ),
             ],
             MyPasswordField(
@@ -50,6 +52,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             ),
             SizedBox(height: 16),
             MyTextButton(
+
               buttonName: 'Remove Account',
               onTap: () async {
                 await removeAccount(

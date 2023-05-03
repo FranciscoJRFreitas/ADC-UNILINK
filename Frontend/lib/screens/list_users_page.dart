@@ -10,7 +10,7 @@ class ListUsersPage extends StatefulWidget {
   final User user;
   final Token token;
 
-  ListUsersPage({@required this.user, @required this.token});
+  ListUsersPage({required this.user, required this.token});
 
   @override
   _ListUsersPageState createState() => _ListUsersPageState();
