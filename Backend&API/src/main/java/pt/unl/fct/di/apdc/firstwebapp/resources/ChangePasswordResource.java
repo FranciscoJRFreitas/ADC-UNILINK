@@ -6,6 +6,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -13,6 +15,8 @@ import javax.ws.rs.core.Response.Status;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 
+import com.google.gson.Gson;
+import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
 
 @Path("/changePwd")
@@ -20,6 +24,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
 public class ChangePasswordResource {
 
     private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(ChangePasswordResource.class.getName());
 
     public ChangePasswordResource() {
@@ -28,17 +33,24 @@ public class ChangePasswordResource {
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response changePassword(ChangePasswordData data) {
+    public Response changePassword(ChangePasswordData data, @Context HttpHeaders headers) {
         LOG.fine("Attempt to change password for user: " + data.username);
 
         String validationResult = data.validChangePassword();
         if (!validationResult.equals("OK"))
             return Response.status(Status.BAD_REQUEST).entity(validationResult).build();
 
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
             Entity user = txn.get(userKey);
+            Entity originalToken = txn.get(tokenKey);
 
             if (user == null) {
                 txn.rollback();
@@ -53,9 +65,7 @@ public class ChangePasswordResource {
                 return Response.status(Status.UNAUTHORIZED).entity("Incorrect current password.").build();
             }
 
-            String storedToken = user.getString("user_token");
-            long storedTokenExpiration = user.getLong("user_token_expiration");
-            if (!storedToken.equals(data.token) || System.currentTimeMillis() > storedTokenExpiration) {
+            if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
             }
