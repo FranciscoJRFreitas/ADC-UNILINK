@@ -60,8 +60,8 @@ public class ModifyAttributesResource {
                 .setKind("User Token").newKey(token.username);
         Transaction txn = datastore.newTransaction();
         try {
-
             Entity user = txn.get(userKey);
+            Entity originalToken = txn.get(tokenKey);
 
             if (user == null) {
                 txn.rollback();
@@ -75,9 +75,7 @@ public class ModifyAttributesResource {
                 return Response.status(Status.UNAUTHORIZED).entity("Incorrect password for user: " + data.username).build();
             }
 
-            String storedToken = user.getString("user_token");
-            long storedTokenExpiration = user.getLong("user_token_expiration");
-            if (!storedToken.equals(data.token) || System.currentTimeMillis() > storedTokenExpiration) {
+            if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session Expired.").build();
             }

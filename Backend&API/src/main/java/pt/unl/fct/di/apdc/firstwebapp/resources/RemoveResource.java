@@ -7,9 +7,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.RemoveData;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -26,20 +24,19 @@ public class RemoveResource {
     public RemoveResource() {
     }
 
-    @POST
+    @DELETE
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteUser(RemoveData data, @Context HttpHeaders headers) {
+    public Response deleteUser(@QueryParam("targetUsername") String targetUsername, @QueryParam("pwd") String password, @Context HttpHeaders headers) {
 
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.getUsername()))
                 .setKind("User Token").newKey(token.username);
-        Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(data.targetUsername);
-
+        Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
 
         Transaction txn = datastore.newTransaction();
         try {
@@ -50,58 +47,59 @@ public class RemoveResource {
 
             if (user == null) {
                 txn.rollback();
-                return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + data.username).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + token.username).build();
             }
 
             String storedPassword = user.getString("user_pwd");
-            String providedPassword = DigestUtils.sha512Hex(data.password);
+            String providedPassword = DigestUtils.sha512Hex(password);
 
             if (!storedPassword.equals(providedPassword))
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Incorrect password for user: " + data.username).build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Incorrect password for user: " + token.username).build();
 
             if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
             }
 
-            if (!data.targetUsername.isEmpty()) {
+            if (!targetUsername.isEmpty()) {
 
                 if (targetUser == null) {
                     txn.rollback();
-                    return Response.status(Response.Status.BAD_REQUEST).entity("Target user not found: " + data.targetUsername).build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Target user not found: " + targetUsername).build();
                 }
 
                 String userRole = user.getString("user_role");
                 String targetUserRole = targetUser.getString("user_role");
-                if (!canDelete(userRole, targetUserRole, data))
+                if (!canDelete(userRole, targetUserRole, token.username, targetUsername))
                     return Response.status(Response.Status.UNAUTHORIZED).entity("You do not have the required permissions for this action.").build();
 
                 txn.delete(targetUserKey, tokenKey);
                 txn.commit();
-                LOG.info("User deleted: " + data.targetUsername);
+                LOG.info("User deleted: " + targetUsername);
                 return Response.ok("{}").build();
             }
 
             txn.delete(userKey, tokenKey);
             txn.commit();
-            LOG.info("User deleted: " + (data.targetUsername == null ? data.username : data.targetUsername));
+            LOG.info("User deleted: " + (targetUsername == null ? token.username : targetUsername));
             return Response.ok("{}").build();
 
         } finally {
             if (txn.isActive()) txn.rollback();
         }
     }
-
-    private boolean canDelete(String userRole, String targetUserRole, RemoveData data) {
+    
+//TODO alterar para JSON
+    private boolean canDelete(String userRole, String targetUserRole, String username, String targetUsername) {
         switch (UserRole.valueOf(userRole)) {
             case USER:
-                return data.username.equals(data.targetUsername);
+                return username.equals(targetUsername);
             case GBO:
-                return targetUserRole.equals(UserRole.USER.toString()) || data.username.equals(data.targetUsername);
+                return targetUserRole.equals(UserRole.USER.toString()) || username.equals(targetUsername);
             case GA:
-                return targetUserRole.equals(UserRole.USER.toString()) || targetUserRole.equals(UserRole.GBO.toString()) || data.username.equals(data.targetUsername);
+                return targetUserRole.equals(UserRole.USER.toString()) || targetUserRole.equals(UserRole.GBO.toString()) || username.equals(targetUsername);
             case GS:
-                return !targetUserRole.equals(UserRole.SU.toString()) || data.username.equals(data.targetUsername);
+                return !targetUserRole.equals(UserRole.SU.toString()) || username.equals(targetUsername);
             case SU:
                 return true;
             default:
