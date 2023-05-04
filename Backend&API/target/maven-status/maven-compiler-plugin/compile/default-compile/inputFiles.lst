@@ -1,8 +1,10 @@
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\servlets\MediaResourceServlet.java
+C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\VerifyAction.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ChangePasswordResource.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ListUsersResource.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\RegisterData.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\RegisterResource.java
+C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ActivationResource.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ModifyAttributesResource.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\LoginData.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\UserProfileVisibility.java
@@ -17,4 +19,5 @@ C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\jav
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\LoginResource.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\filters\AdditionalResponseHeadersFilter.java
+C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\RolesLoader.java
 C:\Users\Francisco Freitas\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\ChangePasswordData.java

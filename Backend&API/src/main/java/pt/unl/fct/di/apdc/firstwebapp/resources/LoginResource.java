@@ -20,6 +20,7 @@ import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUti
 import com.google.cloud.datastore.*;
 
 import com.google.gson.Gson;
+import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -73,6 +74,12 @@ public class LoginResource {
             String hashedPWD = user.getString("user_pwd");
 
             if (hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
+
+                if (user.getString("user_state").equals(UserActivityState.INACTIVE.toString())) {
+                    LOG.warning("No active account: " + data.username);
+                    return Response.status(Status.EXPECTATION_FAILED).entity("Email verification needed! Please verify your email inbox and activate your account.").build();
+                }
+
                 Entity uStats = updateStatsForSuccessfulLogin(stats, ctrskey);
                 return handleSuccessfulLogin(user,  txn, log, uStats, tokenKey);
             } else {

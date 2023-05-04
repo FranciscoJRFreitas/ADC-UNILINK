@@ -1,14 +1,11 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+
 import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
-import pt.unl.fct.di.apdc.firstwebapp.util.RolesLoader;
 import org.apache.commons.codec.digest.DigestUtils;
-import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
+import pt.unl.fct.di.apdc.firstwebapp.util.VerifyAction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -17,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
 
-import static pt.unl.fct.di.apdc.firstwebapp.util.UserRole.USER;
 
 @Path("/remove")
 public class RemoveResource {
@@ -25,9 +21,6 @@ public class RemoveResource {
     private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
-
-    private final JsonObject roles = RolesLoader.loadRoles();
-
 
     public RemoveResource() {
     }
@@ -98,27 +91,7 @@ public class RemoveResource {
     }
 
     private boolean canDelete(String userRole, String targetUserRole) {
-        if (userRole.equals(UserRole.SU.toString()))
-            return true;
-
-        JsonObject userRoleObject = roles.get("roles").getAsJsonObject().get(userRole).getAsJsonObject();
-        JsonObject targetUserRoleObject = roles.get("roles").getAsJsonObject().get(targetUserRole).getAsJsonObject();
-
-        int userLevel = userRoleObject.get("level").getAsInt();
-        int targetUserLevel = targetUserRoleObject.get("level").getAsInt();
-
-        if (userLevel < targetUserLevel) {
-            return false;
-        }
-
-        JsonArray permissions = userRoleObject.get("remove_permissions").getAsJsonArray();
-
-        for (JsonElement permission : permissions) {
-            if (permission.getAsString().equals(targetUserRole)) {
-                return true;
-            }
-        }
-        return false;
+        return VerifyAction.canExecute(userRole, targetUserRole, "remove_permissions");
     }
 
 }

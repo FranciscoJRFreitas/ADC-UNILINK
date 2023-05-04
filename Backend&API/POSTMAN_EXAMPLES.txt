@@ -27,7 +27,7 @@ POST http://localhost:8080/rest/register/
     "email": "joana123@example.com",
     "password": "JoanaPassword123!",
     "confirmPwd": "JoanaPassword123!",
-    "role": "USER",
+    "role": "STUDENT",
     "landlinePhone": "123456789",
     "mobilePhone": "987654321",
     "occupation": "Graphic Designer",

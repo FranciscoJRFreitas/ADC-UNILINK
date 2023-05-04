@@ -77,27 +77,22 @@ public class ListUsersResource {
     private Query<Entity> getQueryForUserRole(UserRole userRole) {
         Query<Entity> query;
         switch (userRole) {
-            case GBO:
-                query = Query.newEntityQueryBuilder()
-                        .setKind("User")
-                        .setFilter(PropertyFilter.eq("user_role", UserRole.USER.toString()))
-                        .build();
-                break;
-            case GA:
+            case DIRECTOR:
                 query = Query.newEntityQueryBuilder()
                         .setKind("User")
                         .setFilter(StructuredQuery.CompositeFilter.and(
-                                PropertyFilter.eq("user_role", UserRole.USER.toString()),
-                                PropertyFilter.eq("user_role", UserRole.GBO.toString())))
+                                PropertyFilter.eq("user_role", UserRole.STUDENT.toString()),
+                                PropertyFilter.eq("user_role", UserRole.PROF.toString()),
+                                PropertyFilter.eq("user_role", UserRole.DIRECTOR.toString())
+                        ))
                         .build();
                 break;
-            case GS:
+            case PROF:
                 query = Query.newEntityQueryBuilder()
                         .setKind("User")
                         .setFilter(StructuredQuery.CompositeFilter.and(
-                                                PropertyFilter.eq("user_role", UserRole.USER.toString()),
-                                                PropertyFilter.eq("user_role", UserRole.GA.toString()),
-                                                PropertyFilter.eq("user_role", UserRole.GBO.toString())))
+                                                PropertyFilter.eq("user_role", UserRole.STUDENT.toString()),
+                                                PropertyFilter.eq("user_role", UserRole.PROF.toString())))
                         .build();
                 break;
             case SU:
@@ -105,12 +100,12 @@ public class ListUsersResource {
                         .setKind("User")
                         .build();
                 break;
-            case USER:
+            case STUDENT:
             default:
                 query = Query.newEntityQueryBuilder()
                         .setKind("User")
                         .setFilter(StructuredQuery.CompositeFilter.and(
-                                PropertyFilter.eq("user_role", UserRole.USER.toString()),
+                                PropertyFilter.eq("user_role", UserRole.STUDENT.toString()),
                                 PropertyFilter.eq("user_state", UserActivityState.ACTIVE.toString()),
                                 PropertyFilter.eq("user_profileVisibility", UserProfileVisibility.PUBLIC.toString())))
                         .build();
@@ -124,7 +119,7 @@ public class ListUsersResource {
 
         for (String property : userEntity.getNames()) {
             // Displaying the "user_username", "user_email", and "user_displayName" properties when the loggedUserRole is equal to UserRole.USER
-            if (!loggedUserRole.equals(UserRole.USER) || property.equals("user_username") || property.equals("user_email") || property.equals("user_displayName")) {
+            if (!loggedUserRole.equals(UserRole.STUDENT) || property.equals("user_username") || property.equals("user_email") || property.equals("user_displayName")) {
                 Value<?> value = userEntity.getValue(property);
                 builder.add(property, value.get().toString());
             }

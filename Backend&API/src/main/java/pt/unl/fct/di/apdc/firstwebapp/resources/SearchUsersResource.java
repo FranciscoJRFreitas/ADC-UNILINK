@@ -78,32 +78,28 @@ public class SearchUsersResource {
         List<Query<Entity>> queries = new ArrayList<>();
 
         switch (userRole) {
-            case GBO:
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_username"));
+            case PROF:
+                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_displayName"));
+                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_username"));
+                queries.add(createQuery(UserRole.PROF, searchQuery, "user_displayName"));
+                queries.add(createQuery(UserRole.PROF, searchQuery, "user_username"));
                 break;
-            case GA:
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_username"));
-                queries.add(createQuery(UserRole.GBO, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.GBO, searchQuery, "user_username"));
-                break;
-            case GS:
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_username"));
-                queries.add(createQuery(UserRole.GA, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.GA, searchQuery, "user_username"));
-                queries.add(createQuery(UserRole.GBO, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.GBO, searchQuery, "user_username"));
+            case DIRECTOR:
+                queries.add(createQuery(UserRole.DIRECTOR, searchQuery, "user_displayName"));
+                queries.add(createQuery(UserRole.DIRECTOR, searchQuery, "user_username"));
+                queries.add(createQuery(UserRole.PROF, searchQuery, "user_displayName"));
+                queries.add(createQuery(UserRole.PROF, searchQuery, "user_username"));
+                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_displayName"));
+                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_username"));
                 break;
             case SU:
                 queries.add(createQuery(null, searchQuery, "user_displayName"));
                 queries.add(createQuery(null, searchQuery, "user_username"));
                 break;
-            case USER:
+            case STUDENT:
             default:
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_displayName", UserProfileVisibility.PUBLIC));
-                queries.add(createQuery(UserRole.USER, searchQuery, "user_username", UserProfileVisibility.PUBLIC));
+                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_displayName", UserProfileVisibility.PUBLIC));
+                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_username", UserProfileVisibility.PUBLIC));
                 break;
         }
         return queries;
@@ -146,7 +142,7 @@ public class SearchUsersResource {
 
         for (String property : userEntity.getNames()) {
             // Displaying the "user_username", "user_email", and "user_displayName" properties when the loggedUserRole is equal to UserRole.USER
-            if (!loggedUserRole.equals(UserRole.USER) || property.equals("user_username") || property.equals("user_email") || property.equals("user_displayName")) {
+            if (!loggedUserRole.equals(UserRole.STUDENT) || property.equals("user_username") || property.equals("user_email") || property.equals("user_displayName")) {
                 Value<?> value = userEntity.getValue(property);
                 builder.add(property, value.get().toString());
             }

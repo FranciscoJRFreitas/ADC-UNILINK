@@ -2,18 +2,22 @@
   "roles": {
     "SU": {
       "level": 4,
-      "remove_permissions": ["SU", "GBA", "GBO", "USER"]
+      "modify_permissions": ["SU", "DIRECTOR", "PROF", "STUDENT"],
+      "remove_permissions": ["SU", "DIRECTOR", "PROF", "STUDENT"]
     },
-    "GBA": {
+    "DIRECTOR": {
       "level": 3,
-      "remove_permissions": ["GBO", "USER"]
+      "modify_permissions": ["PROF", "STUDENT"],
+      "remove_permissions": ["PROF", "STUDENT"]
     },
-    "GBO": {
+    "PROF": {
       "level": 2,
-      "remove_permissions": ["USER"]
+      "modify_permissions": ["STUDENT"],
+      "remove_permissions": ["STUDENT"]
     },
-    "USER": {
+    "STUDENT": {
       "level": 1,
+      "modify_permissions": [],
       "remove_permissions": []
     }
   }

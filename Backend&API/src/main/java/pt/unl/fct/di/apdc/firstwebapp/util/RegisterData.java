@@ -32,7 +32,7 @@ public class RegisterData {
         this.email = email;
         this.password = password;
         this.confirmPwd = confirmPwd;
-        this.role = UserRole.USER;
+        this.role = UserRole.STUDENT;
         this.activityState = UserActivityState.INACTIVE;
         this.profileVisibility = UserProfileVisibility.PUBLIC;
     }
