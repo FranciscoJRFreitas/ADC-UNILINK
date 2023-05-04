@@ -1,0 +1,20 @@
+{
+  "roles": {
+    "SU": {
+      "level": 4,
+      "remove_permissions": ["SU", "GBA", "GBO", "USER"]
+    },
+    "GBA": {
+      "level": 3,
+      "remove_permissions": ["GBO", "USER"]
+    },
+    "GBO": {
+      "level": 2,
+      "remove_permissions": ["USER"]
+    },
+    "USER": {
+      "level": 1,
+      "remove_permissions": []
+    }
+  }
+}

@@ -1,11 +1,14 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
-import pt.unl.fct.di.apdc.firstwebapp.util.RemoveData;
-import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
+import pt.unl.fct.di.apdc.firstwebapp.util.RolesLoader;
 import org.apache.commons.codec.digest.DigestUtils;
+import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -14,12 +17,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.UserRole.USER;
+
 @Path("/remove")
 public class RemoveResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
+
+    private final JsonObject roles = RolesLoader.loadRoles();
+
 
     public RemoveResource() {
     }
@@ -56,7 +64,7 @@ public class RemoveResource {
             if (!storedPassword.equals(providedPassword))
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Incorrect password for user: " + token.username).build();
 
-            if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
+            if (!token.tokenID.equals(originalToken.getString("user_token_ID")) || System.currentTimeMillis() > token.expirationDate) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
             }
@@ -70,7 +78,7 @@ public class RemoveResource {
 
                 String userRole = user.getString("user_role");
                 String targetUserRole = targetUser.getString("user_role");
-                if (!canDelete(userRole, targetUserRole, token.username, targetUsername))
+                if (!canDelete(userRole, targetUserRole))
                     return Response.status(Response.Status.UNAUTHORIZED).entity("You do not have the required permissions for this action.").build();
 
                 txn.delete(targetUserKey, tokenKey);
@@ -88,24 +96,29 @@ public class RemoveResource {
             if (txn.isActive()) txn.rollback();
         }
     }
-    
-//TODO alterar para JSON
-    private boolean canDelete(String userRole, String targetUserRole, String username, String targetUsername) {
-        switch (UserRole.valueOf(userRole)) {
-            case USER:
-                return username.equals(targetUsername);
-            case GBO:
-                return targetUserRole.equals(UserRole.USER.toString()) || username.equals(targetUsername);
-            case GA:
-                return targetUserRole.equals(UserRole.USER.toString()) || targetUserRole.equals(UserRole.GBO.toString()) || username.equals(targetUsername);
-            case GS:
-                return !targetUserRole.equals(UserRole.SU.toString()) || username.equals(targetUsername);
-            case SU:
-                return true;
-            default:
-                return false;
+
+    private boolean canDelete(String userRole, String targetUserRole) {
+        if (userRole.equals(UserRole.SU.toString()))
+            return true;
+
+        JsonObject userRoleObject = roles.get("roles").getAsJsonObject().get(userRole).getAsJsonObject();
+        JsonObject targetUserRoleObject = roles.get("roles").getAsJsonObject().get(targetUserRole).getAsJsonObject();
+
+        int userLevel = userRoleObject.get("level").getAsInt();
+        int targetUserLevel = targetUserRoleObject.get("level").getAsInt();
+
+        if (userLevel < targetUserLevel) {
+            return false;
         }
+
+        JsonArray permissions = userRoleObject.get("remove_permissions").getAsJsonArray();
+
+        for (JsonElement permission : permissions) {
+            if (permission.getAsString().equals(targetUserRole)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
-
