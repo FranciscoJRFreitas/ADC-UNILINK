@@ -1,7 +1,11 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.appengine.api.mail.MailService;
+import com.google.appengine.api.mail.MailServiceFactory;
+import com.google.appengine.api.mail.MailService.Message;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -9,8 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.util.concurrent.Executors;
-
+import com.google.appengine.api.ThreadManager;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.Timestamp;
@@ -21,10 +24,6 @@ import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserProfileVisibility;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
 import java.util.UUID;
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.util.Properties;
-
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -86,7 +85,8 @@ public class RegisterResource {
             LOG.info("User registered: " + data.username);
             txn.commit();
 
-            Executors.newCachedThreadPool().submit(() -> sendVerificationEmail(data.email, token));
+            //ThreadManager.createBackgroundThread(() -> sendVerificationEmail(data.email, token)).start();
+            sendVerificationEmail(data.email, token);
 
             return Response.ok("{}").build();
 
@@ -98,31 +98,22 @@ public class RegisterResource {
     private void sendVerificationEmail(String email, String token) {
         String from = "unilink2023test@gmail.com";
         String subject = "Account Activation";
-        String activationLink = "https://localhost:8080/rest/activate?token=" + token;
+        String activationLink = "https://unilink2023.oa.r.appspot.com/rest/activate?token=" + token;
 
         String content = "Please click the following link to activate your account: <a href='" + activationLink + "'>Activate your account</a>";
 
-        Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com"); // SMTP server for Gmail
-        props.put("mail.smtp.port", "587"); // Port for TLS/STARTTLS
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-
-
-        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(from, "UniTest2023?");
-            }
-        });
+        MailService mailService = MailServiceFactory.getMailService();
 
         try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            Message message = new Message();
+            message.setSender(from);
+            message.setTo(email);
             message.setSubject(subject);
-            message.setContent(content, "text/html");
-            Transport.send(message);
-        } catch (MessagingException e) {
+            message.setHtmlBody(content);
+            mailService.send(message);
+            LOG.info("Email sent.");
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error sending email", e);
             throw new RuntimeException(e);
         }
     }

@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
-
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;

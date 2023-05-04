@@ -4,7 +4,8 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+
 import pt.unl.fct.di.apdc.firstwebapp.util.VerifyAction;
 
 import javax.ws.rs.*;
