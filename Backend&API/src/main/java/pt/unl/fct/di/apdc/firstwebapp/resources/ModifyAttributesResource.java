@@ -140,22 +140,22 @@ public class ModifyAttributesResource {
         txn.commit();
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("displayName", user.getString("user_displayName"));
-        responseData.put("username", user.getString("user_username"));
-        responseData.put("email", user.getString("user_email"));
-        responseData.put("role", user.getString("user_role"));
-        responseData.put("profileVisibility", user.getString("user_profileVisibility"));
-        responseData.put("state", user.getString("user_state"));
-        responseData.put("landlinePhone", user.getString("user_landlinePhone"));
-        responseData.put("mobilePhone", user.getString("user_mobilePhone"));
-        responseData.put("occupation", user.getString("user_occupation"));
-        responseData.put("workplace", user.getString("user_workplace"));
-        responseData.put("address", user.getString("user_address"));
-        responseData.put("additionalAddress", user.getString("user_additionalAddress"));
-        responseData.put("locality", user.getString("user_locality"));
-        responseData.put("postalCode", user.getString("user_postalCode"));
-        responseData.put("nif", user.getString("user_taxIdentificationNumber"));
-        responseData.put("photo", user.getString("user_photo"));
+        responseData.put("displayName", userUpdated.getString("user_displayName"));
+        responseData.put("username", userUpdated.getString("user_username"));
+        responseData.put("email", userUpdated.getString("user_email"));
+        responseData.put("role", userUpdated.getString("user_role"));
+        responseData.put("profileVisibility", userUpdated.getString("user_profileVisibility"));
+        responseData.put("state", userUpdated.getString("user_state"));
+        responseData.put("landlinePhone", userUpdated.getString("user_landlinePhone"));
+        responseData.put("mobilePhone", userUpdated.getString("user_mobilePhone"));
+        responseData.put("occupation", userUpdated.getString("user_occupation"));
+        responseData.put("workplace", userUpdated.getString("user_workplace"));
+        responseData.put("address", userUpdated.getString("user_address"));
+        responseData.put("additionalAddress", userUpdated.getString("user_additionalAddress"));
+        responseData.put("locality", userUpdated.getString("user_locality"));
+        responseData.put("postalCode", userUpdated.getString("user_postalCode"));
+        responseData.put("nif", userUpdated.getString("user_taxIdentificationNumber"));
+        responseData.put("photo", userUpdated.getString("user_photo"));
 
         return Response.ok(g.toJson(responseData)).build();
     }
