@@ -18,7 +18,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LogoutResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(LogoutResource.class.getName());
 

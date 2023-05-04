@@ -2,10 +2,7 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import java.util.logging.Logger;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -23,7 +20,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ChangePasswordResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(ChangePasswordResource.class.getName());
 
@@ -65,7 +62,7 @@ public class ChangePasswordResource {
                 return Response.status(Status.UNAUTHORIZED).entity("Incorrect current password.").build();
             }
 
-            if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
+            if (!token.tokenID.equals(originalToken.getString("tokenID"))|| System.currentTimeMillis() > originalToken.getLong("user_token_expiration_data")) {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
             }

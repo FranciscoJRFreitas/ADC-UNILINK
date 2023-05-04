@@ -12,7 +12,7 @@ public class ChangePasswordData {
     public ChangePasswordData() {
     }
 
-    public ChangePasswordData(String username, String currentPwd, String newPwd, String confirmPwd, String token) {
+    public ChangePasswordData(String username, String currentPwd, String newPwd, String confirmPwd) {
         this.username = username;
         this.currentPwd = currentPwd;
         this.newPwd = newPwd;

@@ -8,7 +8,6 @@ import com.google.cloud.Timestamp;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.LoginData;
 
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -26,7 +25,7 @@ import com.google.gson.Gson;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
     private final Gson g = new Gson();
 
