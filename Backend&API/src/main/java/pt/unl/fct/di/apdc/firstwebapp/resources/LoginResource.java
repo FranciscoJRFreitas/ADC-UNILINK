@@ -129,7 +129,7 @@ public class LoginResource {
                 .build();
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("tokenID", token.getTokenID());
+        //responseData.put("tokenID", token.getTokenID());
         responseData.put("displayName", user.getString("user_displayName"));
         responseData.put("username", user.getString("user_username"));
         responseData.put("email", user.getString("user_email"));
@@ -152,7 +152,7 @@ public class LoginResource {
         LOG.info("The tokenID for the current session is " + token.getTokenID() + "\n  Creation time: " + token.getCreationDate() + "\n  Expiration time: " + token.getExpirationDate());
         txn.put(log, uStats, user_token);
         txn.commit();
-        return Response.ok(g.toJson(responseData)).build();
+        return Response.ok(g.toJson(responseData)).header("Bearer Token", g.toJson(user_token)).build();
     }
 
     private Entity createLogEntity(HttpServletRequest request, HttpHeaders headers, Key logKey) {

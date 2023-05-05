@@ -13,12 +13,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import com.google.appengine.api.ThreadManager;
+
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
+import com.mailjet.client.ClientOptions;
+import com.mailjet.client.MailjetClient;
+import com.mailjet.client.MailjetRequest;
+import com.mailjet.client.MailjetResponse;
+import com.mailjet.client.resource.Email;
+import com.mailjet.client.resource.Emailv31;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import pt.unl.fct.di.apdc.firstwebapp.util.RegisterData;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserProfileVisibility;
@@ -96,27 +104,41 @@ public class RegisterResource {
     }
 
     private void sendVerificationEmail(String email, String token) {
-        String from = "unilink2023test@gmail.com";
+        String from = "fj.freitas@campus.fct.unl.pt";
+        String fromName = "UniLink";
         String subject = "Account Activation";
         String activationLink = "https://unilink2023.oa.r.appspot.com/rest/activate?token=" + token;
-
         String content = "Please click the following link to activate your account: <a href='" + activationLink + "'>Activate your account</a>";
 
-        MailService mailService = MailServiceFactory.getMailService();
+        MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
+        MailjetRequest request;
+        MailjetResponse response;
 
         try {
-            Message message = new Message();
-            message.setSender(from);
-            message.setTo(email);
-            message.setSubject(subject);
-            message.setHtmlBody(content);
-            mailService.send(message);
+            request = new MailjetRequest(Emailv31.resource)
+                    .property(Emailv31.MESSAGES, new JSONArray()
+                            .put(new JSONObject()
+                                    .put(Emailv31.Message.FROM, new JSONObject()
+                                            .put("Email", from)
+                                            .put("Name", fromName))
+                                    .put(Emailv31.Message.TO, new JSONArray()
+                                            .put(new JSONObject()
+                                                    .put("Email", email)))
+                                    .put(Emailv31.Message.SUBJECT, subject)
+                                    .put(Emailv31.Message.TEXTPART, "Please activate your account by clicking the link: " + activationLink)
+                                    .put(Emailv31.Message.HTMLPART, content)
+                                    .put(Emailv31.Message.CUSTOMID, "AccountActivation")));
+
+            response = client.post(request);
+
+            if (response.getStatus() != 200) {
+                throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
+            }
             LOG.info("Email sent.");
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error sending email", e);
             throw new RuntimeException(e);
         }
     }
-
-
+    
 }

@@ -28,7 +28,6 @@ public class ActivationResource {
         QueryResults<Entity> results = datastore.run(query);
         if (results.hasNext()) {
             Entity user = results.next();
-            Key userKey = keyFactory.newKey(user.getString("user_username"));
             Entity newUser = Entity.newBuilder(user)
                     .set("user_state", UserActivityState.ACTIVE.toString())
                     .set("user_activation_token", "")
