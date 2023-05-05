@@ -3,9 +3,7 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.appengine.api.mail.MailService;
-import com.google.appengine.api.mail.MailServiceFactory;
-import com.google.appengine.api.mail.MailService.Message;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,7 +21,6 @@ import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
 import com.mailjet.client.MailjetResponse;
-import com.mailjet.client.resource.Email;
 import com.mailjet.client.resource.Emailv31;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -93,7 +90,6 @@ public class RegisterResource {
             LOG.info("User registered: " + data.username);
             txn.commit();
 
-            //ThreadManager.createBackgroundThread(() -> sendVerificationEmail(data.email, token)).start();
             sendVerificationEmail(data.email, token);
 
             return Response.ok("{}").build();
@@ -104,7 +100,7 @@ public class RegisterResource {
     }
 
     private void sendVerificationEmail(String email, String token) {
-        String from = "unilink2023test@gmail.com";
+        String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";
         String subject = "Account Activation";
         String activationLink = "https://unilink2023.oa.r.appspot.com/rest/activate?token=" + token;
