@@ -104,7 +104,7 @@ public class RegisterResource {
     }
 
     private void sendVerificationEmail(String email, String token) {
-        String from = "fj.freitas@campus.fct.unl.pt";
+        String from = "unilink2023test@gmail.com";
         String fromName = "UniLink";
         String subject = "Account Activation";
         String activationLink = "https://unilink2023.oa.r.appspot.com/rest/activate?token=" + token;
@@ -140,5 +140,5 @@ public class RegisterResource {
             throw new RuntimeException(e);
         }
     }
-    
+
 }
