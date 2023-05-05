@@ -46,7 +46,7 @@ public class ModifyAttributesResource {
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.getUsername()))
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
         Transaction txn = datastore.newTransaction();
 
@@ -63,6 +63,11 @@ public class ModifyAttributesResource {
             if (user == null) {
                 txn.rollback();
                 return Response.status(Status.BAD_REQUEST).entity("User not found: " + data.username).build();
+            }
+            
+            if(originalToken == null) {
+                txn.rollback();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
             String storedPassword = user.getString("user_pwd");
             String providedPassword = DigestUtils.sha512Hex(data.password);

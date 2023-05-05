@@ -1,5 +1,7 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ws.rs.*;
@@ -53,6 +55,10 @@ public class ChangePasswordResource {
                 return Response.status(Status.BAD_REQUEST).entity("User not found.").build();
             }
 
+            if(originalToken == null) {
+                txn.rollback();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+            }
             String storedPassword = user.getString("user_pwd");
             String providedPassword = DigestUtils.sha512Hex(data.currentPwd);
 
@@ -65,14 +71,24 @@ public class ChangePasswordResource {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
             }
+            AuthToken newToken = new AuthToken(data.username);
+            Entity user_token = Entity.newBuilder(tokenKey)
+                    .set("tokenID", newToken.tokenID)
+                    .set("user_token_creation_data", newToken.creationDate)
+                    .set("user_token_expiration_data", newToken.expirationDate)
+                    .build();
+
+            Map<String, Object> tokenData = new HashMap<>();
+            tokenData.put("tokenID", newToken.tokenID);
+            tokenData.put("username", newToken.username);
 
             Entity updatedUser = Entity.newBuilder(user)
                     .set("user_pwd", DigestUtils.sha512Hex(data.newPwd))
                     .build();
 
-            txn.put(updatedUser);
+            txn.put(updatedUser, user_token);
             txn.commit();
-            return Response.ok("{}").build();
+            return Response.ok("{}").header("Authorization", "Bearer " + g.toJson(tokenData)).build();
 
         } finally {
             if (txn.isActive()) txn.rollback();

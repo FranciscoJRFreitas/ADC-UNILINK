@@ -33,17 +33,22 @@ public class LogoutResource {
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        LOG.fine("Attempt to logout user: " + token.getUsername());
+        LOG.fine("Attempt to logout user: " + token.username);
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.getUsername());
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.getUsername()))
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = txn.get(userKey);
             Entity originalToken = txn.get(tokenKey);
 
-            if(user == null || !token.tokenID.equals(originalToken.getString(""))) {
+            if(originalToken == null) {
+                txn.rollback();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+            }
+
+            if(user == null || !token.tokenID.equals(originalToken.getString("tokenID"))) {
                 txn.rollback();
                 return Response.status(Status.FORBIDDEN).build();
             }
