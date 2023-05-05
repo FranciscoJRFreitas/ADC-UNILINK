@@ -36,7 +36,7 @@ public class RemoveResource {
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.getUsername()))
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
         Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
 
@@ -50,6 +50,11 @@ public class RemoveResource {
             if (user == null) {
                 txn.rollback();
                 return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + token.username).build();
+            }
+
+            if(originalToken == null) {
+                txn.rollback();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
 
             String storedPassword = user.getString("user_pwd");

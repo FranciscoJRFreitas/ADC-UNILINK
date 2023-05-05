@@ -52,6 +52,11 @@ public class ListUsersResource {
                 return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + token.username).build();
             }
 
+            if(originalToken == null) {
+                txn.rollback();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+            }
+
             if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();

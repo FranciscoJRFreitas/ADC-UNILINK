@@ -20,19 +20,4 @@ public class AuthToken {
         this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getTokenID() {
-        return tokenID;
-    }
-
-    public long getCreationDate() {
-        return creationDate;
-    }
-
-    public long getExpirationDate() {
-        return expirationDate;
-    }
 }

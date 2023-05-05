@@ -74,11 +74,11 @@ public class LoginResource {
             String hashedPWD = user.getString("user_pwd");
 
             if (hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
-
-                if (user.getString("user_state").equals(UserActivityState.INACTIVE.toString())) {
-                    LOG.warning("No active account: " + data.username);
-                    return Response.status(Status.EXPECTATION_FAILED).entity("Email verification needed! Please verify your email inbox and activate your account.").build();
-                }
+//
+//                if (user.getString("user_state").equals(UserActivityState.INACTIVE.toString())) {
+//                    LOG.warning("No active account: " + data.username);
+//                    return Response.status(Status.EXPECTATION_FAILED).entity("Email verification needed! Please verify your email inbox and activate your account.").build();
+//                }
 
                 Entity uStats = updateStatsForSuccessfulLogin(stats, ctrskey);
                 return handleSuccessfulLogin(user,  txn, log, uStats, tokenKey);
@@ -123,13 +123,15 @@ public class LoginResource {
         AuthToken token = new AuthToken(user.getString("user_username"));
         Entity user_token = Entity.newBuilder(tokenKey)
                 .set("tokenID", token.tokenID)
-                //.set("token_username", token.username)
                 .set("user_token_creation_data", token.creationDate)
                 .set("user_token_expiration_data", token.expirationDate)
                 .build();
 
+        Map<String, Object> tokenData = new HashMap<>();
+        tokenData.put("tokenID", token.tokenID);
+        tokenData.put("username", token.username);
+
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("tokenID", token.getTokenID());
         responseData.put("displayName", user.getString("user_displayName"));
         responseData.put("username", user.getString("user_username"));
         responseData.put("email", user.getString("user_email"));
@@ -149,10 +151,10 @@ public class LoginResource {
 
         LOG.info("User " + user.getString("user_username") + " logged in successfully.");
         //OP7
-        LOG.info("The tokenID for the current session is " + token.getTokenID() + "\n  Creation time: " + token.getCreationDate() + "\n  Expiration time: " + token.getExpirationDate());
+        LOG.info("The tokenID for the current session is " + token.tokenID + "\n  Creation time: " + token.creationDate + "\n  Expiration time: " + token.expirationDate);
         txn.put(log, uStats, user_token);
         txn.commit();
-        return Response.ok(g.toJson(responseData)).build();
+        return Response.ok(g.toJson(responseData)).header("Authorization", "Bearer " + g.toJson(tokenData)).build();
     }
 
     private Entity createLogEntity(HttpServletRequest request, HttpHeaders headers, Key logKey) {
