@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:apdc_ai_60313/screens/search_users_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:math';
 import '../util/Token.dart';
 import '../util/User.dart';
@@ -12,7 +17,7 @@ class MainScreen extends StatefulWidget {
   final User user;
   final Token token;
 
-  MainScreen({@required this.user, @required this.token});
+  MainScreen({required this.user, required this.token});
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -20,13 +25,17 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  String _title;
-  User _currentUser;
+  late String _title;
+  late User _currentUser;
+  late Future<Uint8List?> profilePic;
+  DocumentReference picsRef = FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   @override
   void initState() {
     super.initState();
     _currentUser = widget.user;
+    profilePic = downloadData();
+
   }
 
   List<Widget> _widgetOptions() => [
@@ -51,9 +60,99 @@ class _MainScreenState extends State<MainScreen> {
         RemoveAccountPage(user: _currentUser, token: widget.token),
       ];
 
+  Future<Uint8List?> downloadData() async{
+    return FirebaseStorage.instance.ref('ProfilePictures/' + _currentUser.username).getData();
+  }
+
+  Future getImage(bool gallery) async {
+    ImagePicker picker = ImagePicker();
+
+    XFile? pickedFile =
+    await picker.pickImage(source: ImageSource.gallery);
+
+    final fileBytes = await pickedFile!.readAsBytes();
+
+    Reference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('ProfilePictures/' + _currentUser.username);
+
+    UploadTask uploadTask = storageReference.putData(fileBytes);
+
+    String url = await storageReference.getDownloadURL();
+
+  }
+
+  Widget picture(BuildContext context){
+
+    return FutureBuilder<Uint8List?>(
+        future: profilePic,
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return Image.memory(
+                snapshot.data!
+            );
+          } else if (snapshot.hasError) {
+            return const Icon(Icons.account_circle, size: 80, );
+          }
+          return const CircularProgressIndicator();
+        });
+  }
+
+  Widget profilePicture(BuildContext context){
+
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 80,
+            height: 80,
+            child: CircleAvatar(
+              backgroundColor: Colors.blue,
+              radius: 20,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(200),
+                  child: picture(context)
+
+              ),
+            ),
+          ),
+          Positioned(
+              bottom: 1,
+              right: 1,
+              child: Container(
+                height: 25,
+                width: 25,
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(15))),
+                child: InkWell(
+                  onTap: () async{
+                    await getImage(true);
+                    profilePic = downloadData();
+                    setState(() {
+                    });
+                  } ,
+                  child: const Icon(
+                    Icons.add_a_photo,
+                    size: 15.0,
+                    color: Color(0xFF404040),
+                  ),
+                ),
+              ))
+        ],
+      ),
+
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Color roleColor = _getRoleColor(widget.user.role);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: roleColor,
@@ -71,7 +170,7 @@ class _MainScreenState extends State<MainScreen> {
               color: roleColor == Colors.yellow ? Colors.black : Colors.white,
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
-                String token = prefs.getString('token');
+                String? token = prefs.getString('token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -104,6 +203,7 @@ class _MainScreenState extends State<MainScreen> {
                       fontSize: 18,
                     ),
                   ),
+                  profilePicture(context),
                   Text(
                     'Role: ${widget.user.role}',
                     style: TextStyle(
@@ -180,7 +280,7 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('Logout'),
               onTap: () async {
                 final prefs = await SharedPreferences.getInstance();
-                String token = prefs.getString('token');
+                String? token = prefs.getString('token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -215,7 +315,7 @@ class _MainScreenState extends State<MainScreen> {
     String username,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "http://localhost:8080/rest/logout/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/logout/";
     final response = await http.post(
       Uri.parse(url),
       headers: {

@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     String password,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "http://localhost:8080/rest/login/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/login/";
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
         photoUrl: responseBody['photo'],
       );
 
-      await storeTokenAndExpiration(tokenID);
+      storeTokenAndExpiration(tokenID);
 
       Navigator.push(
         context,
@@ -175,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                                     });
                                   },
                                   controller: passwordController,
+                                  hintText: 'Password',
                                 ),
                               ],
                             ),

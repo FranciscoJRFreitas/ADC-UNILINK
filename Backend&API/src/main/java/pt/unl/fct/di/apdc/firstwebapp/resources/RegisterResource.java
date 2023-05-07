@@ -40,16 +40,15 @@ public class RegisterResource {
         if (!validationResult.equals("OK"))
             return Response.status(Status.BAD_REQUEST).entity(validationResult).build();
 
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
             Entity user = txn.get(userKey);
 
             if (user != null) {
                 txn.rollback();
                 return Response.status(Status.CONFLICT).entity("User already exists.").build();
             }
-
             // Set mandatory fields
             Entity.Builder userBuilder = Entity.newBuilder(userKey)
                     .set("user_displayName", data.displayName)
@@ -71,7 +70,6 @@ public class RegisterResource {
                     .set("user_taxIdentificationNumber", "")
                     .set("user_photo", "")
                     ;
-
             // Set optional fields
             if (data.role != null) userBuilder.set("user_role", data.role.toString());
             if (data.profileVisibility != null) userBuilder.set("user_profileVisibility", data.profileVisibility.toString());

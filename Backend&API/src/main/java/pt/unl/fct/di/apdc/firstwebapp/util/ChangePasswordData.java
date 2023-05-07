@@ -7,7 +7,7 @@ public class ChangePasswordData {
     public String currentPwd;
     public String newPwd;
     public String confirmPwd;
-    public String token;
+
 
     public ChangePasswordData() {
     }
@@ -17,7 +17,6 @@ public class ChangePasswordData {
         this.currentPwd = currentPwd;
         this.newPwd = newPwd;
         this.confirmPwd = confirmPwd;
-        this.token = token;
     }
 
     public String validChangePassword() {

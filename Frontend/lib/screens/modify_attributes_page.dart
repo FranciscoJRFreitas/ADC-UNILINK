@@ -13,7 +13,7 @@ class ModifyAttributesPage extends StatefulWidget {
   final Function(User) onUserUpdate;
 
   ModifyAttributesPage(
-      {@required this.user, @required this.token, this.onUserUpdate});
+      {required this.user, required this.token, required this.onUserUpdate});
 
   @override
   _ModifyAttributesPage createState() => _ModifyAttributesPage();
@@ -79,7 +79,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     void Function(String, bool) showErrorSnackbar,
     bool redirect,
   ) async {
-    final url = 'http://localhost:8080/rest/modify/';
+    final url = 'http://unilink2023.oa.r.appspot.com/rest/modify/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -219,7 +219,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
                                 items: ['User Role', 'USER', 'GBO'],
-                                onChanged: (String newValue) {
+                                onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
                                   });
@@ -231,7 +231,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
                                 items: ['User Role', 'USER', 'GBO', 'GA'],
-                                onChanged: (String newValue) {
+                                onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
                                   });
@@ -243,7 +243,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
                                 items: ['User Role', 'USER', 'GBO', 'GA', 'GS'],
-                                onChanged: (String newValue) {
+                                onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
                                   });
@@ -254,7 +254,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                               selectedValue: _selectedActivityState,
                               hintText: 'Activity State',
                               items: ['Activity State', 'Active', 'Inactive'],
-                              onChanged: (String newValue) {
+                              onChanged: (dynamic newValue) {
                                 setState(() {
                                   _selectedActivityState = newValue;
                                 });
@@ -265,7 +265,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             selectedValue: _selectedProfileVisibility,
                             hintText: 'Profile Visibility',
                             items: ['Profile Visibility', 'Public', 'Private'],
-                            onChanged: (String newValue) {
+                            onChanged: (dynamic newValue) {
                               setState(() {
                                 _selectedProfileVisibility = newValue;
                               });

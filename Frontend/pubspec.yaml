@@ -1,5 +1,5 @@
-name: apdc_ai_60313
-description: Avaliação Individual 60313
+name: unilink2023
+description: Aplicacao da faculdade desenvolvida no ambito da cadeira ADC
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -19,20 +19,27 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.19.4 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_svg: ^0.22.0
-  google_fonts: ^4.0.4
-  http: ^0.13.0
+  http: ^0.13.5
   intl: ^0.18.1
   introduction_screen: ^3.1.8
   lottie: ^2.3.2
   provider: ^6.0.5
   shared_preferences: ^2.1.0
-  
+  cupertino_icons: ^1.0.0
+  shared_preferences: ^2.1.0
+  flutter_svg: ^0.22.0
+  google_fonts: ^4.0.4 # to import google fonts and text theme
+  image_picker: ^0.8.7+2
+  firebase_storage: ^11.1.0
+  cloud_firestore: ^4.5.0
+  firebase_core: ^2.10.0
+  universal_io: ^2.2.0
+  file_picker: ^5.2.7
 
 dev_dependencies:
   flutter_test:

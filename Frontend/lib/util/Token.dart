@@ -4,6 +4,6 @@ class Token {
   final String tokenID;
 
   Token( {
-    @required this.tokenID,
+    required this.tokenID,
   });
 }

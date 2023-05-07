@@ -7,7 +7,7 @@ class HomePage extends StatefulWidget {
   final User user;
   final Token token;
   final Color roleColor;
-  const HomePage({Key key, @required this.user, @required this.token, @required this.roleColor}) : super(key: key);
+  const HomePage({required Key key, required this.user, required this.token, required this.roleColor}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
