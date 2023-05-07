@@ -9,7 +9,8 @@ class ChangePasswordPage extends StatefulWidget {
   final User user;
   final Token token;
 
-  ChangePasswordPage({@required this.user, @required this.token});
+  
+  ChangePasswordPage({required this.user, required this.token});
 
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
@@ -22,6 +23,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool currentPwdVisibility = true;
   bool newPwdVisibility = true;
   bool confirmNewPwdVisibility = true;
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +93,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String token,
   ) async {
 
-    final url = "http://localhost:8080/rest/changePwd/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/changePwd/";
     final response = await http.post(
       Uri.parse(url),
       headers: {

@@ -33,3 +33,11 @@ const kBodyText2 = TextStyle(
   fontWeight: FontWeight.w500,
   color: Colors.white,
 );
+
+class Style {
+  static Color white = Colors.white;
+  static Color black = Colors.black;
+  static Color grey = Colors.grey;
+  static Color darkBlue = Colors.blue.shade800;
+  static Color green = Colors.green.shade200;
+}

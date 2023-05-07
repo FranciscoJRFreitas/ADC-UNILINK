@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "apdc_ai_60313" "\0"
+            VALUE "FileDescription", "unilink2023" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "apdc_ai_60313" "\0"
+            VALUE "InternalName", "unilink2023" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "apdc_ai_60313.exe" "\0"
-            VALUE "ProductName", "apdc_ai_60313" "\0"
+            VALUE "OriginalFilename", "unilink2023.exe" "\0"
+            VALUE "ProductName", "unilink2023" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

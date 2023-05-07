@@ -21,22 +21,22 @@ class User {
   final String photoUrl;
 
   User({
-    @required this.displayName,
-    @required this.username,
-    @required this.email,
-    @required this.role,
-    @required this.profileVisibility,
-    @required this.state,
-    @required this.landlinePhone,
-    @required this.mobilePhone,
-    @required this.occupation,
-    @required this.workplace,
-    @required this.address,
-    @required this.additionalAddress,
-    @required this.locality,
-    @required this.postalCode,
-    @required this.nif,
-    @required this.photoUrl,
+    required this.displayName,
+    required this.username,
+    required this.email,
+    required this.role,
+    required this.profileVisibility,
+    required this.state,
+    required this.landlinePhone,
+    required this.mobilePhone,
+    required this.occupation,
+    required this.workplace,
+    required this.address,
+    required this.additionalAddress,
+    required this.locality,
+    required this.postalCode,
+    required this.nif,
+    required this.photoUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {

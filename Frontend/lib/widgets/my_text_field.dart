@@ -3,12 +3,12 @@ import '../constants.dart';
 
 class MyTextField extends StatelessWidget {
   const MyTextField({
-    Key key,
-    @required this.small,
-    @required this.hintText,
-    @required this.inputType,
-    @required this.controller,
-  }) : super(key: key);
+
+    required this.small,
+    required this.hintText,
+    required this.inputType,
+    required this.controller,
+  });
   final bool small;
   final String hintText;
   final TextInputType inputType;

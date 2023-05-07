@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.apdc_ai_60313">
+    package="com.example.unilink2023">
    <application
-        android:label="apdc_ai_60313"
+        android:label="unilink2023"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

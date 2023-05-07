@@ -1,4 +1,4 @@
-import 'package:apdc_ai_60313/screens/screen.dart';
+import 'package:unilink2023/screens/screen.dart';
 import 'package:flutter/material.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
@@ -10,7 +10,7 @@ class RemoveAccountPage extends StatefulWidget {
   final User user;
   final Token token;
 
-  RemoveAccountPage({@required this.user, @required this.token});
+  RemoveAccountPage({required this.user, required this.token});
 
   @override
   _RemoveAccountPageState createState() => _RemoveAccountPageState();
@@ -20,6 +20,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController targetUsernameController = TextEditingController();
   bool passwordVisibility = true;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +37,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                 small: true,
                 controller: targetUsernameController,
                 hintText: "Target username (leave empty for your account)",
+                inputType: TextInputType.name,
               ),
             ],
             MyPasswordField(
@@ -76,7 +78,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     String targetUsername,
     String token,
   ) async {
-    final url = "http://localhost:8080/rest/remove/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/remove/";
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -97,7 +99,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
           backgroundColor: Colors.green,
         ),
       );
-      if(targetUsername.isEmpty) {
+      if (targetUsername.isEmpty) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => WelcomePage()),

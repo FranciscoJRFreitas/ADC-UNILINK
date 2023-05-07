@@ -3,16 +3,16 @@ import '../constants.dart';
 
 class MyTextComboBox extends StatelessWidget {
   const MyTextComboBox({
-    Key key,
-    @required this.hintText,
-    @required this.items,
-    @required this.selectedValue,
-    @required this.onChanged,
-  }) : super(key: key);
+
+    required this.hintText,
+    required this.items,
+    required this.selectedValue,
+    required this.onChanged,
+  });
   final String hintText;
   final List<String> items;
   final String selectedValue;
-  final Function(String) onChanged;
+  final Function(String?) onChanged;
 
   @override
   Widget build(BuildContext context) {

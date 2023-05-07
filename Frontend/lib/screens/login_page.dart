@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../constants.dart';
 import '../screens/screen.dart';
-import 'package:flutter_svg_provider/flutter_svg_provider.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
 import '../widgets/widget.dart';
@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     String password,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "http://localhost:8080/rest/login/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/login/";
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
         photoUrl: responseBody['photo'],
       );
 
-      await storeTokenAndExpiration(tokenID);
+      storeTokenAndExpiration(tokenID);
 
       Navigator.push(
         context,
@@ -117,10 +117,11 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Image(
-            width: 24,
+          icon: SvgPicture.asset(
+            'assets/images/back_arrow.svg',
+            width: 40,
+            height: 30,
             color: Colors.white,
-            image: Svg('assets/images/back_arrow.svg'),
           ),
         ),
       ),
@@ -174,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                                     });
                                   },
                                   controller: passwordController,
+                                  hintText: 'Password',
                                 ),
                               ],
                             ),
