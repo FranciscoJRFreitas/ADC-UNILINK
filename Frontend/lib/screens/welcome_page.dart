@@ -18,10 +18,9 @@ class WelcomePage extends StatelessWidget {
                   children: [
                     Center(
                       child: Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.2,
                         child: Image(
-                          image:
-                              AssetImage('assets/images/NOVA_Logo.png'),
+                          image: AssetImage('assets/images/NOVA_Logo.png'),
                         ),
                       ),
                     ),
@@ -29,7 +28,7 @@ class WelcomePage extends StatelessWidget {
                       height: 20,
                     ),
                     Text(
-                      "Avaliação Individual\nFrancisco Freitas\n60313",
+                      "Bem vindo à nova plataforma UniLink",
                       style: kHeadline,
                       textAlign: TextAlign.center,
                     ),
@@ -39,7 +38,7 @@ class WelcomePage extends StatelessWidget {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: Text(
-                        "Demonstração de competências individuais adquiridas no decurso das sessões de formação.",
+                        "A tornar as faculdades mais acessiveis",
                         style: kBodyText,
                         textAlign: TextAlign.center,
                       ),

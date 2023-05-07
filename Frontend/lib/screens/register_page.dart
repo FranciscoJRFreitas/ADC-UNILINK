@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:apdc_ai_60313/screens/screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg_provider/flutter_svg_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import '../widgets/register_age.dart';
 import '../widgets/widget.dart';
 import '../constants.dart';
 
@@ -21,6 +22,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPwdController = TextEditingController();
+  String _selectedEducationLevel = 'Education Level';
+  final TextEditingController registration_dateController =
+      TextEditingController();
   String _selectedProfileVisibility = 'Profile Visibility';
   String sv = '';
   final TextEditingController landlinePhoneController = TextEditingController();
@@ -53,6 +57,8 @@ class _RegisterPageState extends State<RegisterPage> {
     String email,
     String password,
     String confirmPwd,
+    String educationLevel,
+    String birthDate,
     String profileVisibility,
     String landlinePhone,
     String mobilePhone,
@@ -65,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
     String nif,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = 'http://localhost:8080/rest/register/';
+    final url = 'https://unilink2023.oa.r.appspot.com/rest/register/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -75,6 +81,8 @@ class _RegisterPageState extends State<RegisterPage> {
         'email': email,
         'password': password,
         'confirmPwd': confirmPwd,
+        'educationLevel': educationLevel,
+        'birthDate': birthDate,
         'profileVisibility': profileVisibility,
         'landlinePhone': landlinePhone,
         'mobilePhone': mobilePhone,
@@ -110,10 +118,11 @@ class _RegisterPageState extends State<RegisterPage> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Image(
-            width: 24,
+          icon: SvgPicture.asset(
+            'assets/images/back_arrow.svg',
+            width: 40,
+            height: 30,
             color: Colors.white,
-            image: Svg('assets/images/back_arrow.svg'),
           ),
         ),
       ),
@@ -220,6 +229,36 @@ class _RegisterPageState extends State<RegisterPage> {
                             "Optional Fields: (You can always change them later)",
                             style: kBodyText,
                           ),
+                          SizedBox(
+                            height: 25,
+                          ),
+                          MyTextComboBox(
+                            selectedValue: _selectedEducationLevel,
+                            hintText: 'Education Level',
+                            items: [
+                              'Education Level',
+                              'Primary Education',
+                              'Secondary Education',
+                              'Undergraduate Degree',
+                              'Master\'s Degree',
+                              'Doctorate'
+                            ],
+                            onChanged: (String newValue) {
+                              setState(() {
+                                _selectedEducationLevel = newValue;
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          regAge(
+                            textColor: Colors.grey,
+                            controller: registration_dateController,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
                           MyTextComboBox(
                             selectedValue: _selectedProfileVisibility,
                             hintText: 'Profile Visibility',
@@ -301,6 +340,19 @@ class _RegisterPageState extends State<RegisterPage> {
                               emailController.text,
                               passwordController.text,
                               confirmPwdController.text,
+                              sv = _selectedEducationLevel == 'Doctorate'
+                                  ? 'D'
+                                  : _selectedEducationLevel ==
+                                          'Secondary Education'
+                                      ? 'SE'
+                                      : _selectedEducationLevel ==
+                                              'Undergraduate Degree'
+                                          ? 'UD'
+                                          : _selectedEducationLevel ==
+                                                  'Master\'s Degree'
+                                              ? 'MD'
+                                              : _selectedEducationLevel == 'PE',
+                              registration_dateController.text,
                               sv = _selectedProfileVisibility == 'Public'
                                   ? 'PUBLIC'
                                   : 'PRIVATE',

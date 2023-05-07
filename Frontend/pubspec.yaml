@@ -24,11 +24,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.12.2
-  cupertino_icons: ^1.0.0
-  shared_preferences: ^2.0.10
-  flutter_svg_provider: ^0.1.8 # to use svg images
-  google_fonts: ^1.1.2 # to import google fonts and text theme
+  flutter_svg: ^0.22.0
+  google_fonts: ^4.0.4
+  http: ^0.13.0
+  intl: ^0.18.1
+  introduction_screen: ^3.1.8
+  lottie: ^2.3.2
+  provider: ^6.0.5
+  shared_preferences: ^2.1.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -45,8 +49,9 @@ flutter:
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/
-  #   - images/a_dot_ham.jpeg
+  - assets/images/
+  - assets/animation/
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see
