@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:apdc_ai_60313/screens/screen.dart';
+import 'package:unilink2023/screens/screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -243,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               'Master\'s Degree',
                               'Doctorate'
                             ],
-                            onChanged: (String newValue) {
+                            onChanged: (dynamic newValue) {
                               setState(() {
                                 _selectedEducationLevel = newValue;
                               });
@@ -351,7 +351,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           : _selectedEducationLevel ==
                                                   'Master\'s Degree'
                                               ? 'MD'
-                                              : _selectedEducationLevel == 'PE',
+                                              : 'PE',
                               registration_dateController.text,
                               sv = _selectedProfileVisibility == 'Public'
                                   ? 'PUBLIC'

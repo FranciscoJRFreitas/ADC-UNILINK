@@ -1,6 +1,7 @@
-import 'package:apdc_ai_60313/provider/intro_provider.dart';
-import 'package:apdc_ai_60313/screens/intro_page.dart';
-import 'package:apdc_ai_60313/screens/splashPage.dart';
+import 'package:provider/provider.dart';
+import 'package:unilink2023/provider/intro_provider.dart';
+import 'package:unilink2023/screens/intro_page.dart';
+import 'package:unilink2023/screens/splashPage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';

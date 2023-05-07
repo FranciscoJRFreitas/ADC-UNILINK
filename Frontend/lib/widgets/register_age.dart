@@ -5,9 +5,9 @@ import '../constants.dart';
 
 class regAge extends StatefulWidget {
   const regAge({
-    Key key,
-    @required this.textColor,
-    @required this.controller,
+    Key? key,
+    required this.textColor,
+    required this.controller,
   }) : super(key: key);
 
   final Color textColor;
@@ -50,7 +50,7 @@ class _regAgeState extends State<regAge> {
         readOnly: true, // when true user cannot edit text
         onTap: () async {
           try {
-            DateTime pickedDate = await showDatePicker(
+            DateTime? pickedDate = await showDatePicker(
                 context: context,
                 initialDate: DateTime(2010), //get today's date
                 firstDate: DateTime(

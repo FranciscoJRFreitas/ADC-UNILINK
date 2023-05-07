@@ -5,8 +5,8 @@ void login() async {
   prefs.setBool('login', true);
 }
 
-Future<bool> loginCheck() async {
+Future<bool?> loginCheck() async {
   final prefs = await SharedPreferences.getInstance();
-  bool loginSave = prefs.getBool('login');
+  bool? loginSave = prefs.getBool('login');
   return loginSave;
 }

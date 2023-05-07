@@ -31,7 +31,6 @@ dependencies:
   provider: ^6.0.5
   shared_preferences: ^2.1.0
   cupertino_icons: ^1.0.0
-  shared_preferences: ^2.1.0
   flutter_svg: ^0.22.0
   google_fonts: ^4.0.4 # to import google fonts and text theme
   image_picker: ^0.8.7+2

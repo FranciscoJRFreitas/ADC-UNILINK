@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:apdc_ai_60313/screens/search_users_page.dart';
+import 'package:unilink2023/screens/search_users_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -28,14 +28,14 @@ class _MainScreenState extends State<MainScreen> {
   late String _title;
   late User _currentUser;
   late Future<Uint8List?> profilePic;
-  DocumentReference picsRef = FirebaseFirestore.instance.collection('ProfilePictures').doc();
+  DocumentReference picsRef =
+      FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   @override
   void initState() {
     super.initState();
     _currentUser = widget.user;
     profilePic = downloadData();
-
   }
 
   List<Widget> _widgetOptions() => [
@@ -60,15 +60,16 @@ class _MainScreenState extends State<MainScreen> {
         RemoveAccountPage(user: _currentUser, token: widget.token),
       ];
 
-  Future<Uint8List?> downloadData() async{
-    return FirebaseStorage.instance.ref('ProfilePictures/' + _currentUser.username).getData();
+  Future<Uint8List?> downloadData() async {
+    return FirebaseStorage.instance
+        .ref('ProfilePictures/' + _currentUser.username)
+        .getData();
   }
 
   Future getImage(bool gallery) async {
     ImagePicker picker = ImagePicker();
 
-    XFile? pickedFile =
-    await picker.pickImage(source: ImageSource.gallery);
+    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     final fileBytes = await pickedFile!.readAsBytes();
 
@@ -79,27 +80,25 @@ class _MainScreenState extends State<MainScreen> {
     UploadTask uploadTask = storageReference.putData(fileBytes);
 
     String url = await storageReference.getDownloadURL();
-
   }
 
-  Widget picture(BuildContext context){
-
+  Widget picture(BuildContext context) {
     return FutureBuilder<Uint8List?>(
         future: profilePic,
         builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
           if (snapshot.hasData) {
-            return Image.memory(
-                snapshot.data!
-            );
+            return Image.memory(snapshot.data!);
           } else if (snapshot.hasError) {
-            return const Icon(Icons.account_circle, size: 80, );
+            return const Icon(
+              Icons.account_circle,
+              size: 80,
+            );
           }
           return const CircularProgressIndicator();
         });
   }
 
-  Widget profilePicture(BuildContext context){
-
+  Widget profilePicture(BuildContext context) {
     return InkWell(
       onTap: () {
         //edit image link click as per your need.
@@ -114,9 +113,7 @@ class _MainScreenState extends State<MainScreen> {
               radius: 20,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(200),
-                  child: picture(context)
-
-              ),
+                  child: picture(context)),
             ),
           ),
           Positioned(
@@ -127,15 +124,13 @@ class _MainScreenState extends State<MainScreen> {
                 width: 25,
                 decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                    BorderRadius.all(Radius.circular(15))),
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
                 child: InkWell(
-                  onTap: () async{
+                  onTap: () async {
                     await getImage(true);
                     profilePic = downloadData();
-                    setState(() {
-                    });
-                  } ,
+                    setState(() {});
+                  },
                   child: const Icon(
                     Icons.add_a_photo,
                     size: 15.0,
@@ -145,7 +140,6 @@ class _MainScreenState extends State<MainScreen> {
               ))
         ],
       ),
-
     );
   }
 

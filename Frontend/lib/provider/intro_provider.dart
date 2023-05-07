@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:apdc_ai_60313/screens/welcome_page.dart';
+import 'package:unilink2023/screens/welcome_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,9 +14,9 @@ class IntroProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> readIntroPageShar() async {
+  Future<bool?> readIntroPageShar() async {
     final prefs = await SharedPreferences.getInstance();
-    bool check = prefs.getBool('introPage');
+    bool? check = prefs.getBool('introPage');
     return check;
   }
 

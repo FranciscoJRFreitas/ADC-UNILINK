@@ -1,4 +1,4 @@
-import 'package:apdc_ai_60313/screens/screen.dart';
+import 'package:unilink2023/screens/screen.dart';
 import 'package:flutter/material.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
@@ -34,10 +34,10 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             ),
             if (widget.user.role != 'USER') ...[
               MyTextField(
-
                 small: true,
                 controller: targetUsernameController,
-                hintText: "Target username (leave empty for your account)", inputType: TextInputType.name,
+                hintText: "Target username (leave empty for your account)",
+                inputType: TextInputType.name,
               ),
             ],
             MyPasswordField(
@@ -52,7 +52,6 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             ),
             SizedBox(height: 16),
             MyTextButton(
-
               buttonName: 'Remove Account',
               onTap: () async {
                 await removeAccount(
@@ -100,7 +99,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
           backgroundColor: Colors.green,
         ),
       );
-      if(targetUsername.isEmpty) {
+      if (targetUsername.isEmpty) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => WelcomePage()),

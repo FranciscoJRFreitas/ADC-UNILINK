@@ -1,11 +1,11 @@
-import 'package:apdc_ai_60313/screens/screen.dart';
+import 'package:unilink2023/screens/screen.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:apdc_ai_60313/provider/intro_provider.dart';
+import 'package:unilink2023/provider/intro_provider.dart';
 
 class IntroPage extends StatefulWidget {
   @override
@@ -13,8 +13,8 @@ class IntroPage extends StatefulWidget {
 }
 
 class _IntroPageState extends State<IntroPage> {
-  IntroProvider providerTrue;
-  IntroProvider providerFalse;
+  late IntroProvider providerTrue;
+  late IntroProvider providerFalse;
 
   @override
   Widget build(BuildContext context) {

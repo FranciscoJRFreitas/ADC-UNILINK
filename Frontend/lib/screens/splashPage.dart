@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:apdc_ai_60313/screens/intro_page.dart';
-import 'package:apdc_ai_60313/screens/screen.dart';
+import 'package:unilink2023/screens/intro_page.dart';
+import 'package:unilink2023/screens/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:apdc_ai_60313/constants.dart';
+import 'package:unilink2023/constants.dart';
 import '../provider/intro_provider.dart';
 import '../util/sharePreference.dart';
 
@@ -15,8 +15,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  IntroProvider providerTrue;
-  IntroProvider providerFalse;
+  late IntroProvider providerTrue;
+  late IntroProvider providerFalse;
 
   @override
   void initState() {
@@ -25,14 +25,14 @@ class _SplashPageState extends State<SplashPage> {
     Timer(
       const Duration(seconds: 5),
       () async {
-        bool check = await providerTrue.readIntroPageShar();
+        bool? check = await providerTrue.readIntroPageShar();
 
-        bool checkLogin = await loginCheck();
+        bool? checkLogin = await loginCheck();
 
         // Future<bool?> check = Provider.of<IntroProvider>(context, listen: true)
         //     .readIntroPageShar();
-        if (check) {
-          if (checkLogin) {
+        if (check == true) {
+          if (checkLogin == true) {
             Navigator.push(
               context,
               MaterialPageRoute(
