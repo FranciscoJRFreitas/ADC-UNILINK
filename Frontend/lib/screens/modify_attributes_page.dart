@@ -79,7 +79,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     void Function(String, bool) showErrorSnackbar,
     bool redirect,
   ) async {
-    final url = 'http://localhost:8080/rest/modify/';
+    final url = 'http://unilink2023.oa.r.appspot.com/rest/modify/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -336,7 +336,39 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                         MyTextButton(
                           buttonName: 'Apply Changes',
                           onTap: () {
-                           Future.delayed(Duration(milliseconds: 1000), () {
+                            modifyAttributes(
+                              passwordController.text,
+                              targetUsernameController.text,
+                              displayNameController.text,
+                              emailController.text,
+                              sr = _selectedUserRole == 'User Role'
+                                  ? ""
+                                  : _selectedUserRole,
+                              sa = _selectedActivityState == 'Active'
+                                  ? 'ACTIVE'
+                                  : _selectedActivityState == 'Inactive'
+                                      ? 'INACTIVE'
+                                      : "",
+                              sv = _selectedProfileVisibility == 'Private'
+                                  ? 'PRIVATE'
+                                  : _selectedProfileVisibility == 'Public'
+                                      ? 'PUBLIC'
+                                      : "",
+                              //Default Private
+                              landlinePhoneController.text,
+                              mobilePhoneController.text,
+                              occupationController.text,
+                              workplaceController.text,
+                              addressController.text,
+                              additionalAddressController.text,
+                              localityController.text,
+                              postalCodeController.text,
+                              nifController.text,
+                              photoController.text,
+                              _showErrorSnackbar,
+                              false,
+                            );
+                            Future.delayed(Duration(milliseconds: 1000), () {
                               modifyAttributes(
                                 passwordController.text,
                                 targetUsernameController.text,

@@ -21,7 +21,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   List<User> _searchResults = [];
 
   Future<void> searchUsers(String query) async {
-    final url = 'http://localhost:8080/rest/search/';
+    final url = 'http://unilink2023.oa.r.appspot.com/rest/search/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},

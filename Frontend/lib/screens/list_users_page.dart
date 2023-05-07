@@ -26,7 +26,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
   }
 
   Future<void> fetchUsers() async {
-    final url = 'http://localhost:8080/rest/list/';
+    final url = 'http://unilink2023.oa.r.appspot.com/rest/list/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},

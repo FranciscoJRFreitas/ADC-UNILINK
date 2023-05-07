@@ -29,6 +29,12 @@ dependencies:
   shared_preferences: ^2.1.0
   flutter_svg_provider: ^1.0.3 # to use svg images
   google_fonts: ^4.0.4 # to import google fonts and text theme
+  image_picker: ^0.8.7+2
+  firebase_storage: ^11.1.0
+  cloud_firestore: ^4.5.0
+  firebase_core: ^2.10.0
+  universal_io: ^2.2.0
+  file_picker: ^5.2.7
 
 dev_dependencies:
   flutter_test:

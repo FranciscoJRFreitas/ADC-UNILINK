@@ -93,7 +93,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String token,
   ) async {
 
-    final url = "http://localhost:8080/rest/changePwd/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/changePwd/";
     final response = await http.post(
       Uri.parse(url),
       headers: {

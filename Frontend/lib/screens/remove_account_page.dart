@@ -79,7 +79,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     String targetUsername,
     String token,
   ) async {
-    final url = "http://localhost:8080/rest/remove/";
+    final url = "http://unilink2023.oa.r.appspot.com/rest/remove/";
     final response = await http.post(
       Uri.parse(url),
       headers: {
