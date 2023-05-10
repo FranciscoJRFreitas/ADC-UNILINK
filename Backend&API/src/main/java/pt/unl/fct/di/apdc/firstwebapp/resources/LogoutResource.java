@@ -59,20 +59,27 @@ public class LogoutResource {
 
             if(originalToken == null) {
                 txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in.").build();
             }
 
             if(user == null || !token.tokenID.equals(originalToken.getString("user_tokenID"))) {
                 txn.rollback();
-                return Response.status(Status.FORBIDDEN).build();
+                return Response.status(Status.FORBIDDEN).entity("Session expired.").build();
             }
 
             if(originalToken.getLong("user_token_expiration_date") < System.currentTimeMillis()) {
                 txn.rollback();
-                return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                return Response.status(Status.FORBIDDEN).entity("Session expired by time.").build();
             }
-            // Remove token
-            txn.delete(tokenKey);
+
+            long activeLogins = originalToken.getLong("user_active_logins");
+
+            if(activeLogins < 2L)
+                txn.delete(tokenKey);
+            else {
+                Entity updatedToken = Entity.newBuilder(originalToken).set("user_active_logins", activeLogins - 1L).build();
+                txn.put(updatedToken);
+            }
             txn.commit();
             return Response.ok("Logout successful.").build();
 

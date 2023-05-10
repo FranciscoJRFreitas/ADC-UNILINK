@@ -81,7 +81,7 @@ public class LoginResource {
                 }
 
                 Entity uStats = updateStatsForSuccessfulLogin(stats, ctrskey);
-                return handleSuccessfulLogin(user,  txn, log, uStats, tokenKey);
+                return handleSuccessfulLogin(user, txn, log, uStats, tokenKey);
             } else {
                 return handleFailedLogin(data.username, txn, stats, ctrskey);
             }
@@ -118,14 +118,30 @@ public class LoginResource {
         return stats;
     }
 
-    private Response handleSuccessfulLogin(Entity user, Transaction txn, Entity log,  Entity uStats, Key tokenKey) {
+    private Response handleSuccessfulLogin(Entity user, Transaction txn, Entity log, Entity uStats, Key tokenKey) {
 
-        AuthToken token = new AuthToken(user.getString("user_username"));
-        Entity user_token = Entity.newBuilder(tokenKey)
-                .set("user_tokenID", token.tokenID)
-                .set("user_token_creation_date", token.creationDate)
-                .set("user_token_expiration_date", token.expirationDate)
-                .build();
+        Entity originalToken = txn.get(tokenKey);
+        AuthToken token;
+        Entity user_token;
+
+        if(originalToken == null) {
+            token = new AuthToken(user.getString("user_username"));
+            user_token = Entity.newBuilder(tokenKey)
+                    .set("user_tokenID", token.tokenID)
+                    .set("user_token_creation_date", token.creationDate)
+                    .set("user_token_expiration_date", token.expirationDate)
+                    .set("user_active_logins", 1L)
+                    .build();
+
+        } else {
+            token = new AuthToken(user.getString("user_username"), originalToken.getString("user_tokenID"));
+            user_token = Entity.newBuilder(tokenKey)
+                    .set("user_tokenID", token.tokenID)
+                    .set("user_token_creation_date", originalToken.getLong("user_token_creation_date"))
+                    .set("user_token_expiration_date", token.expirationDate)
+                    .set("user_active_logins", 1L + originalToken.getLong("user_active_logins"))
+                    .build();
+        }
 
         String tokenString = token.tokenID + "|" + token.username;
 
@@ -148,7 +164,6 @@ public class LoginResource {
         responseData.put("photo", user.getString("user_photo"));
 
         LOG.info("User " + user.getString("user_username") + " logged in successfully.");
-        //OP7
         LOG.info("The tokenID for the current session is " + token.tokenID + "\n  Creation time: " + token.creationDate + "\n  Expiration time: " + token.expirationDate);
         txn.put(log, uStats, user_token);
         txn.commit();

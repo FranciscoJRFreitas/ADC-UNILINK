@@ -70,6 +70,9 @@ public class RegisterResource {
                 return Response.status(Status.CONFLICT).entity("This email is already being used.").build();
             }
 
+            if (data.activityState == null)
+                data.activityState = UserActivityState.INACTIVE;
+
             String token = data.activityState.equals(UserActivityState.ACTIVE) ? "" : UUID.randomUUID().toString();
             if (!token.isEmpty()) {
                 sendVerificationEmail(data.email, data.displayName, token);

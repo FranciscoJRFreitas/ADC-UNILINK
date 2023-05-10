@@ -20,4 +20,11 @@ public class AuthToken {
         this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;
     }
 
+    public AuthToken(String username, String tokenID) {
+        this.username = username;
+        this.tokenID = tokenID;
+        this.creationDate = System.currentTimeMillis();
+        this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;
+    }
+
 }

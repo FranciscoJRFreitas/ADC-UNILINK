@@ -3,7 +3,7 @@ inbound_services:
 - warmup
 auto_id_policy: default
 beta_settings:
-  'source_reference': 'https://github.com/FranciscoJRFreitas/ADC-UNILINK.git#9e04f63c961a472f08fcc0d16d0915d4f3659b08'
+  'source_reference': 'https://github.com/FranciscoJRFreitas/ADC-UNILINK.git#0ab7afee36ef3d0ab3387edd0445ff57bdad8fc4'
 handlers:
 - url: (/registSU/.*/)
   static_files: __static__\1index.html
