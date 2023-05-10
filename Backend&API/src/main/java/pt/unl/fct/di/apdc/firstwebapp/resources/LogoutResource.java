@@ -61,7 +61,7 @@ public class LogoutResource {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
 
-            if(user == null || !token.tokenID.equals(originalToken.getString("tokenID"))) {
+            if(user == null || !token.tokenID.equals(originalToken.getString("user_tokenID"))) {
                 txn.rollback();
                 return Response.status(Status.FORBIDDEN).build();
             }

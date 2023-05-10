@@ -126,3 +126,4 @@ class User {
         return UserRole.UKN;
     }
   }
+}

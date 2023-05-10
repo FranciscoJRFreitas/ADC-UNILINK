@@ -23,7 +23,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  late List<String> _title = ["Home", "Search", "List", "Modify Attributes", "Change Password", "Remove Account"];
+  List<String> _title = ["Home", "Search", "List", "Modify Attributes", "Change Password", "Remove Account"];
   late User _currentUser;
   late Future<Uint8List?> profilePic;
   DocumentReference picsRef =
@@ -147,7 +147,7 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         backgroundColor: roleColor,
         title: Text(
-          "Home",
+          _title[_selectedIndex],
           style: TextStyle(
             color: roleColor == Colors.yellow ? Colors.black : Colors.white,
           ),
