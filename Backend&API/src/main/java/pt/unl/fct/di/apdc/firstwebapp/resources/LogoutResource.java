@@ -30,6 +30,7 @@ public class LogoutResource {
     @POST
     @Path("/")
     public Response logout(@Context HttpHeaders headers) {
+
         String authTokenHeader = headers.getHeaderString("Authorization");
 
         if (authTokenHeader == null || !authTokenHeader.startsWith("Bearer ")) {
@@ -66,7 +67,7 @@ public class LogoutResource {
                 return Response.status(Status.FORBIDDEN).build();
             }
 
-            if(originalToken.getLong("user_token_expiration_data") < System.currentTimeMillis()) {
+            if(originalToken.getLong("user_token_expiration_date") < System.currentTimeMillis()) {
                 txn.rollback();
                 return Response.status(Status.METHOD_NOT_ALLOWED).build();
             }

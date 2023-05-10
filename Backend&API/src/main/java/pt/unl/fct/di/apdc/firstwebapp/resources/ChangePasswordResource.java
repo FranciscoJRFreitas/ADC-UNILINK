@@ -67,15 +67,15 @@ public class ChangePasswordResource {
                 return Response.status(Status.UNAUTHORIZED).entity("Incorrect current password.").build();
             }
 
-            if (!token.tokenID.equals(originalToken.getString("tokenID"))|| System.currentTimeMillis() > originalToken.getLong("user_token_expiration_data")) {
+            if (!token.tokenID.equals(originalToken.getString("user_tokenID"))|| System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
             }
             AuthToken newToken = new AuthToken(data.username);
             Entity user_token = Entity.newBuilder(tokenKey)
-                    .set("tokenID", newToken.tokenID)
-                    .set("user_token_creation_data", newToken.creationDate)
-                    .set("user_token_expiration_data", newToken.expirationDate)
+                    .set("user_tokenID", newToken.tokenID)
+                    .set("user_token_creation_date", newToken.creationDate)
+                    .set("user_token_expiration_date", newToken.expirationDate)
                     .build();
 
             Map<String, Object> tokenData = new HashMap<>();

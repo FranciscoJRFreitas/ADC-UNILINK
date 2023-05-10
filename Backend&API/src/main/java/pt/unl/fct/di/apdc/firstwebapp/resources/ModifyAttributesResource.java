@@ -76,7 +76,7 @@ public class ModifyAttributesResource {
                 return Response.status(Status.UNAUTHORIZED).entity("Incorrect password for user: " + data.username).build();
             }
 
-            if (!token.tokenID.equals(originalToken.getString("user_token_ID")) || System.currentTimeMillis() > token.expirationDate) {
+            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session Expired.").build();
             }

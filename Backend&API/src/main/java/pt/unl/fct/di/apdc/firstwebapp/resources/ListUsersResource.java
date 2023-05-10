@@ -57,7 +57,7 @@ public class ListUsersResource {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
 
-            if (!token.tokenID.equals(originalToken.getString("user_token_ID"))|| System.currentTimeMillis() > token.expirationDate) {
+            if (!token.tokenID.equals(originalToken.getString("user_tokenID"))|| System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
             }
