@@ -24,17 +24,15 @@ import com.mailjet.client.MailjetResponse;
 import com.mailjet.client.resource.Emailv31;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import pt.unl.fct.di.apdc.firstwebapp.util.RegisterData;
-import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
-import pt.unl.fct.di.apdc.firstwebapp.util.UserProfileVisibility;
-import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
+import pt.unl.fct.di.apdc.firstwebapp.util.*;
+
 import java.util.UUID;
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RegisterResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
     public RegisterResource() {
@@ -58,10 +56,24 @@ public class RegisterResource {
 
             if (user != null) {
                 txn.rollback();
-                return Response.status(Status.CONFLICT).entity("User already exists.").build();
+                return Response.status(Status.CONFLICT).entity("Username already exists.").build();
             }
 
-            String token = UUID.randomUUID().toString();
+            Query<Entity> queryByEmail = Query.newEntityQueryBuilder()
+                    .setKind("User")
+                    .setFilter(StructuredQuery.PropertyFilter.eq("user_email", data.email))
+                    .build();
+            QueryResults<Entity> resultsByEmail = datastore.run(queryByEmail);
+
+            if (resultsByEmail.hasNext()) {
+                txn.rollback();
+                return Response.status(Status.CONFLICT).entity("This email is already being used.").build();
+            }
+
+            String token = data.activityState.equals(UserActivityState.ACTIVE) ? "" : UUID.randomUUID().toString();
+            if (!token.isEmpty()) {
+                sendVerificationEmail(data.email, data.displayName, token);
+            }
 
             // Set mandatory fields
             Entity.Builder userBuilder = Entity.newBuilder(userKey)
@@ -69,10 +81,12 @@ public class RegisterResource {
                     .set("user_username", data.username)
                     .set("user_email", data.email)
                     .set("user_pwd", DigestUtils.sha512Hex(data.password))
-                    .set("user_role", UserRole.STUDENT.toString())
+                    .set("user_role", data.role == null ? UserRole.STUDENT.toString() : data.role.toString())
                     .set("user_creation_time", Timestamp.now())
-                    .set("user_profileVisibility", UserProfileVisibility.PUBLIC.toString())
-                    .set("user_state", UserActivityState.INACTIVE.toString())
+                    .set("user_educationLevel", data.educationLevel == null ? "" : UserEducationLevel.PE.toString())
+                    .set("user_birthDate", data.birthDate == null ? "" : data.birthDate)
+                    .set("user_profileVisibility", data.profileVisibility == null ? UserProfileVisibility.PUBLIC.toString() : data.profileVisibility.toString())
+                    .set("user_state", data.activityState == null ? UserActivityState.INACTIVE.toString() : data.activityState.toString())
                     .set("user_activation_token", token)
                     .set("user_landlinePhone", data.landlinePhone == null ? "" : data.landlinePhone)
                     .set("user_mobilePhone", data.mobilePhone == null ? "" : data.mobilePhone)
@@ -90,8 +104,6 @@ public class RegisterResource {
             LOG.info("User registered: " + data.username);
             txn.commit();
 
-            sendVerificationEmail(data.email, token);
-
             return Response.ok("{}").build();
 
         } finally {
@@ -99,12 +111,67 @@ public class RegisterResource {
         }
     }
 
-    private void sendVerificationEmail(String email, String token) {
+    private void sendVerificationEmail(String email, String name, String token) {
         String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";
         String subject = "Account Activation";
-        String activationLink = "https://unilink2023.oa.r.appspot.com/rest/activate?token=" + token;
-        String content = "Please click the following link to activate your account: <a href='" + activationLink + "'>Activate your account</a>";
+        String activationLink = "https://unilink23.oa.r.appspot.com/rest/activate?token=" + token;
+        String htmlContent = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<meta charset='utf-8'>" +
+                "<style>" +
+                ".email-container {" +
+                "    font-family: Arial, sans-serif;" +
+                "    max-width: 600px;" +
+                "    margin: auto;" +
+                "    padding: 20px;" +
+                "    background-color: #ffffff;" +
+                "    border: 1px solid #cccccc;" +
+                "    border-radius: 5px;" +
+                "    text-align: center;" +
+                "}" +
+                ".email-header {" +
+                "    font-size: 1.5em;" +
+                "    font-weight: bold;" +
+                "    color: #333333;" +
+                "}" +
+                ".email-text {" +
+                "    font-size: 1em;" +
+                "    color: #666666;" +
+                "    margin: 20px 0;" +
+                "    text-align: left;" +
+                "}" +
+                ".email-button {" +
+                "    display: inline-block;" +
+                "    font-size: 1em;" +
+                "    font-weight: bold;" +
+                "    color: #f5f5f5;" +
+                "    background-color: #005890;" +
+                "    border-radius: 5px;" +
+                "    padding: 10px 20px;" +
+                "    text-decoration: none;" +
+                "}" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='email-container'>" +
+                "    <h1 class='email-header'>Welcome to UniLink!</h1>" +
+                "    <p class='email-text'>Dear <b>" + name + "</b>,<br><br>" +
+                "    Thank you for registering with UniLink! </p>" +
+                "    <p class='email-text'>To complete your registration and activate your account, please click the button below." +
+                "    </p>" +
+
+                "    <a target='_blank' href='" + activationLink + "' class='email-button'>Activate your account</a>" +
+                "    <p class='email-text'>" +
+                "        If the button above does not work, click the activation link <a target='_blank' href='" + activationLink + "'>here</a>.<br><br>" +
+                "        Best regards,<br>" +
+                "        The UniLink Team" +
+                "    </p>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+
 
         MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
         MailjetRequest request;
@@ -121,8 +188,7 @@ public class RegisterResource {
                                             .put(new JSONObject()
                                                     .put("Email", email)))
                                     .put(Emailv31.Message.SUBJECT, subject)
-                                    .put(Emailv31.Message.TEXTPART, "Please activate your account by clicking the link: " + activationLink)
-                                    .put(Emailv31.Message.HTMLPART, content)
+                                    .put(Emailv31.Message.HTMLPART, htmlContent)
                                     .put(Emailv31.Message.CUSTOMID, "AccountActivation")));
 
             response = client.post(request);

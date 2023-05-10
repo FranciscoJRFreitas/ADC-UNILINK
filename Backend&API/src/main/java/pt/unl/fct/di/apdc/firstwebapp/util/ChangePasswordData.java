@@ -8,7 +8,6 @@ public class ChangePasswordData {
     public String newPwd;
     public String confirmPwd;
 
-
     public ChangePasswordData() {
     }
 

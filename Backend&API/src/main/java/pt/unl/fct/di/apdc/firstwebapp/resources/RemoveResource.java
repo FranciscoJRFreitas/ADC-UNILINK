@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 @Path("/remove")
 public class RemoveResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("ai-60313").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
@@ -38,14 +38,11 @@ public class RemoveResource {
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
-        Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
 
         Transaction txn = datastore.newTransaction();
         try {
-
             Entity user = txn.get(userKey);
             Entity originalToken = txn.get(tokenKey);
-            Entity targetUser = txn.get(targetUserKey);
 
             if (user == null) {
                 txn.rollback();
@@ -54,21 +51,24 @@ public class RemoveResource {
 
             if(originalToken == null) {
                 txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Login is required for this action!").build();
             }
 
             String storedPassword = user.getString("user_pwd");
             String providedPassword = DigestUtils.sha512Hex(password);
 
             if (!storedPassword.equals(providedPassword))
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Incorrect password for user: " + token.username).build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Incorrect password! You need to verify your identity.").build();
 
-            if (!token.tokenID.equals(originalToken.getString("user_token_ID")) || System.currentTimeMillis() > token.expirationDate) {
+            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) && System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
             }
 
             if (!targetUsername.isEmpty()) {
+
+                Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
+                Entity targetUser = txn.get(targetUserKey);
 
                 if (targetUser == null) {
                     txn.rollback();
@@ -88,7 +88,7 @@ public class RemoveResource {
 
             txn.delete(userKey, tokenKey);
             txn.commit();
-            LOG.info("User deleted: " + (targetUsername == null ? token.username : targetUsername));
+            LOG.info("User deleted: " + token.username);
             return Response.ok("{}").build();
 
         } finally {

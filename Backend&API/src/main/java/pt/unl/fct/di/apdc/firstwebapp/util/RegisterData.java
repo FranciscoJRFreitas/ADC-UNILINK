@@ -11,6 +11,8 @@ public class RegisterData {
     public String confirmPwd;
     public UserRole role;
     public UserActivityState activityState;
+    public UserEducationLevel educationLevel;
+    public String birthDate;
     public UserProfileVisibility profileVisibility;
     public String landlinePhone;
     public String mobilePhone;
@@ -35,6 +37,7 @@ public class RegisterData {
         this.role = UserRole.STUDENT;
         this.activityState = UserActivityState.INACTIVE;
         this.profileVisibility = UserProfileVisibility.PUBLIC;
+        this.educationLevel = UserEducationLevel.PE;
     }
 
     /*

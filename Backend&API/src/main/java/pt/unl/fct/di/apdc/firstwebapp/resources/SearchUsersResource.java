@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 @Path("/search")
 public class SearchUsersResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(SearchUsersResource.class.getName());
     private final Gson g = new Gson();
 

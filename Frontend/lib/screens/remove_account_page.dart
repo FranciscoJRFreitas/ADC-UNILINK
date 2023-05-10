@@ -1,5 +1,7 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unilink2023/screens/screen.dart';
 import 'package:flutter/material.dart';
+import '../main.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
 import '../widgets/widget.dart';
@@ -8,9 +10,8 @@ import 'dart:convert';
 
 class RemoveAccountPage extends StatefulWidget {
   final User user;
-  final Token token;
 
-  RemoveAccountPage({required this.user, required this.token});
+  RemoveAccountPage({required this.user});
 
   @override
   _RemoveAccountPageState createState() => _RemoveAccountPageState();
@@ -20,7 +21,6 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController targetUsernameController = TextEditingController();
   bool passwordVisibility = true;
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +53,81 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             SizedBox(height: 16),
             MyTextButton(
               buttonName: 'Remove Account',
-              onTap: () async {
-                await removeAccount(
-                  context,
-                  widget.user.username,
-                  passwordController.text,
-                  targetUsernameController.text,
-                  widget.token.tokenID,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 12),
+                      contentPadding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+                      title: Text(
+                        'Confirm Remove Account',
+                        style: TextStyle(color: Colors.black87, fontSize: 18),
+                      ),
+                      content: Text(
+                        'Are you sure you want to remove this account? This action is irreversible!',
+                        style: TextStyle(color: Colors.black87, fontSize: 16),
+                      ),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      actionsPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text(
+                            'Cancel',
+                            style:
+                                TextStyle(color: Colors.black87, fontSize: 16),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                          ),
+                          child: Text(
+                            'Remove',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          onPressed: () async {
+                            Navigator.of(context).pop();
+                            await removeAccount(
+                              context,
+                              widget.user.username,
+                              passwordController.text,
+                              targetUsernameController.text,
+                            ).then((Map<String, dynamic> message) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(message['content']),
+                                  backgroundColor: message['color'],
+                                ),
+                              );
+                              if (message['redirect']) {
+                                Future.delayed(Duration(milliseconds: 500), () {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => WelcomePage()),
+                                        (route) => false,
+                                  );
+                                });
+                              }
+                            });
+                          },
+
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
               bgColor: Colors.white,
@@ -71,47 +139,53 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     );
   }
 
-  Future<void> removeAccount(
+  Future<Map<String, dynamic>> removeAccount(
     BuildContext context,
     String username,
     String password,
     String targetUsername,
-    String token,
   ) async {
-    final url = "http://unilink2023.oa.r.appspot.com/rest/remove/";
-    final response = await http.post(
+    final url =
+        'https://unilink23.oa.r.appspot.com/rest/remove/?targetUsername=$targetUsername&pwd=$password';
+    final prefs = await SharedPreferences.getInstance();
+    final tokenID = prefs.getString('tokenID');
+    final storedUsername = prefs.getString('username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.delete(
       Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}',
       },
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-        'targetUsername': targetUsername,
-        'token': token,
-      }),
     );
 
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Account removed successfully."),
-          backgroundColor: Colors.green,
-        ),
-      );
-      if (targetUsername.isEmpty) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => WelcomePage()),
-        );
+      if (this.mounted) {
+        return {
+          'content': 'Account removed successfully.',
+          'color': Colors.green,
+          'redirect': targetUsername.isEmpty || targetUsername == storedUsername
+        };
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.body),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (this.mounted) {
+        return {
+          'content': response.body,
+          'color': Colors.red,
+          'redirect': false
+        };
+      }
     }
+    return {'content': '', 'color': Colors.grey, 'redirect': false};
+  }
+
+  void showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
   }
 }

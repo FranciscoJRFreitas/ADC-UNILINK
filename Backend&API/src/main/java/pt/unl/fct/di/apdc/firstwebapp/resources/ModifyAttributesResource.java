@@ -27,7 +27,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.VerifyAction;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ModifyAttributesResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(ModifyAttributesResource.class.getName());
 
     private final Gson g = new Gson();
@@ -81,7 +81,6 @@ public class ModifyAttributesResource {
                 return Response.status(Status.UNAUTHORIZED).entity("Session Expired.").build();
             }
 
-
             UserRole userRole = UserRole.valueOf(user.getString("user_role"));
             if (StringUtils.isEmpty(data.targetUsername))
                 return modifyUserAttributes(user, userRole, data, txn);
@@ -118,6 +117,10 @@ public class ModifyAttributesResource {
             if (StringUtils.isNotEmpty(data.role)) userBuilder.set("user_role", data.role);
             if (StringUtils.isNotEmpty(data.activityState)) userBuilder.set("user_state", data.activityState);
         }
+        if (StringUtils.isNotEmpty(data.educationLevel))
+            userBuilder.set("user_educationLevel", data.educationLevel);
+        if (StringUtils.isNotEmpty(data.birthDate))
+            userBuilder.set("user_birthDate", data.birthDate);
         if (StringUtils.isNotEmpty(data.profileVisibility))
             userBuilder.set("user_profileVisibility", data.profileVisibility);
         if (StringUtils.isNotEmpty(data.landlinePhone)) userBuilder.set("user_landlinePhone", data.landlinePhone);
@@ -148,6 +151,8 @@ public class ModifyAttributesResource {
         responseData.put("username", userUpdated.getString("user_username"));
         responseData.put("email", userUpdated.getString("user_email"));
         responseData.put("role", userUpdated.getString("user_role"));
+        responseData.put("educationLevel", userUpdated.getString("user_educationLevel"));
+        responseData.put("birthDate", userUpdated.getString("user_birthDate"));
         responseData.put("profileVisibility", userUpdated.getString("user_profileVisibility"));
         responseData.put("state", userUpdated.getString("user_state"));
         responseData.put("landlinePhone", userUpdated.getString("user_landlinePhone"));

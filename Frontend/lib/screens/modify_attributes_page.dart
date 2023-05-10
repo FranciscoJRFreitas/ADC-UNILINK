@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
@@ -9,11 +10,10 @@ import 'screen.dart';
 
 class ModifyAttributesPage extends StatefulWidget {
   final User user;
-  final Token token;
   final Function(User) onUserUpdate;
 
   ModifyAttributesPage(
-      {required this.user, required this.token, required this.onUserUpdate});
+      {required this.user, required this.onUserUpdate});
 
   @override
   _ModifyAttributesPage createState() => _ModifyAttributesPage();
@@ -79,10 +79,17 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     void Function(String, bool) showErrorSnackbar,
     bool redirect,
   ) async {
-    final url = 'http://unilink2023.oa.r.appspot.com/rest/modify/';
+    final url = 'https://unilink23.oa.r.appspot.com/rest/modify/';
+     final prefs = await SharedPreferences.getInstance();
+final tokenID = prefs.getString('tokenID');
+final storedUsername = prefs.getString('username');
+Token token = new Token(tokenID: tokenID, username: storedUsername);
+
     final response = await http.post(
       Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'},
       body: json.encode({
         'username': widget.user.username,
         'email': email,
@@ -102,7 +109,6 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
         'postalCode': postalCode,
         'taxIdentificationNumber': nif,
         'photo': photo,
-        'token': widget.token.tokenID,
       }),
     );
 
@@ -114,6 +120,8 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
         username: responseBody['username'],
         email: responseBody['email'],
         role: responseBody['role'],
+        educationLevel: responseBody['educationLevel'],
+        birthDate: responseBody['birthDate'],
         profileVisibility: responseBody['profileVisibility'],
         state: responseBody['state'],
         landlinePhone: responseBody['landlinePhone'],
@@ -138,7 +146,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      MainScreen(user: user, token: widget.token)),
+                      MainScreen(user: user)),
             );
           }
         }

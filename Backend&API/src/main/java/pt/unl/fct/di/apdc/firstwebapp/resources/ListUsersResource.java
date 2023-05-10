@@ -20,18 +20,18 @@ import java.util.logging.Logger;
 @Path("/list")
 public class ListUsersResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(ListUsersResource.class.getName());
 
     public ListUsersResource() {
     }
 
-    @POST
+    @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response listUsers (@Context HttpHeaders headers) {
+    public Response listUsers(@Context HttpHeaders headers) {
 
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();

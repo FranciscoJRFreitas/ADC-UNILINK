@@ -10,9 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-void storeTokenAndExpiration(String token) async {
+void storeTokenAndExpiration(String token, String username) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('token', token);
+  await prefs.setString('tokenID', token);
+  await prefs.setString('username', username);
 }
 
 class LoginPage extends StatefulWidget {
@@ -51,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
     String password,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "http://unilink2023.oa.r.appspot.com/rest/login/";
+    final url = "https://unilink23.oa.r.appspot.com/rest/login/";
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -65,16 +66,19 @@ class _LoginPageState extends State<LoginPage> {
 
     if (response.statusCode == 200) {
       // Handle successful login
+      String authTokenHeader = response.headers['authorization'] ?? '';
+      List<String> token = authTokenHeader.substring("Bearer ".length).trim().split("|");
+
+      storeTokenAndExpiration(token[0], token[1]);
+
       Map<String, dynamic> responseBody = jsonDecode(response.body);
-      String tokenID = responseBody['tokenID'];
-
-      Token token = Token(tokenID: tokenID);
-
       User user = User(
         displayName: responseBody['displayName'],
         username: responseBody['username'],
         email: responseBody['email'],
         role: responseBody['role'],
+        educationLevel: responseBody['educationLevel'],
+        birthDate: responseBody['birthDate'],
         profileVisibility: responseBody['profileVisibility'],
         state: responseBody['state'],
         landlinePhone: responseBody['landlinePhone'],
@@ -89,21 +93,16 @@ class _LoginPageState extends State<LoginPage> {
         photoUrl: responseBody['photo'],
       );
 
-      storeTokenAndExpiration(tokenID);
-
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => MainScreen(user: user, token: token)),
+            builder: (context) => MainScreen(user: user)),
       );
       showErrorSnackbar("Login Successful!", false);
-    } else if (response.statusCode == 403) {
-      // Handle failed login
-      showErrorSnackbar("Invalid login credentials. Please try again.", true);
     } else {
       // Handle unexpected error
       showErrorSnackbar(
-          "An unexpected error occurred. Please try again.", true);
+          response.body, true);
     }
   }
 

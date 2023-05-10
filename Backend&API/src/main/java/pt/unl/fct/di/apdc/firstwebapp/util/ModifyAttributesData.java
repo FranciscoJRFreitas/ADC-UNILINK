@@ -11,6 +11,8 @@ public class ModifyAttributesData {
     public String targetUsername;
     public String role;
     public String activityState;
+    public String educationLevel;
+    public String birthDate;
     public String profileVisibility;
     public String landlinePhone;
     public String mobilePhone;

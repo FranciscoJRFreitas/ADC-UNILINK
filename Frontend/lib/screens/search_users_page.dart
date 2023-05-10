@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
@@ -8,9 +9,8 @@ import 'dart:convert';
 
 class SearchUsersPage extends StatefulWidget {
   final User user;
-  final Token token;
 
-  SearchUsersPage({required this.user, required this.token});
+  SearchUsersPage({required this.user});
 
   @override
   _SearchUsersPageState createState() => _SearchUsersPageState();
@@ -21,13 +21,19 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   List<User> _searchResults = [];
 
   Future<void> searchUsers(String query) async {
-    final url = 'http://unilink2023.oa.r.appspot.com/rest/search/';
+    final url = 'https://unilink23.oa.r.appspot.com/rest/search/';
+     final prefs = await SharedPreferences.getInstance();
+final tokenID = prefs.getString('tokenID');
+final storedUsername = prefs.getString('username');
+Token token = new Token(tokenID: tokenID, username: storedUsername);
+
     final response = await http.post(
       Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'},
       body: json.encode({
         'username': widget.user.username,
-        'token': widget.token.tokenID,
         'searchQuery': query,
       }),
     );

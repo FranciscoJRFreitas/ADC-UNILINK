@@ -26,7 +26,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
     private final Gson g = new Gson();
 
@@ -65,7 +65,7 @@ public class LoginResource {
 
             if (user == null) {
                 LOG.warning("Failed login attempt for username/email: " + data.username);
-                return Response.status(Status.FORBIDDEN).build();
+                return Response.status(Status.NOT_FOUND).entity("Invalid login credentials. Please try again.").build();
             }
 
             Entity stats = getOrCreateUserStats(txn, ctrskey);
@@ -122,14 +122,12 @@ public class LoginResource {
 
         AuthToken token = new AuthToken(user.getString("user_username"));
         Entity user_token = Entity.newBuilder(tokenKey)
-                .set("tokenID", token.tokenID)
-                .set("user_token_creation_data", token.creationDate)
-                .set("user_token_expiration_data", token.expirationDate)
+                .set("user_tokenID", token.tokenID)
+                .set("user_token_creation_date", token.creationDate)
+                .set("user_token_expiration_date", token.expirationDate)
                 .build();
 
-        Map<String, Object> tokenData = new HashMap<>();
-        tokenData.put("tokenID", token.tokenID);
-        tokenData.put("username", token.username);
+        String tokenString = token.tokenID + "|" + token.username;
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("displayName", user.getString("user_displayName"));
@@ -154,7 +152,7 @@ public class LoginResource {
         LOG.info("The tokenID for the current session is " + token.tokenID + "\n  Creation time: " + token.creationDate + "\n  Expiration time: " + token.expirationDate);
         txn.put(log, uStats, user_token);
         txn.commit();
-        return Response.ok(g.toJson(responseData)).header("Authorization", "Bearer " + g.toJson(tokenData)).build();
+        return Response.ok(g.toJson(responseData)).header("Authorization", "Bearer " + tokenString).build();
     }
 
     private Entity createLogEntity(HttpServletRequest request, HttpHeaders headers, Key logKey) {

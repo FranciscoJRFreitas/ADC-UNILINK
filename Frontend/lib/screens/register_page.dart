@@ -71,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
     String nif,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = 'https://unilink2023.oa.r.appspot.com/rest/register/';
+    final url = 'https://unilink23.oa.r.appspot.com/rest/register/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -102,7 +102,7 @@ class _RegisterPageState extends State<RegisterPage> {
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
       showErrorSnackbar(
-          'Registration successful. Login to your new account!', false);
+          'Registration successful! Verify you email inbox to activate your account.', false);
     } else {
       showErrorSnackbar('Failed to register user: ${response.body}', true);
     }

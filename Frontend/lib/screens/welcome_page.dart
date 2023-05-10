@@ -35,7 +35,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       height: 20,
                     ),
                     Text(
-                      "Bem vindo à nova plataforma UniLink",
+                      "Bem-vindo à nova plataforma UniLink!",
                       style: kHeadline,
                       textAlign: TextAlign.center,
                     ),
@@ -45,7 +45,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: Text(
-                        "A tornar as faculdades mais acessiveis",
+                        "A tornar as faculdades mais acessiveis...",
                         style: kBodyText,
                         textAlign: TextAlign.center,
                       ),

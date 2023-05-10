@@ -9,6 +9,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import com.google.appengine.repackaged.com.google.gson.JsonSyntaxException;
 import com.google.cloud.datastore.*;
 
 import com.google.gson.Gson;
@@ -18,7 +20,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LogoutResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink2023").build().getService();
+    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(LogoutResource.class.getName());
 
@@ -28,10 +30,21 @@ public class LogoutResource {
     @POST
     @Path("/")
     public Response logout(@Context HttpHeaders headers) {
-
         String authTokenHeader = headers.getHeaderString("Authorization");
+
+        if (authTokenHeader == null || !authTokenHeader.startsWith("Bearer ")) {
+            LOG.severe("Authorization header is missing or not properly formatted.");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Missing or malformed Authorization header").build();
+        }
+
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
-        AuthToken token = g.fromJson(authToken, AuthToken.class);
+        AuthToken token = null;
+        try {
+            token = g.fromJson(authToken, AuthToken.class);
+        } catch (JsonSyntaxException e) {
+            LOG.severe("Error parsing authToken: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token format").build();
+        }
 
         LOG.fine("Attempt to logout user: " + token.username);
 

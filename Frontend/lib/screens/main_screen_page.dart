@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:math';
 import '../util/Token.dart';
 import '../util/User.dart';
 import '../screens/screen.dart';
@@ -15,9 +14,8 @@ import 'dart:convert';
 
 class MainScreen extends StatefulWidget {
   final User user;
-  final Token token;
 
-  MainScreen({required this.user, required this.token});
+  MainScreen({required this.user});
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -25,7 +23,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  late String _title;
+  late List<String> _title = ["Home", "Search", "List", "Modify Attributes", "Change Password", "Remove Account"];
   late User _currentUser;
   late Future<Uint8List?> profilePic;
   DocumentReference picsRef =
@@ -42,22 +40,20 @@ class _MainScreenState extends State<MainScreen> {
         HomePage(
           key: ValueKey(_currentUser),
           user: _currentUser,
-          token: widget.token,
-          roleColor: _getRoleColor(_currentUser.role),
+          roleColor: _currentUser.getRoleColor(_currentUser.role),
         ),
-        SearchUsersPage(user: _currentUser, token: widget.token),
-        ListUsersPage(user: _currentUser, token: widget.token),
+        SearchUsersPage(user: _currentUser),
+        ListUsersPage(user: _currentUser),
         ModifyAttributesPage(
           user: _currentUser,
-          token: widget.token,
           onUserUpdate: (updatedUser) {
             setState(() {
               _currentUser = updatedUser;
             });
           },
         ),
-        ChangePasswordPage(user: _currentUser, token: widget.token),
-        RemoveAccountPage(user: _currentUser, token: widget.token),
+        ChangePasswordPage(user: _currentUser),
+        RemoveAccountPage(user: _currentUser),
       ];
 
   Future<Uint8List?> downloadData() async {
@@ -145,7 +141,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Color roleColor = _getRoleColor(widget.user.role);
+    Color roleColor = _currentUser.getRoleColor(widget.user.role);
 
     return Scaffold(
       appBar: AppBar(
@@ -164,7 +160,7 @@ class _MainScreenState extends State<MainScreen> {
               color: roleColor == Colors.yellow ? Colors.black : Colors.white,
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
-                String? token = prefs.getString('token');
+                String? token = prefs.getString('tokenID');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -189,7 +185,7 @@ class _MainScreenState extends State<MainScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Text(
-                    'Welcome, ${widget.user.displayName}',
+                    'Welcome, ${widget.user.displayName}!',
                     style: TextStyle(
                       color: roleColor == Colors.yellow
                           ? Colors.black
@@ -197,7 +193,13 @@ class _MainScreenState extends State<MainScreen> {
                       fontSize: 18,
                     ),
                   ),
+                  SizedBox(
+                    height: 5,
+                  ),
                   profilePicture(context),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Text(
                     'Role: ${widget.user.role}',
                     style: TextStyle(
@@ -215,7 +217,6 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 0;
-                  _title = "Home Page";
                 });
                 Navigator.pop(context);
               },
@@ -225,7 +226,6 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 1;
-                  _title = "Search Users";
                 });
                 Navigator.pop(context);
               },
@@ -235,7 +235,6 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 2;
-                  _title = "List Users";
                 });
                 Navigator.pop(context);
               },
@@ -245,7 +244,6 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 3;
-                  _title = "Modify Attributes";
                 });
                 Navigator.pop(context);
               },
@@ -255,7 +253,6 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 4;
-                  _title = "Change Password";
                 });
                 Navigator.pop(context);
               },
@@ -265,7 +262,6 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 5;
-                  _title = "Remove Account";
                 });
                 Navigator.pop(context);
               },
@@ -274,10 +270,10 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('Logout'),
               onTap: () async {
                 final prefs = await SharedPreferences.getInstance();
-                String? token = prefs.getString('token');
+                String? token = prefs.getString('tokenID');
                 if (token != null) {
                   await logout(
-                      context, widget.user.username, _showErrorSnackbar);
+                      context, widget.user.username,_showErrorSnackbar);
                 } else {
                   _showErrorSnackbar('Error logging out', true);
                 }
@@ -309,21 +305,26 @@ class _MainScreenState extends State<MainScreen> {
     String username,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "http://unilink2023.oa.r.appspot.com/rest/logout/";
+    final url = "https://unilink23.oa.r.appspot.com/rest/logout/";
+    final prefs = await SharedPreferences.getInstance();
+    final tokenID = prefs.getString('tokenID');
+    final storedUsername = prefs.getString('username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
     final response = await http.post(
       Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
-      body: jsonEncode({
-        'username': username,
-      }),
     );
+
 
     if (response.statusCode == 200) {
       // Clear token from shared preferences
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token');
+      await prefs.remove('tokenID');
+      await prefs.remove('username');
 
       Navigator.push(
         context,
@@ -335,35 +336,4 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  Color _getRoleColor(String role) {
-    switch (_getRole(role)) {
-      case Role.USER:
-        return Colors.green;
-      case Role.GBO:
-        return Colors.yellow;
-      case Role.GS:
-        return Colors.orange;
-      case Role.SU:
-        return Colors.red;
-      default:
-        return Colors.blue;
-    }
-  }
-
-  Role _getRole(String role) {
-    switch (role) {
-      case "USER":
-        return Role.USER;
-      case "GBO":
-        return Role.GBO;
-      case "GA":
-        return Role.GA;
-      case "GS":
-        return Role.GS;
-      case "SU":
-        return Role.SU;
-      default:
-        return Role.UKN;
-    }
-  }
 }

@@ -9,6 +9,7 @@ pt\unl\fct\di\apdc\firstwebapp\util\ChangePasswordData.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\ModifyAttributesData.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ListUsersResource$1.class
+pt\unl\fct\di\apdc\firstwebapp\util\UserEducationLevel.class
 pt\unl\fct\di\apdc\firstwebapp\resources\SearchUsersResource.class
 pt\unl\fct\di\apdc\firstwebapp\resources\SearchUsersResource$1.class
 pt\unl\fct\di\apdc\firstwebapp\util\UserRole.class

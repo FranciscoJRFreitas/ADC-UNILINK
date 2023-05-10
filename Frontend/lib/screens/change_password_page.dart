@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
 import '../widgets/widget.dart';
@@ -7,10 +8,8 @@ import 'dart:convert';
 
 class ChangePasswordPage extends StatefulWidget {
   final User user;
-  final Token token;
-
   
-  ChangePasswordPage({required this.user, required this.token});
+  ChangePasswordPage({required this.user});
 
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
@@ -72,7 +71,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   currentPwdController.text,
                   newPwdController.text,
                   confirmNewPwdController.text,
-                  widget.token.tokenID,
                 );
               },
               bgColor: Colors.white,
@@ -90,21 +88,25 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String currentPassword,
     String newPassword,
     String confirmPassword,
-    String token,
   ) async {
 
-    final url = "http://unilink2023.oa.r.appspot.com/rest/changePwd/";
-    final response = await http.post(
+    final url = "https://unilink23.oa.r.appspot.com/rest/changePwd/";
+     final prefs = await SharedPreferences.getInstance();
+final tokenID = prefs.getString('tokenID');
+final storedUsername = prefs.getString('username');
+Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.patch(
       Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
       body: jsonEncode({
         'username': username,
         'currentPwd': currentPassword,
         'newPwd': newPassword,
         'confirmPwd': confirmPassword,
-        'token': token,
       }),
     );
 
