@@ -21,9 +21,11 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController targetUsernameController = TextEditingController();
   bool passwordVisibility = true;
+  BuildContext? pageContext;
 
   @override
   Widget build(BuildContext context) {
+    this.pageContext = context;
     return Scaffold(
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -100,7 +102,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                           ),
                           onPressed: () async {
                             Navigator.of(context).pop();
-                            await removeAccount(
+                            /*await removeAccount(
                               context,
                               widget.user.username,
                               passwordController.text,
@@ -115,15 +117,16 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                               if (message['redirect']) {
                                 Future.delayed(Duration(milliseconds: 500), () {
                                   Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => WelcomePage()),
-                                        (route) => false,
+                                    pageContext!,
+                                    MaterialPageRoute(
+                                        builder: (context) => WelcomePage()),
+                                    (route) => false,
                                   );
                                 });
                               }
-                            });
+                            });*/
+                            onRemoveButtonPressed(context);
                           },
-
                         ),
                       ],
                     );
@@ -137,6 +140,31 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
         ),
       ),
     );
+  }
+
+  void onRemoveButtonPressed(BuildContext context) async {
+    Navigator.of(context).pop();
+    Map<String, dynamic> message = await removeAccount(
+      context,
+      widget.user.username,
+      passwordController.text,
+      targetUsernameController.text,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message['content']),
+        backgroundColor: message['color'],
+      ),
+    );
+    if (message['redirect']) {
+      Navigator.of(context)
+          .popUntil((route) => route.settings.name == 'WelcomePage');
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => WelcomePage(),
+        ),
+      );
+    }
   }
 
   Future<Map<String, dynamic>> removeAccount(

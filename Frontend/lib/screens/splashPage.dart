@@ -33,10 +33,10 @@ class _SplashPageState extends State<SplashPage> {
         //     .readIntroPageShar();
         if (check == true) {
           if (checkLogin == true) {
-            Navigator.push(
+            Navigator.pop(
               context,
               MaterialPageRoute(
-                builder: (context) => LoginPage(),
+                builder: (context) => WelcomePage(),
               ),
             );
           } else {
@@ -81,12 +81,10 @@ class _SplashPageState extends State<SplashPage> {
     providerFalse = Provider.of<IntroProvider>(context, listen: false);
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Style.white,
+        backgroundColor: Style.green,
         body: Center(
-          child: Lottie.asset(
-            '/animation/4.json',
-            repeat: true,
-            reverse: false,
+          child: Image.asset(
+            '/images/NOVA_Logo.png',
           ),
         ),
       ),

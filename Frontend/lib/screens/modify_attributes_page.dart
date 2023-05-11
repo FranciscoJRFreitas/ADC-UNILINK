@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 import '../util/Token.dart';
 import '../util/User.dart';
+import '../widgets/register_age.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -12,8 +13,7 @@ class ModifyAttributesPage extends StatefulWidget {
   final User user;
   final Function(User) onUserUpdate;
 
-  ModifyAttributesPage(
-      {required this.user, required this.onUserUpdate});
+  ModifyAttributesPage({required this.user, required this.onUserUpdate});
 
   @override
   _ModifyAttributesPage createState() => _ModifyAttributesPage();
@@ -33,6 +33,9 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
   String sr = '';
   String _selectedActivityState = 'Activity State';
   String sa = '';
+  String _selectedEducationLevel = 'Education Level';
+  final TextEditingController registration_dateController =
+      TextEditingController();
   final TextEditingController landlinePhoneController = TextEditingController();
   final TextEditingController mobilePhoneController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
@@ -60,6 +63,8 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
 
   Future<void> modifyAttributes(
     String password,
+    String educationLevel,
+    String birthDate,
     String targetUsername,
     String displayName,
     String email,
@@ -80,20 +85,23 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     bool redirect,
   ) async {
     final url = 'https://unilink23.oa.r.appspot.com/rest/modify/';
-     final prefs = await SharedPreferences.getInstance();
-final tokenID = prefs.getString('tokenID');
-final storedUsername = prefs.getString('username');
-Token token = new Token(tokenID: tokenID, username: storedUsername);
+    final prefs = await SharedPreferences.getInstance();
+    final tokenID = prefs.getString('tokenID');
+    final storedUsername = prefs.getString('username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
 
-    final response = await http.post(
+    final response = await http.patch(
       Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${json.encode(token.toJson())}'},
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
       body: json.encode({
         'username': widget.user.username,
         'email': email,
         'password': password,
+        'educationLevel': educationLevel,
+        'birthDate': birthDate,
         'displayName': displayName,
         'targetUsername': targetUsername,
         'role': role,
@@ -136,22 +144,18 @@ Token token = new Token(tokenID: tokenID, username: storedUsername);
         photoUrl: responseBody['photo'],
       );
 
-
-
       if (responseBody['username'] == widget.user.username) {
         if (widget.onUserUpdate != null) {
           widget.onUserUpdate(user);
-          if(redirect) {
+          if (redirect) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      MainScreen(user: user)),
+              MaterialPageRoute(builder: (context) => MainScreen(user: user)),
             );
           }
         }
       }
-      if(redirect) {
+      if (redirect) {
         showErrorSnackbar('Changes applied successfully!', false);
       }
     } else {
@@ -221,6 +225,33 @@ Token token = new Token(tokenID: tokenID, username: storedUsername);
                               controller: emailController,
                               hintText: 'Email',
                               inputType: TextInputType.name,
+                            ),
+                            MyTextComboBox(
+                              selectedValue: _selectedEducationLevel,
+                              hintText: 'Education Level',
+                              items: [
+                                'Education Level',
+                                'Primary Education',
+                                'Secondary Education',
+                                'Undergraduate Degree',
+                                'Master\'s Degree',
+                                'Doctorate'
+                              ],
+                              onChanged: (dynamic newValue) {
+                                setState(() {
+                                  _selectedEducationLevel = newValue;
+                                });
+                              },
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            regAge(
+                              textColor: Colors.grey,
+                              controller: registration_dateController,
+                            ),
+                            SizedBox(
+                              height: 10,
                             ),
                             if (widget.user.role == 'GA') ...[
                               MyTextComboBox(
@@ -344,41 +375,22 @@ Token token = new Token(tokenID: tokenID, username: storedUsername);
                         MyTextButton(
                           buttonName: 'Apply Changes',
                           onTap: () {
-                            modifyAttributes(
-                              passwordController.text,
-                              targetUsernameController.text,
-                              displayNameController.text,
-                              emailController.text,
-                              sr = _selectedUserRole == 'User Role'
-                                  ? ""
-                                  : _selectedUserRole,
-                              sa = _selectedActivityState == 'Active'
-                                  ? 'ACTIVE'
-                                  : _selectedActivityState == 'Inactive'
-                                      ? 'INACTIVE'
-                                      : "",
-                              sv = _selectedProfileVisibility == 'Private'
-                                  ? 'PRIVATE'
-                                  : _selectedProfileVisibility == 'Public'
-                                      ? 'PUBLIC'
-                                      : "",
-                              //Default Private
-                              landlinePhoneController.text,
-                              mobilePhoneController.text,
-                              occupationController.text,
-                              workplaceController.text,
-                              addressController.text,
-                              additionalAddressController.text,
-                              localityController.text,
-                              postalCodeController.text,
-                              nifController.text,
-                              photoController.text,
-                              _showErrorSnackbar,
-                              false,
-                            );
                             Future.delayed(Duration(milliseconds: 1000), () {
                               modifyAttributes(
                                 passwordController.text,
+                                sv = _selectedEducationLevel == 'Doctorate'
+                                    ? 'D'
+                                    : _selectedEducationLevel ==
+                                            'Secondary Education'
+                                        ? 'SE'
+                                        : _selectedEducationLevel ==
+                                                'Undergraduate Degree'
+                                            ? 'UD'
+                                            : _selectedEducationLevel ==
+                                                    'Master\'s Degree'
+                                                ? 'MD'
+                                                : 'PE',
+                                registration_dateController.text,
                                 targetUsernameController.text,
                                 displayNameController.text,
                                 emailController.text,

@@ -22,7 +22,7 @@ void main() async {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: WelcomePage(),
+        home: SplashPage(),
       ),
     ),
   );

@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'chat_page.dart';
+
 class MainScreen extends StatefulWidget {
   final User user;
 
@@ -23,9 +25,18 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  List<String> _title = ["Home", "Search", "List", "Modify Attributes", "Change Password", "Remove Account"];
+  List<String> _title = [
+    "Home",
+    "Search",
+    "List",
+    "Modify Attributes",
+    "Change Password",
+    "Remove Account",
+    "Chat"
+  ];
   late User _currentUser;
   late Future<Uint8List?> profilePic;
+
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
@@ -54,12 +65,17 @@ class _MainScreenState extends State<MainScreen> {
         ),
         ChangePasswordPage(user: _currentUser),
         RemoveAccountPage(user: _currentUser),
+        ChatPage(user: _currentUser),
       ];
 
   Future<Uint8List?> downloadData() async {
-    return FirebaseStorage.instance
-        .ref('ProfilePictures/' + _currentUser.username)
-        .getData();
+    try {
+      return FirebaseStorage.instance
+          .ref('ProfilePictures/' + _currentUser.username)
+          .getData();
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future getImage(bool gallery) async {
@@ -123,9 +139,13 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.all(Radius.circular(15))),
                 child: InkWell(
                   onTap: () async {
-                    await getImage(true);
-                    profilePic = downloadData();
-                    setState(() {});
+                    try {
+                      await getImage(true);
+                      profilePic = downloadData();
+                      setState(() {});
+                    } catch (e) {
+                      print(e);
+                    }
                   },
                   child: const Icon(
                     Icons.add_a_photo,
@@ -267,13 +287,22 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             ListTile(
+              title: Text('Chat'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 6;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               title: Text('Logout'),
               onTap: () async {
                 final prefs = await SharedPreferences.getInstance();
                 String? token = prefs.getString('tokenID');
                 if (token != null) {
                   await logout(
-                      context, widget.user.username,_showErrorSnackbar);
+                      context, widget.user.username, _showErrorSnackbar);
                 } else {
                   _showErrorSnackbar('Error logging out', true);
                 }
@@ -319,7 +348,6 @@ class _MainScreenState extends State<MainScreen> {
       },
     );
 
-
     if (response.statusCode == 200) {
       // Clear token from shared preferences
       final prefs = await SharedPreferences.getInstance();
@@ -335,5 +363,4 @@ class _MainScreenState extends State<MainScreen> {
       showErrorSnackbar('${response.body}', true);
     }
   }
-
 }
