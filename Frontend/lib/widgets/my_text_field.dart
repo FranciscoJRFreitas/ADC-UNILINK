@@ -3,7 +3,6 @@ import '../constants.dart';
 
 class MyTextField extends StatelessWidget {
   const MyTextField({
-
     required this.small,
     required this.hintText,
     required this.inputType,
@@ -26,9 +25,7 @@ class MyTextField extends StatelessWidget {
         decoration: InputDecoration(
           contentPadding: EdgeInsets.all(20),
           hintText: hintText,
-          hintStyle: small
-              ? kBodyText.copyWith(fontSize: 12)
-              : kBodyText,
+          hintStyle: small ? kBodyText.copyWith(fontSize: 12) : kBodyText,
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
               color: Colors.grey,

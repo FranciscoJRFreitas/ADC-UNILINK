@@ -34,6 +34,52 @@ const kBodyText2 = TextStyle(
   color: Colors.white,
 );
 
+final ThemeData kLightTheme = ThemeData(
+  scaffoldBackgroundColor: kWhiteBackgroundColor,
+  primarySwatch: Colors.green, // This sets the primary color swatch
+  primaryColor: Colors.green[400],
+  textTheme: TextTheme(
+    bodyLarge: TextStyle(
+      color: Colors.black, // Black for light theme
+    ),
+    bodyMedium: TextStyle(
+      color: Colors.black54, // Black for light theme
+    ),
+    bodySmall: TextStyle(
+      color: Colors.black54, // Black for light theme
+    ),
+    titleLarge: TextStyle(
+        fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+  ),
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.green, // Blue buttons for light theme
+  ),
+  // customize other properties as needed
+);
+
+final ThemeData kDarkTheme = ThemeData(
+  scaffoldBackgroundColor: kBackgroundColor,
+  primarySwatch: Colors.green, // This sets the primary color swatch
+  primaryColor: Colors.green[400],
+  textTheme: TextTheme(
+    bodyLarge: TextStyle(
+      color: Colors.white, // White for dark theme
+    ),
+    bodyMedium: TextStyle(
+      color: Colors.white60, // Black for light theme
+    ),
+    bodySmall: TextStyle(
+      color: Colors.white60, // Black for light theme
+    ),
+    titleLarge: TextStyle(
+        fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+  ),
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.green, // Blue buttons for dark theme
+  ),
+  // customize other properties as needed
+);
+
 class Style {
   static Color white = Colors.white;
   static Color black = Colors.black;
