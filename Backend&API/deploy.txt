@@ -1,2 +1,0 @@
-Remoto: mvn package appengine:deploy -Dapp.deploy.projectId=unilink23 -Dapp.deploy.version=
-Local: mvn clean install appengine:run

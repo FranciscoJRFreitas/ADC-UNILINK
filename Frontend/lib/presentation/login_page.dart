@@ -2,19 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../constants.dart';
-import '../screens/screen.dart';
-import '../util/Token.dart';
-import '../util/User.dart';
+import '../presentation/screen.dart';
+import '../domain/Token.dart';
+import '../domain/User.dart';
 import '../widgets/widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-void storeTokenAndExpiration(String token, String username) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('tokenID', token);
-  await prefs.setString('username', username);
-}
+import '../data/web_cookies.dart' as cookies;
+import 'package:unilink2023/data/sqlite.dart';
+import 'dart:io' as io;
+import 'package:flutter/src/foundation/constants.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -27,6 +24,26 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    void doNothingSnackbar(String message, bool isError, bool show) {}
+
+    if (kIsWeb) {
+      if (cookies.getCookie('login') != null)
+        login(context, cookies.getCookie('username')!,
+            cookies.getCookie('password')!, doNothingSnackbar);
+    } else if (io.Platform.isAndroid) {
+      final sqliteService = SqliteService();
+      sqliteService.initializeDB().whenComplete(() async {
+        User user = await sqliteService.getUser();
+        login(context, user.username, await sqliteService.getPassword(),
+            doNothingSnackbar);
+        setState(() {});
+      });
+    }
+  }
+
+  @override
   void dispose() {
     emailUsernameController.dispose();
     passwordController.dispose();
@@ -34,7 +51,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Function to display the snackbar
-  void _showErrorSnackbar(String message, bool Error) {
+  void _showErrorSnackbar(String message, bool Error, bool show) {
+    if (!show) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -44,66 +62,6 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Error ? Colors.red : Colors.blue.shade900,
       ),
     );
-  }
-
-  Future<void> login(
-    BuildContext context,
-    String username,
-    String password,
-    void Function(String, bool) showErrorSnackbar,
-  ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/login/";
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      // Handle successful login
-      String authTokenHeader = response.headers['authorization'] ?? '';
-      List<String> token = authTokenHeader.substring("Bearer ".length).trim().split("|");
-
-      storeTokenAndExpiration(token[0], token[1]);
-
-      Map<String, dynamic> responseBody = jsonDecode(response.body);
-      User user = User(
-        displayName: responseBody['displayName'],
-        username: responseBody['username'],
-        email: responseBody['email'],
-        role: responseBody['role'],
-        educationLevel: responseBody['educationLevel'],
-        birthDate: responseBody['birthDate'],
-        profileVisibility: responseBody['profileVisibility'],
-        state: responseBody['state'],
-        landlinePhone: responseBody['landlinePhone'],
-        mobilePhone: responseBody['mobilePhone'],
-        occupation: responseBody['occupation'],
-        workplace: responseBody['workplace'],
-        address: responseBody['address'],
-        additionalAddress: responseBody['additionalAddress'],
-        locality: responseBody['locality'],
-        postalCode: responseBody['postalCode'],
-        nif: responseBody['nif'],
-        photoUrl: responseBody['photo'],
-      );
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MainScreen(user: user)),
-      );
-      showErrorSnackbar("Login Successful!", false);
-    } else {
-      // Handle unexpected error
-      showErrorSnackbar(
-          response.body, true);
-    }
   }
 
   @override
@@ -239,4 +197,76 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+}
+
+Future<int> login(
+  BuildContext context,
+  String username,
+  String password,
+  void Function(String, bool, bool) showErrorSnackbar,
+) async {
+  final url = "https://unilink23.oa.r.appspot.com/rest/login/";
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'username': username,
+      'password': password,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    // Handle successful login
+    String authTokenHeader = response.headers['authorization'] ?? '';
+    List<String> token =
+        authTokenHeader.substring("Bearer ".length).trim().split("|");
+
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    User user = User(
+      displayName: responseBody['displayName'],
+      username: responseBody['username'],
+      email: responseBody['email'],
+      role: responseBody['role'],
+      educationLevel: responseBody['educationLevel'],
+      birthDate: responseBody['birthDate'],
+      profileVisibility: responseBody['profileVisibility'],
+      state: responseBody['state'],
+      landlinePhone: responseBody['landlinePhone'],
+      mobilePhone: responseBody['mobilePhone'],
+      occupation: responseBody['occupation'],
+      workplace: responseBody['workplace'],
+      address: responseBody['address'],
+      additionalAddress: responseBody['additionalAddress'],
+      locality: responseBody['locality'],
+      postalCode: responseBody['postalCode'],
+      nif: responseBody['nif'],
+      photoUrl: responseBody['photo'],
+    );
+
+    if (kIsWeb) {
+      cookies.setCookie('username', user.username);
+      cookies.setCookie('password', password);
+      cookies.setCookie('token', token[0]);
+      cookies.setCookie('displayName', user.displayName);
+      cookies.setCookie('email', user.email);
+
+      cookies.setCookie('login', 'true');
+    } else if (io.Platform.isAndroid) {
+      SqliteService().deleteUser(username);
+      SqliteService().insertUser(user, token[0], password);
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+    );
+    showErrorSnackbar("Login Successful!", false, true);
+  } else {
+    // Handle unexpected error
+    showErrorSnackbar(response.body, true, true);
+  }
+
+  return response.statusCode;
 }

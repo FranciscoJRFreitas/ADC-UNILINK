@@ -17,11 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.LevenshteinDistance.levenshteinDistance;
+
 @Path("/search")
 public class SearchUsersResource {
 
     private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(SearchUsersResource.class.getName());
+    private static final int MAX_DISTANCE = 2; //Levenshtein algorithm distance
     private final Gson g = new Gson();
 
     public SearchUsersResource() {
@@ -51,27 +54,20 @@ public class SearchUsersResource {
                 return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + data.username).build();
             }
 
-            if(originalToken == null) {
+            if (originalToken == null) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
 
-            if (!token.tokenID.equals(originalToken.getString("user_tokenID"))|| System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
             }
 
             UserRole userRole = UserRole.valueOf(user.getString("user_role"));
 
-            List<Query<Entity>> queries = getQueriesForUserRole(userRole, data.searchQuery);
-            List<Object> users = new ArrayList<>();
-            for (Query<Entity> query : queries) {
-                QueryResults<Entity> results = datastore.run(query);
-                while (results.hasNext()) {
-                    Entity userEntity = results.next();
-                    users.add(entityToJsonObject(userEntity, userRole));
-                }
-            }
+            List<Object> users = getEntitiesForUserRole(userRole, data.searchQuery);
+
             return Response.ok(users).build();
 
         } finally {
@@ -79,72 +75,77 @@ public class SearchUsersResource {
         }
     }
 
-    private List<Query<Entity>> getQueriesForUserRole(UserRole userRole, String searchQuery) {
+    private List<Object> getEntitiesForUserRole(UserRole userRole, String searchQuery) {
         List<Query<Entity>> queries = new ArrayList<>();
 
         switch (userRole) {
             case PROF:
-                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_username"));
-                queries.add(createQuery(UserRole.PROF, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.PROF, searchQuery, "user_username"));
+                queries.add(buildQuery(UserRole.STUDENT, null));
+                queries.add(buildQuery(UserRole.PROF, null));
                 break;
             case DIRECTOR:
-                queries.add(createQuery(UserRole.DIRECTOR, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.DIRECTOR, searchQuery, "user_username"));
-                queries.add(createQuery(UserRole.PROF, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.PROF, searchQuery, "user_username"));
-                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_displayName"));
-                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_username"));
+                queries.add(buildQuery(UserRole.DIRECTOR, null));
+                queries.add(buildQuery(UserRole.PROF, null));
+                queries.add(buildQuery(UserRole.STUDENT, null));
                 break;
             case SU:
-                queries.add(createQuery(null, searchQuery, "user_displayName"));
-                queries.add(createQuery(null, searchQuery, "user_username"));
+                queries.add(buildQuery(null, null));
                 break;
             case STUDENT:
             default:
-                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_displayName", UserProfileVisibility.PUBLIC));
-                queries.add(createQuery(UserRole.STUDENT, searchQuery, "user_username", UserProfileVisibility.PUBLIC));
+                queries.add(buildQuery(UserRole.STUDENT, UserProfileVisibility.PUBLIC));
                 break;
         }
-        return queries;
+
+        List<Entity> results = new ArrayList<>();
+        for (Query<Entity> query : queries) {
+            results.addAll(fuzzySearch(query, searchQuery));
+        }
+
+        List<Object> users = new ArrayList<>();
+        for (Entity entity : results) {
+            users.add(entityToJsonObject(entity, userRole));
+        }
+
+        return users;
     }
 
-    private Query<Entity> createQuery(UserRole userRole, String searchQuery, String property) {
-        return createQuery(userRole, searchQuery, property, null);
-    }
-
-    private Query<Entity> createQuery(UserRole userRole, String searchQuery, String property, UserProfileVisibility profileVisibility) {
+    private Query<Entity> buildQuery(UserRole userRole, UserProfileVisibility profileVisibility) {
         EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder().setKind("User");
+        List<StructuredQuery.Filter> filters = new ArrayList<>();
 
         if (userRole != null) {
-            return queryBuilder
-                    .setFilter(StructuredQuery.CompositeFilter.and(
-                            PropertyFilter.ge(property, searchQuery),
-                            PropertyFilter.lt(property, searchQuery + "\ufffd"),
-                            PropertyFilter.eq("user_role", userRole.toString())))
-                    .build();
+            filters.add(PropertyFilter.eq("user_role", userRole.toString()));
         }
         if (profileVisibility != null) {
-            return queryBuilder
-                    .setFilter(StructuredQuery.CompositeFilter.and(
-                            PropertyFilter.ge(property, searchQuery),
-                            PropertyFilter.lt(property, searchQuery + "\ufffd"),
-                            PropertyFilter.eq("user_profileVisibility", profileVisibility.toString())))
-                    .build();
+            filters.add(PropertyFilter.eq("user_profileVisibility", profileVisibility.toString()));
         }
 
-        return queryBuilder
-                .setFilter(StructuredQuery.CompositeFilter.and(
-                        PropertyFilter.ge(property, searchQuery),
-                        PropertyFilter.lt(property, searchQuery + "\ufffd")))
-                .build();
+        if (!filters.isEmpty())
+            for (StructuredQuery.Filter filter : filters)
+                queryBuilder.setFilter(StructuredQuery.CompositeFilter.and(filter));
+
+        return queryBuilder.build();
     }
 
+    private List<Entity> fuzzySearch(Query<Entity> query, String searchQuery) {
+        String[] propertiesToSearch = new String[]{"user_username", "user_displayName"};
+        QueryResults<Entity> results = datastore.run(query);
+        List<Entity> filteredResults = new ArrayList<>();
+        while (results.hasNext()) {
+            for (String property : propertiesToSearch) {
+                Entity result = results.next();
+                String propertyValue = result.getString(property);
+                if (levenshteinDistance(searchQuery.toLowerCase(), propertyValue.toLowerCase()) <= MAX_DISTANCE) {
+                    filteredResults.add(result);
+                }
+            }
+        }
+        return filteredResults;
+    }
 
     private JsonObject entityToJsonObject(Entity userEntity, UserRole loggedUserRole) {
         JsonObjectBuilder builder = Json.createObjectBuilder();
-
         for (String property : userEntity.getNames()) {
             // Displaying the "user_username", "user_email", and "user_displayName" properties when the loggedUserRole is equal to UserRole.USER
             if (!loggedUserRole.equals(UserRole.STUDENT) || property.equals("user_username") || property.equals("user_email") || property.equals("user_displayName")) {

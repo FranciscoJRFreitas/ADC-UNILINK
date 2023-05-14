@@ -1,11 +1,14 @@
-import 'package:unilink2023/screens/screen.dart';
+import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/provider/intro_provider.dart';
+import '../data/web_cookies.dart' as cookies;
+import 'dart:io' as io;
+import 'package:flutter/src/foundation/constants.dart';
+import '../data/sqlite.dart';
 
 class IntroPage extends StatefulWidget {
   @override
@@ -13,20 +16,18 @@ class IntroPage extends StatefulWidget {
 }
 
 class _IntroPageState extends State<IntroPage> {
-  late IntroProvider providerTrue;
-  late IntroProvider providerFalse;
-
   @override
   Widget build(BuildContext context) {
-    providerTrue = Provider.of<IntroProvider>(context, listen: true);
-    providerFalse = Provider.of<IntroProvider>(context, listen: false);
     return SafeArea(
       child: Scaffold(
         body: IntroductionScreen(
           showDoneButton: true,
           onDone: () async {
-            providerFalse.introPageShar();
-
+            if (kIsWeb) {
+              cookies.setCookie('intro', 'true');
+            } else if (io.Platform.isAndroid) {
+              SqliteService().updateCheckIntro(1);
+            }
             // Provider.of<IntroProvider>(context, listen: true)
             //     .readIntroPageShar();
             Navigator.pushReplacement(

@@ -1,0 +1,7 @@
+Remoto: mvn package appengine:deploy -Dapp.deploy.projectId=unilink23 -Dapp.deploy.version=
+Local: mvn clean install appengine:run
+registSU: http://unilink23.oa.r.appspot.com/registSU/
+Para criar utilizadores localmente:
+    - Premir: Tecla windows (Win) + R ->(Windows)
+    - Executar (escrever na caixa): chrome.exe --user-data-dir=%TMP%\temporary-chrome-profile-dir --disable-web-security --disable-site-isolation-trials
+    - Opção "Create Locally": "Yes"

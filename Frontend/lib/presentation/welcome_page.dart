@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
-import '../screens/screen.dart';
+import '../presentation/screen.dart';
 import '../widgets/widget.dart';
 
 class WelcomePage extends StatefulWidget {
