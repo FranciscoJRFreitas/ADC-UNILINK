@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/util/ThemeNotifier.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
 import '../constants.dart';
 
 class SettingsPage extends StatelessWidget {

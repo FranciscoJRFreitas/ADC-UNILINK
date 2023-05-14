@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:unilink2023/screens/intro_page.dart';
-import 'package:unilink2023/screens/screen.dart';
+import 'package:unilink2023/presentation/intro_page.dart';
+import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/constants.dart';
-import '../localstorage/web_cookies.dart' as cookies;
-import 'package:unilink2023/screens/login_page.dart';
-import 'package:unilink2023/localstorage/sqlite.dart';
+import '../data/web_cookies.dart' as cookies;
+import 'package:unilink2023/presentation/login_page.dart';
+import 'package:unilink2023/data/sqlite.dart';
 import 'dart:io' as io;
 import 'package:flutter/src/foundation/constants.dart';
-import '../util/User.dart';
-import 'package:unilink2023/util/cacheFactory.dart' as cache;
+import '../domain/User.dart';
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 class SplashPage extends StatefulWidget {
   @override
@@ -27,45 +27,36 @@ class _SplashPageState extends State<SplashPage> {
     Timer(
       const Duration(seconds: 2),
       () async {
-
         bool loginB = false;
         bool introB = false;
 
-        if (kIsWeb){
-
+        if (kIsWeb) {
           cookies.setCookie('cookie', 'start');
 
           if (cookies.getCookie('login') != null) loginB = true;
           if (cookies.getCookie('intro') != null) introB = true;
-
-        } else if (io.Platform.isAndroid){
-
+        } else if (io.Platform.isAndroid) {
           if (SqliteService().getCheckLogin() == true) loginB = true;
           if (SqliteService().getCheckIntro() == true) introB = true;
-
         }
-
 
         if (introB == true) {
           if (loginB == true) {
-
             int response = 0;
 
             void doNothingSnackbar(String message, bool isError, bool show) {}
-            if (kIsWeb){
-
-            response = await login(context, cookies.getCookie('username')!, cookies.getCookie('password')!, doNothingSnackbar);
-
-            } else if (io.Platform.isAndroid){
-
+            if (kIsWeb) {
+              response = await login(context, cookies.getCookie('username')!,
+                  cookies.getCookie('password')!, doNothingSnackbar);
+            } else if (io.Platform.isAndroid) {
               final sqliteService = SqliteService();
 
               User user = await sqliteService.getUser();
-              response = await login(context, user.username,  await sqliteService.getPassword(), doNothingSnackbar);
+              response = await login(context, user.username,
+                  await sqliteService.getPassword(), doNothingSnackbar);
             }
 
-            if(response != 200){
-
+            if (response != 200) {
               cache.removeLoginCache();
 
               Navigator.push(
@@ -74,7 +65,6 @@ class _SplashPageState extends State<SplashPage> {
                   builder: (context) => WelcomePage(),
                 ),
               );
-
             }
           } else {
             Navigator.push(

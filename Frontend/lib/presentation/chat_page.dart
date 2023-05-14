@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../util/User.dart';
+import '../domain/User.dart';
 import '../widgets/GroupTitle.dart';
 import '../widgets/widgets.dart';
 import 'main_screen_page.dart';

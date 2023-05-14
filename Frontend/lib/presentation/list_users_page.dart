@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:unilink2023/screens/userprofile_page.dart';
+import 'package:unilink2023/presentation/userprofile_page.dart';
 import '../constants.dart';
-import '../util/Token.dart';
-import '../util/User.dart';
+import '../domain/Token.dart';
+import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/util/cacheFactory.dart' as cache;
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 class ListUsersPage extends StatefulWidget {
   final User user;

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:unilink2023/screens/screen.dart';
+import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -102,7 +102,8 @@ class _RegisterPageState extends State<RegisterPage> {
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
       showErrorSnackbar(
-          'Registration successful! Verify you email inbox to activate your account.', false);
+          'Registration successful! Verify you email inbox to activate your account.',
+          false);
     } else {
       showErrorSnackbar('Failed to register user: ${response.body}', true);
     }
