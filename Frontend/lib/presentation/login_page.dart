@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../constants.dart';
 import '../presentation/screen.dart';
-import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;

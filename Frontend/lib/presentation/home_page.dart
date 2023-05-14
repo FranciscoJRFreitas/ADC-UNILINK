@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
-import '../domain/Token.dart';
 import '../domain/User.dart';
 
 class HomePage extends StatefulWidget {

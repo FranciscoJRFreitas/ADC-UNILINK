@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../domain/User.dart';
 import '../widgets/GroupTitle.dart';
 import '../widgets/widgets.dart';
-import 'main_screen_page.dart';
 
 class ChatPage extends StatefulWidget {
   final User user;

@@ -1,17 +1,13 @@
 import 'dart:typed_data';
 
-import 'package:unilink2023/presentation/news_page.dart';
-import 'package:unilink2023/presentation/chat_page.dart';
-import 'package:unilink2023/presentation/search_users_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:unilink2023/presentation/settings_page.dart';
 import '../constants.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import '../presentation/screen.dart';
+import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
