@@ -44,6 +44,7 @@
         <init-param>
             <param-name>jersey.config.server.provider.scanning.recursive</param-name>
             <param-value>false</param-value>
+            <param-value>false</param-value>
         </init-param>
 
         <init-param>
@@ -59,6 +60,10 @@
         <servlet-name>servlet-storage</servlet-name>
         <servlet-class>pt.unl.fct.di.apdc.firstwebapp.servlets.MediaResourceServlet</servlet-class>
     </servlet>
+
+    <listener>
+        <listener-class>pt.unl.fct.di.apdc.firstwebapp.servlets.FirebaseInit</listener-class>
+    </listener>
 
     <servlet-mapping>
         <servlet-name>MainServices</servlet-name>
