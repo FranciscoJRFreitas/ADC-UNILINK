@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
-import '../util/Token.dart';
-import '../util/User.dart';
+import '../domain/User.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
   final Color roleColor;
-  const HomePage({required Key key, required this.user, required this.roleColor}) : super(key: key);
+  const HomePage(
+      {required Key key, required this.user, required this.roleColor})
+      : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
