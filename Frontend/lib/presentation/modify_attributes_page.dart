@@ -84,7 +84,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     void Function(String, bool) showErrorSnackbar,
     bool redirect,
   ) async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/modify/';
+    final url = kBaseUrl + 'rest/modify/';
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);

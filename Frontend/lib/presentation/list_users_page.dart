@@ -5,6 +5,7 @@ import '../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import '../constants.dart';
 
 class ListUsersPage extends StatefulWidget {
   final User user;
@@ -25,7 +26,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
   }
 
   Future<void> fetchUsers() async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/list/';
+    final url = kBaseUrl + 'rest/list/';
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);

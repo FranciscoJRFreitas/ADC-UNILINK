@@ -204,7 +204,7 @@ Future<int> login(
   String password,
   void Function(String, bool, bool) showErrorSnackbar,
 ) async {
-  final url = "https://unilink23.oa.r.appspot.com/rest/login/";
+  final url = kBaseUrl + "rest/login/";
   final response = await http.post(
     Uri.parse(url),
     headers: {

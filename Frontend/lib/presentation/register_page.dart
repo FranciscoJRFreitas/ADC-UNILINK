@@ -71,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
     String nif,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/register/';
+    final url = kBaseUrl + 'rest/register/';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},

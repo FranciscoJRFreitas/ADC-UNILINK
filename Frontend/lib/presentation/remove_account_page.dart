@@ -1,12 +1,12 @@
 import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import '../constants.dart';
 
 class RemoveAccountPage extends StatefulWidget {
   final User user;
@@ -174,7 +174,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     String targetUsername,
   ) async {
     final url =
-        'https://unilink23.oa.r.appspot.com/rest/remove/?targetUsername=$targetUsername&pwd=$password';
+        kBaseUrl + 'rest/remove/?targetUsername=$targetUsername&pwd=$password';
 
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
