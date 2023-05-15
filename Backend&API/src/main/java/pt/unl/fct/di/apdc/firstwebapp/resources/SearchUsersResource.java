@@ -14,6 +14,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -25,6 +26,7 @@ public class SearchUsersResource {
     private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(SearchUsersResource.class.getName());
     private static final int MAX_DISTANCE = 2; //Levenshtein algorithm distance
+    private static final int MAX_RESULTS_DISPLAYED = 10;
     private final Gson g = new Gson();
 
     public SearchUsersResource() {
@@ -132,15 +134,23 @@ public class SearchUsersResource {
         String[] propertiesToSearch = new String[]{"user_username", "user_displayName"};
         QueryResults<Entity> results = datastore.run(query);
         List<Entity> filteredResults = new ArrayList<>();
-        while (results.hasNext()) {
-            for (String property : propertiesToSearch) {
-                Entity result = results.next();
-                String propertyValue = result.getString(property);
-                if (levenshteinDistance(searchQuery.toLowerCase(), propertyValue.toLowerCase()) <= MAX_DISTANCE) {
-                    filteredResults.add(result);
-                }
+        int counter = 0;
+
+        while (results.hasNext() && counter < MAX_RESULTS_DISPLAYED) {
+            Entity result = results.next();
+
+            if (Arrays.stream(propertiesToSearch)
+                    .anyMatch(property -> {
+                        String propertyValue = result.getString(property);
+                        return levenshteinDistance(searchQuery.toLowerCase(), propertyValue.toLowerCase()) <= MAX_DISTANCE
+                                || searchQuery.toLowerCase().contains(propertyValue.toLowerCase())
+                                || propertyValue.toLowerCase().contains(searchQuery.toLowerCase());
+                    })) {
+                filteredResults.add(result);
+                counter++;
             }
         }
+
         return filteredResults;
     }
 
