@@ -1,17 +1,17 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.gson.Gson;
-import pt.unl.fct.di.apdc.firstwebapp.util.*;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+import pt.unl.fct.di.apdc.firstwebapp.util.Group;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 
@@ -31,16 +31,13 @@ public class ChatResources {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createGroup(Group group) throws IOException {
 
-        initialize();
-        LOG.severe("Initialized");
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("chats");
         DatabaseReference newChatRef = chatsRef.push(); // Generate a unique ID for the new chat
-        LOG.severe("chatsRefCreated");
         // Set the data for the new chat
         newChatRef.child("groupID").setValueAsync(newChatRef.getKey());
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
         newChatRef.child("description").setValueAsync(group.description);
-        LOG.severe("chatsRefCreated not null");
+
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(newChatRef.getKey());
         //when creating a group the creater becomes the admin
         membersRef.child(group.adminID).setValueAsync(true); // Set the creator as a member
@@ -57,13 +54,4 @@ public class ChatResources {
         return Response.ok("{}").build();
     }
 
-    public void initialize() throws IOException {
-
-        FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(GoogleCredentials.getApplicationDefault())
-                .setDatabaseUrl("https://unilink23-default-rtdb.europe-west1.firebasedatabase.app")
-                .build();
-
-        FirebaseApp.initializeApp(options);
-    }
 }
