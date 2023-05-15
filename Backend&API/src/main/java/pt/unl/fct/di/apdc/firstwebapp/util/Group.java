@@ -1,7 +1,5 @@
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
-import java.util.UUID;
-
 public class Group {
 
     public String DisplayName;
