@@ -9,13 +9,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.logging.Logger;
-import java.io.FileInputStream;
+
 
 
 @Path("/chat")
@@ -31,7 +29,7 @@ public class ChatResources {
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createGroup(Group group) throws IOException{
+    public Response createGroup(Group group) throws IOException {
 
         initialize();
         LOG.severe("Initialized");
@@ -61,16 +59,11 @@ public class ChatResources {
 
     public void initialize() throws IOException {
 
-        LOG.severe("initializing...");
-        FileInputStream serviceAccount =
-                new FileInputStream("Backend&API/src/main/java/pt/unl/fct/di/apdc/firstwebapp/resources/unilink23-firebase-adminsdk-a3nn3-d8beef1a33.json");
-        LOG.severe("initializing... 2");
-        LOG.severe(serviceAccount.toString());
         FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setCredentials(GoogleCredentials.getApplicationDefault())
                 .setDatabaseUrl("https://unilink23-default-rtdb.europe-west1.firebasedatabase.app")
                 .build();
-        LOG.severe("initializing... !!");
+
         FirebaseApp.initializeApp(options);
     }
 }
