@@ -14,8 +14,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-
-
 @Path("/chat")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ChatResources {
@@ -32,9 +30,9 @@ public class ChatResources {
     public Response createGroup(Group group) throws IOException {
 
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("chats");
-        DatabaseReference newChatRef = chatsRef.push(); // Generate a unique ID for the new chat
+        DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat
+
         // Set the data for the new chat
-        newChatRef.child("groupID").setValueAsync(newChatRef.getKey());
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
         newChatRef.child("description").setValueAsync(group.description);
 
