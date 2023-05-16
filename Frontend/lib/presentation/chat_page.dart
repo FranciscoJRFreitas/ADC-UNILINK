@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
-
-import '../domain/User.dart';
-import '../widgets/GroupTitle.dart';
+import '../domain/Token.dart';
+import '../widgets/my_text_field.dart';
 import '../widgets/widgets.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 class ChatPage extends StatefulWidget {
-  final User user;
-
-  ChatPage({required this.user});
+  ChatPage();
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
+  final TextEditingController groupNameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   Stream? groups;
   bool _isLoading = true;
   late String userName;
-  late String groupName;
 
   @override
   void initState() {
@@ -55,10 +56,21 @@ class _ChatPageState extends State<ChatPage> {
     });
   }*/
 
+  // Function to display the snackbar
+  void _showErrorSnackbar(String message, bool Error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    userName = widget.user.username;
-    groupName = 'Unilink';
     return Scaffold(
       //drawer: Drawer(
       /*   child: ListView(
@@ -159,7 +171,7 @@ class _ChatPageState extends State<ChatPage> {
       )),*/
       body: Stack(
         children: <Widget>[
-          groupList(), // assuming groupList() returns a widget
+          //groupList(), // assuming groupList() returns a widget
           Align(
             alignment: Alignment.topRight,
             child: Padding(
@@ -177,7 +189,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          popUpDialog(context, groupName);
+          popUpDialog(context);
         },
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
@@ -190,7 +202,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  popUpDialog(BuildContext context, String groupName) {
+  popUpDialog(BuildContext context) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -204,32 +216,18 @@ class _ChatPageState extends State<ChatPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _isLoading == true
-                      ? Center(
-                          child: CircularProgressIndicator(
-                              color: Theme.of(context).primaryColor),
-                        )
-                      : TextField(
-                          onChanged: (val) {
-                            setState(() {
-                              groupName = 'UniLink';
-                            });
-                          },
-                          style: const TextStyle(color: Colors.black),
-                          decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                  borderRadius: BorderRadius.circular(20)),
-                              errorBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.red),
-                                  borderRadius: BorderRadius.circular(20)),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                  borderRadius: BorderRadius.circular(20))),
-                        ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'Group name',
+                    inputType: TextInputType.text,
+                    controller: groupNameController,
+                  ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'Group Description',
+                    inputType: TextInputType.text,
+                    controller: descriptionController,
+                  ),
                 ],
               ),
               actions: [
@@ -243,17 +241,9 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (groupName != "") {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      /*DatabaseService(
-                              uid: FirebaseAuth.instance.currentUser!.uid)
-                          .createGroup(userName,
-                              FirebaseAuth.instance.currentUser!.uid, groupName)
-                          .whenComplete(() {
-                        _isLoading = false;
-                      });*/
+                    {
+                      createGroup(context, groupNameController.text,
+                          descriptionController.text, _showErrorSnackbar);
                       Navigator.of(context).pop();
                       showSnackbar(
                           context, Colors.green, "Group created successfully.");
@@ -270,24 +260,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   groupList() {
-    if (groupName == 'Unilink') {
-      return ListView.builder(
-        itemCount: 1,
-        itemBuilder: (context, index) {
-          return GroupTile(
-              groupId: '1', groupName: 'Unilink', userName: userName);
-        },
-      );
-    } else {
-      return noGroupWidget();
-    }
-    /*} else {
+    return noGroupWidget();
+  }
+  /*} else {
               return Center(
                 child: CircularProgressIndicator(
                     color: Theme.of(context).primaryColor),
               );
             }*/
-  }
 
   noGroupWidget() {
     return Container(
@@ -298,7 +278,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           GestureDetector(
             onTap: () {
-              popUpDialog(context, '');
+              popUpDialog(context);
             },
             child: Icon(
               Icons.add_circle,
@@ -316,5 +296,36 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
+  }
+
+  Future<void> createGroup(
+    BuildContext context,
+    String groupName,
+    String description,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url = "https://unilink23.oa.r.appspot.com/rest/chat/create";
+    final tokenID = await cache.getValue('users', 'token');
+    final storedUsername = await cache.getValue('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+      body: jsonEncode({
+        'DisplayName': groupName,
+        'description': description,
+        'adminID': storedUsername
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Changes applied successfully!', false);
+    } else {
+      showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    }
   }
 }

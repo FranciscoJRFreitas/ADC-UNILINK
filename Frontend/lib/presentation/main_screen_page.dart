@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         ChangePasswordPage(user: _currentUser),
         RemoveAccountPage(user: _currentUser),
-        ChatPage(user: _currentUser),
+        ChatPage(),
         SettingsPage(),
         Placeholder(), //estudante
         Placeholder(), //professor
