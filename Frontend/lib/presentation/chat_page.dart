@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:unilink2023/presentation/chat_msg_page.dart';
 import '../domain/Group.dart';
 import '../domain/Token.dart';
 import '../widgets/my_text_field.dart';
@@ -218,7 +219,13 @@ class _ChatPageState extends State<ChatPage> {
                         top: 10, bottom: 80), // Adjust the padding as needed
                     children: groups.map((group) {
                       return GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => GroupMessagesPage(
+                                    groupId: group.DisplayName)),
+                          );
+                        },
                         child: Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
