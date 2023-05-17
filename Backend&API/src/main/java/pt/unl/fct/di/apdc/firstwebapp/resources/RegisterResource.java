@@ -1,5 +1,6 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,9 +15,14 @@ import javax.ws.rs.core.Response.Status;
 
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FirestoreOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
@@ -102,18 +108,28 @@ public class RegisterResource {
                     .set("user_taxIdentificationNumber", data.taxIdentificationNumber == null ? "" : data.taxIdentificationNumber)
                     .set("user_photo", data.photo == null ? "" : data.photo);
 
+
             user = userBuilder.build();
             txn.add(user);
             LOG.info("User registered: " + data.username);
             txn.commit();
-
+            initConversations(data.username);
             return Response.ok("{}").build();
 
         } finally {
             if (txn.isActive()) txn.rollback();
         }
     }
+    private void initConversations(String username){
+        LOG.severe("Inserting data");
+        DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
+        DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
+        // Set the data for the new chat
+        newChatsForUserRef.child("DM").setValueAsync("DM");
+        newChatsForUserRef.child("Groups").setValueAsync("Groups");
+        LOG.severe("Inserting data finished");
 
+    }
     private void sendVerificationEmail(String email, String name, String token) {
         String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";

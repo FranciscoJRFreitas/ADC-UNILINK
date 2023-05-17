@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 // //void main() async {
 //     runApp(
@@ -34,7 +35,6 @@ void main() async {
       home: SplashPage(),
     ),
   );
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
