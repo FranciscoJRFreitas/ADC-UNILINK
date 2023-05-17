@@ -39,17 +39,16 @@ class _ChatPageState extends State<ChatPage> {
       List<Group> groups = [];
 
       Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
-      if (data != null) {
-        data.forEach((key, value) {
-          String id = key;
-          String displayName = value['DisplayName'];
-          String description = value['description'];
 
-          Group group =
-              Group(id: id, DisplayName: displayName, description: description);
-          groups.add(group);
-        });
-      }
+      data.forEach((key, value) {
+        String id = key;
+        String displayName = value['DisplayName'];
+        String description = value['description'];
+
+        Group group =
+            Group(id: id, DisplayName: displayName, description: description);
+        groups.add(group);
+      });
 
       streamController.add(groups);
     });
