@@ -68,13 +68,9 @@ class _MainScreenState extends State<MainScreen> {
       ];
 
   Future<Uint8List?> downloadData() async {
-    try {
-      return FirebaseStorage.instance
-          .ref('ProfilePictures/' + _currentUser.username)
-          .getData();
-    } catch (e) {
-      print(e);
-    }
+
+    return FirebaseStorage.instance.ref(
+          'ProfilePictures/' + _currentUser.username).getData().onError((error, stackTrace) => null);
   }
 
   Future getImage(bool gallery) async {
@@ -88,9 +84,9 @@ class _MainScreenState extends State<MainScreen> {
         .ref()
         .child('ProfilePictures/' + _currentUser.username);
 
-    UploadTask uploadTask = storageReference.putData(fileBytes);
+    await storageReference.putData(fileBytes);
+    setState(() {});
 
-    String url = await storageReference.getDownloadURL();
   }
 
   Widget picture(BuildContext context) {
@@ -99,7 +95,7 @@ class _MainScreenState extends State<MainScreen> {
         builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
           if (snapshot.hasData) {
             return Image.memory(snapshot.data!);
-          } else if (snapshot.hasError) {
+          } else {
             return const Icon(
               Icons.account_circle,
               size: 80,
@@ -138,13 +134,11 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.all(Radius.circular(15))),
                 child: InkWell(
                   onTap: () async {
-                    try {
+
                       await getImage(true);
                       profilePic = downloadData();
                       setState(() {});
-                    } catch (e) {
-                      print(e);
-                    }
+
                   },
                   child: const Icon(
                     Icons.add_a_photo,
