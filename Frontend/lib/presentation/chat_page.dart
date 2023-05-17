@@ -20,6 +20,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  var username;
   Stream<List<Group>>? groupsStream;
 
   @override
@@ -27,6 +28,7 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
 
     groupsStream = listenForGroups();
+    getUsername();
   }
 
   Stream<List<Group>> listenForGroups() {
@@ -213,7 +215,8 @@ class _ChatPageState extends State<ChatPage> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => GroupMessagesPage(
-                                    groupId: group.DisplayName)),
+                                    groupId: group.DisplayName,
+                                    username: username)),
                           );
                         },
                         child: Card(
@@ -382,6 +385,10 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
+  }
+
+  void getUsername() async {
+    username = await cache.getValue('users', 'username');
   }
 
   Future<void> createGroup(

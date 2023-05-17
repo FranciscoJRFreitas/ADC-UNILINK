@@ -1,18 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+
+import '../widgets/message_tile.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
+  final String username;
 
-  GroupMessagesPage({required this.groupId});
+  GroupMessagesPage({required this.groupId, required this.username});
 
   @override
   _GroupMessagesPageState createState() => _GroupMessagesPageState();
 }
 
 class _GroupMessagesPageState extends State<GroupMessagesPage> {
+  TextEditingController messageController = TextEditingController();
   late DatabaseReference messagesRef;
   late List<Message> messages = [];
+  Stream<List<Message>>? messageStream;
 
   @override
   void initState() {
@@ -20,6 +28,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
+    StreamController<List<Message>> streamController = StreamController();
 
     // Set up a listener to fetch and update the messages in real-time
     messagesRef.onChildAdded.listen((event) {
@@ -28,6 +37,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         Message message = Message.fromSnapshot(event.snapshot);
         // Add the message to the list
         messages.add(message);
+        streamController.add(messages);
+        messageStream = streamController.stream;
       });
     });
   }
@@ -39,30 +50,148 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     super.dispose();
   }
 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Group Messages'),
+//       ),
+//       body: ListView.builder(
+//         itemCount: messages.length,
+//         itemBuilder: (context, index) {
+//           Message message = messages[index];
+//           return ListTile(
+//             title: Text(message.text),
+//             subtitle: Text('Sent by: ${message.name}'),
+//             trailing: Column(
+//               crossAxisAlignment: CrossAxisAlignment.end,
+//               children: [
+//                 Text('ID: ${message.id}'),
+//                 Text('Timestamp: ${message.timestamp}'),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Group Messages'),
+        centerTitle: true,
+        elevation: 0,
+        title: Text(widget.groupId),
+        backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          IconButton(
+              onPressed: () {
+                // nextScreen(
+                //     context,
+                //     GroupInfo(
+                //       groupId: widget.groupId,
+                //       groupName: widget.groupName,
+                //       adminName: admin,
+                //     ));
+              },
+              icon: const Icon(Icons.info))
+        ],
       ),
-      body: ListView.builder(
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          Message message = messages[index];
-          return ListTile(
-            title: Text(message.text),
-            subtitle: Text('Sent by: ${message.name}'),
-            trailing: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('ID: ${message.id}'),
-                Text('Timestamp: ${message.timestamp}'),
-              ],
+      body: Stack(
+        children: <Widget>[
+          // chat messages here
+          chatMessages(),
+          Container(
+            alignment: Alignment.bottomCenter,
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              width: MediaQuery.of(context).size.width,
+              color: Color.fromARGB(255, 28, 42, 172),
+              child: Row(children: [
+                Expanded(
+                    child: TextFormField(
+                  controller: messageController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: "Send a message...",
+                    hintStyle: TextStyle(color: Colors.white, fontSize: 16),
+                    border: InputBorder.none,
+                  ),
+                )),
+                const SizedBox(
+                  width: 12,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    sendMessage(messageController.text);
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: const Center(
+                        child: Icon(
+                      Icons.send,
+                      color: Colors.white,
+                    )),
+                  ),
+                )
+              ]),
             ),
-          );
-        },
+          )
+        ],
       ),
     );
+  }
+
+  chatMessages() {
+    return StreamBuilder<List<Message>>(
+      stream: messageStream,
+      builder: (context, AsyncSnapshot<List<Message>> snapshot) {
+        return snapshot.hasData
+            ? ListView.builder(
+                itemCount: snapshot.data?.length ?? 0,
+                itemBuilder: (context, index) {
+                  Message? message = snapshot.data?[index];
+                  return message != null
+                      ? MessageTile(
+                          message: message.text,
+                          sender: message.name,
+                          sentByMe: widget.username == message.name,
+                        )
+                      : Container();
+                },
+              )
+            : Container();
+      },
+    );
+  }
+
+  sendMessage(String content) {
+    final DatabaseReference messageRef =
+        FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
+    Map<String, dynamic> messageData = {
+      'message': content,
+      'name': widget.username,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+    messageRef.push().set(messageData).then((value) {
+      setState(() {
+        messageController.clear();
+      });
+    }).catchError((error) {
+      // Handle the error if the message fails to send
+      print('Failed to send message: $error');
+    });
+
+    setState(() {
+      messageController.clear();
+    });
   }
 }
 
