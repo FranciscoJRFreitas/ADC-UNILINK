@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import '../domain/Group.dart';
 import '../domain/Token.dart';
@@ -21,8 +20,6 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   Stream<List<Group>>? groupsStream;
-
-  // DatabaseReference groupsRef = FirebaseDatabase.instance.ref('chats');
 
   @override
   void initState() {
