@@ -83,7 +83,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 User user = _searchResults[index];
-                bool isNotUser = widget.user.role != 'USER';
+                bool isNotUser = widget.user.role != 'STUDENT';
                 /*return Card(
                   child: ListTile(
                     title: Text(

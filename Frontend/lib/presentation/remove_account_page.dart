@@ -34,7 +34,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             SizedBox(
               height: 20,
             ),
-            if (widget.user.role != 'USER') ...[
+            if (widget.user.role != 'STUDENT') ...[
               MyTextField(
                 small: true,
                 controller: targetUsernameController,
