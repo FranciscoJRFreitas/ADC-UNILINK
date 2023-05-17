@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../domain/Group.dart';
 import '../domain/Token.dart';
+import '../widgets/GroupTile.dart';
 import '../widgets/my_text_field.dart';
 import '../widgets/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -20,37 +21,50 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController descriptionController = TextEditingController();
   List<Group> groups = [];
 
-  DatabaseReference groupsRef = FirebaseDatabase.instance.ref('chats');
-
   @override
   void initState() {
     super.initState();
 
-    groupsRef.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value;
-      updateGroups(data);
-    });
+    fetchChats();
   }
 
-  void updateGroups(Object? data) async {
-    List<dynamic> response = jsonDecode(data.toString());
-    print('Response body: $response');
-    setState(() {
-      groups = response
-          .map(
-            (groupJson) => Group.fromJson(groupJson),
-          )
-          .toList();
-    });
-  }
+  void fetchChats() async {
+    DatabaseReference chatsRef =
+        FirebaseDatabase.instance.reference().child('chats');
 
-  // string manipulation
-  String getId(String res) {
-    return res.substring(0, res.indexOf("_"));
-  }
+    try {
+      chatsRef.once().then((DatabaseEvent snapshot) {
+        if (snapshot.snapshot.value != null) {
+          Map<dynamic, dynamic>? chats =
+              snapshot.snapshot.value as Map<dynamic, dynamic>?;
 
-  String getName(String res) {
-    return res.substring(res.indexOf("_") + 1);
+          if (chats != null) {
+            List<Widget> groupTiles = [];
+
+            chats.forEach((key, value) {
+              String title = value['title'];
+              String description = value['description'];
+
+              // Create a GroupTile widget for each chat
+              GroupTile groupTile = GroupTile(
+                groupId: title,
+                description: description,
+              );
+
+              groupTiles.add(groupTile);
+            });
+
+            // Use the groupTiles list to display the GroupTile widgets
+            // For example, you can place them in a ListView or Column widget
+            ListView(
+              children: groupTiles,
+            );
+          }
+        }
+      });
+    } catch (error) {
+      print('Error fetching chats: $error');
+    }
   }
 
   /*gettingUserData() async {
