@@ -41,7 +41,6 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                 controller: targetUsernameController,
                 hintText: "Target username (leave empty for your account)",
                 inputType: TextInputType.name,
-                style: TextStyle(color: Colors.white),
               ),
             ],
             MyPasswordField(
@@ -192,11 +191,18 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     );
 
     if (response.statusCode == 200) {
-
       if (targetUsername.isEmpty)
-        FirebaseStorage.instance.ref().child('ProfilePictures/$username').delete().onError((error, stackTrace) => null);
+        FirebaseStorage.instance
+            .ref()
+            .child('ProfilePictures/$username')
+            .delete()
+            .onError((error, stackTrace) => null);
       else
-        FirebaseStorage.instance.ref().child('ProfilePictures/$targetUsername').delete().onError((error, stackTrace) => null);
+        FirebaseStorage.instance
+            .ref()
+            .child('ProfilePictures/$targetUsername')
+            .delete()
+            .onError((error, stackTrace) => null);
 
       if (this.mounted) {
         return {
