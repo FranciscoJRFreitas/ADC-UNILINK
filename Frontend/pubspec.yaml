@@ -43,6 +43,9 @@ dependencies:
   path: ^1.8.2
   universal_html: ^2.2.1
   firebase_database: ^10.2.1
+  video_player: ^2.2.10
+  photo_view: ^0.14.0
+  html: any
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +64,7 @@ flutter:
   assets:
   - assets/images/
   - assets/animation/
+  - assets/videos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

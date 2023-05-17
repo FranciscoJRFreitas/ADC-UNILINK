@@ -9,9 +9,11 @@ String? getCookie(String name) {
   for (final cookie in cookies!) {
     final parts = cookie.split('=');
     final cookieName = parts[0].trim();
-    final cookieValue = parts[1].trim();
-    if (cookieName == name) {
-      return cookieValue;
+    if (parts.length >= 2) {  // Check if there are at least two parts
+      final cookieValue = parts[1].trim();
+      if (cookieName == name) {
+        return cookieValue;
+      }
     }
   }
   return null;

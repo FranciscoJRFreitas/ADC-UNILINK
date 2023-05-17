@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../constants.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class RemoveAccountPage extends StatefulWidget {
   final User user;
@@ -34,7 +35,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             SizedBox(
               height: 20,
             ),
-            if (widget.user.role != 'USER') ...[
+            if (widget.user.role != 'STUDENT') ...[
               MyTextField(
                 small: true,
                 controller: targetUsernameController,
@@ -191,6 +192,12 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     );
 
     if (response.statusCode == 200) {
+
+      if (targetUsername.isEmpty)
+        FirebaseStorage.instance.ref().child('ProfilePictures/$username').delete().onError((error, stackTrace) => null);
+      else
+        FirebaseStorage.instance.ref().child('ProfilePictures/$targetUsername').delete().onError((error, stackTrace) => null);
+
       if (this.mounted) {
         return {
           'content': 'Account removed successfully.',
