@@ -122,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                                   hintText: 'Email or username',
                                   inputType: TextInputType.text,
                                   controller: emailUsernameController,
+                                  style: TextStyle(color: Colors.white),
                                 ),
                                 MyPasswordField(
                                   isPasswordVisible: isPasswordVisible,

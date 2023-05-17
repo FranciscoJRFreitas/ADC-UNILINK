@@ -55,16 +55,6 @@ class _ChatPageState extends State<ChatPage> {
 
     return streamController.stream;
   }
-
-  // string manipulation
-  String getId(String res) {
-    return res.substring(0, res.indexOf("_"));
-  }
-
-  String getName(String res) {
-    return res.substring(res.indexOf("_") + 1);
-  }
-
   /*gettingUserData() async {
     await HelperFunctions.getUserEmailFromSF().then((value) {
       setState(() {
@@ -308,16 +298,17 @@ class _ChatPageState extends State<ChatPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   MyTextField(
-                    small: false,
-                    hintText: 'Group name',
-                    inputType: TextInputType.text,
-                    controller: groupNameController,
-                  ),
+                      small: false,
+                      hintText: 'Group name',
+                      inputType: TextInputType.text,
+                      controller: groupNameController,
+                      style: TextStyle(color: Colors.black)),
                   MyTextField(
                     small: false,
                     hintText: 'Group Description',
                     inputType: TextInputType.text,
                     controller: descriptionController,
+                    style: TextStyle(color: Colors.black),
                   ),
                 ],
               ),

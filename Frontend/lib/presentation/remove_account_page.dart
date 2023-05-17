@@ -40,6 +40,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                 controller: targetUsernameController,
                 hintText: "Target username (leave empty for your account)",
                 inputType: TextInputType.name,
+                style: TextStyle(color: Colors.white),
               ),
             ],
             MyPasswordField(
