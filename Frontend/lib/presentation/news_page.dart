@@ -1,9 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:unilink2023/presentation/news_box.dart';
+import '../domain/FeedItem.dart';
+import '../domain/fetchNews.dart';
 
-class NewsFeedPage1 extends StatelessWidget {
+class NewsFeedPage1 extends StatefulWidget {
   const NewsFeedPage1({Key? key}) : super(key: key);
+
+  @override
+  _NewsFeedPage1State createState() => _NewsFeedPage1State();
+}
+
+class _NewsFeedPage1State extends State<NewsFeedPage1> {
+  late Future<List<FeedItem>> _feedItemsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _feedItemsFuture = fetchNews();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,52 +26,29 @@ class NewsFeedPage1 extends StatelessWidget {
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
-          child: ListView.separated(
-            itemCount: _feedItems.length,
-            separatorBuilder: (BuildContext context, int index) {
-              return const Divider();
-            },
-            itemBuilder: (BuildContext context, int index) {
-              final item = _feedItems[index];
-              return CustomCard(
-                  imageUrl: item.imageUrl,
-                  tags: item.tags,
-                  content: item.content);
-              /* return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (item.content != null)
-                            Text(
-                              item.content!,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          if (item.imageUrl != null)
-                            Container(
-                              height: 200,
-                              margin: const EdgeInsets.only(top: 8.0),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(item.imageUrl!),
-                                  )),
-                            ),
-                          // _ActionsRow(item: item)
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );*/
+          child: FutureBuilder<List<FeedItem>>(
+            future: _feedItemsFuture,
+            builder: (BuildContext context, AsyncSnapshot<List<FeedItem>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator(); // Show loading spinner while fetching data
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}'); // Show error if something goes wrong
+              } else {
+                final _feedItems = snapshot.data!;
+                return ListView.separated(
+                  itemCount: _feedItems.length,
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    final item = _feedItems[index];
+                    return CustomCard(
+                        imageUrl: item.imageUrl,
+                        tags: item.tags,
+                        content: item.content);
+                  },
+                );
+              }
             },
           ),
         ),
@@ -64,6 +56,7 @@ class NewsFeedPage1 extends StatelessWidget {
     );
   }
 }
+
 
 class _AvatarImage extends StatelessWidget {
   final String url;
@@ -81,7 +74,7 @@ class _AvatarImage extends StatelessWidget {
   }
 }
 
-class _ActionsRow extends StatelessWidget {
+class _ActionsRow extends StatelessWidget  {
   final FeedItem item;
   const _ActionsRow({Key? key, required this.item}) : super(key: key);
 
@@ -124,37 +117,6 @@ class _ActionsRow extends StatelessWidget {
   }
 }
 
-class FeedItem {
-  final String? content;
-  final String? imageUrl;
-  final UserNews user;
-  final int commentsCount;
-  final int likesCount;
-  final int retweetsCount;
-  List<String>? tags;
-
-  FeedItem(
-      {this.content,
-      this.imageUrl,
-      required this.user,
-      this.commentsCount = 0,
-      this.likesCount = 0,
-      this.retweetsCount = 0,
-      this.tags});
-}
-
-class UserNews {
-  final String fullName;
-  final String imageUrl;
-  final String userName;
-
-  UserNews(
-    this.fullName,
-    this.userName,
-    this.imageUrl,
-  );
-}
-
 final List<UserNews> _users = [
   UserNews(
     "John Doe",
@@ -178,7 +140,7 @@ final List<UserNews> _users = [
   )
 ];
 
-final List<FeedItem> _feedItems = [
+/*[
   FeedItem(
       content:
           "A son asked his father (a programmer) why the sun rises in the east, and sets in the west. His response? It works, don’t touch!",
@@ -220,4 +182,4 @@ final List<FeedItem> _feedItems = [
       user: _users[0],
       imageUrl: "https://picsum.photos/id/1006/960/540",
       tags: ['Eventos']),
-];
+];*/
