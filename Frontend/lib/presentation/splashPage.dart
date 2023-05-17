@@ -13,7 +13,7 @@ import 'dart:io' as io;
 import 'package:flutter/src/foundation/constants.dart';
 import '../domain/User.dart';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
-import 'package:video_player/video_player.dart';
+//import 'package:video_player/video_player.dart';
 
 class SplashPage extends StatefulWidget {
   @override
