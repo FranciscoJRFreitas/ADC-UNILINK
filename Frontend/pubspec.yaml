@@ -42,6 +42,7 @@ dependencies:
   sqflite: ^2.2.8+2
   path: ^1.8.2
   universal_html: ^2.2.1
+  video_player: ^2.2.10
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +61,7 @@ flutter:
   assets:
   - assets/images/
   - assets/animation/
+  - assets/videos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -200,32 +200,12 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             },
                           ),
                           Text(
-                            "Modify Attributes:",
+                            "Attributes to modify:",
                             style: kBodyText.copyWith(
                               color: Colors.white,
                             ),
                           ),
-                          if (widget.user.role != 'USER') ...[
-                            MyTextField(
-                              small: true,
-                              controller: targetUsernameController,
-                              hintText:
-                                  'Target username for changes (leave empty for your own account)',
-                              inputType: TextInputType.name,
-                            ),
-                            MyTextField(
-                              small: false,
-                              controller: displayNameController,
-                              hintText: 'Name',
-                              inputType: TextInputType.name,
-                            ),
-                            MyTextField(
-                              small: false,
-                              controller: emailController,
-                              hintText: 'Email',
-                              inputType: TextInputType.name,
-                            ),
-                            MyTextComboBox(
+                          MyTextComboBox(
                               selectedValue: _selectedEducationLevel,
                               hintText: 'Education Level',
                               items: [
@@ -252,23 +232,31 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             SizedBox(
                               height: 10,
                             ),
-                            if (widget.user.role == 'GA') ...[
+                          if (widget.user.role != 'STUDENT') ...[
+                            MyTextField(
+                              small: true,
+                              controller: targetUsernameController,
+                              hintText:
+                                  'Target username for changes (leave empty for your own account)',
+                              inputType: TextInputType.name,
+                            ),
+                            MyTextField(
+                              small: false,
+                              controller: displayNameController,
+                              hintText: 'Name',
+                              inputType: TextInputType.name,
+                            ),
+                            MyTextField(
+                              small: false,
+                              controller: emailController,
+                              hintText: 'Email',
+                              inputType: TextInputType.name,
+                            ),
+                            if (widget.user.role == 'DIRECTOR') ...[
                               MyTextComboBox(
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
-                                items: ['User Role', 'USER', 'GBO'],
-                                onChanged: (dynamic newValue) {
-                                  setState(() {
-                                    _selectedUserRole = newValue;
-                                  });
-                                },
-                              ),
-                            ],
-                            if (widget.user.role == 'GS') ...[
-                              MyTextComboBox(
-                                selectedValue: _selectedUserRole,
-                                hintText: 'User Role',
-                                items: ['User Role', 'USER', 'GBO', 'GA'],
+                                items: ['User Role', 'STUDENT', 'PROF'],
                                 onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
@@ -280,7 +268,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                               MyTextComboBox(
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
-                                items: ['User Role', 'USER', 'GBO', 'GA', 'GS'],
+                                items: ['User Role', 'STUDENT', 'PROF', 'DIRECTOR', 'SU'],
                                 onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;

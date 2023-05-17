@@ -13,6 +13,7 @@ import 'dart:io' as io;
 import 'package:flutter/src/foundation/constants.dart';
 import '../domain/User.dart';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import 'package:video_player/video_player.dart';
 
 class SplashPage extends StatefulWidget {
   @override
@@ -25,7 +26,7 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     Timer(
-      const Duration(seconds: 2),
+      const Duration(seconds: 6),
       () async {
         bool loginB = false;
         bool introB = false;
@@ -90,9 +91,19 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: kBackgroundColor,
-        body: Center(child: Image.asset('/images/NOVA_Logo.png')),
+        backgroundColor: Colors.white,
+        body: Center(
+            child: Lottie.asset(
+          'animation/NovaAnimation.mp4.lottie.json',
+          repeat: true,
+          reverse: false,
+        )),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
