@@ -25,6 +25,7 @@ class _IntroPageState extends State<IntroPage> {
           onDone: () async {
             if (kIsWeb) {
               cookies.setCookie('intro', 'true');
+              cookies.setCookie('theme', 'Light');
             } else if (io.Platform.isAndroid) {
               SqliteService().updateCheckIntro(1);
               SqliteService().updateTheme('Light');
