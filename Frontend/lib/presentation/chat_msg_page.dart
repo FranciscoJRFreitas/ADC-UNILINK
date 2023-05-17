@@ -21,6 +21,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late DatabaseReference messagesRef;
   late List<Message> messages = [];
   Stream<List<Message>>? messageStream;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -40,6 +41,23 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         streamController.add(messages);
         messageStream = streamController.stream;
       });
+      _scrollToBottom();
+    });
+    _jumpToBottom();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+    }
+  }
+
+  void _jumpToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
     });
   }
 
@@ -50,32 +68,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     super.dispose();
   }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Group Messages'),
-//       ),
-//       body: ListView.builder(
-//         itemCount: messages.length,
-//         itemBuilder: (context, index) {
-//           Message message = messages[index];
-//           return ListTile(
-//             title: Text(message.text),
-//             subtitle: Text('Sent by: ${message.name}'),
-//             trailing: Column(
-//               crossAxisAlignment: CrossAxisAlignment.end,
-//               children: [
-//                 Text('ID: ${message.id}'),
-//                 Text('Timestamp: ${message.timestamp}'),
-//               ],
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,6 +116,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   width: 12,
                 ),
                 GestureDetector(
+                  //Add enter event listener to send message
                   onTap: () {
                     sendMessage(messageController.text);
                   },
@@ -155,6 +148,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
         return snapshot.hasData
             ? ListView.builder(
+                controller: _scrollController,
                 itemCount: snapshot.data?.length ?? 0,
                 itemBuilder: (context, index) {
                   Message? message = snapshot.data?[index];
