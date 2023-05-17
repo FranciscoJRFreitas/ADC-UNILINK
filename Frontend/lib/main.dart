@@ -1,16 +1,24 @@
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/splashPage.dart';
+import 'package:unilink2023/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
+import '../data/web_cookies.dart' as cookies;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+
+
   );
+
+  if (kIsWeb) {
+    cookies.setCookie('cookie', 'start');
+  }
 
   runApp(
     ChangeNotifierProvider(

@@ -32,11 +32,14 @@ class _SplashPageState extends State<SplashPage> {
         bool introB = false;
 
         if (kIsWeb) {
-          cookies.setCookie('cookie', 'start');
-          cookies.setCookie('theme', 'Light');
+
+          if (cookies.getCookie('theme') == null) {
+            cookies.setCookie('theme', 'Light');
+          }
 
           if (cookies.getCookie('login') != null) loginB = true;
           if (cookies.getCookie('intro') != null) introB = true;
+
         } else if (io.Platform.isAndroid) {
           if (SqliteService().getCheckLogin() == true) loginB = true;
           if (SqliteService().getCheckIntro() == true) introB = true;
