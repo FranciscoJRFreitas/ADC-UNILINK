@@ -6,37 +6,27 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
 
-// //void main() async {
-//     runApp(
-//       MultiProvider(providers: [
-//         ChangeNotifierProvider(
-//           create: (_) => ThemeNotifier(kDarkTheme),
-//         ),
-//         ChangeNotifierProvider(create: (context) => IntroProvider()),
-//       ], child: MyApp()),
-//     );
-//
-//     await Firebase.initializeApp(
-//       options: DefaultFirebaseOptions.currentPlatform,
-//     );
-//   }
 void main() async {
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'UniLink',
-      theme: ThemeData(
-        //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-        scaffoldBackgroundColor: kBackgroundColor,
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: SplashPage(),
-    ),
-  );
-
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeNotifier(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'UniLink',
+        theme: ThemeData(
+          //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+          scaffoldBackgroundColor: kBackgroundColor,
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: MyApp(),
+      ),
+    ),
   );
 }
 
