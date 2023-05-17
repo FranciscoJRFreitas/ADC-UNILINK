@@ -461,7 +461,7 @@ class _MainScreenState extends State<MainScreen> {
     String username,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/logout/";
+    final url = kBaseUrl + "rest/logout/";
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);

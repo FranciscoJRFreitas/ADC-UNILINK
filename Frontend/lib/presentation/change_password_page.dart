@@ -5,6 +5,7 @@ import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import '../constants.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   final User user;
@@ -88,7 +89,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String newPassword,
     String confirmPassword,
   ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/changePwd/";
+    final url = kBaseUrl + "rest/changePwd/";
 
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');

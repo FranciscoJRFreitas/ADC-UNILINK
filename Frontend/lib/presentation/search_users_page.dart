@@ -3,7 +3,6 @@ import 'package:unilink2023/presentation/userprofile_page.dart';
 import '../constants.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
@@ -22,7 +21,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   List<User> _searchResults = [];
 
   Future<void> searchUsers(String query) async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/search/';
+    final url = kBaseUrl + 'rest/search/';
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
@@ -132,7 +131,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                           EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                       child: ListTile(
                         title: Text(
-                          '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',
+                          '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',//TODO Mudar para token em vez de widget
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Column(

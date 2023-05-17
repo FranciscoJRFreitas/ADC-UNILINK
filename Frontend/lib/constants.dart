@@ -34,6 +34,9 @@ const kBodyText2 = TextStyle(
   color: Colors.white,
 );
 
+const kBaseUrl = "https://unilink23.oa.r.appspot.com/";
+//const kBaseUrl = "http://localhost:8080/";
+
 final ThemeData kLightTheme = ThemeData(
   scaffoldBackgroundColor: kWhiteBackgroundColor,
   primarySwatch: Colors.green, // This sets the primary color swatch
