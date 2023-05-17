@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../domain/Group.dart';
 import '../domain/Token.dart';
@@ -18,30 +20,44 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  List<Group> groups = [];
+  Stream<List<Group>>? groupsStream;
 
-  DatabaseReference groupsRef = FirebaseDatabase.instance.ref('chats');
+  // DatabaseReference groupsRef = FirebaseDatabase.instance.ref('chats');
 
   @override
   void initState() {
     super.initState();
 
-    groupsRef.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value;
-      updateGroups(data);
-    });
+    groupsStream = listenForGroups();
   }
 
-  void updateGroups(Object? data) async {
-    List<dynamic> response = jsonDecode(data.toString());
-    print('Response body: $response');
-    setState(() {
-      groups = response
-          .map(
-            (groupJson) => Group.fromJson(groupJson),
-          )
-          .toList();
+  Stream<List<Group>> listenForGroups() {
+    DatabaseReference groupsRef =
+        FirebaseDatabase.instance.ref().child('chats');
+
+    StreamController<List<Group>> streamController = StreamController();
+
+    groupsRef.onValue.listen((event) {
+      DataSnapshot snapshot = event.snapshot;
+      List<Group> groups = [];
+
+      Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+      if (data != null) {
+        data.forEach((key, value) {
+          String id = key;
+          String displayName = value['DisplayName'];
+          String description = value['description'];
+
+          Group group =
+              Group(id: id, DisplayName: displayName, description: description);
+          groups.add(group);
+        });
+      }
+
+      streamController.add(groups);
     });
+
+    return streamController.stream;
   }
 
   // string manipulation
@@ -191,49 +207,66 @@ class _ChatPageState extends State<ChatPage> {
       body: Stack(
         children: <Widget>[
           //groupList(), // assuming groupList() returns a widget
-          ListView.builder(
-            itemCount: groups.length,
-            itemBuilder: (context, index) {
-              Group group = groups[index];
-              if (groups.isEmpty)
-                return Text("There are no groups...");
-              else
-                return GestureDetector(
-                  onTap: () {},
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    elevation: 5,
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                      child: ListTile(
-                        title: Text(
-                          '${group.DisplayName}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.person, size: 20),
-                                SizedBox(width: 5),
-                                Text('Description: ${group.description}'),
-                              ],
+          StreamBuilder<List<Group>>(
+            stream: groupsStream, // Replace with your stream of groups
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
+              if (snapshot.hasData) {
+                List<Group> groups = snapshot.data!;
+
+                if (groups.isEmpty) {
+                  return noGroupWidget();
+                } else {
+                  return ListView(
+                    padding: EdgeInsets.only(
+                        top: 10, bottom: 80), // Adjust the padding as needed
+                    children: groups.map((group) {
+                      return GestureDetector(
+                        onTap: () {},
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 8),
+                            child: ListTile(
+                              title: Text(
+                                '${group.DisplayName}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.person, size: 20),
+                                      SizedBox(width: 5),
+                                      Text('Description: ${group.description}'),
+                                    ],
+                                  ),
+                                  // ... Add other information rows with icons here
+                                  // Make sure to add some spacing (SizedBox) between rows for better readability
+                                ],
+                              ),
                             ),
-                            // ... Add other information rows with icons here
-                            // Make sure to add some spacing (SizedBox) between rows for better readability
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                );
+                      );
+                    }).toList(),
+                  );
+                }
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return CircularProgressIndicator();
+              }
             },
           ),
+          // ... existing code ...
           Align(
             alignment: Alignment.topRight,
             child: Padding(
