@@ -350,9 +350,6 @@ class _ChatPageState extends State<ChatPage> {
         });
   }
 
-  groupList() {
-    return noGroupWidget();
-  }
   /*} else {
               return Center(
                 child: CircularProgressIndicator(
