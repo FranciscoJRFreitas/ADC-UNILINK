@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   List<Widget> _widgetOptions() => [
-        NewsFeedPage1(), //futuramente as news
+        NewsFeedPage(), //futuramente as news
         SearchUsersPage(user: _currentUser),
         ListUsersPage(user: _currentUser),
         ModifyAttributesPage(

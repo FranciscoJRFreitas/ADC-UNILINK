@@ -3,21 +3,49 @@ import 'package:flutter/material.dart';
 import 'package:unilink2023/presentation/news_box.dart';
 import '../domain/FeedItem.dart';
 import '../domain/fetchNews.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class NewsFeedPage1 extends StatefulWidget {
-  const NewsFeedPage1({Key? key}) : super(key: key);
+class NewsFeedPage extends StatefulWidget {
+  const NewsFeedPage({Key? key}) : super(key: key);
 
   @override
-  _NewsFeedPage1State createState() => _NewsFeedPage1State();
+  _NewsFeedPageState createState() => _NewsFeedPageState();
 }
 
-class _NewsFeedPage1State extends State<NewsFeedPage1> {
-  late Future<List<FeedItem>> _feedItemsFuture;
+class _NewsFeedPageState extends State<NewsFeedPage> {
+  ScrollController _scrollController = ScrollController();
+  List<FeedItem> _feedItems = [];
+  int _page = 0;
+  bool _hasMore = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _feedItemsFuture = fetchNews();
+    _fetchMore();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        _fetchMore();
+      }
+    });
+  }
+
+  void _fetchMore() async {
+    if (_isLoading || !_hasMore) return;
+    setState(() {
+      _isLoading = true;
+    });
+    List<FeedItem> newFeedItems = await fetchNews(_page);
+    setState(() {
+      _isLoading = false;
+      if (newFeedItems.isEmpty) {
+        _hasMore = false;
+      } else {
+        _feedItems.addAll(newFeedItems);
+        _page++;
+      }
+    });
   }
 
   @override
@@ -26,34 +54,46 @@ class _NewsFeedPage1State extends State<NewsFeedPage1> {
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
-          child: FutureBuilder<List<FeedItem>>(
-            future: _feedItemsFuture,
-            builder: (BuildContext context, AsyncSnapshot<List<FeedItem>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator(); // Show loading spinner while fetching data
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}'); // Show error if something goes wrong
-              } else {
-                final _feedItems = snapshot.data!;
-                return ListView.separated(
-                  itemCount: _feedItems.length,
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider();
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    final item = _feedItems[index];
-                    return CustomCard(
-                        imageUrl: item.imageUrl,
-                        tags: item.tags,
-                        content: item.content);
-                  },
-                );
+          child: ListView.separated(
+            controller: _scrollController,
+            itemCount: _feedItems.length + (_hasMore ? 1 : 0),
+            separatorBuilder: (BuildContext context, int index) {
+              return const Divider();
+            },
+            itemBuilder: (BuildContext context, int index) {
+              if (index == _feedItems.length) {
+                if (_isLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else {
+                  return SizedBox.shrink();
+                }
               }
+              final item = _feedItems[index];
+              return MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () => _launchURL(item.pageUrl ?? ''),
+                  child: CustomCard(
+                    imageUrl: item.imageUrl,
+                    tags: item.tags,
+                    content: item.content,
+                  ),
+                ),
+              );
             },
           ),
         ),
       ),
     );
+  }
+}
+
+void _launchURL(String url) async {
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    // can't launch url, there is some error
+    throw "Could not launch $url";
   }
 }
 

@@ -1,4 +1,5 @@
 class FeedItem {
+  final String? pageUrl;
   final String? content;
   final String? imageUrl;
   //final UserNews user;
@@ -8,7 +9,8 @@ class FeedItem {
   List<String>? tags;
 
   FeedItem(
-      {this.content,
+      {this.pageUrl,
+      this.content,
       this.imageUrl,
       //required this.user,
       this.commentsCount = 0,
