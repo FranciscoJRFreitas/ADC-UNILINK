@@ -7,6 +7,7 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
 import '../data/web_cookies.dart' as cookies;
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,13 +17,11 @@ void main() async {
 
   );
 
-  if (kIsWeb) {
-    cookies.setCookie('cookie', 'start');
-  }
+  var themeSetting = await cache.getValue('settings', 'theme');
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeNotifier(),
+      create: (context) => ThemeNotifier(themeSetting!),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'UniLink',
