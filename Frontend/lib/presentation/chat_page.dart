@@ -27,37 +27,47 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
 
-    groupsStream = listenForGroups();
     getUsername();
+    groupsStream = listenForGroups();
   }
 
   Stream<List<Group>> listenForGroups() {
-    DatabaseReference groupsRef =
-        FirebaseDatabase.instance.ref().child('chats');
+    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('chats');
+    DatabaseReference membersRef =
+        FirebaseDatabase.instance.ref().child('members');
 
     StreamController<List<Group>> streamController = StreamController();
 
-    groupsRef.onValue.listen((event) {
+    chatsRef.onValue.listen((event) {
       DataSnapshot snapshot = event.snapshot;
       List<Group> groups = [];
 
-      Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+      Map<dynamic, dynamic> chatData = snapshot.value as Map<dynamic, dynamic>;
 
-      data.forEach((key, value) {
+      chatData.forEach((key, value) {
         String id = key;
         String displayName = value['DisplayName'];
         String description = value['description'];
 
-        Group group =
-            Group(id: id, DisplayName: displayName, description: description);
-        groups.add(group);
-      });
+        membersRef.child(key).onValue.listen((memberEvent) {
+          DataSnapshot memberSnapshot = memberEvent.snapshot;
+          Map<dynamic, dynamic>? memberData =
+              memberSnapshot.value as Map<dynamic, dynamic>?;
 
-      streamController.add(groups);
+          if (memberData != null && memberData[username] != null) {
+            Group group = Group(
+                id: id, DisplayName: displayName, description: description);
+            groups.add(group);
+          }
+
+          streamController.add(groups);
+        });
+      });
     });
 
     return streamController.stream;
   }
+
   /*gettingUserData() async {
     await HelperFunctions.getUserEmailFromSF().then((value) {
       setState(() {
@@ -95,107 +105,8 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //drawer: Drawer(
-      /*   child: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 50),
-        children: <Widget>[
-          Icon(
-            Icons.account_circle,
-            size: 150,
-            color: Colors.grey[700],
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Text(
-            userName,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          const Divider(
-            height: 2,
-          ),
-          ListTile(
-            onTap: () {},
-            selectedColor: Theme.of(context).primaryColor,
-            selected: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.group),
-            title: const Text(
-              "Groups",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-          ListTile(
-            onTap: () {
-              nextScreenReplace(
-                  context,
-                  MainScreen(
-                    user: widget.user,
-                  ));
-            },
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.group),
-            title: const Text(
-              "Profile",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-          ListTile(
-            onTap: () async {
-              showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text("Logout"),
-                      content: const Text("Are you sure you want to logout?"),
-                      actions: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(
-                            Icons.cancel,
-                            color: Colors.red,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            await authService.signOut();
-                            Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginPage()),
-                                (route) => false);
-                          },
-                          icon: const Icon(
-                            Icons.done,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    );
-                  });
-            },
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text(
-              "Logout",
-              style: TextStyle(color: Colors.black),
-            ),
-          )
-        ],
-      )),*/
-
       body: Stack(
         children: <Widget>[
-          //groupList(), // assuming groupList() returns a widget
           StreamBuilder<List<Group>>(
             stream: groupsStream, // Replace with your stream of groups
             builder:
@@ -420,5 +331,9 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }
+    setState(() {
+      groupNameController.clear();
+      descriptionController.clear();
+    });
   }
 }
