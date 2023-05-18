@@ -32,36 +32,36 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Stream<List<Group>> listenForGroups() {
-    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('chats');
     DatabaseReference membersRef =
         FirebaseDatabase.instance.ref().child('members');
+    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('chats');
 
     StreamController<List<Group>> streamController = StreamController();
 
-    chatsRef.onValue.listen((event) {
-      DataSnapshot snapshot = event.snapshot;
+    membersRef.onValue.listen((event) {
+      DataSnapshot membersSnapshot = event.snapshot;
       List<Group> groups = [];
 
-      Map<dynamic, dynamic> chatData = snapshot.value as Map<dynamic, dynamic>;
+      Map<dynamic, dynamic> membersData =
+          membersSnapshot.value as Map<dynamic, dynamic>;
 
-      chatData.forEach((key, value) {
-        String id = key;
-        String displayName = value['DisplayName'];
-        String description = value['description'];
-
-        membersRef.child(key).onValue.listen((memberEvent) {
-          DataSnapshot memberSnapshot = memberEvent.snapshot;
-          Map<dynamic, dynamic>? memberData =
-              memberSnapshot.value as Map<dynamic, dynamic>?;
-
-          if (memberData != null && memberData[username] != null) {
+      membersData.forEach((key, value) {
+        if (value != null && value[username] != null) {
+          String id = key;
+          chatsRef.child(id).once().then((chatSnapshot) {
+            Map<dynamic, dynamic> chatsData =
+                chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
+            String displayName = chatsData['DisplayName'];
+            String description = chatsData['description'];
             Group group = Group(
-                id: id, DisplayName: displayName, description: description);
+              id: id,
+              DisplayName: displayName,
+              description: description,
+            );
             groups.add(group);
-          }
-
-          streamController.add(groups);
-        });
+            streamController.add(groups);
+          });
+        }
       });
     });
 
@@ -97,16 +97,17 @@ class _ChatPageState extends State<ChatPage> {
                   return noGroupWidget();
                 } else {
                   return ListView(
-                    padding: EdgeInsets.only(
-                        top: 10, bottom: 80), // Adjust the padding as needed
+                    padding: EdgeInsets.only(top: 10, bottom: 80),
                     children: groups.map((group) {
                       return GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) => GroupMessagesPage(
-                                    groupId: group.DisplayName,
-                                    username: username)),
+                              builder: (context) => GroupMessagesPage(
+                                groupId: group.id,
+                                username: username,
+                              ),
+                            ),
                           );
                         },
                         child: Card(
@@ -152,14 +153,14 @@ class _ChatPageState extends State<ChatPage> {
               }
             },
           ),
-          // ... existing code ...
           Align(
             alignment: Alignment.topRight,
             child: Padding(
-              padding: EdgeInsets.all(16.0), // Adjust this as needed
+              padding: EdgeInsets.all(16.0),
               child: IconButton(
                 onPressed: () {
-                  nextScreen(context, const Placeholder()); //searchPageChat
+                  // nextScreen(context, const Placeholder()); //searchPageChat
+                  // Replace the above line with your desired logic
                 },
                 icon: const Icon(Icons.search),
                 color: Colors.white,

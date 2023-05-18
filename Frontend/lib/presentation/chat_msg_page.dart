@@ -172,17 +172,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
     messageRef.push().set(messageData).then((value) {
-      setState(() {
-        messageController.clear();
-      });
+      messageController.clear();
     }).catchError((error) {
       // Handle the error if the message fails to send
       print('Failed to send message: $error');
     });
-
-    setState(() {
-      messageController.clear();
-    });
+    messageController.clear();
   }
 }
 
