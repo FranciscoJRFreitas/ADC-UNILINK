@@ -1,10 +1,15 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/userprofile_page.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import '../constants.dart';
 
 class ListUsersPage extends StatefulWidget {
   final User user;
@@ -25,7 +30,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
   }
 
   Future<void> fetchUsers() async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/list/';
+    final url = kBaseUrl + 'rest/list/';
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
@@ -105,6 +110,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
                     MaterialPageRoute(
                         builder: (context) => UserProfilePage(
                               user: user,
+                              targetUser: widget.user,
                               isNotUser: isNotUser,
                             )),
                   );
@@ -117,6 +123,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: ListTile(
+                      leading: picture(context, user.username),
                       title: Text(
                         '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -145,4 +152,55 @@ class _ListUsersPageState extends State<ListUsersPage> {
       ),
     );
   }
+
+  Future<Uint8List?> downloadData(String username) async {
+
+    return FirebaseStorage.instance.ref(
+        'ProfilePictures/' + username).getData().onError((error, stackTrace) => null);
+  }
+
+  Widget picture(BuildContext context, String username) {
+    return FutureBuilder<Uint8List?>(
+        future: downloadData(username),
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) { // Here
+                    return Dialog(
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          PhotoView(
+                            imageProvider: MemoryImage(snapshot.data!),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Icon(Icons.close, color: Colors.white), // Choose your icon and color
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(); // Use dialogContext here
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Image.memory(snapshot.data!),
+            );
+          } else {
+            return const Icon(
+              Icons.account_circle,
+              size: 50,
+            );
+          }
+          return const CircularProgressIndicator();
+        });
+  }
+
 }

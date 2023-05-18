@@ -84,7 +84,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     void Function(String, bool) showErrorSnackbar,
     bool redirect,
   ) async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/modify/';
+    final url = kBaseUrl + 'rest/modify/';
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
@@ -200,35 +200,12 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             },
                           ),
                           Text(
-                            "Modify Attributes:",
+                            "Attributes to modify:",
                             style: kBodyText.copyWith(
                               color: Colors.white,
                             ),
                           ),
-                          if (widget.user.role != 'USER') ...[
-                            MyTextField(
-                              small: true,
-                              controller: targetUsernameController,
-                              hintText:
-                                  'Target username for changes (leave empty for your own account)',
-                              inputType: TextInputType.name,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            MyTextField(
-                              small: false,
-                              controller: displayNameController,
-                              hintText: 'Name',
-                              inputType: TextInputType.name,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            MyTextField(
-                              small: false,
-                              controller: emailController,
-                              hintText: 'Email',
-                              inputType: TextInputType.name,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            MyTextComboBox(
+                          MyTextComboBox(
                               selectedValue: _selectedEducationLevel,
                               hintText: 'Education Level',
                               items: [
@@ -255,23 +232,31 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             SizedBox(
                               height: 10,
                             ),
-                            if (widget.user.role == 'GA') ...[
+                          if (widget.user.role != 'STUDENT') ...[
+                            MyTextField(
+                              small: true,
+                              controller: targetUsernameController,
+                              hintText:
+                                  'Target username for changes (leave empty for your own account)',
+                              inputType: TextInputType.name,
+                            ),
+                            MyTextField(
+                              small: false,
+                              controller: displayNameController,
+                              hintText: 'Name',
+                              inputType: TextInputType.name,
+                            ),
+                            MyTextField(
+                              small: false,
+                              controller: emailController,
+                              hintText: 'Email',
+                              inputType: TextInputType.name,
+                            ),
+                            if (widget.user.role == 'DIRECTOR') ...[
                               MyTextComboBox(
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
-                                items: ['User Role', 'USER', 'GBO'],
-                                onChanged: (dynamic newValue) {
-                                  setState(() {
-                                    _selectedUserRole = newValue;
-                                  });
-                                },
-                              ),
-                            ],
-                            if (widget.user.role == 'GS') ...[
-                              MyTextComboBox(
-                                selectedValue: _selectedUserRole,
-                                hintText: 'User Role',
-                                items: ['User Role', 'USER', 'GBO', 'GA'],
+                                items: ['User Role', 'STUDENT', 'PROF'],
                                 onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
@@ -283,7 +268,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                               MyTextComboBox(
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
-                                items: ['User Role', 'USER', 'GBO', 'GA', 'GS'],
+                                items: ['User Role', 'STUDENT', 'PROF', 'DIRECTOR', 'SU'],
                                 onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
@@ -317,63 +302,54 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             controller: landlinePhoneController,
                             hintText: 'Landline Phone',
                             inputType: TextInputType.phone,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: mobilePhoneController,
                             hintText: 'Mobile Phone',
                             inputType: TextInputType.phone,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: occupationController,
                             hintText: 'Occupation',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: workplaceController,
                             hintText: 'Workplace',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: addressController,
                             hintText: 'Address',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: additionalAddressController,
                             hintText: 'Additional Address',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: localityController,
                             hintText: 'Locality',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: postalCodeController,
                             hintText: 'Postal Code (1234-567)',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                           MyTextField(
                             small: false,
                             controller: nifController,
                             hintText: 'NIF (123456789)',
                             inputType: TextInputType.text,
-                            style: TextStyle(color: Colors.white),
                           ),
                         ],
                       ),

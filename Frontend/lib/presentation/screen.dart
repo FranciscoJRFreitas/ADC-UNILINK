@@ -9,7 +9,7 @@ export './modify_attributes_page.dart';
 export './remove_account_page.dart';
 export './chat_page.dart';
 export './userprofile_page.dart';
-export './splashPage.dart';
+export './splash_page.dart';
 export './settings_page.dart';
 export './search_users_page.dart';
 export './news_page.dart';

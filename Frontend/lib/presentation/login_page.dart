@@ -122,7 +122,6 @@ class _LoginPageState extends State<LoginPage> {
                                   hintText: 'Email or username',
                                   inputType: TextInputType.text,
                                   controller: emailUsernameController,
-                                  style: TextStyle(color: Colors.white),
                                 ),
                                 MyPasswordField(
                                   isPasswordVisible: isPasswordVisible,
@@ -205,7 +204,7 @@ Future<int> login(
   String password,
   void Function(String, bool, bool) showErrorSnackbar,
 ) async {
-  final url = "https://unilink23.oa.r.appspot.com/rest/login/";
+  final url = kBaseUrl + "rest/login/";
   final response = await http.post(
     Uri.parse(url),
     headers: {

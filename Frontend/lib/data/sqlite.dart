@@ -14,7 +14,8 @@ class SqliteService {
           'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
           'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
           'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
-          'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT); CREATE TABLE settings(checkIntro INTEGER, checkLogin INTEGER);',
+          'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT); CREATE TABLE settings(checkIntro INTEGER, checkLogin INTEGER,'
+          'theme TEXT NOT NULL);',
         );
       },
       version: 1,
@@ -48,6 +49,14 @@ class SqliteService {
         : await db.rawUpdate('UPDATE Settings SET checkLogin = $value');
   }
 
+  Future<void> updateTheme(String value) async {
+    Database db = await getDatabase();
+
+    await getCheckLogin() == null
+        ? await db.rawInsert('INSERT INTO Settings(theme) VALUES($value)')
+        : await db.rawUpdate('UPDATE Settings SET theme = $value');
+  }
+
   Future<bool?> getCheckIntro() async {
     Database db = await getDatabase();
 
@@ -67,6 +76,18 @@ class SqliteService {
 
     if (maps.isNotEmpty && maps[0].containsKey('checkLogin')) {
       return maps[0]['checkLogin'] == 1 ? true : false;
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getLightTheme() async {
+    Database db = await getDatabase();
+
+    final List<Map<String, dynamic>> maps = await db.query('settings');
+
+    if (maps.isNotEmpty && maps[0].containsKey('theme')) {
+      return maps[0]['theme'];
     } else {
       return null;
     }

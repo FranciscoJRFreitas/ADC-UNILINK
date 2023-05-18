@@ -11,6 +11,7 @@ import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import 'package:photo_view/photo_view.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -68,13 +69,9 @@ class _MainScreenState extends State<MainScreen> {
       ];
 
   Future<Uint8List?> downloadData() async {
-    try {
-      return FirebaseStorage.instance
-          .ref('ProfilePictures/' + _currentUser.username)
-          .getData();
-    } catch (e) {
-      print(e);
-    }
+
+    return FirebaseStorage.instance.ref(
+          'ProfilePictures/' + _currentUser.username).getData().onError((error, stackTrace) => null);
   }
 
   Future getImage(bool gallery) async {
@@ -88,26 +85,55 @@ class _MainScreenState extends State<MainScreen> {
         .ref()
         .child('ProfilePictures/' + _currentUser.username);
 
-    UploadTask uploadTask = storageReference.putData(fileBytes);
+    await storageReference.putData(fileBytes);
+    setState(() {});
 
-    String url = await storageReference.getDownloadURL();
   }
 
   Widget picture(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-        future: profilePic,
-        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
-          if (snapshot.hasData) {
-            return Image.memory(snapshot.data!);
-          } else if (snapshot.hasError) {
-            return const Icon(
-              Icons.account_circle,
-              size: 80,
+  return FutureBuilder<Uint8List?>(
+    future: profilePic,
+    builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+      if (snapshot.hasData) {
+        return GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext dialogContext) { // Here
+                return Dialog(
+                  child: Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      PhotoView(
+                        imageProvider: MemoryImage(snapshot.data!),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: IconButton(
+                          icon: Icon(Icons.close, color: Colors.white), // Choose your icon and color
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop(); // Use dialogContext here
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
-          }
-          return const CircularProgressIndicator();
-        });
+          },
+          child: Image.memory(snapshot.data!),
+        );
+      } else {
+        return const Icon(
+          Icons.account_circle,
+          size: 80,
+        );
+      }
+      return const CircularProgressIndicator();
+    });
   }
+
 
   Widget profilePicture(BuildContext context) {
     return InkWell(
@@ -138,13 +164,11 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.all(Radius.circular(15))),
                 child: InkWell(
                   onTap: () async {
-                    try {
+
                       await getImage(true);
                       profilePic = downloadData();
                       setState(() {});
-                    } catch (e) {
-                      print(e);
-                    }
+
                   },
                   child: const Icon(
                     Icons.add_a_photo,
@@ -461,7 +485,7 @@ class _MainScreenState extends State<MainScreen> {
     String username,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/logout/";
+    final url = kBaseUrl + "rest/logout/";
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);

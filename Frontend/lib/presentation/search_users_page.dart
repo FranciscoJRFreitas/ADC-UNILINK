@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/userprofile_page.dart';
 import '../constants.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
@@ -22,7 +25,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   List<User> _searchResults = [];
 
   Future<void> searchUsers(String query) async {
-    final url = 'https://unilink23.oa.r.appspot.com/rest/search/';
+    final url = kBaseUrl + 'rest/search/';
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
@@ -84,7 +87,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 User user = _searchResults[index];
-                bool isNotUser = widget.user.role != 'USER';
+                bool isNotUser = widget.user.role != 'STUDENT';
                 /*return Card(
                   child: ListTile(
                     title: Text(
@@ -118,6 +121,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                       MaterialPageRoute(
                           builder: (context) => UserProfilePage(
                                 user: user,
+                                targetUser: widget.user,
                                 isNotUser: isNotUser,
                               )),
                     );
@@ -131,8 +135,9 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                       padding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                       child: ListTile(
+                        leading: picture(context, user.username),
                         title: Text(
-                          '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',
+                          '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',//TODO Mudar para token em vez de widget
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Column(
@@ -161,4 +166,55 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
       ),
     );
   }
+
+  Future<Uint8List?> downloadData(String username) async {
+
+    return FirebaseStorage.instance.ref(
+        'ProfilePictures/' + username).getData().onError((error, stackTrace) => null);
+  }
+
+  Widget picture(BuildContext context, String username) {
+    return FutureBuilder<Uint8List?>(
+        future: downloadData(username),
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) { // Here
+                    return Dialog(
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          PhotoView(
+                            imageProvider: MemoryImage(snapshot.data!),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Icon(Icons.close, color: Colors.white), // Choose your icon and color
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(); // Use dialogContext here
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Image.memory(snapshot.data!),
+            );
+          } else {
+            return const Icon(
+              Icons.account_circle,
+              size: 50,
+            );
+          }
+          return const CircularProgressIndicator();
+        });
+  }
+
 }

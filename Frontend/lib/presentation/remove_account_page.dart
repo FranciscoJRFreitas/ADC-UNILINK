@@ -1,12 +1,13 @@
 import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import '../constants.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class RemoveAccountPage extends StatefulWidget {
   final User user;
@@ -34,13 +35,12 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             SizedBox(
               height: 20,
             ),
-            if (widget.user.role != 'USER') ...[
+            if (widget.user.role != 'STUDENT') ...[
               MyTextField(
                 small: true,
                 controller: targetUsernameController,
                 hintText: "Target username (leave empty for your account)",
                 inputType: TextInputType.name,
-                style: TextStyle(color: Colors.white),
               ),
             ],
             MyPasswordField(
@@ -175,7 +175,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     String targetUsername,
   ) async {
     final url =
-        'https://unilink23.oa.r.appspot.com/rest/remove/?targetUsername=$targetUsername&pwd=$password';
+        kBaseUrl + 'rest/remove/?targetUsername=$targetUsername&pwd=$password';
 
     final tokenID = await cache.getValue('users', 'token');
     final storedUsername = await cache.getValue('users', 'username');
@@ -191,6 +191,19 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     );
 
     if (response.statusCode == 200) {
+      if (targetUsername.isEmpty)
+        FirebaseStorage.instance
+            .ref()
+            .child('ProfilePictures/$username')
+            .delete()
+            .onError((error, stackTrace) => null);
+      else
+        FirebaseStorage.instance
+            .ref()
+            .child('ProfilePictures/$targetUsername')
+            .delete()
+            .onError((error, stackTrace) => null);
+
       if (this.mounted) {
         return {
           'content': 'Account removed successfully.',

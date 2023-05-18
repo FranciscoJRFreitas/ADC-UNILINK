@@ -198,17 +198,16 @@ class _ChatPageState extends State<ChatPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   MyTextField(
-                      small: false,
-                      hintText: 'Group name',
-                      inputType: TextInputType.text,
-                      controller: groupNameController,
-                      style: TextStyle(color: Colors.black)),
+                    small: false,
+                    hintText: 'Group name',
+                    inputType: TextInputType.text,
+                    controller: groupNameController,
+                  ),
                   MyTextField(
                     small: false,
                     hintText: 'Group Description',
                     inputType: TextInputType.text,
                     controller: descriptionController,
-                    style: TextStyle(color: Colors.black),
                   ),
                 ],
               ),

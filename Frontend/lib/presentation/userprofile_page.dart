@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
-
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../domain/User.dart';
 
 class UserProfilePage extends StatelessWidget {
   final User user;
+  final User targetUser;
   final bool isNotUser;
 
-  UserProfilePage({required this.user, required this.isNotUser});
+  UserProfilePage({required this.user, required this.targetUser, required this.isNotUser});
 
   @override
   Widget build(BuildContext context) {
-    print(user.username);
-    print(user.role);
+    //String? currentUser = await cache.getValue('users', 'username');
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 8, 52, 88),
         title: Text(
-            '${user.displayName}${user.username == user.username ? ' (You)' : ''}'),
+            '${user.displayName}${user.username == targetUser.username ? ' (You)' : ''}'),
       ),
       body: SingleChildScrollView(
         child: Padding(

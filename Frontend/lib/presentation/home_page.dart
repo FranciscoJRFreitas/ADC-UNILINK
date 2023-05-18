@@ -75,6 +75,18 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Divider(),
                     ListTile(
+                      title: Text("Education Level"),
+                      trailing: Text(widget.user.educationLevel ?? 'N/A'),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text("Birth date"),
+                      trailing: Text(widget.user.birthDate ?? 'N/A'),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    Divider(),
+                    ListTile(
                       title: Text("Profile Visibility"),
                       trailing: Text(widget.user.profileVisibility ?? 'N/A'),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
