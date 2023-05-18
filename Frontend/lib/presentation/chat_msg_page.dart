@@ -47,8 +47,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -62,6 +65,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   void dispose() {
     // Clean up the listener
     messagesRef.onChildAdded.drain();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -75,22 +79,24 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
-              onPressed: () {
-                // nextScreen(
-                //     context,
-                //     GroupInfo(
-                //       groupId: widget.groupId,
-                //       groupName: widget.groupName,
-                //       adminName: admin,
-                //     ));
-              },
-              icon: const Icon(Icons.info))
+            onPressed: () {
+              // nextScreen(
+              //     context,
+              //     GroupInfo(
+              //       groupId: widget.groupId,
+              //       groupName: widget.groupName,
+              //       adminName: admin,
+              //     ));
+            },
+            icon: const Icon(Icons.info),
+          ),
         ],
       ),
-      body: Stack(
+      body: Column(
         children: <Widget>[
-          // chat messages here
-          chatMessages(),
+          Expanded(
+            child: chatMessages(),
+          ),
           Container(
             alignment: Alignment.bottomCenter,
             width: MediaQuery.of(context).size.width,
@@ -98,42 +104,46 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               width: MediaQuery.of(context).size.width,
               color: Color.fromARGB(255, 28, 42, 172),
-              child: Row(children: [
-                Expanded(
+              child: Row(
+                children: [
+                  Expanded(
                     child: TextFormField(
-                  controller: messageController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    hintText: "Send a message...",
-                    hintStyle: TextStyle(color: Colors.white, fontSize: 16),
-                    border: InputBorder.none,
-                  ),
-                )),
-                const SizedBox(
-                  width: 12,
-                ),
-                GestureDetector(
-                  //Add enter event listener to send message
-                  onTap: () {
-                    sendMessage(messageController.text);
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(30),
+                      controller: messageController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: "Send a message...",
+                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
+                        border: InputBorder.none,
+                      ),
                     ),
-                    child: const Center(
-                        child: Icon(
-                      Icons.send,
-                      color: Colors.white,
-                    )),
                   ),
-                )
-              ]),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  GestureDetector(
+                    //Add enter event listener to send message
+                    onTap: () {
+                      sendMessage(messageController.text);
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -143,22 +153,26 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     return StreamBuilder<List<Message>>(
       stream: messageStream,
       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
-        return snapshot.hasData
-            ? ListView.builder(
-                controller: _scrollController,
-                itemCount: snapshot.data?.length ?? 0,
-                itemBuilder: (context, index) {
-                  Message? message = snapshot.data?[index];
-                  return message != null
-                      ? MessageTile(
-                          message: message.text,
-                          sender: message.name,
-                          sentByMe: widget.username == message.name,
-                        )
-                      : Container();
-                },
-              )
-            : Container();
+        if (snapshot.hasData) {
+          WidgetsBinding.instance!
+              .addPostFrameCallback((_) => _scrollToBottom());
+          return ListView.builder(
+            controller: _scrollController,
+            itemCount: snapshot.data?.length ?? 0,
+            itemBuilder: (context, index) {
+              Message? message = snapshot.data?[index];
+              return message != null
+                  ? MessageTile(
+                      message: message.text,
+                      sender: message.name,
+                      sentByMe: widget.username == message.name,
+                    )
+                  : Container();
+            },
+          );
+        } else {
+          return Container();
+        }
       },
     );
   }
