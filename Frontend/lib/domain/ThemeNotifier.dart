@@ -7,19 +7,20 @@ import 'package:unilink2023/data/sqlite.dart';
 import 'dart:io' as io;
 
 class ThemeNotifier with ChangeNotifier {
-  ThemeData? _currentTheme;
+  ThemeData _currentTheme =
+      cache.getValue('settings', 'theme') == 'Light' ? kLightTheme : kDarkTheme;
 
   ThemeNotifier(String themeSetting) {
     _currentTheme = themeSetting == 'Dark'
-      ? ThemeData.dark()
-      : ThemeData.light();
+      ? kDarkTheme
+      : kLightTheme;
   }
 
   ThemeData? get currentTheme => _currentTheme;
 
   Future<void> toggleTheme() async {
     if (await cache.getValue('settings', 'theme') == 'Dark') {
-      _currentTheme = ThemeData.light();
+      _currentTheme = kLightTheme;
 
       if (kIsWeb)
         cookies.setCookie('theme', 'Light');
@@ -27,7 +28,7 @@ class ThemeNotifier with ChangeNotifier {
         SqliteService().updateTheme('Light');
       //... other actions for light theme
     } else {
-      _currentTheme = ThemeData.dark();
+      _currentTheme = kDarkTheme;
       if (kIsWeb)
         cookies.setCookie('theme', 'Dark');
       else if (io.Platform.isAndroid)

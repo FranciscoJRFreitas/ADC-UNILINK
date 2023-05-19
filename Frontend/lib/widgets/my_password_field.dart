@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 
 class MyPasswordField extends StatelessWidget {
-
   const MyPasswordField({
     required this.isPasswordVisible,
     required this.onTap,
@@ -36,27 +35,13 @@ class MyPasswordField extends StatelessWidget {
               onPressed: () => onTap(),
               icon: Icon(
                 isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                color: Colors.grey,
+                color: Theme.of(context).primaryIconTheme.color,
               ),
             ),
           ),
           contentPadding: EdgeInsets.all(20),
-          hintText: hintText == null ? 'Password': hintText,
-          hintStyle: kBodyText,
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.grey,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.white,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(18),
-          ),
+          hintText: hintText == null ? 'Password' : hintText,
+          hintStyle: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
     );

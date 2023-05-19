@@ -19,27 +19,16 @@ class MyTextField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: TextField(
         controller: controller,
-        style: kBodyText.copyWith(color: Colors.white),
+        style: Theme.of(context).textTheme.bodyMedium,
         keyboardType: inputType,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(
+          //removi algumas coisas daqui
           contentPadding: EdgeInsets.all(20),
           hintText: hintText,
-          hintStyle: small ? kBodyText.copyWith(fontSize: 12) : kBodyText,
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.grey,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.white,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(18),
-          ),
+          hintStyle: small
+              ? Theme.of(context).textTheme.bodySmall
+              : Theme.of(context).textTheme.bodyMedium,
         ),
       ),
     );

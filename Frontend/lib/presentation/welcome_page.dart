@@ -32,11 +32,11 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     Text(
                       "Bem-vindo à nova plataforma UniLink!",
-                      style: kHeadline,
+                      style: Theme.of(context).textTheme.titleLarge,
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(
@@ -46,7 +46,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: Text(
                         "A tornar as faculdades mais acessiveis...",
-                        style: kBodyText,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
                     )
@@ -63,7 +63,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   children: [
                     Expanded(
                       child: MyTextButton(
-                        bgColor: Colors.white,
+                        bgColor: Theme.of(context).primaryColor,
                         buttonName: 'Register',
                         onTap: () {
                           Navigator.push(

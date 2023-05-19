@@ -67,7 +67,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: kBackgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -83,115 +82,105 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: SafeArea(
         //to make page scrollable
-        child: CustomScrollView(
-          reverse: true,
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+
+        child: Padding(
+          padding: const EdgeInsets.only(
+              top: 20.0, left: 15.0, right: 15.0), // This line is changed
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                fit: FlexFit.loose,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Flexible(
                       fit: FlexFit.loose,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Welcome back,",
-                                  style: kHeadline,
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  "You've been missed!",
-                                  style: kBodyText2,
-                                ),
-                                SizedBox(
-                                  height: 60,
-                                ),
-                                MyTextField(
-                                  small: false,
-                                  hintText: 'Email or username',
-                                  inputType: TextInputType.text,
-                                  controller: emailUsernameController,
-                                ),
-                                MyPasswordField(
-                                  isPasswordVisible: isPasswordVisible,
-                                  onTap: () {
-                                    setState(() {
-                                      isPasswordVisible = !isPasswordVisible;
-                                    });
-                                  },
-                                  controller: passwordController,
-                                  hintText: 'Password',
-                                ),
-                              ],
-                            ),
+                          Text(
+                            "Welcome back,",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "You've been missed!",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          MyTextField(
+                            small: false,
+                            hintText: 'Email or username',
+                            inputType: TextInputType.text,
+                            controller: emailUsernameController,
+                          ),
+                          MyPasswordField(
+                            isPasswordVisible: isPasswordVisible,
+                            onTap: () {
+                              setState(() {
+                                isPasswordVisible = !isPasswordVisible;
+                              });
+                            },
+                            controller: passwordController,
+                            hintText: 'Password',
                           ),
                         ],
                       ),
                     ),
-                    Column(
-                      // Wrap the login button and the row with a Column widget
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Don't have an account? ",
-                              style: kBodyText.copyWith(color: Colors.blue),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => RegisterPage(),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                'Register',
-                                style: kBodyText.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        MyTextButton(
-                          buttonName: 'Login',
-                          onTap: () {
-                            login(
-                              context,
-                              emailUsernameController.text,
-                              passwordController.text,
-                              _showErrorSnackbar,
-                            );
-                          },
-                          bgColor: Colors.white,
-                          textColor: Colors.black87,
-                        ),
-                      ],
-                    ),
-                    Expanded(child: Container()),
-                    // Add an Expanded widget to create the bottom margin
                   ],
                 ),
               ),
-            ),
-          ],
+              Column(
+                // Wrap the login button and the row with a Column widget
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account? ",
+                        style: kBodyText.copyWith(color: Colors.blue),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => RegisterPage(),
+                            ),
+                          );
+                        },
+                        child: Text('Register',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  MyTextButton(
+                    buttonName: 'Login',
+                    onTap: () {
+                      login(
+                        context,
+                        emailUsernameController.text,
+                        passwordController.text,
+                        _showErrorSnackbar,
+                      );
+                    },
+                    bgColor: Theme.of(context).primaryColor,
+                    textColor: Colors.black87,
+                  ),
+                ],
+              ),
+              Expanded(child: Container()),
+              // Add an Expanded widget to create the bottom margin
+            ],
+          ),
         ),
       ),
     );
