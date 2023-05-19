@@ -71,7 +71,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               CupertinoPageRoute(
                                   builder: (context) => RegisterPage()));
                         },
-                        textColor: Colors.black87,
+                        textColor: Colors.black87, height: 60,
                       ),
                     ),
                     Expanded(
@@ -85,7 +85,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 builder: (context) => LoginPage(),
                               ));
                         },
-                        textColor: Colors.white,
+                        textColor: Colors.white, height: 60,
                       ),
                     ),
                   ],

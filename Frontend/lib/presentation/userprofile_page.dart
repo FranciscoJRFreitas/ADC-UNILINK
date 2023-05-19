@@ -12,7 +12,7 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //String? currentUser = await cache.getValue('users', 'username');
-    
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 8, 52, 88),

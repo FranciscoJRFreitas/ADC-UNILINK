@@ -28,14 +28,14 @@ class _MainScreenState extends State<MainScreen> {
     "News",
     "Search",
     "List",
-    "Modify Attributes",
+    "User Profile",
     "Change Password",
     "Remove Account",
     "Chat",
     "Settings",
-    "estudane",
-    "Professor",
-    "Diretor",
+    "Student",
+    "Teacher",
+    "Director",
   ];
   late User _currentUser;
   late Future<Uint8List?> profilePic;
@@ -54,14 +54,15 @@ class _MainScreenState extends State<MainScreen> {
         NewsFeedPage(), //futuramente as news
         SearchUsersPage(user: _currentUser),
         ListUsersPage(user: _currentUser),
-        ModifyAttributesPage(
+        /*ModifyAttributesPage(
           user: _currentUser,
           onUserUpdate: (updatedUser) {
             setState(() {
               _currentUser = updatedUser;
             });
           },
-        ),
+        ),*/
+        HomePage(user: _currentUser),
         ChangePasswordPage(user: _currentUser),
         RemoveAccountPage(user: _currentUser),
         ChatPage(user: _currentUser),
@@ -226,16 +227,10 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => HomePage(
-                      key: ValueKey(_currentUser),
-                      user: _currentUser,
-                      //roleColor: _currentUser.getRoleColor(_currentUser.role),
-                    ),
-                  ),
-                );
-                _isExpanded = !_isExpanded; // replace with your screen
+                setState(() {
+                  _selectedIndex = 3;
+                });
+                Navigator.pop(context); // replace with your screen
               },
               child: DrawerHeader(
                 decoration: BoxDecoration(

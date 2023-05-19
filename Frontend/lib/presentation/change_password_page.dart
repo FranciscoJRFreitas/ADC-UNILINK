@@ -74,7 +74,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 );
               },
               bgColor: Colors.white,
-              textColor: Colors.black87,
+              textColor: Colors.black87, height: 60,
             ),
           ],
         ),

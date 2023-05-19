@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import '../widgets/register_age.dart';
+import '../widgets/register_page.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -411,7 +411,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             });
                           },
                           bgColor: Colors.white,
-                          textColor: Colors.black87,
+                          textColor: Colors.black87, height: 60,
                         ),
                       ],
                     ),

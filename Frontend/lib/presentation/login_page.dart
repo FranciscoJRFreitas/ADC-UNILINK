@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     },
                     bgColor: Theme.of(context).primaryColor,
-                    textColor: Colors.black87,
+                    textColor: Colors.black87, height: 60,
                   ),
                 ],
               ),

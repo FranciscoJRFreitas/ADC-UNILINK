@@ -135,7 +135,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                 );
               },
               bgColor: Colors.white,
-              textColor: Colors.black87,
+              textColor: Colors.black87, height: 60,
             ),
           ],
         ),

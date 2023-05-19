@@ -5,7 +5,7 @@ export './main_screen_page.dart';
 export './change_password_page.dart';
 export './home_page.dart';
 export './list_users_page.dart';
-export './modify_attributes_page.dart';
+export './edit_profile_page.dart';
 export './remove_account_page.dart';
 export './chat_page.dart';
 export './userprofile_page.dart';

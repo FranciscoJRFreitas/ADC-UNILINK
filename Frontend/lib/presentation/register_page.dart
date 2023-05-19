@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import '../widgets/register_age.dart';
+import '../widgets/register_page.dart';
 import '../widgets/widget.dart';
 import '../constants.dart';
 
@@ -367,7 +367,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             );
                           },
                           bgColor: Theme.of(context).primaryColor,
-                          textColor: Colors.black87,
+                          textColor: Colors.black87, height: 60,
                         ),
                       ],
                     ),
