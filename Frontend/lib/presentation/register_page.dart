@@ -113,7 +113,6 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: kBackgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -133,9 +132,8 @@ class _RegisterPageState extends State<RegisterPage> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
+                padding:
+                    const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
                 child: Column(
                   children: [
                     Flexible(
@@ -144,11 +142,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Text(
                             "Register",
-                            style: kHeadline,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                           Text(
                             "Create a new account to get started!",
-                            style: kBodyText2,
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           SizedBox(
                             height: 25,
@@ -171,9 +169,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
                                 child: Text(
                                   'Login',
-                                  style: kBodyText.copyWith(
-                                    color: Colors.white,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ),
                             ],
@@ -183,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           Text(
                             "Mandatory Fields:",
-                            style: kBodyText,
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                           MyTextField(
                             small: false,
@@ -228,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           Text(
                             "Optional Fields: (You can always change them later)",
-                            style: kBodyText,
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                           SizedBox(
                             height: 25,
@@ -370,7 +366,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               _showErrorSnackbar,
                             );
                           },
-                          bgColor: Colors.white,
+                          bgColor: Theme.of(context).primaryColor,
                           textColor: Colors.black87,
                         ),
                       ],

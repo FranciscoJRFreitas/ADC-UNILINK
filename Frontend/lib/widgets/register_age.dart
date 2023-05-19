@@ -24,29 +24,13 @@ class _regAgeState extends State<regAge> {
         controller: widget.controller, //editing controller of this TextField
         decoration: InputDecoration(
           hintText: 'Enter your birthday',
-          hintStyle: TextStyle(color: Style.grey),
+          hintStyle: Theme.of(context).textTheme.bodyMedium,
           prefixIcon: Icon(
             Icons.calendar_month_outlined,
-            color: Style.grey,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Style.grey),
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(20),
-            ),
-            borderSide: BorderSide(color: Style.grey),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(20),
-            ),
-            borderSide: BorderSide(width: 1, color: Style.grey),
+            color: Theme.of(context).primaryIconTheme.color,
           ),
         ),
-        style: TextStyle(color: Style.grey),
+        style: Theme.of(context).textTheme.bodyMedium,
         readOnly: true, // when true user cannot edit text
         onTap: () async {
           try {

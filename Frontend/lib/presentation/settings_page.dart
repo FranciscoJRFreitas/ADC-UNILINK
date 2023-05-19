@@ -35,7 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
           iconSize: 50.0,
           icon: Icon(
             Provider.of<ThemeNotifier>(context, listen: false).currentTheme ==
-                    ThemeData.dark()
+                    kDarkTheme
                 ? Icons.nights_stay
                 : Icons.wb_sunny,
           ),

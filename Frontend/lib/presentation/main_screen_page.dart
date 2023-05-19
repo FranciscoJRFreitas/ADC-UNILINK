@@ -23,7 +23,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 7;
   List<String> _title = [
     "News",
     "Search",
@@ -32,7 +32,10 @@ class _MainScreenState extends State<MainScreen> {
     "Change Password",
     "Remove Account",
     "Chat",
-    "Settings"
+    "Settings",
+    "estudane",
+    "Professor",
+    "Diretor",
   ];
   late User _currentUser;
   late Future<Uint8List?> profilePic;
@@ -69,9 +72,10 @@ class _MainScreenState extends State<MainScreen> {
       ];
 
   Future<Uint8List?> downloadData() async {
-
-    return FirebaseStorage.instance.ref(
-          'ProfilePictures/' + _currentUser.username).getData().onError((error, stackTrace) => null);
+    return FirebaseStorage.instance
+        .ref('ProfilePictures/' + _currentUser.username)
+        .getData()
+        .onError((error, stackTrace) => null);
   }
 
   Future getImage(bool gallery) async {
@@ -87,53 +91,55 @@ class _MainScreenState extends State<MainScreen> {
 
     await storageReference.putData(fileBytes);
     setState(() {});
-
   }
 
   Widget picture(BuildContext context) {
-  return FutureBuilder<Uint8List?>(
-    future: profilePic,
-    builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
-      if (snapshot.hasData) {
-        return GestureDetector(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext dialogContext) { // Here
-                return Dialog(
-                  child: Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      PhotoView(
-                        imageProvider: MemoryImage(snapshot.data!),
+    return FutureBuilder<Uint8List?>(
+        future: profilePic,
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    // Here
+                    return Dialog(
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          PhotoView(
+                            imageProvider: MemoryImage(snapshot.data!),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Icon(Icons.close,
+                                  color: Colors
+                                      .white), // Choose your icon and color
+                              onPressed: () {
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: IconButton(
-                          icon: Icon(Icons.close, color: Colors.white), // Choose your icon and color
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop(); // Use dialogContext here
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
+              child: Image.memory(snapshot.data!),
             );
-          },
-          child: Image.memory(snapshot.data!),
-        );
-      } else {
-        return const Icon(
-          Icons.account_circle,
-          size: 80,
-        );
-      }
-      return const CircularProgressIndicator();
-    });
+          } else {
+            return const Icon(
+              Icons.account_circle,
+              size: 80,
+            );
+          }
+          return const CircularProgressIndicator();
+        });
   }
-
 
   Widget profilePicture(BuildContext context) {
     return InkWell(
@@ -164,11 +170,9 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.all(Radius.circular(15))),
                 child: InkWell(
                   onTap: () async {
-
-                      await getImage(true);
-                      profilePic = downloadData();
-                      setState(() {});
-
+                    await getImage(true);
+                    profilePic = downloadData();
+                    setState(() {});
                   },
                   child: const Icon(
                     Icons.add_a_photo,
@@ -186,16 +190,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     Color roleColor = _currentUser.getRoleColor(widget.user.role);
     bool _isExpanded = false;
-    List<bool> _isExpandedExpasionTile = [false, false];
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 8, 52, 88), //roleColor,
         title: Text(
           _title[_selectedIndex],
-          style: TextStyle(
-              color: Colors
-                  .white // roleColor == Colors.yellow ? Colors.black : Colors.white,
-              ),
+          style: Theme.of(context).textTheme.bodyLarge,
+          selectionColor: Colors.white,
         ),
         centerTitle: true,
         actions: [
@@ -229,7 +231,7 @@ class _MainScreenState extends State<MainScreen> {
                     builder: (context) => HomePage(
                       key: ValueKey(_currentUser),
                       user: _currentUser,
-                      roleColor: _currentUser.getRoleColor(_currentUser.role),
+                      //roleColor: _currentUser.getRoleColor(_currentUser.role),
                     ),
                   ),
                 );
@@ -254,16 +256,8 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         Row(
                           children: [
-                            Text(
-                              ' ${widget.user.displayName} ',
-                              style: TextStyle(
-                                color: Colors.white,
-                                /*roleColor == Colors.yellow
-                                    ? Colors.black
-                                    : Colors.white,*/
-                                fontSize: 18,
-                              ),
-                            ),
+                            Text(' ${widget.user.displayName} ',
+                                style: Theme.of(context).textTheme.titleLarge),
                             Icon(
                               _isExpanded
                                   ? Icons.keyboard_arrow_down_outlined
@@ -416,7 +410,7 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 200),
+            SizedBox(height: 170),
             Divider(
               // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
               thickness: 1, // Adjusts the divider's thickness.
