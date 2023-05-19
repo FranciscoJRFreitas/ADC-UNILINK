@@ -15,7 +15,7 @@ class SqliteService {
           'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
           'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
           'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT); CREATE TABLE settings(checkIntro INTEGER, checkLogin INTEGER,'
-          'theme TEXT NOT NULL);',
+          'theme TEXT NOT NULL, pageIndex INTEGER);',
         );
       },
       version: 1,
@@ -55,6 +55,14 @@ class SqliteService {
     await getCheckLogin() == null
         ? await db.rawInsert('INSERT INTO Settings(theme) VALUES($value)')
         : await db.rawUpdate('UPDATE Settings SET theme = $value');
+  }
+
+  Future<void> updateIndex(int value) async {
+    Database db = await getDatabase();
+
+    await getCheckLogin() == null
+        ? await db.rawInsert('INSERT INTO Settings(pageIndex) VALUES($value)')
+        : await db.rawUpdate('UPDATE Settings SET pageIndex = $value');
   }
 
   Future<bool?> getCheckIntro() async {

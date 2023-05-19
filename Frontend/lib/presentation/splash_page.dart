@@ -33,10 +33,6 @@ class _SplashPageState extends State<SplashPage> {
 
         if (kIsWeb) {
 
-          if (cookies.getCookie('theme') == null) {
-            cookies.setCookie('theme', 'Dark');
-          }
-
           if (cookies.getCookie('login') != null) loginB = true;
           if (cookies.getCookie('intro') != null) introB = true;
 

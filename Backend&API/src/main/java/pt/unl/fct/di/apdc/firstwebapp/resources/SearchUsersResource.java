@@ -4,6 +4,7 @@ import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -142,9 +143,10 @@ public class SearchUsersResource {
             if (Arrays.stream(propertiesToSearch)
                     .anyMatch(property -> {
                         String propertyValue = result.getString(property);
-                        return levenshteinDistance(searchQuery.toLowerCase(), propertyValue.toLowerCase()) <= MAX_DISTANCE
-                                || searchQuery.toLowerCase().contains(propertyValue.toLowerCase())
-                                || propertyValue.toLowerCase().contains(searchQuery.toLowerCase());
+                        return (searchQuery != null && !searchQuery.trim().isEmpty()) &&
+                                (levenshteinDistance(searchQuery.trim().toLowerCase(), propertyValue.trim().toLowerCase()) <= MAX_DISTANCE
+                                        || searchQuery.trim().toLowerCase().contains(propertyValue.trim().toLowerCase())
+                                        || propertyValue.trim().toLowerCase().contains(searchQuery.trim().toLowerCase()));
                     })) {
                 filteredResults.add(result);
                 counter++;

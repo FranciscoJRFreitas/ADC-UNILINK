@@ -1,7 +1,7 @@
-import "package:universal_html/html.dart";
+import 'package:universal_html/html.dart';
 
-void setCookie(String name, String value) {
-  document.cookie = '$name=$value';
+void setCookie(String name, dynamic value) {
+  document.cookie = '$name=${value.toString()}';
 }
 
 String? getCookie(String name) {

@@ -87,8 +87,8 @@ final ThemeData kLightTheme = ThemeData(
         borderRadius: BorderRadius.circular(18),
       ),
     ),
-    primaryIconTheme: IconThemeData(color: Style.lightBlack)
-
+    primaryIconTheme: IconThemeData(color: Style.lightBlack),
+    secondaryHeaderColor: Colors.black,
     // customize other properties as needed
     );
 
@@ -142,7 +142,8 @@ final ThemeData kDarkTheme = ThemeData(
         borderRadius: BorderRadius.circular(18),
       ),
     ),
-    primaryIconTheme: IconThemeData(color: Style.grey)
+    primaryIconTheme: IconThemeData(color: Style.grey),
+    secondaryHeaderColor: Colors.white,
     // customize other properties as needed
     );
 

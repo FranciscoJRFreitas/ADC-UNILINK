@@ -65,11 +65,11 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).secondaryHeaderColor),
               decoration: InputDecoration(
                 labelText: 'Search',
-                labelStyle: TextStyle(color: Colors.white),
-                prefixIcon: Icon(Icons.search, color: Colors.white),
+                labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).secondaryHeaderColor),
               ),
               onChanged: (value) {
                 if (value.trim().isNotEmpty) {

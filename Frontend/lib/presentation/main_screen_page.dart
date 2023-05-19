@@ -23,7 +23,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 7;
+  int _selectedIndex = 0;
   List<String> _title = [
     "News",
     "Search",
@@ -254,18 +254,13 @@ class _MainScreenState extends State<MainScreen> {
                         SizedBox(
                           width: 5,
                         ),
-                        Row(
-                          children: [
-                            Text(' ${widget.user.displayName} ',
-                                style: Theme.of(context).textTheme.titleLarge),
-                            Icon(
-                              _isExpanded
-                                  ? Icons.keyboard_arrow_down_outlined
-                                  : Icons.keyboard_arrow_up_outlined,
-                              color: Colors.white,
+                        Text(processDisplayName(widget.user.displayName),
+                            style: widget.user.displayName.length < 5
+                            ? Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white) : widget.user.displayName.length < 10
+                            ? Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)
+                            : Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white),
+                            textAlign: TextAlign.center,
                             ),
-                          ],
-                        ),
                         SizedBox(
                           height: 5,
                         ),
@@ -277,8 +272,15 @@ class _MainScreenState extends State<MainScreen> {
                             //roleColor == Colors.yellow ? Colors.black: Colors.white,
                             fontSize: 10,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ]),
+                      Icon(
+                              _isExpanded
+                                  ? Icons.keyboard_arrow_down_outlined
+                                  : Icons.keyboard_arrow_up_outlined,
+                              color: Colors.white,
+                            ),
                     ]),
                     SizedBox(
                       height: 5,
@@ -450,6 +452,29 @@ class _MainScreenState extends State<MainScreen> {
       body: getSelectedWidget(),
     );
   }
+
+  String processDisplayName(String displayName) {
+    if(displayName.length < 20)
+      return displayName;
+    List<String> words = displayName.split(' ');
+    String result = '';
+    int currentLength = 0;
+    if(words.length < 2)
+      return displayName.substring(0, 17) + '...';
+
+    for (String word in words) {
+      if(currentLength + word.length > 20){
+        result += '\n';
+        currentLength = 0;
+      }
+      
+      result += word + ' ';
+      currentLength += word.length + 1;  // 1 for the space
+    }
+  
+    return result.trimRight();
+  }
+
 
   Widget getSelectedWidget() {
     var options = _widgetOptions();

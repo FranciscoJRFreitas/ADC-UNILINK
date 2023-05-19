@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:unilink2023/data/sqlite.dart';
 import 'package:unilink2023/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,7 +18,16 @@ void main() async {
 
   );
 
+  if(kIsWeb) {
+    if (cookies.getCookie('theme') == null) {
+      cookies.setCookie('theme', 'Dark');
+    }
+  } else {
+    SqliteService().updateTheme('Dark');
+  }
+
   var themeSetting = await cache.getValue('settings', 'theme');
+
 
   runApp(
     ChangeNotifierProvider(
