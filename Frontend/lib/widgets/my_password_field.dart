@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../constants.dart';
 
 class MyPasswordField extends StatelessWidget {
   const MyPasswordField({
@@ -7,22 +6,28 @@ class MyPasswordField extends StatelessWidget {
     required this.onTap,
     required this.controller,
     required this.hintText,
+    this.style,
+    this.focusNode,
+    this.onSubmitted,
   });
 
   final bool isPasswordVisible;
   final Function onTap;
   final TextEditingController controller;
   final String hintText;
+  final TextStyle? style;
+  final FocusNode? focusNode;
+  final Function(String)? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: TextField(
+        onSubmitted: onSubmitted,
+        focusNode: focusNode,
         controller: controller,
-        style: kBodyText.copyWith(
-          color: Colors.white,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
         obscureText: isPasswordVisible,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,

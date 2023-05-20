@@ -352,23 +352,31 @@ Widget build(BuildContext context) {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: LineTextField(title: 'Display Name', icon: Icons.alternate_email, controller: displayNameController),
                 ),
+                SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: LineTextField(title: 'Email', icon: Icons.mail, controller: emailController),
                 ),
+                SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: LineTextField(title: "Birth date", icon: Icons.schedule, controller: birthDateController),
                 ),
+                SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: LineTextField(title: "Address", icon: Icons.home, controller: addressController),
                 ),
+                SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: LineTextField(title: "NIF", icon: Icons.perm_identity, controller: nifController),
                 ),
-                ToggleButton(active: _isPublic, title: "Profile Visibility", optionL: "Private", optionR: "Public"),
+                SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: ToggleButton(active: _isPublic, title: "Profile Visibility", optionL: "Private", optionR: "Public"),
+                ),
                 Container(
                   padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
                   child: MyTextButton(

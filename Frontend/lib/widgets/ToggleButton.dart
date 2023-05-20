@@ -26,7 +26,7 @@ class _ToggleButtonState extends State<ToggleButton> {
     return ListTile(
       title: Text(
         widget.title ?? "",
-        style: Theme.of(context).textTheme.bodyLarge,
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       trailing: Switch(
         value: _isActive,
@@ -40,7 +40,7 @@ class _ToggleButtonState extends State<ToggleButton> {
       ),
       subtitle: Text(
       _isActive ? widget.optionR ?? "" : widget.optionL ?? "",
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
   }

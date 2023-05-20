@@ -11,6 +11,7 @@ import '../data/web_cookies.dart' as cookies;
 import 'package:unilink2023/data/sqlite.dart';
 import 'dart:io' as io;
 import 'package:flutter/src/foundation/constants.dart';
+import 'package:flutter/services.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -18,6 +19,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  FocusNode _emailFocusNode = FocusNode();
+  FocusNode _passwordFocusNode = FocusNode();
   bool isPasswordVisible = true;
   final TextEditingController emailUsernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -46,6 +49,8 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     emailUsernameController.dispose();
     passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -81,8 +86,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       body: SafeArea(
-        //to make page scrollable
-
         child: Padding(
           padding: const EdgeInsets.only(
               top: 20.0, left: 15.0, right: 15.0), // This line is changed
@@ -116,8 +119,13 @@ class _LoginPageState extends State<LoginPage> {
                           MyTextField(
                             small: false,
                             hintText: 'Email or username',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).secondaryHeaderColor),
                             inputType: TextInputType.text,
                             controller: emailUsernameController,
+                            focusNode: _emailFocusNode,
+                            onSubmitted: (_) {
+                              FocusScope.of(context).requestFocus(_passwordFocusNode);
+                            },
                           ),
                           MyPasswordField(
                             isPasswordVisible: isPasswordVisible,
@@ -128,6 +136,15 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             controller: passwordController,
                             hintText: 'Password',
+                            focusNode: _passwordFocusNode,
+                            onSubmitted: (_) {
+                              login(
+                                context,
+                                emailUsernameController.text,
+                                passwordController.text,
+                                _showErrorSnackbar,
+                              );
+                            },
                           ),
                         ],
                       ),

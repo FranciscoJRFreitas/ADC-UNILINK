@@ -15,6 +15,23 @@ class IntroPage extends StatefulWidget {
   State<IntroPage> createState() => _IntroPageState();
 }
 
+void navigateToWelcomePage(BuildContext context) {
+  if (kIsWeb) {
+    cookies.setCookie('intro', 'true');
+  } else if (io.Platform.isAndroid) {
+    SqliteService().updateCheckIntro(1);
+    SqliteService().updateTheme('Dark');
+  }
+  // Provider.of<IntroProvider>(context, listen: true)
+  //     .readIntroPageShar();
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => WelcomePage(),
+    ),
+  );
+}
+
 class _IntroPageState extends State<IntroPage> {
   @override
   Widget build(BuildContext context) {
@@ -22,44 +39,16 @@ class _IntroPageState extends State<IntroPage> {
       child: Scaffold(
         body: IntroductionScreen(
           showDoneButton: true,
-          onDone: () async {
-            if (kIsWeb) {
-              cookies.setCookie('intro', 'true');
-            } else if (io.Platform.isAndroid) {
-              SqliteService().updateCheckIntro(1);
-              SqliteService().updateTheme('Dark');
-            }
-            // Provider.of<IntroProvider>(context, listen: true)
-            //     .readIntroPageShar();
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WelcomePage(),
-              ),
-            );
-            // if (providerTrue!.intro == false) {
-            //   Navigator.pushReplacement(
-            //     context,
-            //     MaterialPageRoute(
-            //       builder: (context) => const LoginPage(),
-            //     ),
-            //   );
-            // }
-
-            //  else {
-            //   Navigator.pushReplacement(
-            //     context,
-            //     MaterialPageRoute(
-            //       builder: (context) => const LoginPage(),
-            //     ),
-            //   );
-            // }
-            // providerFalse!.introPageShar();
+          onSkip: () { 
+            navigateToWelcomePage(context);
           },
-          done: Text("done"),
+          onDone: () {
+            navigateToWelcomePage(context);
+          },
+          done: Text("done", style: TextStyle(color: Colors.white)),
           showNextButton: true,
-          next: Text("next"),
-          skip: Text("skip"),
+          next: Text("next", style: TextStyle(color: Colors.white)),
+          skip: Text("skip", style: TextStyle(color: Colors.white)),
           showSkipButton: true,
           pages: [
             PageViewModel(
@@ -94,8 +83,8 @@ class _IntroPageState extends State<IntroPage> {
                   reverse: false,
                 ),
               ),
-              body: "Why are you waiting",
-              title: "Go",
+              body: "Why are you waiting?",
+              title: "Jump in!",
             ),
           ],
         ),

@@ -58,7 +58,7 @@ final ThemeData kLightTheme = ThemeData(
           fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black),
     ),
     buttonTheme: ButtonThemeData(
-      buttonColor: Colors.green,
+      buttonColor: Color.fromARGB(255, 111, 175, 76),
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Style.lightBlue,
@@ -112,7 +112,7 @@ final ThemeData kDarkTheme = ThemeData(
           fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),
     ),
     buttonTheme: ButtonThemeData(
-      buttonColor: Colors.green, // Blue buttons for dark theme
+      buttonColor: Color.fromARGB(255, 111, 175, 76), // Blue buttons for dark theme
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Style.darkBlue,
