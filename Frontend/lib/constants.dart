@@ -58,11 +58,10 @@ final ThemeData kLightTheme = ThemeData(
           fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black),
     ),
     buttonTheme: ButtonThemeData(
-      buttonColor: Colors.green, // Blue buttons for light theme
+      buttonColor: Colors.green,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Style.lightBlue,
-      // Set your desired color here
     ),
     inputDecorationTheme: InputDecorationTheme(
       enabledBorder: OutlineInputBorder(

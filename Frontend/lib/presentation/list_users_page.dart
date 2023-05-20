@@ -179,7 +179,22 @@ class _ListUsersPageState extends State<ListUsersPage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                              icon: Icon(Icons.close, color: Colors.white), // Choose your icon and color
+                            icon: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle, // use circle if the icon is circular
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black,
+                                    blurRadius: 15.0,
+                                    spreadRadius: 2.0,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                ),
+                              ),
                               onPressed: () {
                                 Navigator.of(dialogContext).pop(); // Use dialogContext here
                               },

@@ -10,8 +10,9 @@ import 'package:unilink2023/data/web_cookies.dart';
 import '../constants.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import '../widgets/register_page.dart';
+import '../widgets/ToggleButton.dart';
 import '../widgets/widget.dart';
+import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'screen.dart';
@@ -218,7 +219,6 @@ class _EditProfilePage extends State<EditProfilePage> {
                 showDialog(
                   context: context,
                   builder: (BuildContext dialogContext) {
-                    // Here
                     return Dialog(
                       child: Stack(
                         alignment: Alignment.topRight,
@@ -229,12 +229,24 @@ class _EditProfilePage extends State<EditProfilePage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                              icon: Icon(Icons.close,
-                                  color: Colors
-                                      .white), // Choose your icon and color
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ),
                               onPressed: () {
-                                Navigator.of(dialogContext)
-                                    .pop(); // Use dialogContext here
+                                Navigator.of(dialogContext).pop();
                               },
                             ),
                           ),
@@ -244,7 +256,15 @@ class _EditProfilePage extends State<EditProfilePage> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: ClipOval(
+                child: FittedBox(
+                  child: Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.fill,
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
             );
           } else {
             return const Icon(
@@ -256,6 +276,8 @@ class _EditProfilePage extends State<EditProfilePage> {
         });
   }
 
+
+
   Widget profilePicture(BuildContext context) {
     return InkWell(
       onTap: () {
@@ -266,13 +288,7 @@ class _EditProfilePage extends State<EditProfilePage> {
           Container(
             width: 125,
             height: 125,
-            child: CircleAvatar(
-              backgroundColor: Colors.white70,
-              radius: 125,
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(200),
-                  child: picture(context)),
-            ),
+            child: picture(context),
           ),
           Positioned(
               bottom: 1,
@@ -280,8 +296,8 @@ class _EditProfilePage extends State<EditProfilePage> {
               child: Container(
                 height: 35,
                 width: 35,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: BorderRadius.all(Radius.circular(15))),
                 child: InkWell(
                   onTap: () async {
@@ -289,10 +305,10 @@ class _EditProfilePage extends State<EditProfilePage> {
                     profilePic = downloadData();
                     setState(() {});
                   },
-                  child: const Icon(
+                  child: Icon(
                     Icons.add_a_photo,
                     size: 30.0,
-                    color: Color(0xFF404040),
+                    color: Theme.of(context).secondaryHeaderColor,
                   ),
                 ),
               ))
@@ -301,140 +317,137 @@ class _EditProfilePage extends State<EditProfilePage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: EdgeInsets.fromLTRB(125, 80, 125, 50),
-      shape: RoundedRectangleBorder(
-          borderRadius:
-          BorderRadius.all(
-              Radius.circular(20.0))),
-      child: SingleChildScrollView(
-          child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
+@override
+Widget build(BuildContext context) {
+  bool _isPublic = widget.user.profileVisibility!.toLowerCase() == 'public';
+  double offset = MediaQuery.of(context).size.width * 0.1;
+  return Dialog(
+    insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(20.0)
+      ),
+    ),
+    child: Stack(
+      alignment: Alignment.topCenter,
+      clipBehavior: Clip.none,
+      children: [
+        SingleChildScrollView(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: 750, // Set the maximum width for the Dialog
+            ),
+          child: Padding(
+            padding: EdgeInsets.only(top: 20), // Provide space for the image at the top
+            child: Column(
               children: [
-                Positioned(
-                    top: -75,
-                    child: profilePicture(context)
+                SizedBox(height: 40),
+                Divider(
+                  thickness: 2,
+                  color: Theme.of(context).primaryColor,
                 ),
-                Column(
-                  children: [
-                    SizedBox(height: 16),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
-                      child: Text(
-                        'Edit Profile',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-
-                    /* Container(
-                padding: EdgeInsets.fromLTRB(70, 0, 0, 0),
-                child: profilePicture(context)
-            ),*/
-                    SizedBox(width: 16),
-                    SizedBox(height: 20),
-                    Divider(
-                      // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                      thickness: 5, // Adjusts the divider's thickness.
-                      color: Style.lightBlue,
-                    ),
-                    SizedBox(height: 20),
-                    ChangeInfoItem(
-                        context, 'Display Name',
-                        Icons.alternate_email,
-                        displayNameController
-                    ),
-                    ChangeInfoItem( context,
-                        'Email',
-                        Icons.mail,
-                        emailController
-                    ),
-                    /*ChangeInfoItem(context,
-              title: "Education Level",
-              value: widget.user.educationLevel ?? '',
-              icon: Icons.school, ), */
-                    ChangeInfoItem( context,
-                        "Birth date",
-                        Icons.schedule,
-                        birthDateController
-                    ),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                      child: InfoItem(
-                      title: "Profile Visibility",
-                      value: widget.user.profileVisibility ?? '',
-                      icon: Icons.public,
-                      ),
-                    ),
-                    ChangeInfoItem(
-                        context, "Address",
-                        Icons.school,
-                        addressController
-                    ),
-                    ChangeInfoItem(context,
-                        "NIF",
-                        Icons.school,
-                        nifController
-                    ),
-                    // ...more info items...
-
-                    Container(
-                      padding: EdgeInsets.fromLTRB(150, 20, 100, 0),
-                      child: MyTextButton(
-                          buttonName: 'Save Changes', 
-                          onTap: () async {
-                            String? password;
-                            password = await cache.getValue('users', 'password');
-
-                            print(password);
-                            print(nifController.text);
-                            modifyAttributes(password!, '', birthDateController.text, widget.user.username, displayNameController.text, emailController.text, 'SU', '', '', '', '', '', '', addressController.text, '', '', '2012-666', nifController.text, '', _showErrorSnackbar, true);
-                            
-                          }, 
-                          bgColor: Style.lightBlue, 
-                          textColor: Style.white, 
-                          height: 45),
-                    ),
-                    SizedBox(height: 20),
-                  ],
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: LineTextField(title: 'Display Name', icon: Icons.alternate_email, controller: displayNameController),
                 ),
-              ]),
-      )
-    );
-  }
-
-  Widget ChangeInfoItem(BuildContext context, String title, IconData icon, TextEditingController controller) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-      child: ListTile(
-        leading: Container(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-          child: Icon(
-            icon,
-            color: Theme.of(context).primaryIconTheme.color,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: LineTextField(title: 'Email', icon: Icons.mail, controller: emailController),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: LineTextField(title: "Birth date", icon: Icons.schedule, controller: birthDateController),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: LineTextField(title: "Address", icon: Icons.home, controller: addressController),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: LineTextField(title: "NIF", icon: Icons.perm_identity, controller: nifController),
+                ),
+                ToggleButton(active: _isPublic, title: "Profile Visibility", optionL: "Private", optionR: "Public"),
+                Container(
+                  padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
+                  child: MyTextButton(
+                    alignment: Alignment.center,
+                    buttonName: 'Save Changes',
+                    onTap: () async {
+                      String? password;
+                      password = await cache.getValue('users', 'password');
+                      print(password);
+                      print(nifController.text);
+                      modifyAttributes(password!, '', birthDateController.text, widget.user.username, displayNameController.text, emailController.text, 'SU', '', '', '', '', '', '', addressController.text, '', '', '2012-666', nifController.text, '', _showErrorSnackbar, true);
+                    },
+                    bgColor: Theme.of(context).primaryColor,
+                    textColor: Colors.white,
+                    height: 45,
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
           ),
         ),
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.bodyLarge,
+        Positioned(
+          top: -65,
+          child: profilePicture(context)
         ),
-        subtitle: textField(TextInputType.name, controller)
-    )
-    );
-  }
+        Positioned(
+          top: 1,
+          right: 1,
+          child: IconButton(
+            hoverColor: Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+            splashRadius: 20.0,
+            icon: Container(
+              height: 25,
+              width: 25,
+            child: Icon(
+              Icons.close,
+              color: Theme.of(context).secondaryHeaderColor,
+            ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget textField(TextInputType inputType, TextEditingController controller ){
-    return TextField(
-        controller: controller,
-        style:  TextStyle(
-          fontSize: 20.0,
-          height: 1.0),
-        keyboardType: inputType,
-        );
 
-  }
+  Widget textField(TextInputType inputType, TextEditingController controller){
+  return TextField(
+    controller: controller,
+    style: TextStyle(fontSize: 20.0, height: 1.0),
+    keyboardType: inputType,
+    decoration: InputDecoration(
+      contentPadding: EdgeInsets.only(top: 15), // you can control this as you want
+      border: UnderlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.black,
+        ),
+      ),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.black,
+        ),
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.black,
+        ),
+      ),
+    ),
+  );
+}
+
+
 
 }
 

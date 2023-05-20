@@ -7,17 +7,20 @@ class MyTextButton extends StatelessWidget {
     required this.onTap,
     required this.bgColor,
     required this.textColor,
-    required this.height
+    required this.height,
+    this.alignment,
   });
   final String buttonName;
   final Function()? onTap;
   final Color bgColor;
   final Color textColor;
   final double height;
+  final Alignment? alignment;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      alignment: alignment,
       height: height,
       width: double.infinity,
       decoration: BoxDecoration(

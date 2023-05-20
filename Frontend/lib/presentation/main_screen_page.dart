@@ -115,13 +115,26 @@ class _MainScreenState extends State<MainScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                              icon: Icon(Icons.close,
-                                  color: Colors
-                                      .white), // Choose your icon and color
-                              onPressed: () {
-                                Navigator.of(dialogContext)
-                                    .pop(); // Use dialogContext here
-                              },
+                            icon: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle, // use circle if the icon is circular
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black,
+                                    blurRadius: 15.0,
+                                    spreadRadius: 2.0,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(dialogContext)
+                                  .pop(); // Use dialogContext here
+                            },
                             ),
                           ),
                         ],
@@ -160,28 +173,6 @@ class _MainScreenState extends State<MainScreen> {
                   child: picture(context)),
             ),
           ),
-          Positioned(
-              bottom: 1,
-              right: 1,
-              child: Container(
-                height: 25,
-                width: 25,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(15))),
-                child: InkWell(
-                  onTap: () async {
-                    await getImage(true);
-                    profilePic = downloadData();
-                    setState(() {});
-                  },
-                  child: const Icon(
-                    Icons.add_a_photo,
-                    size: 15.0,
-                    color: Color(0xFF404040),
-                  ),
-                ),
-              ))
         ],
       ),
     );

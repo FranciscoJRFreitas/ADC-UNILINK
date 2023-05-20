@@ -26,7 +26,7 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     Timer(
-      const Duration(seconds: 6),
+      const Duration(seconds: kIsWeb ? 0 : 6),//TODO Changed for testing reasons
       () async {
         bool loginB = false;
         bool introB = false;
