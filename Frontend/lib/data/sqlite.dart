@@ -4,22 +4,58 @@ import 'package:path/path.dart';
 import '../domain/User.dart';
 
 class SqliteService {
+  static final SqliteService _singleton = SqliteService._internal();
+
+  factory SqliteService() {
+    return _singleton;
+  }
+
+  SqliteService._internal();
+
   Future<Database> initializeDB() async {
     String path = await getDatabasesPath();
+    String dbPath = join(path, 'database.db');
 
-    return openDatabase(
-      join(path, 'database.db'),
+    // Delete the database
+    await deleteDatabase(dbPath);
+
+    return await openDatabase(
+      dbPath,
       onCreate: (database, version) async {
         await database.execute(
-          'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
-          'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
-          'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
-          'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT); CREATE TABLE settings(checkIntro INTEGER, checkLogin INTEGER,'
-          'theme TEXT NOT NULL, pageIndex INTEGER);',
-        );
+            'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
+            'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
+            'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
+            'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT)');
+        await database.execute(
+            'CREATE TABLE settings(checkIntro INTEGER, checkLogin INTEGER,'
+            'theme TEXT NOT NULL, pageIndex INTEGER)');
       },
       version: 1,
     );
+  }
+
+  Future<Database> getDatabase() async {
+    String path = join(await getDatabasesPath(), 'database.db');
+    return openDatabase(path);
+  }
+
+  Future<void> printAllTables() async {
+    Database db = await getDatabase();
+    var tableNames =
+        (await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'"))
+            .map((row) => row['name'])
+            .toList();
+    print(tableNames);
+  }
+
+  Future<void> printTableContent(String tableName) async {
+    Database db = await getDatabase();
+    var tableContent = await db.rawQuery('SELECT * FROM $tableName');
+    print('Content of $tableName:');
+    for (var row in tableContent) {
+      print(row);
+    }
   }
 
   Future<void> insertUser(User user, String token, String password) async {
@@ -27,7 +63,7 @@ class SqliteService {
     Database db = await getDatabase();
 
     await db.insert(
-      'Users',
+      'users',
       user.toMap(token, password),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -37,32 +73,32 @@ class SqliteService {
     Database db = await getDatabase();
 
     await getCheckIntro() == null
-        ? await db.rawInsert('INSERT INTO Settings(checkIntro) VALUES($value)')
-        : await db.rawUpdate('UPDATE Settings SET checkIntro = $value');
+        ? await db.rawInsert('INSERT INTO settings(checkIntro) VALUES($value)')
+        : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
   }
 
   Future<void> updateCheckLogin(int value) async {
     Database db = await getDatabase();
 
     await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO Settings(checkLogin) VALUES($value)')
-        : await db.rawUpdate('UPDATE Settings SET checkLogin = $value');
+        ? await db.rawInsert('INSERT INTO settings(checkLogin) VALUES($value)')
+        : await db.rawUpdate('UPDATE settings SET checkLogin = $value');
   }
 
   Future<void> updateTheme(String value) async {
     Database db = await getDatabase();
 
-    await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO Settings(theme) VALUES($value)')
-        : await db.rawUpdate('UPDATE Settings SET theme = $value');
+    await getTheme() == null
+        ? await db.rawInsert("INSERT INTO settings(theme) VALUES('$value')")
+        : await db.rawUpdate("UPDATE settings SET theme = '$value'");
   }
 
   Future<void> updateIndex(int value) async {
     Database db = await getDatabase();
 
     await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO Settings(pageIndex) VALUES($value)')
-        : await db.rawUpdate('UPDATE Settings SET pageIndex = $value');
+        ? await db.rawInsert('INSERT INTO settings(pageIndex) VALUES($value)')
+        : await db.rawUpdate('UPDATE settings SET pageIndex = $value');
   }
 
   Future<bool?> getCheckIntro() async {
@@ -89,7 +125,7 @@ class SqliteService {
     }
   }
 
-  Future<String?> getLightTheme() async {
+  Future<String?> getTheme() async {
     Database db = await getDatabase();
 
     final List<Map<String, dynamic>> maps = await db.query('settings');
@@ -157,7 +193,7 @@ class SqliteService {
 
   Future<void> updateUser(User user, String token, String password) async {
     // Get a reference to the database.
-    final db = await initializeDB();
+    final db = await getDatabase();
 
     // Update the given Dog.
     await db.update(
@@ -172,7 +208,7 @@ class SqliteService {
 
   Future<void> deleteUser(String username) async {
     // Get a reference to the database.
-    final db = await initializeDB();
+    final db = await getDatabase();
 
     // Remove the User from the database.
     await db.delete(
@@ -188,16 +224,6 @@ class SqliteService {
     // Get a reference to the database
     Database db = await getDatabase();
 
-    // Replace 'your_table_name' with the name of the table where you store the cache
-    String tableName = 'users';
-
-    // Execute the query to delete all data from the table
-    await db.rawDelete('DELETE FROM $tableName');
-  }
-
-  Future<Database> getDatabase() async {
-    // Replace 'your_database_name.db' with your actual SQLite database name
-    String path = await getDatabasesPath() + 'database.db';
-    return openDatabase(path);
+    await db.rawDelete('DELETE FROM users');
   }
 }

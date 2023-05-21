@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
@@ -32,6 +33,7 @@ class _MainScreenState extends State<MainScreen> {
     "Change Password",
     "Remove Account",
     "Chat",
+    "Contacts",
     "Settings",
     "Student",
     "Teacher",
@@ -66,6 +68,7 @@ class _MainScreenState extends State<MainScreen> {
         ChangePasswordPage(user: _currentUser),
         RemoveAccountPage(user: _currentUser),
         ChatPage(user: _currentUser),
+        ContactsPage(),
         SettingsPage(),
         Placeholder(), //estudante
         Placeholder(), //professor
@@ -278,19 +281,7 @@ class _MainScreenState extends State<MainScreen> {
             widget.user.role == 'STUDENT' || widget.user.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
-                    title: Text('Estudante'),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 8;
-                      });
-                      Navigator.pop(context);
-                    },
-                  )
-                : Container(),
-            widget.user.role == 'PROF' || widget.user.role == 'SU'
-                ? ListTile(
-                    leading: Icon(Icons.newspaper),
-                    title: Text('Prof'),
+                    title: Text('Student'),
                     onTap: () {
                       setState(() {
                         _selectedIndex = 9;
@@ -299,13 +290,25 @@ class _MainScreenState extends State<MainScreen> {
                     },
                   )
                 : Container(),
-            widget.user.role == 'DIRECTOR' || widget.user.role == 'SU'
+            widget.user.role == 'PROF' || widget.user.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
-                    title: Text('Diretor'),
+                    title: Text('Professor'),
                     onTap: () {
                       setState(() {
                         _selectedIndex = 10;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : Container(),
+            widget.user.role == 'DIRECTOR' || widget.user.role == 'SU'
+                ? ListTile(
+                    leading: Icon(Icons.newspaper),
+                    title: Text('Director'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 11;
                       });
                       Navigator.pop(context);
                     },
@@ -387,7 +390,6 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ],
             ),
-
             ListTile(
               leading: Icon(Icons.chat),
               title: Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
@@ -405,12 +407,23 @@ class _MainScreenState extends State<MainScreen> {
               color: kBackgroundColor, // Adjusts the divider's color.
             ),
             ListTile(
+              leading: Icon(Icons.call),
+              title: Text('Contacts',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 7;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings',
                   style: Theme.of(context).textTheme.bodyLarge),
               onTap: () {
                 setState(() {
-                  _selectedIndex = 7;
+                  _selectedIndex = 8;
                 });
                 Navigator.pop(context);
               },

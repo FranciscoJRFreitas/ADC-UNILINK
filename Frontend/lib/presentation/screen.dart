@@ -13,5 +13,5 @@ export './splash_page.dart';
 export './settings_page.dart';
 export './search_users_page.dart';
 export './news_page.dart';
-export './news_box.dart';
+export '../widgets/news_box.dart';
 export './intro_page.dart';

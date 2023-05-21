@@ -18,16 +18,21 @@ void main() async {
 
   );
 
+  await SqliteService().initializeDB();
+
+  await SqliteService().printAllTables();
+
   if(kIsWeb) {
     if (cookies.getCookie('theme') == null) {
       cookies.setCookie('theme', 'Dark');
     }
   } else {
-    SqliteService().updateTheme('Dark');
+    await SqliteService().updateTheme('Dark');
   }
 
-  var themeSetting = await cache.getValue('settings', 'theme');
+  await SqliteService().printTableContent('settings');
 
+  var themeSetting = await cache.getValue('settings', 'theme');
 
   runApp(
     ChangeNotifierProvider(
