@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+//import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../constants.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -74,7 +75,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 );
               },
               bgColor: Colors.white,
-              textColor: Colors.black87, height: 60,
+              textColor: Colors.black87,
+              height: 60,
             ),
           ],
         ),
@@ -91,8 +93,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   ) async {
     final url = kBaseUrl + "rest/changePwd/";
 
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
 
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 

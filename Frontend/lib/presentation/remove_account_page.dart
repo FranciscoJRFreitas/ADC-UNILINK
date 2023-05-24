@@ -1,11 +1,12 @@
 import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
+
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -135,7 +136,8 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                 );
               },
               bgColor: Colors.white,
-              textColor: Colors.black87, height: 60,
+              textColor: Colors.black87,
+              height: 60,
             ),
           ],
         ),
@@ -177,8 +179,8 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     final url =
         kBaseUrl + 'rest/remove/?targetUsername=$targetUsername&pwd=$password';
 
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
 
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 

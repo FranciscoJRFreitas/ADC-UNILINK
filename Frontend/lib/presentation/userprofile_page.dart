@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../domain/User.dart';
 
 class UserProfilePage extends StatelessWidget {
@@ -11,7 +10,7 @@ class UserProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //String? currentUser = await cache.getValue('users', 'username');
+    //String? currentUser = await cacheFactory.getValue('users', 'username');
 
     return Scaffold(
       appBar: AppBar(

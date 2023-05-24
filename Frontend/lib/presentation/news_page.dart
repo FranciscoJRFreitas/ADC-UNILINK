@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:unilink2023/presentation/news_box.dart';
+import 'package:unilink2023/widgets/news_box.dart';
 import '../domain/FeedItem.dart';
 import '../domain/fetchNews.dart';
 import 'package:url_launcher/url_launcher.dart';

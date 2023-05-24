@@ -4,11 +4,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/userprofile_page.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../constants.dart';
 
 class ListUsersPage extends StatefulWidget {
@@ -31,8 +31,8 @@ class _ListUsersPageState extends State<ListUsersPage> {
 
   Future<void> fetchUsers() async {
     final url = kBaseUrl + 'rest/list/';
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.get(
@@ -154,9 +154,10 @@ class _ListUsersPageState extends State<ListUsersPage> {
   }
 
   Future<Uint8List?> downloadData(String username) async {
-
-    return FirebaseStorage.instance.ref(
-        'ProfilePictures/' + username).getData().onError((error, stackTrace) => null);
+    return FirebaseStorage.instance
+        .ref('ProfilePictures/' + username)
+        .getData()
+        .onError((error, stackTrace) => null);
   }
 
   Widget picture(BuildContext context, String username) {
@@ -168,7 +169,8 @@ class _ListUsersPageState extends State<ListUsersPage> {
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (BuildContext dialogContext) { // Here
+                  builder: (BuildContext dialogContext) {
+                    // Here
                     return Dialog(
                       child: Stack(
                         alignment: Alignment.topRight,
@@ -179,24 +181,26 @@ class _ListUsersPageState extends State<ListUsersPage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                            icon: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle, // use circle if the icon is circular
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    blurRadius: 15.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape
+                                      .circle, // use circle if the icon is circular
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
                                 ),
                               ),
                               onPressed: () {
-                                Navigator.of(dialogContext).pop(); // Use dialogContext here
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
                               },
                             ),
                           ),
@@ -217,5 +221,4 @@ class _ListUsersPageState extends State<ListUsersPage> {
           return const CircularProgressIndicator();
         });
   }
-
 }

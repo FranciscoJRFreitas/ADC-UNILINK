@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:unilink2023/data/web_cookies.dart';
 import '../constants.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/ToggleButton.dart';
@@ -16,8 +16,6 @@ import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'screen.dart';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
-import 'dart:io';
 
 class EditProfilePage extends StatefulWidget {
   final User user;
@@ -50,7 +48,8 @@ class _EditProfilePage extends State<EditProfilePage> {
   final TextEditingController occupationController = TextEditingController();
   final TextEditingController workplaceController = TextEditingController();
   late TextEditingController addressController;
-  final TextEditingController additionalAddressController = TextEditingController();
+  final TextEditingController additionalAddressController =
+      TextEditingController();
   final TextEditingController localityController = TextEditingController();
   final TextEditingController postalCodeController = TextEditingController();
   late TextEditingController nifController;
@@ -58,12 +57,12 @@ class _EditProfilePage extends State<EditProfilePage> {
   late Future<Uint8List?> profilePic;
 
   DocumentReference picsRef =
-  FirebaseFirestore.instance.collection('ProfilePictures').doc();
+      FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   @override
-  void initState(){
-
-    displayNameController = TextEditingController(text: widget.user.displayName);
+  void initState() {
+    displayNameController =
+        TextEditingController(text: widget.user.displayName);
     emailController = TextEditingController(text: widget.user.email);
     birthDateController = TextEditingController(text: widget.user.birthDate);
     addressController = TextEditingController(text: widget.user.address);
@@ -71,7 +70,6 @@ class _EditProfilePage extends State<EditProfilePage> {
 
     profilePic = downloadData();
   }
-
 
   // Function to display the snackbar
   void _showErrorSnackbar(String message, bool Error) {
@@ -110,8 +108,8 @@ class _EditProfilePage extends State<EditProfilePage> {
     bool redirect,
   ) async {
     final url = kBaseUrl + 'rest/modify/';
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.patch(
@@ -276,8 +274,6 @@ class _EditProfilePage extends State<EditProfilePage> {
         });
   }
 
-
-
   Widget profilePicture(BuildContext context) {
     return InkWell(
       onTap: () {
@@ -317,146 +313,179 @@ class _EditProfilePage extends State<EditProfilePage> {
     );
   }
 
-@override
-Widget build(BuildContext context) {
-  bool _isPublic = widget.user.profileVisibility!.toLowerCase() == 'public';
-  double offset = MediaQuery.of(context).size.width * 0.1;
-  return Dialog(
-    insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(20.0)
+  @override
+  Widget build(BuildContext context) {
+    bool _isPublic = widget.user.profileVisibility!.toLowerCase() == 'public';
+    double offset = MediaQuery.of(context).size.width * 0.1;
+    return Dialog(
+      insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
       ),
-    ),
-    child: Stack(
-      alignment: Alignment.topCenter,
-      clipBehavior: Clip.none,
-      children: [
-        SingleChildScrollView(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: 750, // Set the maximum width for the Dialog
-            ),
-          child: Padding(
-            padding: EdgeInsets.only(top: 20), // Provide space for the image at the top
-            child: Column(
-              children: [
-                SizedBox(height: 40),
-                Divider(
-                  thickness: 2,
-                  color: Theme.of(context).primaryColor,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        clipBehavior: Clip.none,
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: 750, // Set the maximum width for the Dialog
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: 20), // Provide space for the image at the top
+                child: Column(
+                  children: [
+                    SizedBox(height: 40),
+                    Divider(
+                      thickness: 2,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: 'Display Name',
+                          icon: Icons.alternate_email,
+                          controller: displayNameController),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: 'Email',
+                          icon: Icons.mail,
+                          controller: emailController),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: "Birth date",
+                          icon: Icons.schedule,
+                          controller: birthDateController),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: "Address",
+                          icon: Icons.home,
+                          controller: addressController),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: "NIF",
+                          icon: Icons.perm_identity,
+                          controller: nifController),
+                    ),
+                    SizedBox(height: 5),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: ToggleButton(
+                          active: _isPublic,
+                          title: "Profile Visibility",
+                          optionL: "Private",
+                          optionR: "Public"),
+                    ),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
+                      child: MyTextButton(
+                        alignment: Alignment.center,
+                        buttonName: 'Save Changes',
+                        onTap: () async {
+                          String? password;
+                          password =
+                              await cacheFactory.get('users', 'password');
+                          print(password);
+                          print(nifController.text);
+                          modifyAttributes(
+                              password!,
+                              '',
+                              birthDateController.text,
+                              widget.user.username,
+                              displayNameController.text,
+                              emailController.text,
+                              'SU',
+                              '',
+                              '',
+                              '',
+                              '',
+                              '',
+                              '',
+                              addressController.text,
+                              '',
+                              '',
+                              '2012-666',
+                              nifController.text,
+                              '',
+                              _showErrorSnackbar,
+                              true);
+                        },
+                        bgColor: Theme.of(context).primaryColor,
+                        textColor: Colors.white,
+                        height: 45,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
                 ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: LineTextField(title: 'Display Name', icon: Icons.alternate_email, controller: displayNameController),
-                ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: LineTextField(title: 'Email', icon: Icons.mail, controller: emailController),
-                ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: LineTextField(title: "Birth date", icon: Icons.schedule, controller: birthDateController),
-                ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: LineTextField(title: "Address", icon: Icons.home, controller: addressController),
-                ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: LineTextField(title: "NIF", icon: Icons.perm_identity, controller: nifController),
-                ),
-                SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: ToggleButton(active: _isPublic, title: "Profile Visibility", optionL: "Private", optionR: "Public"),
-                ),
-                Container(
-                  padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
-                  child: MyTextButton(
-                    alignment: Alignment.center,
-                    buttonName: 'Save Changes',
-                    onTap: () async {
-                      String? password;
-                      password = await cache.getValue('users', 'password');
-                      print(password);
-                      print(nifController.text);
-                      modifyAttributes(password!, '', birthDateController.text, widget.user.username, displayNameController.text, emailController.text, 'SU', '', '', '', '', '', '', addressController.text, '', '', '2012-666', nifController.text, '', _showErrorSnackbar, true);
-                    },
-                    bgColor: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
-                    height: 45,
-                  ),
-                ),
-                SizedBox(height: 20),
-              ],
+              ),
             ),
           ),
+          Positioned(top: -65, child: profilePicture(context)),
+          Positioned(
+            top: 1,
+            right: 1,
+            child: IconButton(
+              hoverColor:
+                  Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+              splashRadius: 20.0,
+              icon: Container(
+                height: 25,
+                width: 25,
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget textField(TextInputType inputType, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      style: TextStyle(fontSize: 20.0, height: 1.0),
+      keyboardType: inputType,
+      decoration: InputDecoration(
+        contentPadding:
+            EdgeInsets.only(top: 15), // you can control this as you want
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.black,
           ),
         ),
-        Positioned(
-          top: -65,
-          child: profilePicture(context)
-        ),
-        Positioned(
-          top: 1,
-          right: 1,
-          child: IconButton(
-            hoverColor: Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
-            splashRadius: 20.0,
-            icon: Container(
-              height: 25,
-              width: 25,
-            child: Icon(
-              Icons.close,
-              color: Theme.of(context).secondaryHeaderColor,
-            ),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.black,
           ),
         ),
-      ],
-    ),
-  );
-}
-
-
-  Widget textField(TextInputType inputType, TextEditingController controller){
-  return TextField(
-    controller: controller,
-    style: TextStyle(fontSize: 20.0, height: 1.0),
-    keyboardType: inputType,
-    decoration: InputDecoration(
-      contentPadding: EdgeInsets.only(top: 15), // you can control this as you want
-      border: UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: Colors.black,
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.black,
+          ),
         ),
       ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: Colors.black,
-        ),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: Colors.black,
-        ),
-      ),
-    ),
-  );
+    );
+  }
 }
-
-
-
-}
-
-

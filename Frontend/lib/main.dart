@@ -1,33 +1,42 @@
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/data/sqlite.dart';
 import 'package:unilink2023/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
+import 'data/android_implementation.dart';
+import 'data/cache_factory_provider.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
-import '../data/web_cookies.dart' as cookies;
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+//import '../data/web_cookies.dart' as cookies;
+//import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-
-
   );
 
+  if (cacheFactory is AndroidImplementation)
+    (cacheFactory as AndroidImplementation).initDB();
+
+  cacheFactory.set('theme', 'Dark');
+
+  //await SqliteService().initializeDB();
+
+  //await SqliteService().printAllTables();
+/*
   if(kIsWeb) {
     if (cookies.getCookie('theme') == null) {
       cookies.setCookie('theme', 'Dark');
     }
   } else {
-    SqliteService().updateTheme('Dark');
-  }
+    await SqliteService().updateTheme('Dark');
+  }*/
 
-  var themeSetting = await cache.getValue('settings', 'theme');
+  //await SqliteService().printTableContent('settings');
 
+  String? themeSetting = await cacheFactory.get('settings', 'theme')
+      as String?; //await cacheFactory.getValue('settings', 'theme');
 
   runApp(
     ChangeNotifierProvider(

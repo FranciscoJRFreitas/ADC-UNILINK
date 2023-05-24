@@ -3,13 +3,14 @@ import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+
 import 'package:unilink2023/presentation/userprofile_page.dart';
 import '../constants.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 class SearchUsersPage extends StatefulWidget {
   final User user;
@@ -26,8 +27,8 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
 
   Future<void> searchUsers(String query) async {
     final url = kBaseUrl + 'rest/search/';
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.post(

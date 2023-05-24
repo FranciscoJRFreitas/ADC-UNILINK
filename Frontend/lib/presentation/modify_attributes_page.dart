@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/register_page.dart';
@@ -7,7 +8,6 @@ import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'screen.dart';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 class ModifyAttributesPage extends StatefulWidget {
   final User user;
@@ -85,8 +85,8 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
     bool redirect,
   ) async {
     final url = kBaseUrl + 'rest/modify/';
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.patch(
@@ -206,32 +206,32 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             ),
                           ),
                           MyTextComboBox(
-                              selectedValue: _selectedEducationLevel,
-                              hintText: 'Education Level',
-                              items: [
-                                'Education Level',
-                                'Primary Education',
-                                'Secondary Education',
-                                'Undergraduate Degree',
-                                'Master\'s Degree',
-                                'Doctorate'
-                              ],
-                              onChanged: (dynamic newValue) {
-                                setState(() {
-                                  _selectedEducationLevel = newValue;
-                                });
-                              },
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            regAge(
-                              textColor: Colors.grey,
-                              controller: registration_dateController,
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
+                            selectedValue: _selectedEducationLevel,
+                            hintText: 'Education Level',
+                            items: [
+                              'Education Level',
+                              'Primary Education',
+                              'Secondary Education',
+                              'Undergraduate Degree',
+                              'Master\'s Degree',
+                              'Doctorate'
+                            ],
+                            onChanged: (dynamic newValue) {
+                              setState(() {
+                                _selectedEducationLevel = newValue;
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          regAge(
+                            textColor: Colors.grey,
+                            controller: registration_dateController,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
                           if (widget.user.role != 'STUDENT') ...[
                             MyTextField(
                               small: true,
@@ -268,7 +268,13 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                               MyTextComboBox(
                                 selectedValue: _selectedUserRole,
                                 hintText: 'User Role',
-                                items: ['User Role', 'STUDENT', 'PROF', 'DIRECTOR', 'SU'],
+                                items: [
+                                  'User Role',
+                                  'STUDENT',
+                                  'PROF',
+                                  'DIRECTOR',
+                                  'SU'
+                                ],
                                 onChanged: (dynamic newValue) {
                                   setState(() {
                                     _selectedUserRole = newValue;
@@ -411,7 +417,8 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
                             });
                           },
                           bgColor: Colors.white,
-                          textColor: Colors.black87, height: 60,
+                          textColor: Colors.black87,
+                          height: 60,
                         ),
                       ],
                     ),

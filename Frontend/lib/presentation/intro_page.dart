@@ -1,14 +1,10 @@
 import 'package:unilink2023/presentation/screen.dart';
-import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
-import '../data/web_cookies.dart' as cookies;
-import 'dart:io' as io;
-import 'package:flutter/src/foundation/constants.dart';
-import '../data/sqlite.dart';
+
+import '../data/cache_factory_provider.dart';
 
 class IntroPage extends StatefulWidget {
   @override
@@ -16,12 +12,8 @@ class IntroPage extends StatefulWidget {
 }
 
 void navigateToWelcomePage(BuildContext context) {
-  if (kIsWeb) {
-    cookies.setCookie('intro', 'true');
-  } else if (io.Platform.isAndroid) {
-    SqliteService().updateCheckIntro(1);
-    SqliteService().updateTheme('Dark');
-  }
+  cacheFactory.set('checkIntro', 'true');
+
   // Provider.of<IntroProvider>(context, listen: true)
   //     .readIntroPageShar();
   Navigator.pushReplacement(
@@ -39,7 +31,7 @@ class _IntroPageState extends State<IntroPage> {
       child: Scaffold(
         body: IntroductionScreen(
           showDoneButton: true,
-          onSkip: () { 
+          onSkip: () {
             navigateToWelcomePage(context);
           },
           onDone: () {

@@ -4,13 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import 'package:photo_view/photo_view.dart';
 
 class MainScreen extends StatefulWidget {
@@ -32,6 +33,7 @@ class _MainScreenState extends State<MainScreen> {
     "Change Password",
     "Remove Account",
     "Chat",
+    "Contacts",
     "Settings",
     "Student",
     "Teacher",
@@ -66,6 +68,7 @@ class _MainScreenState extends State<MainScreen> {
         ChangePasswordPage(user: _currentUser),
         RemoveAccountPage(user: _currentUser),
         ChatPage(),
+        ContactsPage(),
         SettingsPage(),
         Placeholder(), //estudante
         Placeholder(), //professor
@@ -115,26 +118,27 @@ class _MainScreenState extends State<MainScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                            icon: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle, // use circle if the icon is circular
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    blurRadius: 15.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape
+                                      .circle, // use circle if the icon is circular
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.of(dialogContext)
-                                  .pop(); // Use dialogContext here
-                            },
+                              onPressed: () {
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
+                              },
                             ),
                           ),
                         ],
@@ -199,7 +203,7 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(Icons.logout),
               color: roleColor == Colors.yellow ? Colors.black : Colors.white,
               onPressed: () async {
-                final token = await cache.getValue('users', 'token');
+                final token = await cacheFactory.get('users', 'token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -240,13 +244,24 @@ class _MainScreenState extends State<MainScreen> {
                         SizedBox(
                           width: 5,
                         ),
-                        Text(processDisplayName(widget.user.displayName),
-                            style: widget.user.displayName.length < 5
-                            ? Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white) : widget.user.displayName.length < 10
-                            ? Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)
-                            : Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white),
-                            textAlign: TextAlign.center,
-                            ),
+                        Text(
+                          processDisplayName(widget.user.displayName),
+                          style: widget.user.displayName.length < 5
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(color: Colors.white)
+                              : widget.user.displayName.length < 10
+                                  ? Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(color: Colors.white)
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
                         SizedBox(
                           height: 5,
                         ),
@@ -262,11 +277,11 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ]),
                       Icon(
-                              _isExpanded
-                                  ? Icons.keyboard_arrow_down_outlined
-                                  : Icons.keyboard_arrow_up_outlined,
-                              color: Colors.white,
-                            ),
+                        _isExpanded
+                            ? Icons.keyboard_arrow_down_outlined
+                            : Icons.keyboard_arrow_up_outlined,
+                        color: Colors.white,
+                      ),
                     ]),
                     SizedBox(
                       height: 5,
@@ -278,19 +293,7 @@ class _MainScreenState extends State<MainScreen> {
             widget.user.role == 'STUDENT' || widget.user.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
-                    title: Text('Estudante'),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 8;
-                      });
-                      Navigator.pop(context);
-                    },
-                  )
-                : Container(),
-            widget.user.role == 'PROF' || widget.user.role == 'SU'
-                ? ListTile(
-                    leading: Icon(Icons.newspaper),
-                    title: Text('Prof'),
+                    title: Text('Student'),
                     onTap: () {
                       setState(() {
                         _selectedIndex = 9;
@@ -299,13 +302,25 @@ class _MainScreenState extends State<MainScreen> {
                     },
                   )
                 : Container(),
-            widget.user.role == 'DIRECTOR' || widget.user.role == 'SU'
+            widget.user.role == 'PROF' || widget.user.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
-                    title: Text('Diretor'),
+                    title: Text('Professor'),
                     onTap: () {
                       setState(() {
                         _selectedIndex = 10;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : Container(),
+            widget.user.role == 'DIRECTOR' || widget.user.role == 'SU'
+                ? ListTile(
+                    leading: Icon(Icons.newspaper),
+                    title: Text('Director'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 11;
                       });
                       Navigator.pop(context);
                     },
@@ -387,7 +402,6 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ],
             ),
-
             ListTile(
               leading: Icon(Icons.chat),
               title: Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
@@ -405,12 +419,23 @@ class _MainScreenState extends State<MainScreen> {
               color: kBackgroundColor, // Adjusts the divider's color.
             ),
             ListTile(
+              leading: Icon(Icons.call),
+              title: Text('Contacts',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 7;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings',
                   style: Theme.of(context).textTheme.bodyLarge),
               onTap: () {
                 setState(() {
-                  _selectedIndex = 7;
+                  _selectedIndex = 8;
                 });
                 Navigator.pop(context);
               },
@@ -421,7 +446,7 @@ class _MainScreenState extends State<MainScreen> {
               title:
                   Text('Logout', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () async {
-                final token = await cache.getValue('users', 'token');
+                final token = await cacheFactory.get('users', 'token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -440,27 +465,24 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   String processDisplayName(String displayName) {
-    if(displayName.length < 20)
-      return displayName;
+    if (displayName.length < 20) return displayName;
     List<String> words = displayName.split(' ');
     String result = '';
     int currentLength = 0;
-    if(words.length < 2)
-      return displayName.substring(0, 17) + '...';
+    if (words.length < 2) return displayName.substring(0, 17) + '...';
 
     for (String word in words) {
-      if(currentLength + word.length > 20){
+      if (currentLength + word.length > 20) {
         result += '\n';
         currentLength = 0;
       }
-      
+
       result += word + ' ';
-      currentLength += word.length + 1;  // 1 for the space
+      currentLength += word.length + 1; // 1 for the space
     }
-  
+
     return result.trimRight();
   }
-
 
   Widget getSelectedWidget() {
     var options = _widgetOptions();
@@ -491,8 +513,8 @@ class _MainScreenState extends State<MainScreen> {
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + "rest/logout/";
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.post(
@@ -505,7 +527,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (response.statusCode == 200) {
       // Clear token from cache
-      cache.removeLoginCache();
+      cacheFactory.removeLoginCache();
 
       Navigator.push(
         context,
