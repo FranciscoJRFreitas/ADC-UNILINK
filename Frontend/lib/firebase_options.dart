@@ -23,15 +23,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -55,7 +49,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '190649102208',
     projectId: 'unilink23',
     authDomain: 'unilink23.firebaseapp.com',
-    databaseURL: 'https://unilink23-default-rtdb.europe-west1.firebasedatabase.app',
+    databaseURL:
+        'https://unilink23-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'unilink23.appspot.com',
   );
 
@@ -64,7 +59,34 @@ class DefaultFirebaseOptions {
     appId: '1:190649102208:android:b6eb46114dca4189519b65',
     messagingSenderId: '190649102208',
     projectId: 'unilink23',
-    databaseURL: 'https://unilink23-default-rtdb.europe-west1.firebasedatabase.app',
+    databaseURL:
+        'https://unilink23-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'unilink23.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCadMr4N1zXR1KtX6Vu77HUK2fNMl-kSk8',
+    appId: '1:190649102208:ios:8eac3cad7956bcb5519b65',
+    messagingSenderId: '190649102208',
+    projectId: 'unilink23',
+    databaseURL:
+        'https://unilink23-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'unilink23.appspot.com',
+    iosClientId:
+        '190649102208-i6rtcli8lmvtim86a3s7s0s3hdev9n6r.apps.googleusercontent.com',
+    iosBundleId: 'com.example.apdcAi60313',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCadMr4N1zXR1KtX6Vu77HUK2fNMl-kSk8',
+    appId: '1:190649102208:ios:8eac3cad7956bcb5519b65',
+    messagingSenderId: '190649102208',
+    projectId: 'unilink23',
+    databaseURL:
+        'https://unilink23-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'unilink23.appspot.com',
+    iosClientId:
+        '190649102208-i6rtcli8lmvtim86a3s7s0s3hdev9n6r.apps.googleusercontent.com',
+    iosBundleId: 'com.example.apdcAi60313',
   );
 }

@@ -191,11 +191,18 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     );
 
     if (response.statusCode == 200) {
-
       if (targetUsername.isEmpty)
-        FirebaseStorage.instance.ref().child('ProfilePictures/$username').delete().onError((error, stackTrace) => null);
+        FirebaseStorage.instance
+            .ref()
+            .child('ProfilePictures/$username')
+            .delete()
+            .onError((error, stackTrace) => null);
       else
-        FirebaseStorage.instance.ref().child('ProfilePictures/$targetUsername').delete().onError((error, stackTrace) => null);
+        FirebaseStorage.instance
+            .ref()
+            .child('ProfilePictures/$targetUsername')
+            .delete()
+            .onError((error, stackTrace) => null);
 
       if (this.mounted) {
         return {

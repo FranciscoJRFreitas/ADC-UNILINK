@@ -1,172 +1,166 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
-import '../domain/User.dart';
-import '../widgets/GroupTitle.dart';
+import 'package:unilink2023/presentation/chat_msg_page.dart';
+import '../domain/Group.dart';
+import '../domain/Token.dart';
+import '../widgets/my_text_field.dart';
 import '../widgets/widgets.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import 'package:firebase_database/firebase_database.dart';
 
 class ChatPage extends StatefulWidget {
-  final User user;
-
-  ChatPage({required this.user});
+  ChatPage();
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  Stream? groups;
-  bool _isLoading = true;
-  late String userName;
-  late String groupName;
+  final TextEditingController groupNameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  var username;
+  Stream<List<Group>>? groupsStream;
 
   @override
   void initState() {
     super.initState();
-    //gettingUserData();
+
+    getUsername();
+    groupsStream = listenForGroups();
   }
 
-  // string manipulation
-  String getId(String res) {
-    return res.substring(0, res.indexOf("_"));
+  Stream<List<Group>> listenForGroups() {
+    DatabaseReference membersRef =
+        FirebaseDatabase.instance.ref().child('members');
+    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('chats');
+
+    StreamController<List<Group>> streamController = StreamController();
+
+    membersRef.onValue.listen((event) {
+      DataSnapshot membersSnapshot = event.snapshot;
+      List<Group> groups = [];
+
+      Map<dynamic, dynamic> membersData =
+          membersSnapshot.value as Map<dynamic, dynamic>;
+
+      membersData.forEach((key, value) {
+        if (value != null && value[username] != null) {
+          String id = key;
+          chatsRef.child(id).once().then((chatSnapshot) {
+            Map<dynamic, dynamic> chatsData =
+                chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
+            String displayName = chatsData['DisplayName'];
+            String description = chatsData['description'];
+            Group group = Group(
+              id: id,
+              DisplayName: displayName,
+              description: description,
+            );
+            groups.add(group);
+            streamController.add(groups);
+          });
+        }
+      });
+    });
+
+    return streamController.stream;
   }
 
-  String getName(String res) {
-    return res.substring(res.indexOf("_") + 1);
+  // Function to display the snackbar
+  void _showErrorSnackbar(String message, bool Error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
   }
-
-  /*gettingUserData() async {
-    await HelperFunctions.getUserEmailFromSF().then((value) {
-      setState(() {
-        email = value!;
-      });
-    });
-    await HelperFunctions.getUserNameFromSF().then((val) {
-      setState(() {
-        userName = val!;
-      });
-    });
-    // getting the list of snapshots in our stream
-    await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
-        .getUserGroups()
-        .then((snapshot) {
-      setState(() {
-        groups = snapshot;
-      });
-    });
-  }*/
 
   @override
   Widget build(BuildContext context) {
-    userName = widget.user.username;
-    groupName = 'Unilink';
     return Scaffold(
-      //drawer: Drawer(
-      /*   child: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 50),
-        children: <Widget>[
-          Icon(
-            Icons.account_circle,
-            size: 150,
-            color: Colors.grey[700],
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Text(
-            userName,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          const Divider(
-            height: 2,
-          ),
-          ListTile(
-            onTap: () {},
-            selectedColor: Theme.of(context).primaryColor,
-            selected: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.group),
-            title: const Text(
-              "Groups",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-          ListTile(
-            onTap: () {
-              nextScreenReplace(
-                  context,
-                  MainScreen(
-                    user: widget.user,
-                  ));
-            },
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.group),
-            title: const Text(
-              "Profile",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-          ListTile(
-            onTap: () async {
-              showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text("Logout"),
-                      content: const Text("Are you sure you want to logout?"),
-                      actions: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(
-                            Icons.cancel,
-                            color: Colors.red,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            await authService.signOut();
-                            Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginPage()),
-                                (route) => false);
-                          },
-                          icon: const Icon(
-                            Icons.done,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    );
-                  });
-            },
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text(
-              "Logout",
-              style: TextStyle(color: Colors.black),
-            ),
-          )
-        ],
-      )),*/
       body: Stack(
         children: <Widget>[
-          groupList(), // assuming groupList() returns a widget
+          StreamBuilder<List<Group>>(
+            stream: groupsStream, // Replace with your stream of groups
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
+              if (snapshot.hasData) {
+                List<Group> groups = snapshot.data!;
+
+                if (groups.isEmpty) {
+                  return noGroupWidget();
+                } else {
+                  return ListView(
+                    padding: EdgeInsets.only(top: 10, bottom: 80),
+                    children: groups.map((group) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => GroupMessagesPage(
+                                groupId: group.id,
+                                username: username,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 8),
+                            child: ListTile(
+                              title: Text(
+                                '${group.DisplayName}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.person, size: 20),
+                                      SizedBox(width: 5),
+                                      Text('Description: ${group.description}'),
+                                    ],
+                                  ),
+                                  // ... Add other information rows with icons here
+                                  // Make sure to add some spacing (SizedBox) between rows for better readability
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ),
           Align(
             alignment: Alignment.topRight,
             child: Padding(
-              padding: EdgeInsets.all(16.0), // Adjust this as needed
+              padding: EdgeInsets.all(16.0),
               child: IconButton(
                 onPressed: () {
-                  nextScreen(context, const Placeholder()); //searchPageChat
+                  // nextScreen(context, const Placeholder()); //searchPageChat
+                  // Replace the above line with your desired logic
                 },
                 icon: const Icon(Icons.search),
                 color: Colors.white,
@@ -177,7 +171,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          popUpDialog(context, groupName);
+          popUpDialog(context);
         },
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
@@ -190,7 +184,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  popUpDialog(BuildContext context, String groupName) {
+  popUpDialog(BuildContext context) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -204,32 +198,18 @@ class _ChatPageState extends State<ChatPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _isLoading == true
-                      ? Center(
-                          child: CircularProgressIndicator(
-                              color: Theme.of(context).primaryColor),
-                        )
-                      : TextField(
-                          onChanged: (val) {
-                            setState(() {
-                              groupName = 'UniLink';
-                            });
-                          },
-                          style: const TextStyle(color: Colors.black),
-                          decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                  borderRadius: BorderRadius.circular(20)),
-                              errorBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.red),
-                                  borderRadius: BorderRadius.circular(20)),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                  borderRadius: BorderRadius.circular(20))),
-                        ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'Group name',
+                    inputType: TextInputType.text,
+                    controller: groupNameController,
+                  ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'Group Description',
+                    inputType: TextInputType.text,
+                    controller: descriptionController,
+                  ),
                 ],
               ),
               actions: [
@@ -243,17 +223,9 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (groupName != "") {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      /*DatabaseService(
-                              uid: FirebaseAuth.instance.currentUser!.uid)
-                          .createGroup(userName,
-                              FirebaseAuth.instance.currentUser!.uid, groupName)
-                          .whenComplete(() {
-                        _isLoading = false;
-                      });*/
+                    {
+                      createGroup(context, groupNameController.text,
+                          descriptionController.text, _showErrorSnackbar);
                       Navigator.of(context).pop();
                       showSnackbar(
                           context, Colors.green, "Group created successfully.");
@@ -269,25 +241,12 @@ class _ChatPageState extends State<ChatPage> {
         });
   }
 
-  groupList() {
-    if (groupName == 'Unilink') {
-      return ListView.builder(
-        itemCount: 1,
-        itemBuilder: (context, index) {
-          return GroupTile(
-              groupId: '1', groupName: 'Unilink', userName: userName);
-        },
-      );
-    } else {
-      return noGroupWidget();
-    }
-    /*} else {
+  /*} else {
               return Center(
                 child: CircularProgressIndicator(
                     color: Theme.of(context).primaryColor),
               );
             }*/
-  }
 
   noGroupWidget() {
     return Container(
@@ -298,7 +257,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           GestureDetector(
             onTap: () {
-              popUpDialog(context, '');
+              popUpDialog(context);
             },
             child: Icon(
               Icons.add_circle,
@@ -316,5 +275,44 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
+  }
+
+  void getUsername() async {
+    username = await cache.getValue('users', 'username');
+  }
+
+  Future<void> createGroup(
+    BuildContext context,
+    String groupName,
+    String description,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url = "https://unilink23.oa.r.appspot.com/rest/chat/create";
+    final tokenID = await cache.getValue('users', 'token');
+    final storedUsername = await cache.getValue('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+      body: jsonEncode({
+        'DisplayName': groupName,
+        'description': description,
+        'adminID': storedUsername
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Changes applied successfully!', false);
+    } else {
+      showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    }
+    setState(() {
+      groupNameController.clear();
+      descriptionController.clear();
+    });
   }
 }

@@ -34,7 +34,7 @@ dependencies:
   flutter_svg: ^0.22.0
   google_fonts: ^4.0.4 # to import google fonts and text theme
   image_picker: ^0.8.7+2
-  firebase_storage: ^11.1.0
+  firebase_storage: ^11.2.1
   cloud_firestore: ^4.5.0
   firebase_core: ^2.10.0
   universal_io: ^2.2.0
@@ -42,6 +42,7 @@ dependencies:
   sqflite: ^2.2.8+2
   path: ^1.8.2
   universal_html: ^2.2.1
+  firebase_database: ^10.2.1
   video_player: ^2.2.10
   photo_view: ^0.14.0
   html: any

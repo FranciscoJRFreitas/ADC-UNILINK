@@ -9,7 +9,8 @@ class GroupTile extends StatefulWidget {
       {Key? key,
       required this.groupId,
       required this.groupName,
-      required this.userName})
+      required this.userName,
+      required description})
       : super(key: key);
 
   @override
