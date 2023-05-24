@@ -7,7 +7,7 @@ import '../widgets/my_text_field.dart';
 import '../widgets/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
+import '../data/cache_factory_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class ChatPage extends StatefulWidget {
@@ -278,7 +278,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void getUsername() async {
-    username = await cache.getValue('users', 'username');
+    username = await cacheFactory.get('users', 'username');
   }
 
   Future<void> createGroup(
@@ -288,8 +288,8 @@ class _ChatPageState extends State<ChatPage> {
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = "https://unilink23.oa.r.appspot.com/rest/chat/create";
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.post(
