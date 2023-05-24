@@ -1,16 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../constants.dart';
+import '../data/cache_factory_provider.dart';
 import '../presentation/screen.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../data/web_cookies.dart' as cookies;
-import 'package:unilink2023/data/sqlite.dart';
-import 'dart:io' as io;
-import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/services.dart';
 
 class LoginPage extends StatefulWidget {
@@ -30,19 +28,15 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     void doNothingSnackbar(String message, bool isError, bool show) {}
 
-    if (kIsWeb) {
-      if (cookies.getCookie('login') != null)
-        login(context, cookies.getCookie('username')!,
-            cookies.getCookie('password')!, doNothingSnackbar);
-    } else if (io.Platform.isAndroid) {
-      final sqliteService = SqliteService();
-      sqliteService.initializeDB().whenComplete(() async {
-        User user = await sqliteService.getUser();
-        login(context, user.username, await sqliteService.getPassword(),
+    (() async {
+      if (cacheFactory.get('settings', 'checkLogin') != null)
+        login(
+            context,
+            await cacheFactory.get('users', 'username')! as String,
+            await cacheFactory.get('users', 'password')! as String,
             doNothingSnackbar);
-        setState(() {});
-      });
-    }
+      setState(() {});
+    });
   }
 
   @override
@@ -87,115 +81,118 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(
-              top: 20.0, left: 15.0, right: 15.0), // This line is changed
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.only(top: 20.0, left: 15.0, right: 15.0),
+          child: Stack(
             children: [
-              Flexible(
-                fit: FlexFit.loose,
+              SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Welcome back,",
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "You've been missed!",
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          MyTextField(
-                            small: false,
-                            hintText: 'Email or username',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).secondaryHeaderColor),
-                            inputType: TextInputType.text,
-                            controller: emailUsernameController,
-                            focusNode: _emailFocusNode,
-                            onSubmitted: (_) {
-                              FocusScope.of(context).requestFocus(_passwordFocusNode);
-                            },
-                          ),
-                          MyPasswordField(
-                            isPasswordVisible: isPasswordVisible,
-                            onTap: () {
-                              setState(() {
-                                isPasswordVisible = !isPasswordVisible;
-                              });
-                            },
-                            controller: passwordController,
-                            hintText: 'Password',
-                            focusNode: _passwordFocusNode,
-                            onSubmitted: (_) {
-                              login(
-                                context,
-                                emailUsernameController.text,
-                                passwordController.text,
-                                _showErrorSnackbar,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Welcome back,",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "You've been missed!",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        MyTextField(
+                          small: false,
+                          hintText: 'Email or username',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                  color:
+                                      Theme.of(context).secondaryHeaderColor),
+                          inputType: TextInputType.text,
+                          controller: emailUsernameController,
+                          focusNode: _emailFocusNode,
+                          onSubmitted: (_) {
+                            FocusScope.of(context)
+                                .requestFocus(_passwordFocusNode);
+                          },
+                        ),
+                        MyPasswordField(
+                          isPasswordVisible: isPasswordVisible,
+                          onTap: () {
+                            setState(() {
+                              isPasswordVisible = !isPasswordVisible;
+                            });
+                          },
+                          controller: passwordController,
+                          hintText: 'Password',
+                          focusNode: _passwordFocusNode,
+                          onSubmitted: (_) {
+                            login(
+                              context,
+                              emailUsernameController.text,
+                              passwordController.text,
+                              _showErrorSnackbar,
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              Column(
-                // Wrap the login button and the row with a Column widget
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account? ",
-                        style: kBodyText.copyWith(color: Colors.blue),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => RegisterPage(),
-                            ),
-                          );
-                        },
-                        child: Text('Register',
-                            style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  MyTextButton(
-                    buttonName: 'Login',
-                    onTap: () {
-                      login(
-                        context,
-                        emailUsernameController.text,
-                        passwordController.text,
-                        _showErrorSnackbar,
-                      );
-                    },
-                    bgColor: Theme.of(context).primaryColor,
-                    textColor: Colors.black87, height: 60,
-                  ),
-                ],
+              Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: kBodyText.copyWith(color: Colors.blue),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => RegisterPage(),
+                              ),
+                            );
+                          },
+                          child: Text('Register',
+                              style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    MyTextButton(
+                      buttonName: 'Login',
+                      onTap: () {
+                        login(
+                          context,
+                          emailUsernameController.text,
+                          passwordController.text,
+                          _showErrorSnackbar,
+                        );
+                      },
+                      bgColor: Theme.of(context).primaryColor,
+                      textColor: Colors.black87,
+                      height: 60,
+                    ),
+                  ],
+                ),
               ),
-              Expanded(child: Container()),
-              // Add an Expanded widget to create the bottom margin
             ],
           ),
         ),
@@ -250,18 +247,19 @@ Future<int> login(
       photoUrl: responseBody['photo'],
     );
 
-    if (kIsWeb) {
-      cookies.setCookie('username', user.username);
-      cookies.setCookie('password', password);
-      cookies.setCookie('token', token[0]);
-      cookies.setCookie('displayName', user.displayName);
-      cookies.setCookie('email', user.email);
+    cacheFactory.set('username', user.username);
+    cacheFactory.set('password', password);
+    cacheFactory.set('token', token[0]);
+    cacheFactory.set('displayName', user.displayName);
+    cacheFactory.set('email', user.email);
 
-      cookies.setCookie('login', 'true');
-    } else if (io.Platform.isAndroid) {
+    cacheFactory.set('checkLogin', 'true');
+    /*} else if (io.Platform.isAndroid) {
       SqliteService().deleteUser(username);
       SqliteService().insertUser(user, token[0], password);
-    }
+    }*/
+
+    //await SqliteService().printTableContent('settings');
 
     Navigator.push(
       context,

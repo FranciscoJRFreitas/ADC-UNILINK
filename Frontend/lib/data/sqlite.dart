@@ -28,8 +28,8 @@ class SqliteService {
             'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
             'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT)');
         await database.execute(
-            'CREATE TABLE settings(checkIntro INTEGER, checkLogin INTEGER,'
-            'theme TEXT NOT NULL, pageIndex INTEGER)');
+            'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
+            'theme TEXT NOT NULL, pageIndex TEXT)');
       },
       version: 1,
     );
@@ -38,24 +38,6 @@ class SqliteService {
   Future<Database> getDatabase() async {
     String path = join(await getDatabasesPath(), 'database.db');
     return openDatabase(path);
-  }
-
-  Future<void> printAllTables() async {
-    Database db = await getDatabase();
-    var tableNames =
-        (await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'"))
-            .map((row) => row['name'])
-            .toList();
-    print(tableNames);
-  }
-
-  Future<void> printTableContent(String tableName) async {
-    Database db = await getDatabase();
-    var tableContent = await db.rawQuery('SELECT * FROM $tableName');
-    print('Content of $tableName:');
-    for (var row in tableContent) {
-      print(row);
-    }
   }
 
   Future<void> insertUser(User user, String token, String password) async {
@@ -69,7 +51,7 @@ class SqliteService {
     );
   }
 
-  Future<void> updateCheckIntro(int value) async {
+  Future<void> updateCheckIntro(String value) async {
     Database db = await getDatabase();
 
     await getCheckIntro() == null
@@ -77,7 +59,7 @@ class SqliteService {
         : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
   }
 
-  Future<void> updateCheckLogin(int value) async {
+  Future<void> updateCheckLogin(String value) async {
     Database db = await getDatabase();
 
     await getCheckLogin() == null
@@ -93,7 +75,7 @@ class SqliteService {
         : await db.rawUpdate("UPDATE settings SET theme = '$value'");
   }
 
-  Future<void> updateIndex(int value) async {
+  Future<void> updateIndex(String value) async {
     Database db = await getDatabase();
 
     await getCheckLogin() == null
@@ -107,7 +89,7 @@ class SqliteService {
     final List<Map<String, dynamic>> maps = await db.query('settings');
 
     if (maps.isNotEmpty && maps[0].containsKey('checkIntro')) {
-      return maps[0]['checkIntro'] == 1 ? true : false;
+      return maps[0]['checkIntro'] == 'true' ? true : false;
     } else {
       return null;
     }
@@ -119,7 +101,7 @@ class SqliteService {
     final List<Map<String, dynamic>> maps = await db.query('settings');
 
     if (maps.isNotEmpty && maps[0].containsKey('checkLogin')) {
-      return maps[0]['checkLogin'] == 1 ? true : false;
+      return maps[0]['checkLogin'] == 'true' ? true : false;
     } else {
       return null;
     }

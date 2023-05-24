@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
+import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import 'package:photo_view/photo_view.dart';
 
 class MainScreen extends StatefulWidget {
@@ -202,7 +202,7 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(Icons.logout),
               color: roleColor == Colors.yellow ? Colors.black : Colors.white,
               onPressed: () async {
-                final token = await cache.getValue('users', 'token');
+                final token = await cacheFactory.get('users', 'token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -434,7 +434,7 @@ class _MainScreenState extends State<MainScreen> {
               title:
                   Text('Logout', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () async {
-                final token = await cache.getValue('users', 'token');
+                final token = await cacheFactory.get('users', 'token');
                 if (token != null) {
                   await logout(
                       context, widget.user.username, _showErrorSnackbar);
@@ -504,8 +504,8 @@ class _MainScreenState extends State<MainScreen> {
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + "rest/logout/";
-    final tokenID = await cache.getValue('users', 'token');
-    final storedUsername = await cache.getValue('users', 'username');
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.post(
@@ -518,7 +518,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (response.statusCode == 200) {
       // Clear token from cache
-      cache.removeLoginCache();
+      cacheFactory.removeLoginCache();
 
       Navigator.push(
         context,
