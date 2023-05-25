@@ -17,7 +17,7 @@ class SqliteService {
     String dbPath = join(path, 'database.db');
 
     // Delete the database
-    await deleteDatabase(dbPath);
+    //await deleteDatabase(dbPath);
 
     await openDatabase(
       dbPath,
@@ -30,6 +30,7 @@ class SqliteService {
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
             'theme TEXT, pageIndex TEXT)');
+        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'pageIndex': null});
       },
       version: 1,
     );
@@ -54,25 +55,28 @@ class SqliteService {
   Future<void> updateCheckIntro(String value) async {
     Database db = await getDatabase();
 
-    await getCheckIntro() == null
-        ? await db.rawInsert('INSERT INTO settings(checkIntro) VALUES($value)')
-        : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
+    //await getCheckIntro() == null
+      //  ? await db.rawInsert('INSERT INTO settings(checkIntro) VALUES($value)')
+      //  : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
+    await db.rawUpdate('UPDATE settings SET checkIntro = $value');
   }
 
   Future<void> updateCheckLogin(String value) async {
     Database db = await getDatabase();
 
-    await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO settings(checkLogin) VALUES($value)')
-        : await db.rawUpdate('UPDATE settings SET checkLogin = $value');
+    //await getCheckLogin() == null
+        //? await db.rawInsert('INSERT INTO settings(checkLogin) VALUES($value)')
+        //: await db.rawUpdate('UPDATE settings SET checkLogin = $value');
+    await db.rawUpdate('UPDATE settings SET checkLogin = $value');
   }
 
   Future<void> updateTheme(String value) async {
     Database db = await getDatabase();
 
-    await getTheme() == null
-        ? await db.rawInsert("INSERT INTO settings(theme) VALUES('$value')")
-        : await db.rawUpdate("UPDATE settings SET theme = '$value'");
+    //await getTheme() == null
+      //  ? await db.rawInsert("INSERT INTO settings(theme) VALUES('$value')")
+       // : await db.rawUpdate("UPDATE settings SET theme = '$value'");
+    await db.rawUpdate("UPDATE settings SET theme = '$value'");
   }
 
   Future<void> updateIndex(String value) async {
@@ -177,7 +181,7 @@ class SqliteService {
     // Get a reference to the database.
     final db = await getDatabase();
 
-    // Update the given Dog.
+    // Update the given user.
     await db.update(
       'users',
       user.toMap(token, password),

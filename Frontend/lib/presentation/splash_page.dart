@@ -25,13 +25,17 @@ class _SplashPageState extends State<SplashPage> {
       //TODO Changed for testing reasons
       () async {
 
-        bool loginB = false;
+
+        var loginB = await cacheFactory.get('settings', 'checkLogin');
+        var introB = await cacheFactory.get('settings', 'checkIntro');
+
+        /*bool loginB = false;
         loginB = await cacheFactory.get('settings', 'checkLogin') == 'true';
         bool introB = false;
-        introB = await cacheFactory.get('settings', 'checkIntro') == 'true';
+        introB = await cacheFactory.get('settings', 'checkIntro') == 'true';*/
 
-        if (introB == true) {
-          if (loginB == true) {
+        if (introB == 'true' || introB == '1') {
+          if (loginB == 'true' || loginB == '1') {
 
             void doNothingSnackbar(String message, bool isError, bool show) {}
             final username = await cacheFactory.get('users', 'username');
