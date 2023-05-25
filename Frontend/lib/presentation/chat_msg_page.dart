@@ -75,7 +75,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         centerTitle: true,
         elevation: 0,
         title: Text(widget.groupId),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Color.fromARGB(255, 8, 52, 88),
         actions: [
           IconButton(
             onPressed: () {
@@ -102,7 +102,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               width: MediaQuery.of(context).size.width,
-              color: Color.fromARGB(255, 28, 42, 172),
+              color: Color.fromARGB(0, 0, 0, 0),
               child: Row(
                 children: [
                   Expanded(

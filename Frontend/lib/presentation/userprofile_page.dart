@@ -24,6 +24,7 @@ class UserProfilePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildProfileCard('Página a ser alterada para "profile page"', '', context),
               _buildProfileCard('Username', user.username, context),
               _buildProfileCard('Email', user.email, context),
               if (isNotUser)
