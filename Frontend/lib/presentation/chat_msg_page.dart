@@ -7,6 +7,7 @@ import '../widgets/message_tile.dart';
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
   final String username;
+  final TextEditingController emailUsernameController = TextEditingController();
 
   GroupMessagesPage({required this.groupId, required this.username});
 
@@ -113,6 +114,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         hintStyle: TextStyle(color: Colors.white, fontSize: 16),
                         border: InputBorder.none,
                       ),
+                      onFieldSubmitted: (String value) {
+                        sendMessage(value);
+                      },
                     ),
                   ),
                   const SizedBox(
