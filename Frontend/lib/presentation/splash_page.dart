@@ -24,13 +24,11 @@ class _SplashPageState extends State<SplashPage> {
       const Duration(seconds: kIsWeb ? 6 : 0),
       //TODO Changed for testing reasons
       () async {
+
         bool loginB = false;
+        loginB = await cacheFactory.get('settings', 'checkLogin') == 'true';
         bool introB = false;
-
-        cacheFactory.printDb();
-
-        if (await cacheFactory.get('settings', 'checkLogin') != null) loginB = true;
-        if (await cacheFactory.get('settings', 'checkIntro') != null) introB = true;
+        introB = await cacheFactory.get('settings', 'checkIntro') == 'true';
 
         if (introB == true) {
           if (loginB == true) {

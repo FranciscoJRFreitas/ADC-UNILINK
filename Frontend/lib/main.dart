@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'data/android_implementation.dart';
 import 'data/cache_factory_provider.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
-//import '../data/web_cookies.dart' as cookies;
 //import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 void main() async {
@@ -16,31 +16,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  if (cacheFactory is AndroidImplementation)
-    (cacheFactory as AndroidImplementation).initDB();
-
+  cacheFactory.initDB();
+  cacheFactory.printDb();
   cacheFactory.set('theme', 'Dark');
-
-  //await SqliteService().initializeDB();
-
-  //await SqliteService().printAllTables();
-/*
-  if(kIsWeb) {
-    if (cookies.getCookie('theme') == null) {
-      cookies.setCookie('theme', 'Dark');
-    }
-  } else {
-    await SqliteService().updateTheme('Dark');
-  }*/
-
-  //await SqliteService().printTableContent('settings');
-
-  String? themeSetting = await cacheFactory.get('settings', 'theme')
-      as String?; //await cacheFactory.getValue('settings', 'theme');
+  cacheFactory.printDb();
+  dynamic themeSetting = await cacheFactory.get('settings', 'theme');
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeNotifier(themeSetting!),
+      create: (context) => ThemeNotifier(themeSetting),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'UniLink',

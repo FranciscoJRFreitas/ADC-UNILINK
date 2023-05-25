@@ -128,6 +128,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                     );
                   },
                   child: Card(
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     elevation: 5,

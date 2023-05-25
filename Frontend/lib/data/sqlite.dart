@@ -12,14 +12,14 @@ class SqliteService {
 
   SqliteService._internal();
 
-  Future<Database> initializeDB() async {
+  void initializeDB() async {
     String path = await getDatabasesPath();
     String dbPath = join(path, 'database.db');
 
     // Delete the database
     await deleteDatabase(dbPath);
 
-    return await openDatabase(
+    await openDatabase(
       dbPath,
       onCreate: (database, version) async {
         await database.execute(
@@ -29,7 +29,7 @@ class SqliteService {
             'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT NOT NULL, pageIndex TEXT)');
+            'theme TEXT, pageIndex TEXT)');
       },
       version: 1,
     );
@@ -83,25 +83,25 @@ class SqliteService {
         : await db.rawUpdate('UPDATE settings SET pageIndex = $value');
   }
 
-  Future<bool?> getCheckIntro() async {
+  Future<String?> getCheckIntro() async {
     Database db = await getDatabase();
 
     final List<Map<String, dynamic>> maps = await db.query('settings');
 
     if (maps.isNotEmpty && maps[0].containsKey('checkIntro')) {
-      return maps[0]['checkIntro'] == 'true' ? true : false;
+      return maps[0]['checkIntro'];
     } else {
       return null;
     }
   }
 
-  Future<bool?> getCheckLogin() async {
+  Future<String?> getCheckLogin() async {
     Database db = await getDatabase();
 
     final List<Map<String, dynamic>> maps = await db.query('settings');
 
     if (maps.isNotEmpty && maps[0].containsKey('checkLogin')) {
-      return maps[0]['checkLogin'] == 'true' ? true : false;
+      return maps[0]['checkLogin'];
     } else {
       return null;
     }

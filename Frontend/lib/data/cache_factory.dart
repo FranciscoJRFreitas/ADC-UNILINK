@@ -3,6 +3,7 @@ abstract class CacheFactory {
   Future<dynamic>? get(String table, String value);
   void delete(String value);
   void removeLoginCache();
+  void initDB();
 
   void printDb();
 }

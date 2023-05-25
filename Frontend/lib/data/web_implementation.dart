@@ -1,14 +1,12 @@
 import 'dart:html';
-
 import 'cache_factory.dart';
-import 'cache_factory_provider.dart';
 
-class WebImplementation implements CacheFactory {
-  WebImplementation._();
+class CacheFactoryImpl implements CacheFactory {
+  CacheFactoryImpl._();
 
-  static final WebImplementation _instance = WebImplementation._();
+  static final CacheFactoryImpl _instance = CacheFactoryImpl._();
 
-  factory WebImplementation() {
+  factory CacheFactoryImpl() {
     return _instance;
   }
 
@@ -62,5 +60,10 @@ class WebImplementation implements CacheFactory {
     for (final cookie in cookies!) {
       print(cookie);
     }
+  }
+
+  @override
+  void initDB() async {
+    // TODO: implement initDB
   }
 }
