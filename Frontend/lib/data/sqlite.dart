@@ -26,7 +26,7 @@ class SqliteService {
             'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
             'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
             'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
-            'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT)');
+            'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT, password TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
             'theme TEXT, pageIndex TEXT)');

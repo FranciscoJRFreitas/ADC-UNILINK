@@ -250,6 +250,7 @@ Future<int> login(
     cacheFactory.set('username', user.username);
     cacheFactory.set('password', password);
     cacheFactory.set('token', token[0]);
+    cacheFactory.setUser(user, token[0], password);
     cacheFactory.set('displayName', user.displayName);
     cacheFactory.set('email', user.email);
 

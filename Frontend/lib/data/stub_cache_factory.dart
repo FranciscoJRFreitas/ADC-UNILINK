@@ -1,3 +1,5 @@
+import 'package:unilink2023/domain/User.dart';
+
 import 'cache_factory.dart';
 
 class CacheFactoryImpl extends CacheFactory{
@@ -24,6 +26,10 @@ class CacheFactoryImpl extends CacheFactory{
 
   @override
   void initDB() async {
+  }
+
+  @override
+  void setUser(User user, String token, String password) {
   }
 
 }

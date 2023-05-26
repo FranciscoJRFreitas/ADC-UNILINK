@@ -24,23 +24,31 @@ class _ToggleButtonState extends State<ToggleButton> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(
-        widget.title ?? "",
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-      trailing: Switch(
-        value: _isActive,
-        onChanged: (value) {
-          setState(() {
-            _isActive = value;
-          });
-        },
-        activeTrackColor: Theme.of(context).primaryColor.withOpacity(0.5),
-        activeColor: Theme.of(context).primaryColor,
+      title: widget.title != null 
+        ? Text(
+            widget.title ?? "",
+            style: Theme.of(context).textTheme.bodyMedium,
+          ) 
+        : null,
+      trailing: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: widget.title != null ? double.infinity : 150, // adjust width as needed
+        ),
+        child: 
+        Switch(
+          value: _isActive,
+          onChanged: (value) {
+            setState(() {
+              _isActive = value;
+            });
+          },
+          activeTrackColor: Theme.of(context).primaryColor.withOpacity(0.5),
+          activeColor: Theme.of(context).primaryColor,
+        ),
       ),
       subtitle: Text(
-      _isActive ? widget.optionR ?? "" : widget.optionL ?? "",
-      style: Theme.of(context).textTheme.bodyLarge,
+        _isActive ? widget.optionR ?? "" : widget.optionL ?? "",
+        style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
   }

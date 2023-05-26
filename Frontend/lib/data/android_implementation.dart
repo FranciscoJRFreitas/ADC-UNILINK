@@ -1,4 +1,5 @@
 import 'package:unilink2023/data/sqlite.dart';
+import 'package:unilink2023/domain/User.dart';
 
 import 'cache_factory.dart';
 
@@ -28,8 +29,6 @@ class CacheFactoryImpl implements CacheFactory {
       await SqliteService().updateIndex(value);
     else if (property == 'theme')
       await SqliteService().updateTheme(value);
-    //else if (property == 'user')
-    //await SqliteService().updateUser(user, token, password);
   }
 
   @override
@@ -79,5 +78,10 @@ class CacheFactoryImpl implements CacheFactory {
     for (var row in result) {
       print(row);
     }
+  }
+
+  @override
+  void setUser(User user, String token, String password) {
+    SqliteService().insertUser(user, token, password);
   }
 }
