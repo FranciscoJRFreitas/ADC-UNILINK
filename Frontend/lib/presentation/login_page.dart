@@ -141,54 +141,52 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                bottom: 100,
-                left: 0,
-                right: 0,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: kBodyText.copyWith(color: Colors.blue),
+                        SizedBox(
+                          height: 25,
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => RegisterPage(),
-                              ),
-                            );
-                          },
-                          child: Text('Register',
-                              style: Theme.of(context).textTheme.bodySmall),
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account? ",
+                                  style: kBodyText.copyWith(color: Colors.blue),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => RegisterPage(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text('Register',
+                                      style: Theme.of(context).textTheme.bodySmall),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            MyTextButton(
+                              buttonName: 'Login',
+                              onTap: () {
+                                login(
+                                  context,
+                                  emailUsernameController.text,
+                                  passwordController.text,
+                                  _showErrorSnackbar,
+                                );
+                              },
+                              bgColor: Theme.of(context).primaryColor,
+                              textColor: Colors.black87,
+                              height: 60,
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    MyTextButton(
-                      buttonName: 'Login',
-                      onTap: () {
-                        login(
-                          context,
-                          emailUsernameController.text,
-                          passwordController.text,
-                          _showErrorSnackbar,
-                        );
-                      },
-                      bgColor: Theme.of(context).primaryColor,
-                      textColor: Colors.black87,
-                      height: 60,
                     ),
                   ],
                 ),
