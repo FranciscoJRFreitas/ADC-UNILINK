@@ -9,12 +9,7 @@ import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart' as http_io;
-import 'package:http/browser_client.dart' as http_browser;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -239,15 +234,7 @@ Future<int> login(
 ) async {
   final url = kBaseUrl + "rest/login/";
 
-  http.BaseClient createHttpClient() {
-    if (kIsWeb) {
-      return http_browser.BrowserClient();
-    } else {
-      return http_io.IOClient();
-    }
-  }
-
-  final client = createHttpClient();
+  http.Client client = http.Client();
   http.Response response;
   try {
     response = await client.post(
@@ -261,7 +248,7 @@ Future<int> login(
       }),
     );
   } on http.ClientException {
-    showErrorSnackbar("Request timeout. Please try again later.", true, true);
+    showErrorSnackbar("Connection failed. Please try again later.", true, true);
     return -1;
   }
 
