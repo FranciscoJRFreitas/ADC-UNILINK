@@ -10,6 +10,11 @@ import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart' as http_io;
+import 'package:http/browser_client.dart' as http_browser;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -22,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = true;
   final TextEditingController emailUsernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -133,12 +139,19 @@ class _LoginPageState extends State<LoginPage> {
                           hintText: 'Password',
                           focusNode: _passwordFocusNode,
                           onSubmitted: (_) {
+                            setState(() {
+                              _isLoading = true;
+                            });
                             login(
                               context,
                               emailUsernameController.text,
                               passwordController.text,
                               _showErrorSnackbar,
-                            );
+                            ).then((_) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            });
                           },
                         ),
                         SizedBox(
@@ -163,7 +176,9 @@ class _LoginPageState extends State<LoginPage> {
                                     );
                                   },
                                   child: Text('Register',
-                                      style: Theme.of(context).textTheme.bodySmall),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall),
                                 ),
                               ],
                             ),
@@ -171,15 +186,24 @@ class _LoginPageState extends State<LoginPage> {
                               height: 20,
                             ),
                             MyTextButton(
-                              buttonName: 'Login',
-                              onTap: () {
-                                login(
-                                  context,
-                                  emailUsernameController.text,
-                                  passwordController.text,
-                                  _showErrorSnackbar,
-                                );
-                              },
+                              buttonName: _isLoading ? 'Loading...' : 'Login',
+                              onTap: _isLoading
+                                  ? () {}
+                                  : () {
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+                                      login(
+                                        context,
+                                        emailUsernameController.text,
+                                        passwordController.text,
+                                        _showErrorSnackbar,
+                                      ).then((_) {
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
+                                      });
+                                    },
                               bgColor: Theme.of(context).primaryColor,
                               textColor: Colors.black87,
                               height: 60,
@@ -191,6 +215,14 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
+              if (_isLoading)
+                Container(
+                  color:
+                      Colors.black.withOpacity(0.5), // semi-transparent overlay
+                  child: Center(
+                    child: CircularProgressIndicator(), // a loading spinner
+                  ),
+                ),
             ],
           ),
         ),
@@ -206,16 +238,32 @@ Future<int> login(
   void Function(String, bool, bool) showErrorSnackbar,
 ) async {
   final url = kBaseUrl + "rest/login/";
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({
-      'username': username,
-      'password': password,
-    }),
-  );
+
+  http.BaseClient createHttpClient() {
+    if (kIsWeb) {
+      return http_browser.BrowserClient();
+    } else {
+      return http_io.IOClient();
+    }
+  }
+
+  final client = createHttpClient();
+  http.Response response;
+  try {
+    response = await client.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'username': username,
+        'password': password,
+      }),
+    );
+  } on http.ClientException {
+    showErrorSnackbar("Request timeout. Please try again later.", true, true);
+    return -1;
+  }
 
   if (response.statusCode == 200) {
     // Handle successful login
@@ -223,7 +271,10 @@ Future<int> login(
     List<String> token =
         authTokenHeader.substring("Bearer ".length).trim().split("|");
 
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    // Compute the processing on a separate isolate
+    Map<String, dynamic> responseBody =
+        await compute(parseResponse, response.body);
+
     User user = User(
       displayName: responseBody['displayName'],
       username: responseBody['username'],
@@ -253,12 +304,6 @@ Future<int> login(
     cacheFactory.set('email', user.email);
 
     cacheFactory.set('checkLogin', 'true');
-    /*} else if (io.Platform.isAndroid) {
-      SqliteService().deleteUser(username);
-      SqliteService().insertUser(user, token[0], password);
-    }*/
-
-    //await SqliteService().printTableContent('settings');
 
     Navigator.push(
       context,
@@ -271,4 +316,8 @@ Future<int> login(
   }
 
   return response.statusCode;
+}
+
+Map<String, dynamic> parseResponse(String responseBody) {
+  return jsonDecode(responseBody);
 }
