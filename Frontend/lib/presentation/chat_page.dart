@@ -306,13 +306,11 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     if (response.statusCode == 200) {
-      showErrorSnackbar('Changes applied successfully!', false);
+      showErrorSnackbar('Created a group successfully!', false);
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }
-    setState(() {
-      groupNameController.clear();
-      descriptionController.clear();
-    });
+    groupNameController.clear();
+    descriptionController.clear();
   }
 }

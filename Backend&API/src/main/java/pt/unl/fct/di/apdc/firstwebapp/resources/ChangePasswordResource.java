@@ -13,6 +13,9 @@ import javax.ws.rs.core.Response.Status;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
@@ -87,6 +90,18 @@ public class ChangePasswordResource {
                     .build();
 
             txn.put(updatedUser, user_token);
+            try {
+                FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+                UserRecord userRecord = firebaseAuth.getUserByEmail(user.getString("user_email"));
+
+                UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userRecord.getUid())
+                        .setPassword(data.newPwd);
+
+                UserRecord updtUser = firebaseAuth.updateUser(request);
+                System.out.println("Password updated successfully for user: " + updtUser.getUid());
+            } catch (FirebaseAuthException e) {
+                System.err.println("Error updating password: " + e.getMessage());
+            }
             txn.commit();
             return Response.ok("{}").header("Authorization", "Bearer " + g.toJson(tokenData)).build();
 

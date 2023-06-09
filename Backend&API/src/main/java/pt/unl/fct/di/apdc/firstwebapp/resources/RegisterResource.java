@@ -21,6 +21,9 @@ import com.google.cloud.datastore.*;
 
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserRecord;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.mailjet.client.ClientOptions;
@@ -114,6 +117,17 @@ public class RegisterResource {
             LOG.info("User registered: " + data.username);
             txn.commit();
             initConversations(data.username);
+            try {
+                FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+                UserRecord.CreateRequest request = new UserRecord.CreateRequest()
+                        .setEmail(data.email)
+                        .setPassword(data.password);
+
+                UserRecord userRecord = firebaseAuth.createUser(request);
+                System.out.println("New user created: " + userRecord.getUid());
+            } catch (FirebaseAuthException e) {
+                System.err.println("Error creating user: " + e.getMessage());
+            }
             return Response.ok("{}").build();
 
         } finally {

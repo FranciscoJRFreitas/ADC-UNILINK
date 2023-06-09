@@ -13,6 +13,7 @@ import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -527,6 +528,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (response.statusCode == 200) {
       // Clear token from cache
+      FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
 
       Navigator.push(

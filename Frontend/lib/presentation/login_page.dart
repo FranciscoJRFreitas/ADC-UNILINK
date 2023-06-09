@@ -5,11 +5,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../presentation/screen.dart';
-import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
+import '../domain/User.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -246,7 +247,22 @@ Future<int> login(
       nif: responseBody['nif'],
       photoUrl: responseBody['photo'],
     );
+    try {
+      FirebaseAuth.UserCredential userCredential =
+          await FirebaseAuth.FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: user.email,
+        password: password,
+      );
 
+      // User authenticated successfully
+      FirebaseAuth.User? fbuser = userCredential.user;
+      print('User authenticated: ${fbuser?.uid}');
+
+      // Continue with your desired logic
+    } catch (e) {
+      // Failed to authenticate user
+      print('Failed to authenticate user: $e');
+    }
     cacheFactory.set('username', user.username);
     cacheFactory.set('password', password);
     cacheFactory.set('token', token[0]);

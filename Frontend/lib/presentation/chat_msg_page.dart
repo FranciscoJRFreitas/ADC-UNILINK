@@ -1,8 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import '../data/cache_factory_provider.dart';
+import '../domain/Group.dart';
+import '../domain/Token.dart';
 import '../widgets/message_tile.dart';
+import 'package:http/http.dart' as http;
+
+import '../widgets/widgets.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -53,12 +60,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     }
   }
 
-  void _jumpToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    }
-  }
-
   @override
   void dispose() {
     // Clean up the listener
@@ -77,15 +78,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
-            onPressed: () {
-              // nextScreen(
-              //     context,
-              //     GroupInfo(
-              //       groupId: widget.groupId,
-              //       groupName: widget.groupName,
-              //       adminName: admin,
-              //     ));
-            },
+            onPressed: () {},
             icon: const Icon(Icons.info),
           ),
         ],
@@ -174,6 +167,25 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       },
     );
   }
+
+  /*Future<void> inviteGroup(
+    BuildContext context,
+    String groupId,
+    String userId,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url = "https://unilink23.oa.r.appspot.com/rest/chat/invite/" +
+        groupId +
+        "/" +
+        userId;
+
+    final response = await http.post(Uri.parse(url), headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${json.encode(token.toJson())}'
+    });
+
+    if (response.statusCode == 200) {}
+  }*/
 
   sendMessage(String content) {
     final DatabaseReference messageRef =

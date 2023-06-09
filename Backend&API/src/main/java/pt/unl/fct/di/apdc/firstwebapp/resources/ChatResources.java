@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.Group;
+import pt.unl.fct.di.apdc.firstwebapp.util.InviteToken;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -22,6 +23,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.core.Response.Status;
 
 @Path("/chat")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -84,34 +86,56 @@ public class ChatResources {
     }
 
     @POST
-    @Path("/invite/{groupId}/{userId}")
+    @Path("/invite")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response inviteToGroup(@PathParam("groupId") String groupId, @PathParam("userId") String userId) {
+    public Response inviteToGroup(@QueryParam("groupId") String groupId, @QueryParam("userId") String userId) {
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(userId);
         Entity user = datastore.get(userKey);
 
-        String userEmail = user.getString("user_email");
+        InviteToken Invtoken = new InviteToken(userId, groupId);
+        Transaction txn = datastore.newTransaction();
+        try{
+            Key tokenKey = datastore.newKeyFactory().setKind("InviteToken").newKey(Invtoken.tokenID);
+            Entity token = Entity.newBuilder(tokenKey)
+                    .set("user", Invtoken.username)
+                    .set("groupId", Invtoken.groupId)
+                    .build();
+            txn.put(token);
+            txn.commit();
+            String userEmail = user.getString("user_email");
 
-        sendInviteEmail(userEmail, userId, groupId);
+            sendInviteEmail(userEmail, userId, groupId, Invtoken.tokenID);
 
-        return Response.ok().build();
+            return Response.ok().build();
+        }
+        finally {
+            if (txn.isActive()) txn.rollback();
+        }
     }
 
     @GET
-    @Path("/join/{groupId}/{userId}")
+    @Path("/join")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response joinGroup(@PathParam("groupId") String groupId, @PathParam("userId") String userId){
-        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
-        //when creating a group the creater becomes the admin
-        membersRef.child(userId).setValueAsync(false);
-        return null;
+    public Response joinGroup(@QueryParam("token") String token){
+        Key tokenkey = datastore.newKeyFactory().setKind("InviteToken").newKey(token);
+        Entity invtoken = datastore.get(tokenkey);
+        if(invtoken == null){
+            return Response.status(Status.FORBIDDEN).build();
+        }
+        String group = invtoken.getString("groupId");
+        String user = invtoken.getString("user");
+
+        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(group);
+
+        membersRef.child(user).setValueAsync(false);
+        return Response.ok().build();
     }
 
-    private void sendInviteEmail(String email, String userId, String groupId) {
+    private void sendInviteEmail(String email, String userId, String groupId, String Token) {
         String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";
         String subject = "You received an invite";
-        String invitationLink = "https://unilink23.oa.r.appspot.com/rest/chat/join/" + groupId + "/" + userId;
+        String invitationLink = "https://unilink23.oa.r.appspot.com/rest/chat/join?token=" + Token;
         String htmlContent = "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
