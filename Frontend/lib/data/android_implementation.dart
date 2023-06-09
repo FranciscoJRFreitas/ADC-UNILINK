@@ -1,19 +1,21 @@
 import 'package:unilink2023/data/sqlite.dart';
+import 'package:unilink2023/domain/User.dart';
 
 import 'cache_factory.dart';
 
-class AndroidImplementation implements CacheFactory {
-  AndroidImplementation._();
+class CacheFactoryImpl implements CacheFactory {
+  CacheFactoryImpl._();
 
   // Singleton instance
-  static final AndroidImplementation _instance = AndroidImplementation._();
+  static final CacheFactoryImpl _instance = CacheFactoryImpl._();
 
   // Factory method to get the singleton instance
-  factory AndroidImplementation() {
+  factory CacheFactoryImpl() {
     return _instance;
   }
 
-  initDB() {
+  @override
+  void initDB() {
     SqliteService().initializeDB();
   }
 
@@ -25,9 +27,8 @@ class AndroidImplementation implements CacheFactory {
       await SqliteService().updateCheckLogin(value);
     else if (property == 'index')
       await SqliteService().updateIndex(value);
-    else if (property == 'theme') await SqliteService().updateTheme(value);
-    //else if (property == 'user')
-    //await SqliteService().updateUser(user, token, password);
+    else if (property == 'theme')
+      await SqliteService().updateTheme(value);
   }
 
   @override
@@ -77,5 +78,10 @@ class AndroidImplementation implements CacheFactory {
     for (var row in result) {
       print(row);
     }
+  }
+
+  @override
+  void setUser(User user, String token, String password) {
+    SqliteService().insertUser(user, token, password);
   }
 }

@@ -12,24 +12,25 @@ class SqliteService {
 
   SqliteService._internal();
 
-  Future<Database> initializeDB() async {
+  void initializeDB() async {
     String path = await getDatabasesPath();
     String dbPath = join(path, 'database.db');
 
     // Delete the database
-    await deleteDatabase(dbPath);
+    //await deleteDatabase(dbPath);
 
-    return await openDatabase(
+    await openDatabase(
       dbPath,
       onCreate: (database, version) async {
         await database.execute(
             'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
             'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
             'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
-            'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT)');
+            'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT, password TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT NOT NULL, pageIndex TEXT)');
+            'theme TEXT, pageIndex TEXT)');
+        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'pageIndex': null});
       },
       version: 1,
     );
@@ -54,25 +55,28 @@ class SqliteService {
   Future<void> updateCheckIntro(String value) async {
     Database db = await getDatabase();
 
-    await getCheckIntro() == null
-        ? await db.rawInsert('INSERT INTO settings(checkIntro) VALUES($value)')
-        : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
+    //await getCheckIntro() == null
+      //  ? await db.rawInsert('INSERT INTO settings(checkIntro) VALUES($value)')
+      //  : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
+    await db.rawUpdate('UPDATE settings SET checkIntro = $value');
   }
 
   Future<void> updateCheckLogin(String value) async {
     Database db = await getDatabase();
 
-    await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO settings(checkLogin) VALUES($value)')
-        : await db.rawUpdate('UPDATE settings SET checkLogin = $value');
+    //await getCheckLogin() == null
+        //? await db.rawInsert('INSERT INTO settings(checkLogin) VALUES($value)')
+        //: await db.rawUpdate('UPDATE settings SET checkLogin = $value');
+    await db.rawUpdate('UPDATE settings SET checkLogin = $value');
   }
 
   Future<void> updateTheme(String value) async {
     Database db = await getDatabase();
 
-    await getTheme() == null
-        ? await db.rawInsert("INSERT INTO settings(theme) VALUES('$value')")
-        : await db.rawUpdate("UPDATE settings SET theme = '$value'");
+    //await getTheme() == null
+      //  ? await db.rawInsert("INSERT INTO settings(theme) VALUES('$value')")
+       // : await db.rawUpdate("UPDATE settings SET theme = '$value'");
+    await db.rawUpdate("UPDATE settings SET theme = '$value'");
   }
 
   Future<void> updateIndex(String value) async {
@@ -83,25 +87,25 @@ class SqliteService {
         : await db.rawUpdate('UPDATE settings SET pageIndex = $value');
   }
 
-  Future<bool?> getCheckIntro() async {
+  Future<String?> getCheckIntro() async {
     Database db = await getDatabase();
 
     final List<Map<String, dynamic>> maps = await db.query('settings');
 
     if (maps.isNotEmpty && maps[0].containsKey('checkIntro')) {
-      return maps[0]['checkIntro'] == 'true' ? true : false;
+      return maps[0]['checkIntro'];
     } else {
       return null;
     }
   }
 
-  Future<bool?> getCheckLogin() async {
+  Future<String?> getCheckLogin() async {
     Database db = await getDatabase();
 
     final List<Map<String, dynamic>> maps = await db.query('settings');
 
     if (maps.isNotEmpty && maps[0].containsKey('checkLogin')) {
-      return maps[0]['checkLogin'] == 'true' ? true : false;
+      return maps[0]['checkLogin'];
     } else {
       return null;
     }
@@ -177,7 +181,7 @@ class SqliteService {
     // Get a reference to the database.
     final db = await getDatabase();
 
-    // Update the given Dog.
+    // Update the given user.
     await db.update(
       'users',
       user.toMap(token, password),

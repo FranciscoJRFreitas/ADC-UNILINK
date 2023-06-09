@@ -24,6 +24,19 @@ class SearchUsersPage extends StatefulWidget {
 class _SearchUsersPageState extends State<SearchUsersPage> {
   TextEditingController _searchController = TextEditingController();
   List<User> _searchResults = [];
+  String? uUsername;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData(); // Call the method in initState
+  }
+
+  Future<void> loadData() async {
+    uUsername = await cacheFactory.get('users', 'username');
+    //TODO More data needs to be retrieved
+    setState(() {});
+  }
 
   Future<void> searchUsers(String query) async {
     final url = kBaseUrl + 'rest/search/';
@@ -69,8 +82,10 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
               style: TextStyle(color: Theme.of(context).secondaryHeaderColor),
               decoration: InputDecoration(
                 labelText: 'Search',
-                labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-                prefixIcon: Icon(Icons.search, color: Theme.of(context).secondaryHeaderColor),
+                labelStyle:
+                    TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                prefixIcon: Icon(Icons.search,
+                    color: Theme.of(context).secondaryHeaderColor),
               ),
               onChanged: (value) {
                 if (value.trim().isNotEmpty) {
@@ -128,6 +143,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                     );
                   },
                   child: Card(
+                    color: Theme.of(context).cardColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     elevation: 5,
@@ -138,7 +154,8 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                       child: ListTile(
                         leading: picture(context, user.username),
                         title: Text(
-                          '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',//TODO Mudar para token em vez de widget
+                          '${user.displayName}${user.username == uUsername ? ' (You)' : ''}', //TODO Mudar para token em vez de widget
+                          //TODO Faz sentido user ver se a si próprio no search?
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Column(
@@ -147,7 +164,11 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                             SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.person, size: 20),
+                                Icon(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
+                                    Icons.person,
+                                    size: 20),
                                 SizedBox(width: 5),
                                 Text('Username: ${user.username}'),
                               ],
@@ -169,9 +190,10 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   }
 
   Future<Uint8List?> downloadData(String username) async {
-
-    return FirebaseStorage.instance.ref(
-        'ProfilePictures/' + username).getData().onError((error, stackTrace) => null);
+    return FirebaseStorage.instance
+        .ref('ProfilePictures/' + username)
+        .getData()
+        .onError((error, stackTrace) => null);
   }
 
   Widget picture(BuildContext context, String username) {
@@ -183,7 +205,8 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (BuildContext dialogContext) { // Here
+                  builder: (BuildContext dialogContext) {
+                    // Here
                     return Dialog(
                       child: Stack(
                         alignment: Alignment.topRight,
@@ -194,25 +217,27 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                            icon: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle, // use circle if the icon is circular
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    blurRadius: 15.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop(); // Use dialogContext here
-                            },
+                              onPressed: () {
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
+                              },
                             ),
                           ),
                         ],
@@ -224,13 +249,13 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
               child: Image.memory(snapshot.data!),
             );
           } else {
-            return const Icon(
+            return Icon(
               Icons.account_circle,
+              color: Theme.of(context).secondaryHeaderColor,
               size: 50,
             );
           }
           return const CircularProgressIndicator();
         });
   }
-
 }
