@@ -1,15 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../data/cache_factory_provider.dart';
-import '../domain/Group.dart';
-import '../domain/Token.dart';
 import '../widgets/message_tile.dart';
-import 'package:http/http.dart' as http;
-
-import '../widgets/widgets.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -24,21 +17,44 @@ class GroupMessagesPage extends StatefulWidget {
 
 class _GroupMessagesPageState extends State<GroupMessagesPage> {
   TextEditingController messageController = TextEditingController();
+  late DatabaseReference chatsRef;
+  late DatabaseReference membersRef;
   late DatabaseReference messagesRef;
   late List<Message> messages = [];
+  late String desc;
+  late List<String> members = [];
   Stream<List<Message>>? messageStream;
   final ScrollController _scrollController = ScrollController();
+  late int messageCap = 10; //still experiment
 
   @override
   void initState() {
     super.initState();
+
+    chatsRef =
+        FirebaseDatabase.instance.ref().child('chats').child(widget.groupId);
+    chatsRef.once().then((chatSnapshot) {
+      Map<dynamic, dynamic> chatsData =
+          chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
+      desc = chatsData['description'];
+    });
+
+    membersRef =
+        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
+    membersRef.onChildAdded.listen((event) {
+      setState(() {
+        String memberId = event.snapshot.key as String;
+        members.add(memberId);
+      });
+    });
+
     // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
     StreamController<List<Message>> streamController = StreamController();
 
     // Set up a listener to fetch and update the messages in real-time
-    messagesRef.onChildAdded.listen((event) {
+    messagesRef.limitToLast(messageCap).onChildAdded.listen((event) {
       setState(() {
         // Parse the data snapshot into a Message object
         Message message = Message.fromSnapshot(event.snapshot);
@@ -64,7 +80,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   @override
   void dispose() {
     // Clean up the listener
+    messageCap = 10;
     messagesRef.onChildAdded.drain();
+    membersRef.onChildAdded.drain();
     _scrollController.dispose();
     super.dispose();
   }
@@ -79,7 +97,35 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         backgroundColor: Color.fromARGB(255, 8, 52, 88),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("${widget.groupId}"),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("${desc}"),
+                        SizedBox(height: 8),
+                        Text("Members:"),
+                        SizedBox(height: 4),
+                        for (String member in members) Text(member),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text("Close"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             icon: const Icon(Icons.info),
           ),
         ],
@@ -87,7 +133,18 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       body: Column(
         children: <Widget>[
           Expanded(
-            child: chatMessages(),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification notification) {
+                if (notification is ScrollEndNotification &&
+                    _scrollController.position.pixels ==
+                        _scrollController.position.maxScrollExtent) {
+                  // Load older messages here
+                  loadOlderMessages();
+                }
+                return false;
+              },
+              child: chatMessages(),
+            ),
           ),
           Container(
             alignment: Alignment.bottomCenter,
@@ -116,7 +173,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     width: 12,
                   ),
                   GestureDetector(
-                    //Add enter event listener to send message
                     onTap: () {
                       sendMessage(messageController.text);
                     },
@@ -142,6 +198,41 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         ],
       ),
     );
+  }
+
+  void loadOlderMessages() {
+    print(1);
+    // Get the timestamp of the oldest loaded message
+    int oldestMessageTimestamp = messages.isEmpty
+        ? DateTime.now().millisecondsSinceEpoch
+        : messages.first.timestamp;
+
+    // Query the messagesRef for older messages using the startAt() method
+    messagesRef
+        .orderByChild('timestamp')
+        .startAt(
+            oldestMessageTimestamp) // Include messages starting from the next timestamp
+        .limitToLast(messageCap)
+        .once()
+        .then((msgSnapshot) {
+      print(2);
+      if (msgSnapshot.snapshot.value != null) {
+        // Parse and add the older messages to the messages list
+        Map<dynamic, dynamic> messagesData =
+            msgSnapshot.snapshot.value as Map<dynamic, dynamic>;
+        List<Message> olderMessages = [];
+        messagesData.forEach((key, value) {
+          Message message = Message.fromSnapshot(msgSnapshot.snapshot);
+          olderMessages.add(message);
+        });
+
+        print(3);
+        // Add the older messages at the beginning of the messages list
+        setState(() {
+          messages.insertAll(0, olderMessages);
+        });
+      }
+    });
   }
 
   chatMessages() {
@@ -231,4 +322,11 @@ class Message {
       timestamp: data['timestamp'] as int,
     );
   }
+}
+
+class GroupInfo {
+  final String description;
+  final List<String> members;
+
+  GroupInfo({required this.description, required this.members});
 }
