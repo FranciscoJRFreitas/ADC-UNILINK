@@ -26,6 +26,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   Stream<List<Message>>? messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
+  late bool isLoadning = false;
 
   @override
   void initState() {
@@ -42,10 +43,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     membersRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
     membersRef.onChildAdded.listen((event) {
-      setState(() {
-        String memberId = event.snapshot.key as String;
-        members.add(memberId);
-      });
+      String memberId = event.snapshot.key as String;
+      members.add(memberId);
     });
 
     // Get a reference to the messages node for the specific group
@@ -116,6 +115,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     ),
                     actions: [
                       TextButton(
+                        onPressed: () {},
+                        child: Text("Invite"),
+                      ),
+                      TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -136,9 +139,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {
                 if (notification is ScrollEndNotification &&
-                    _scrollController.position.pixels ==
-                        _scrollController.position.maxScrollExtent) {
+                    _scrollController.position.pixels == 0) {
                   // Load older messages here
+                  isLoadning = true;
                   loadOlderMessages();
                 }
                 return false;
@@ -201,7 +204,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   void loadOlderMessages() {
-    print(1);
     // Get the timestamp of the oldest loaded message
     int oldestMessageTimestamp = messages.isEmpty
         ? DateTime.now().millisecondsSinceEpoch
@@ -210,23 +212,21 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Query the messagesRef for older messages using the startAt() method
     messagesRef
         .orderByChild('timestamp')
-        .startAt(
-            oldestMessageTimestamp) // Include messages starting from the next timestamp
+        .endAt(oldestMessageTimestamp - 1)
         .limitToLast(messageCap)
         .once()
         .then((msgSnapshot) {
-      print(2);
       if (msgSnapshot.snapshot.value != null) {
         // Parse and add the older messages to the messages list
         Map<dynamic, dynamic> messagesData =
             msgSnapshot.snapshot.value as Map<dynamic, dynamic>;
         List<Message> olderMessages = [];
         messagesData.forEach((key, value) {
-          Message message = Message.fromSnapshot(msgSnapshot.snapshot);
+          Message message =
+              Message.fromSnapshot(msgSnapshot.snapshot.child(key));
           olderMessages.add(message);
         });
 
-        print(3);
         // Add the older messages at the beginning of the messages list
         setState(() {
           messages.insertAll(0, olderMessages);
@@ -240,8 +240,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       stream: messageStream,
       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
         if (snapshot.hasData) {
-          WidgetsBinding.instance!
-              .addPostFrameCallback((_) => _scrollToBottom());
+          if (!isLoadning) {
+            WidgetsBinding.instance!
+                .addPostFrameCallback((_) => _scrollToBottom());
+          } else {
+            isLoadning = false;
+          }
           return ListView.builder(
             controller: _scrollController,
             itemCount: snapshot.data?.length ?? 0,
@@ -322,11 +326,4 @@ class Message {
       timestamp: data['timestamp'] as int,
     );
   }
-}
-
-class GroupInfo {
-  final String description;
-  final List<String> members;
-
-  GroupInfo({required this.description, required this.members});
 }

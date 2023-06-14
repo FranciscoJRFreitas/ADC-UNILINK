@@ -301,7 +301,9 @@ Future<int> login(
       // Failed to authenticate user
       print('Failed to authenticate user: $e');
     }
+
     cacheFactory.set('username', user.username);
+    cacheFactory.set("role", user.role);
     cacheFactory.set('password', password);
     cacheFactory.set('token', token[0]);
     cacheFactory.setUser(user, token[0], password);
