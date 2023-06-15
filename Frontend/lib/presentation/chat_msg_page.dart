@@ -29,7 +29,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late bool isLoadning = false;
   FocusNode messageFocusNode = FocusNode();
 
-
   @override
   void initState() {
     super.initState();
@@ -246,7 +245,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
         if (snapshot.hasData) {
           if (!isLoadning) {
-            WidgetsBinding.instance!
+            WidgetsBinding.instance
                 .addPostFrameCallback((_) => _scrollToBottom());
           } else {
             isLoadning = false;
@@ -292,23 +291,29 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }*/
 
   sendMessage(String content) {
-  final DatabaseReference messageRef =
-      FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-  Map<String, dynamic> messageData = {
-    'message': content,
-    'name': widget.username,
-    'timestamp': DateTime.now().millisecondsSinceEpoch,
-  };
-  messageRef.push().set(messageData).then((value) {
-    messageController.clear();
-    //Request focus on the message text field
-    messageFocusNode.requestFocus();
-  }).catchError((error) {
-    // Handle the error if the message fails to send
-    print('Failed to send message: $error');
-  });
-}
-
+    final DatabaseReference messageRef =
+        FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
+    Map<String, dynamic> messageData = {
+      'message': content,
+      'name': widget.username,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+    messageRef.push().set(messageData).then((value) {
+      messageController.clear();
+      //Request focus on the message text field
+      messageFocusNode.requestFocus();
+    }).catchError((error) {
+      // Handle the error if the message fails to send
+      print('Failed to send message: $error');
+    });
+    Future.delayed(Duration(milliseconds: 300), () {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
 }
 
 class Message {

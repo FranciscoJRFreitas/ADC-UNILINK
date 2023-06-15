@@ -1,26 +1,8 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
-
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.FirestoreOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
@@ -35,7 +17,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import pt.unl.fct.di.apdc.firstwebapp.util.*;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -124,7 +115,13 @@ public class RegisterResource {
                         .setPassword(data.password);
 
                 UserRecord userRecord = firebaseAuth.createUser(request);
-                System.out.println("New user created: " + userRecord.getUid());
+                String uid = userRecord.getUid();
+
+                // Save the UID in the "users" node
+                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                usersRef.child(uid).setValueAsync(false);
+
+                System.out.println("New user created: " + uid);
             } catch (FirebaseAuthException e) {
                 System.err.println("Error creating user: " + e.getMessage());
             }
