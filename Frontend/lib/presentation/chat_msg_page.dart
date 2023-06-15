@@ -27,11 +27,14 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
   late bool isLoadning = false;
+  FocusNode messageFocusNode = FocusNode();
+
 
   @override
   void initState() {
     super.initState();
 
+    messageFocusNode.requestFocus();
     chatsRef =
         FirebaseDatabase.instance.ref().child('chats').child(widget.groupId);
     chatsRef.once().then((chatSnapshot) {
@@ -83,6 +86,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef.onChildAdded.drain();
     membersRef.onChildAdded.drain();
     _scrollController.dispose();
+    messageFocusNode.dispose();
     super.dispose();
   }
 
@@ -161,6 +165,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   Expanded(
                     child: TextFormField(
                       controller: messageController,
+                      focusNode: messageFocusNode,
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         hintText: "Send a message...",
@@ -287,21 +292,23 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }*/
 
   sendMessage(String content) {
-    final DatabaseReference messageRef =
-        FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    Map<String, dynamic> messageData = {
-      'message': content,
-      'name': widget.username,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    messageRef.push().set(messageData).then((value) {
-      messageController.clear();
-    }).catchError((error) {
-      // Handle the error if the message fails to send
-      print('Failed to send message: $error');
-    });
+  final DatabaseReference messageRef =
+      FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
+  Map<String, dynamic> messageData = {
+    'message': content,
+    'name': widget.username,
+    'timestamp': DateTime.now().millisecondsSinceEpoch,
+  };
+  messageRef.push().set(messageData).then((value) {
     messageController.clear();
-  }
+    //Request focus on the message text field
+    messageFocusNode.requestFocus();
+  }).catchError((error) {
+    // Handle the error if the message fails to send
+    print('Failed to send message: $error');
+  });
+}
+
 }
 
 class Message {
