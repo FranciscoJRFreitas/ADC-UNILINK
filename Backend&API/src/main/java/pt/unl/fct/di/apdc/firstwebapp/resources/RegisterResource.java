@@ -108,129 +108,128 @@ public class RegisterResource {
             LOG.info("User registered: " + data.username);
             txn.commit();
             initConversations(data.username);
-            try {
-                FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-                UserRecord.CreateRequest request = new UserRecord.CreateRequest()
-                        .setEmail(data.email)
-                        .setPassword(data.password);
 
-                UserRecord userRecord = firebaseAuth.createUser(request);
-                String uid = userRecord.getUid();
+            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+            UserRecord.CreateRequest request = new UserRecord.CreateRequest()
+                    .setEmail(data.email)
+                    .setPassword(data.password);
 
-                // Save the UID in the "users" node
-                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-                usersRef.child(uid).setValueAsync(false);
+            UserRecord userRecord = firebaseAuth.createUser(request);
+            String uid = userRecord.getUid();
 
-                System.out.println("New user created: " + uid);
-            } catch (FirebaseAuthException e) {
-                System.err.println("Error creating user: " + e.getMessage());
-            }
-            return Response.ok("{}").build();
+            // Save the UID in the "users" node
+            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+            usersRef.child(uid).setValueAsync(false);
 
+            System.out.println("New user created: " + uid);
+
+        } catch (FirebaseAuthException e) {
+            System.err.println("Error creating user: " + e.getMessage());
         } finally {
             if (txn.isActive()) txn.rollback();
         }
+        return Response.ok("{}").build();
     }
-    private void initConversations(String username){
-        LOG.severe("Inserting data");
-        DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
-        DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
-        // Set the data for the new chat
-        newChatsForUserRef.child("DM").setValueAsync("DM");
-        newChatsForUserRef.child("Groups").setValueAsync("Groups");
-        LOG.severe("Inserting data finished");
+        private void initConversations (String username){
+            LOG.severe("Inserting data");
+            DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
+            DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
+            // Set the data for the new chat
+            newChatsForUserRef.child("DM").setValueAsync("DM");
+            newChatsForUserRef.child("Groups").setValueAsync("Groups");
+            LOG.severe("Inserting data finished");
 
-    }
-    private void sendVerificationEmail(String email, String name, String token) {
-        String from = "fj.freitas@campus.fct.unl.pt";
-        String fromName = "UniLink";
-        String subject = "Account Activation";
-        String activationLink = "https://unilink23.oa.r.appspot.com/rest/activate?token=" + token;
-        String htmlContent = "<!DOCTYPE html>" +
-                "<html>" +
-                "<head>" +
-                "<meta charset='utf-8'>" +
-                "<style>" +
-                ".email-container {" +
-                "    font-family: Arial, sans-serif;" +
-                "    max-width: 600px;" +
-                "    margin: auto;" +
-                "    padding: 20px;" +
-                "    background-color: #ffffff;" +
-                "    border: 1px solid #cccccc;" +
-                "    border-radius: 5px;" +
-                "    text-align: center;" +
-                "}" +
-                ".email-header {" +
-                "    font-size: 1.5em;" +
-                "    font-weight: bold;" +
-                "    color: #333333;" +
-                "}" +
-                ".email-text {" +
-                "    font-size: 1em;" +
-                "    color: #666666;" +
-                "    margin: 20px 0;" +
-                "    text-align: left;" +
-                "}" +
-                ".email-button {" +
-                "    display: inline-block;" +
-                "    font-size: 1em;" +
-                "    font-weight: bold;" +
-                "    color: #f5f5f5;" +
-                "    background-color: #005890;" +
-                "    border-radius: 5px;" +
-                "    padding: 10px 20px;" +
-                "    text-decoration: none;" +
-                "}" +
-                "</style>" +
-                "</head>" +
-                "<body>" +
-                "<div class='email-container'>" +
-                "    <h1 class='email-header'>Welcome to UniLink!</h1>" +
-                "    <p class='email-text'>Dear <b>" + name + "</b>,<br><br>" +
-                "    Thank you for registering with UniLink! </p>" +
-                "    <p class='email-text'>To complete your registration and activate your account, please click the button below." +
-                "    </p>" +
-
-                "    <a target='_blank' href='" + activationLink + "' class='email-button'>Activate your account</a>" +
-                "    <p class='email-text'>" +
-                "        If the button above does not work, click the activation link <a target='_blank' href='" + activationLink + "'>here</a>.<br><br>" +
-                "        Best regards,<br>" +
-                "        The UniLink Team" +
-                "    </p>" +
-                "</div>" +
-                "</body>" +
-                "</html>";
-
-
-        MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
-        MailjetRequest request;
-        MailjetResponse response;
-
-        try {
-            request = new MailjetRequest(Emailv31.resource)
-                    .property(Emailv31.MESSAGES, new JSONArray()
-                            .put(new JSONObject()
-                                    .put(Emailv31.Message.FROM, new JSONObject()
-                                            .put("Email", from)
-                                            .put("Name", fromName))
-                                    .put(Emailv31.Message.TO, new JSONArray()
-                                            .put(new JSONObject()
-                                                    .put("Email", email)))
-                                    .put(Emailv31.Message.SUBJECT, subject)
-                                    .put(Emailv31.Message.HTMLPART, htmlContent)
-                                    .put(Emailv31.Message.CUSTOMID, "AccountActivation")));
-
-            response = client.post(request);
-
-            if (response.getStatus() != 200) {
-                throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
-            }
-            LOG.info("Email sent.");
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error sending email", e);
-            throw new RuntimeException(e);
         }
-    }
+        private void sendVerificationEmail (String email, String name, String token){
+            String from = "fj.freitas@campus.fct.unl.pt";
+            String fromName = "UniLink";
+            String subject = "Account Activation";
+            String activationLink = "https://unilink23.oa.r.appspot.com/rest/activate?token=" + token;
+            String htmlContent = "<!DOCTYPE html>" +
+                    "<html>" +
+                    "<head>" +
+                    "<meta charset='utf-8'>" +
+                    "<style>" +
+                    ".email-container {" +
+                    "    font-family: Arial, sans-serif;" +
+                    "    max-width: 600px;" +
+                    "    margin: auto;" +
+                    "    padding: 20px;" +
+                    "    background-color: #ffffff;" +
+                    "    border: 1px solid #cccccc;" +
+                    "    border-radius: 5px;" +
+                    "    text-align: center;" +
+                    "}" +
+                    ".email-header {" +
+                    "    font-size: 1.5em;" +
+                    "    font-weight: bold;" +
+                    "    color: #333333;" +
+                    "}" +
+                    ".email-text {" +
+                    "    font-size: 1em;" +
+                    "    color: #666666;" +
+                    "    margin: 20px 0;" +
+                    "    text-align: left;" +
+                    "}" +
+                    ".email-button {" +
+                    "    display: inline-block;" +
+                    "    font-size: 1em;" +
+                    "    font-weight: bold;" +
+                    "    color: #f5f5f5;" +
+                    "    background-color: #005890;" +
+                    "    border-radius: 5px;" +
+                    "    padding: 10px 20px;" +
+                    "    text-decoration: none;" +
+                    "}" +
+                    "</style>" +
+                    "</head>" +
+                    "<body>" +
+                    "<div class='email-container'>" +
+                    "    <h1 class='email-header'>Welcome to UniLink!</h1>" +
+                    "    <p class='email-text'>Dear <b>" + name + "</b>,<br><br>" +
+                    "    Thank you for registering with UniLink! </p>" +
+                    "    <p class='email-text'>To complete your registration and activate your account, please click the button below." +
+                    "    </p>" +
 
-}
+                    "    <a target='_blank' href='" + activationLink + "' class='email-button'>Activate your account</a>" +
+                    "    <p class='email-text'>" +
+                    "        If the button above does not work, click the activation link <a target='_blank' href='" + activationLink + "'>here</a>.<br><br>" +
+                    "        Best regards,<br>" +
+                    "        The UniLink Team" +
+                    "    </p>" +
+                    "</div>" +
+                    "</body>" +
+                    "</html>";
+
+
+            MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
+            MailjetRequest request;
+            MailjetResponse response;
+
+            try {
+                request = new MailjetRequest(Emailv31.resource)
+                        .property(Emailv31.MESSAGES, new JSONArray()
+                                .put(new JSONObject()
+                                        .put(Emailv31.Message.FROM, new JSONObject()
+                                                .put("Email", from)
+                                                .put("Name", fromName))
+                                        .put(Emailv31.Message.TO, new JSONArray()
+                                                .put(new JSONObject()
+                                                        .put("Email", email)))
+                                        .put(Emailv31.Message.SUBJECT, subject)
+                                        .put(Emailv31.Message.HTMLPART, htmlContent)
+                                        .put(Emailv31.Message.CUSTOMID, "AccountActivation")));
+
+                response = client.post(request);
+
+                if (response.getStatus() != 200) {
+                    throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
+                }
+                LOG.info("Email sent.");
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Error sending email", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+    }

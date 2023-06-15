@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:unilink2023/widgets/news_box.dart';
 import '../domain/FeedItem.dart';
-import '../domain/fetchNews.dart';
+import '../application/fetchNews.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsFeedPage extends StatefulWidget {
@@ -97,7 +97,6 @@ void _launchURL(String url) async {
   }
 }
 
-
 class _AvatarImage extends StatelessWidget {
   final String url;
   const _AvatarImage(this.url, {Key? key}) : super(key: key);
@@ -114,7 +113,7 @@ class _AvatarImage extends StatelessWidget {
   }
 }
 
-class _ActionsRow extends StatelessWidget  {
+class _ActionsRow extends StatelessWidget {
   final FeedItem item;
   const _ActionsRow({Key? key, required this.item}) : super(key: key);
 

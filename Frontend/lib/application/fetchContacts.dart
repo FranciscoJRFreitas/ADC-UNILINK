@@ -1,25 +1,27 @@
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
-import 'Contact.dart';
-
+import '../domain/Contact.dart';
 
 Future<Map<String, List<Contact>>> fetchContacts() async {
-  final response = await http.get(Uri.parse('https://www.fct.unl.pt/faculdade/contactos'));
+  final response =
+      await http.get(Uri.parse('https://www.fct.unl.pt/faculdade/contactos'));
 
   if (response.statusCode == 200) {
     var document = parser.parse(response.body);
-    
+
     // Fetching Main Contacts
-    var mainContactsElement = document.querySelector('.row.clearfix div.col-tn-12.col-xs-6.col-sm-6');
+    var mainContactsElement =
+        document.querySelector('.row.clearfix div.col-tn-12.col-xs-6.col-sm-6');
     var mainContacts = mainContactsElement?.querySelectorAll('p') ?? [];
-    
+
     List<Contact> mainContactList = [];
-    
+
     for (var i = 0; i < mainContacts.length; i += 2) {
       var contactName = mainContacts[i].text;
-      var contactPhone = (i + 1 < mainContacts.length) ? mainContacts[i + 1].text : '';
-      
+      var contactPhone =
+          (i + 1 < mainContacts.length) ? mainContacts[i + 1].text : '';
+
       mainContactList.add(Contact(
         name: contactName,
         url: '',
@@ -27,11 +29,11 @@ Future<Map<String, List<Contact>>> fetchContacts() async {
       ));
     }
 
-
     // Fetching Departments Contacts
-    var departmentsElement = document.querySelector('.row.clearfix .col-tn-12.col-xs-6.col-sm-6 ul');
+    var departmentsElement =
+        document.querySelector('.row.clearfix .col-tn-12.col-xs-6.col-sm-6 ul');
     var departmentsContacts = departmentsElement?.querySelectorAll('li') ?? [];
-    
+
     List<Contact> departmentsContactList = [];
 
     for (var department in departmentsContacts) {
@@ -47,7 +49,6 @@ Future<Map<String, List<Contact>>> fetchContacts() async {
       ));
     }
 
-    
     return {
       'mainContacts': mainContactList,
       'departmentsContacts': departmentsContactList,

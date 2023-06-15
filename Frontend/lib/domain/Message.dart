@@ -1,17 +1,25 @@
-// import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-// class Message {
-//   final String msgId;
-//   final String senderName;
+class Message {
+  final String id;
+  final String text;
+  final String name;
+  final int timestamp;
 
-//   final String content;
+  Message({
+    required this.id,
+    required this.text,
+    required this.name,
+    required this.timestamp,
+  });
 
-//   Message({required this.senderName, required this.content});
-
-//   factory Message.fromSnapshot(DataSnapshot snapshot) {
-//     return Message(
-//       senderName: snapshot.value['senderName'] as String,
-//       content: snapshot.value['content'] as String,
-//     );
-//   }
-// }
+  factory Message.fromSnapshot(DataSnapshot snapshot) {
+    final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+    return Message(
+      id: snapshot.key!,
+      text: data['message'] as String,
+      name: data['name'] as String,
+      timestamp: data['timestamp'] as int,
+    );
+  }
+}
