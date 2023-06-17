@@ -4,7 +4,7 @@ import 'package:unilink2023/widgets/news_box.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../domain/Contact.dart';
 import '../widgets/contacts_box.dart';
-import '../domain/fetchContacts.dart';
+import '../application/fetchContacts.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({Key? key}) : super(key: key);
@@ -41,7 +41,6 @@ class _ContactsPageState extends State<ContactsPage> {
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +89,7 @@ void _launchURL(String url) async {
   }
 }
 
-class _ActionsRow extends StatelessWidget  {
+class _ActionsRow extends StatelessWidget {
   final Contact item;
   const _ActionsRow({Key? key, required this.item}) : super(key: key);
 

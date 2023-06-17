@@ -90,66 +90,62 @@ class _ChatPageState extends State<ChatPage> {
             stream: groupsStream, // Replace with your stream of groups
             builder:
                 (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
                 List<Group> groups = snapshot.data!;
 
-                if (groups.isEmpty) {
-                  return noGroupWidget();
-                } else {
-                  return ListView(
-                    padding: EdgeInsets.only(top: 10, bottom: 80),
-                    children: groups.map((group) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => GroupMessagesPage(
-                                groupId: group.id,
-                                username: username,
-                              ),
+                return ListView(
+                  padding: EdgeInsets.only(top: 10, bottom: 80),
+                  children: groups.map((group) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => GroupMessagesPage(
+                              groupId: group.id,
+                              username: username,
                             ),
-                          );
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
                           ),
-                          elevation: 5,
-                          margin: EdgeInsets.symmetric(vertical: 8),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 8),
-                            child: ListTile(
-                              title: Text(
-                                '${group.DisplayName}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.person, size: 20),
-                                      SizedBox(width: 5),
-                                      Text('Description: ${group.description}'),
-                                    ],
-                                  ),
-                                  // ... Add other information rows with icons here
-                                  // Make sure to add some spacing (SizedBox) between rows for better readability
-                                ],
-                              ),
+                        );
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 5,
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          child: ListTile(
+                            title: Text(
+                              '${group.DisplayName}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.person, size: 20),
+                                    SizedBox(width: 5),
+                                    Text('Description: ${group.description}'),
+                                  ],
+                                ),
+                                // ... Add other information rows with icons here
+                                // Make sure to add some spacing (SizedBox) between rows for better readability
+                              ],
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  );
-                }
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
+                      ),
+                    );
+                  }).toList(),
+                );
               } else {
-                return CircularProgressIndicator();
+                return noGroupWidget();
               }
             },
           ),
@@ -191,6 +187,7 @@ class _ChatPageState extends State<ChatPage> {
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               title: const Text(
                 "Create a group",
                 textAlign: TextAlign.left,
@@ -249,33 +246,38 @@ class _ChatPageState extends State<ChatPage> {
             }*/
 
   noGroupWidget() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () {
-              popUpDialog(context);
-            },
-            child: Icon(
-              Icons.add_circle,
-              color: Colors.grey[700],
-              size: 75,
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  popUpDialog(context);
+                },
+                child: Icon(
+                  Icons.add_circle,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          const Text(
-            "You've not joined any groups, tap on the add icon to create a group or also search from top search button.",
-            textAlign: TextAlign.center,
-          )
-        ],
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You've not joined any groups, tap on the add icon to create a group or also search from top search button.",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
       ),
     );
-  }
+}
 
   void getUsername() async {
     username = await cacheFactory.get('users', 'username');
