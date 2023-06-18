@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:unilink2023/presentation/chat_info_page.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 
@@ -36,7 +37,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
     messageFocusNode.requestFocus();
     chatsRef =
-        FirebaseDatabase.instance.ref().child('chats').child(widget.groupId);
+        FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
     chatsRef.once().then((chatSnapshot) {
       Map<dynamic, dynamic> chatsData =
           chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
@@ -101,36 +102,13 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         actions: [
           IconButton(
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("${widget.groupId}"),
-                    content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("${desc}"),
-                        SizedBox(height: 8),
-                        Text("Members:"),
-                        SizedBox(height: 4),
-                        for (String member in members) Text(member),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {},
-                        child: Text("Invite"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("Close"),
-                      ),
-                    ],
-                  );
-                },
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ChatInfoPage(
+                    members: members,
+                    groupId: widget.groupId,
+                  ),
+                ),
               );
             },
             icon: const Icon(Icons.info),
