@@ -20,12 +20,9 @@ class GroupMessagesPage extends StatefulWidget {
 
 class _GroupMessagesPageState extends State<GroupMessagesPage> {
   TextEditingController messageController = TextEditingController();
-  late DatabaseReference chatsRef;
-  late DatabaseReference membersRef;
   late DatabaseReference messagesRef;
   late List<Message> messages = [];
-  late String desc;
-  late List<String> members = [];
+
   Stream<List<Message>>? messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
@@ -42,20 +39,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     _configureMessaging();
 
     messageFocusNode.requestFocus();
-    chatsRef =
-        FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
-    chatsRef.once().then((chatSnapshot) {
-      Map<dynamic, dynamic> chatsData =
-          chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
-      desc = chatsData['description'];
-    });
-
-    membersRef =
-        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
-    membersRef.onChildAdded.listen((event) {
-      String memberId = event.snapshot.key as String;
-      members.add(memberId);
-    });
 
     // Get a reference to the messages node for the specific group
     messagesRef =
@@ -112,7 +95,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Clean up the listener
     messageCap = 10;
     messagesRef.onChildAdded.drain();
-    membersRef.onChildAdded.drain();
+
     _scrollController.dispose();
     messageFocusNode.dispose();
     super.dispose();
@@ -132,8 +115,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
-                    members: members,
                     groupId: widget.groupId,
+                    username: widget.username,
                   ),
                 ),
               );
