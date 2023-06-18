@@ -10,68 +10,47 @@ class FirebaseMessagingService {
   final _databaseRef = FirebaseDatabase.instance.ref();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
-  FirebaseMessagingService(this._notificationService);
-
-  Future<void> initialize() async {
-    print('Initializing FirebaseMessagingService...');
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-      badge: true,
-      sound: true,
-      alert: true,
-    );
-
-    _onMessage();
-    _onMessageOpenedApp();
-    getDeviceFirebaseToken();
-  }
-
-  getDeviceFirebaseToken() async {
-    print('Retrieving Firebase Messaging token...');
-    try {
-      final token = await FirebaseMessaging.instance.getToken();
-      print('=======================================');
-      print('TOKEN: $token');
-      print('=======================================');
-
-/*       if (_currentUser != null) {
-        // Store the token in the database
-        await _databaseRef.child('users/${_currentUser!.uid}').set({
-          'token': token
-        });
-      } */
-
-    } catch (e) {
-      print('Failed to get Firebase Messaging token: $e');
-    }
-  }
-
-  _onMessage() {
-    FirebaseMessaging.onMessage.listen((message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-
-      if (notification != null && android != null) {
-        _notificationService.showLocalNotification(
-          CustomNotification(
-            id: android.hashCode,
-            title: notification.title!,
-            body: notification.body!,
-            payload: message.data['route'] ?? '',
-          ),
-        );
+  FirebaseMessagingService(this._notificationService) {
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
+      if (message != null) {
+        _handleMessage(message);
       }
+    });
+
+    FirebaseMessaging.onMessage.listen(_handleMessage);
+
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+
+    FirebaseMessaging.instance.getToken().then((String? token) {
+      print('Token: $token');
     });
   }
 
-  _onMessageOpenedApp() {
-    FirebaseMessaging.onMessageOpenedApp.listen(_goToPageAfterMessage);
+  void requestPermission() async {
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    print('User granted permission: ${settings.authorizationStatus}');
   }
 
-  _goToPageAfterMessage(message) {
-    final String route = message.data['route'] ?? '';
-    if (route.isNotEmpty) {
-      Routes.navigatorKey?.currentState?.pushNamed(route);
-    }
+  void _handleMessage(RemoteMessage message) {
+    print('Got a message with data: ${message.data}');
+
+    // Handle your message. You could, for example, show a notification:
+    _notificationService.showLocalNotification(
+      CustomNotification(
+        id: message.data['id'],
+        title: message.notification?.title ?? '',
+        body: message.notification?.body ?? '',
+        payload: message.data['route'] ?? '',
+      ),
+    );
   }
 }

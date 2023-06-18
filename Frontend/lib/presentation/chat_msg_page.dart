@@ -42,7 +42,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
     messageFocusNode.requestFocus();
     chatsRef =
-        FirebaseDatabase.instance.ref().child('chats').child(widget.groupId);
+        FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
     chatsRef.once().then((chatSnapshot) {
       Map<dynamic, dynamic> chatsData =
           chatSnapshot.snapshot.value as Map<dynamic, dynamic>;

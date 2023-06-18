@@ -57,13 +57,12 @@ class MyApp extends StatelessWidget {
   
   void initState(BuildContext context) {
     
-    initilizeFirebaseMessaging(context);
+    FirebaseMessagingService messagingService = FirebaseMessagingService(context.read<NotificationService>());
+    messagingService.requestPermission();
     checkNotifications(context);
   }
 
-  initilizeFirebaseMessaging(BuildContext context) async {
-    await Provider.of<FirebaseMessagingService>(context, listen: false).initialize();
-  }
+ 
   checkNotifications(BuildContext context) async {
     await Provider.of<NotificationService>(context, listen: false).checkForNotifications();
   }
