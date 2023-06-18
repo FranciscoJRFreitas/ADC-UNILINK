@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
@@ -224,27 +225,22 @@ class _MainScreenState extends State<MainScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedIndex = 3;
-                });
-                Navigator.pop(context); // replace with your screen
-              },
-              child: DrawerHeader(
-                decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 8, 52, 88) //roleColor,
+            DrawerHeader(
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 8, 52, 88) //roleColor,
+                  ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Row(children: [
+                    profilePicture(context),
+                    SizedBox(
+                      width: 10,
                     ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Row(children: [
-                      profilePicture(context),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Column(children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                      child: Column(children: [
                         SizedBox(
                           width: 5,
                         ),
@@ -280,18 +276,12 @@ class _MainScreenState extends State<MainScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ]),
-                      Icon(
-                        _isExpanded
-                            ? Icons.keyboard_arrow_down_outlined
-                            : Icons.keyboard_arrow_up_outlined,
-                        color: Colors.white,
-                      ),
-                    ]),
-                    SizedBox(
-                      height: 5,
                     ),
-                  ],
-                ),
+                  ]),
+                  SizedBox(
+                    height: 5,
+                  ),
+                ],
               ),
             ),
             widget.user.role == 'STUDENT' || widget.user.role == 'SU'
@@ -302,6 +292,16 @@ class _MainScreenState extends State<MainScreen> {
                     title: Text('Student',
                         style: Theme.of(context).textTheme.bodyLarge),
                     children: [
+                        ListTile(
+                          leading: Icon(Icons.person),
+                          title: Text('Profile'),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 3;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
                         ListTile(
                           leading: Icon(Icons.schedule),
                           title: Text('Schedule'),
@@ -542,10 +542,8 @@ class _MainScreenState extends State<MainScreen> {
           FirebaseAuth.FirebaseAuth.instance.currentUser;
 
       if (_currentUser != null) {
-        DatabaseReference userRef = FirebaseDatabase.instance
-            .ref()
-            .child('chat')
-            .child(username);
+        DatabaseReference userRef =
+            FirebaseDatabase.instance.ref().child('chat').child(username);
         DatabaseReference userGroupsRef = userRef.child('Groups');
 
         // Retrieve user's group IDs from the database
@@ -558,6 +556,7 @@ class _MainScreenState extends State<MainScreen> {
           Map<dynamic, dynamic> userGroups =
               userGroupsSnapshot.value as Map<dynamic, dynamic>;
           for (String groupId in userGroups.keys) {
+            if(!kIsWeb)//PROVISIONAL
             await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
           }
         }
