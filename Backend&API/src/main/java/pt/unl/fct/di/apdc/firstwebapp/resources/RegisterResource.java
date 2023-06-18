@@ -160,6 +160,9 @@ public class RegisterResource {
                     "    border-radius: 5px;" +
                     "    text-align: center;" +
                     "}" +
+                    ".email-container a {" +
+                    "    color: #ffffff;" +
+                    "}" +
                     ".email-header {" +
                     "    font-size: 1.5em;" +
                     "    font-weight: bold;" +
