@@ -1,9 +1,14 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
+import '../domain/Notification.dart';
 import '../presentation/screen.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
@@ -13,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import '../domain/User.dart';
 import 'package:flutter/foundation.dart';
+import '../application/firebase_messaging_service.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -239,90 +245,128 @@ Future<int> login(
 
   http.Client client = http.Client();
   http.Response response;
-  try {
-    response = await client.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-      }),
-    );
-  } on http.ClientException {
-    showErrorSnackbar("Connection failed. Please try again later.", true, true);
+  debugPrint(username + " " + password);
+  if (username == '' && password == '') {
+    showErrorSnackbar("Escreve alguma merda.", true, true);
     return -1;
-  }
-
-  if (response.statusCode == 200) {
-    // Handle successful login
-    String authTokenHeader = response.headers['authorization'] ?? '';
-    List<String> token =
-        authTokenHeader.substring("Bearer ".length).trim().split("|");
-
-    // Compute the processing on a separate isolate
-    Map<String, dynamic> responseBody =
-        await compute(parseResponse, response.body);
-
-    User user = User(
-      displayName: responseBody['displayName'],
-      username: responseBody['username'],
-      email: responseBody['email'],
-      role: responseBody['role'],
-      educationLevel: responseBody['educationLevel'],
-      birthDate: responseBody['birthDate'],
-      profileVisibility: responseBody['profileVisibility'],
-      state: responseBody['state'],
-      landlinePhone: responseBody['landlinePhone'],
-      mobilePhone: responseBody['mobilePhone'],
-      occupation: responseBody['occupation'],
-      workplace: responseBody['workplace'],
-      address: responseBody['address'],
-      additionalAddress: responseBody['additionalAddress'],
-      locality: responseBody['locality'],
-      postalCode: responseBody['postalCode'],
-      nif: responseBody['nif'],
-      photoUrl: responseBody['photo'],
-    );
+  } else {
     try {
-      FirebaseAuth.UserCredential userCredential =
-          await FirebaseAuth.FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: user.email,
-        password: password,
+      response = await client.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+        }),
       );
+    } on http.ClientException {
+      showErrorSnackbar(
+          "Connection failed. Please try again later.", true, true);
+      return -1;
+    }
 
-      // User authenticated successfully
-      FirebaseAuth.User? fbuser = userCredential.user;
-      print('User authenticated: ${fbuser?.uid}');
+    if (response.statusCode == 200) {
+      // Handle successful login
+      String authTokenHeader = response.headers['authorization'] ?? '';
+      List<String> token =
+          authTokenHeader.substring("Bearer ".length).trim().split("|");
 
-      // Continue with your desired logic
+      // Compute the processing on a separate isolate
+      Map<String, dynamic> responseBody =
+          await compute(parseResponse, response.body);
+
+      User user = User(
+        displayName: responseBody['displayName'],
+        username: responseBody['username'],
+        email: responseBody['email'],
+        role: responseBody['role'],
+        educationLevel: responseBody['educationLevel'],
+        birthDate: responseBody['birthDate'],
+        profileVisibility: responseBody['profileVisibility'],
+        state: responseBody['state'],
+        landlinePhone: responseBody['landlinePhone'],
+        mobilePhone: responseBody['mobilePhone'],
+        occupation: responseBody['occupation'],
+        workplace: responseBody['workplace'],
+        address: responseBody['address'],
+        additionalAddress: responseBody['additionalAddress'],
+        locality: responseBody['locality'],
+        postalCode: responseBody['postalCode'],
+        nif: responseBody['nif'],
+        photoUrl: responseBody['photo'],
+      );
+      try {
+        FirebaseAuth.UserCredential userCredential =
+            await FirebaseAuth.FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: user.email,
+          password: password,
+        );
+
+      final FirebaseAuth.User? _currentUser = userCredential.user;
+
+      if (_currentUser != null) {
+        DatabaseReference userRef = FirebaseDatabase.instance
+            .ref()
+            .child('chat')
+            .child(username);
+        DatabaseReference userGroupsRef = userRef.child('Groups');
+
+        /* // Store the token in the database
+        await userRef
+            .child('token')
+            .set(await FirebaseMessaging.instance.getToken()); */
+
+        // Retrieve user's group IDs from the database
+        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+        // Retrieve the DataSnapshot from the Event
+        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+        // Subscribe to all the groups
+        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+          Map<dynamic, dynamic> userGroups =
+              userGroupsSnapshot.value as Map<dynamic, dynamic>;
+          for (String groupId in userGroups.keys) {
+            await FirebaseMessaging.instance.subscribeToTopic(groupId);
+          }
+        }
+      }
     } catch (e) {
       // Failed to authenticate user
       print('Failed to authenticate user: $e');
     }
 
     cacheFactory.set('username', user.username);
-    cacheFactory.set("role", user.role);
+    cacheFactory.set('role', user.role);
     cacheFactory.set('password', password);
     cacheFactory.set('token', token[0]);
     cacheFactory.setUser(user, token[0], password);
     cacheFactory.set('displayName', user.displayName);
     cacheFactory.set('email', user.email);
 
-    cacheFactory.set('checkLogin', 'true');
+      cacheFactory.set('checkLogin', 'true');
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MainScreen(user: user)),
-    );
-    showErrorSnackbar("Login Successful!", false, true);
-  } else {
-    // Handle unexpected error
-    showErrorSnackbar(response.body, true, true);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+      );
+      showErrorSnackbar("Login Successful!", false, true);
+    } else {
+      // Handle unexpected error
+      if (response.statusCode == 500) {
+        showErrorSnackbar(
+            'There was a mistake on our side.Please try later.', true, true);
+      } else if (response.statusCode == 403) {
+        showErrorSnackbar('Wrong Password!', true, true);
+      } else if (response.statusCode == 404) {
+        showErrorSnackbar('Incorrect Info!', true, true);
+      }
+    }
+
+    return response.statusCode;
   }
-
-  return response.statusCode;
 }
 
 Map<String, dynamic> parseResponse(String responseBody) {

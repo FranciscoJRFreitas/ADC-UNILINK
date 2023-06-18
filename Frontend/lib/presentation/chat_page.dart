@@ -9,6 +9,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../data/cache_factory_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+
 
 class ChatPage extends StatefulWidget {
   ChatPage();
@@ -22,6 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController descriptionController = TextEditingController();
   var username;
   Stream<List<Group>>? groupsStream;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
   Stream<List<Group>> listenForGroups() {
     DatabaseReference membersRef =
         FirebaseDatabase.instance.ref().child('members');
-    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('chats');
+    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('groups');
 
     StreamController<List<Group>> streamController = StreamController();
 
@@ -187,6 +191,7 @@ class _ChatPageState extends State<ChatPage> {
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               title: const Text(
                 "Create a group",
                 textAlign: TextAlign.left,
@@ -245,33 +250,38 @@ class _ChatPageState extends State<ChatPage> {
             }*/
 
   noGroupWidget() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () {
-              popUpDialog(context);
-            },
-            child: Icon(
-              Icons.add_circle,
-              color: Colors.grey[700],
-              size: 75,
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  popUpDialog(context);
+                },
+                child: Icon(
+                  Icons.add_circle,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          const Text(
-            "You've not joined any groups, tap on the add icon to create a group or also search from top search button.",
-            textAlign: TextAlign.center,
-          )
-        ],
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You've not joined any groups, tap on the add icon to create a group or also search from top search button.",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
       ),
     );
-  }
+}
 
   void getUsername() async {
     username = await cacheFactory.get('users', 'username');
@@ -303,6 +313,7 @@ class _ChatPageState extends State<ChatPage> {
 
     if (response.statusCode == 200) {
       showErrorSnackbar('Created a group successfully!', false);
+      _firebaseMessaging.subscribeToTopic(groupName);
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }

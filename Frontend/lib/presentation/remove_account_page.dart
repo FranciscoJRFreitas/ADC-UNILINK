@@ -9,11 +9,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '../data/cache_factory.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RemoveAccountPage extends StatefulWidget {
-  final User user;
-
-  RemoveAccountPage({required this.user});
+  RemoveAccountPage();
 
   @override
   _RemoveAccountPageState createState() => _RemoveAccountPageState();
@@ -24,11 +24,38 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   TextEditingController targetUsernameController = TextEditingController();
   bool passwordVisibility = true;
   BuildContext? pageContext;
+  String? _currentRole;
+  String? _currentUsername;
+
+  void initState() {
+    super.initState();
+    getUser();
+  }
+
+  Future<void> getUser() async {
+    _currentRole = await cacheFactory.get('users', 'role');
+    _currentUsername = await cacheFactory.get('users', 'username');
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     this.pageContext = context;
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: SvgPicture.asset(
+            'assets/images/back_arrow.svg',
+            width: 40,
+            height: 30,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -36,7 +63,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
             SizedBox(
               height: 20,
             ),
-            if (widget.user.role != 'STUDENT') ...[
+            if (_currentRole != 'STUDENT') ...[
               MyTextField(
                 small: true,
                 controller: targetUsernameController,
@@ -149,7 +176,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     Navigator.of(context).pop();
     Map<String, dynamic> message = await removeAccount(
       context,
-      widget.user.username,
+      _currentUsername!,
       passwordController.text,
       targetUsernameController.text,
     );

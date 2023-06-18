@@ -16,6 +16,7 @@ pt\unl\fct\di\apdc\firstwebapp\resources\SearchUsersResource$1.class
 pt\unl\fct\di\apdc\firstwebapp\util\UserRole.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChangePasswordResource.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RegisterResource.class
+pt\unl\fct\di\apdc\firstwebapp\util\InviteToken.class
 pt\unl\fct\di\apdc\firstwebapp\util\VerifyAction.class
 pt\unl\fct\di\apdc\firstwebapp\resources\LoginResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\RolesLoader.class

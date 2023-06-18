@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,6 +16,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
+import '../presentation/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -66,12 +69,12 @@ class _MainScreenState extends State<MainScreen> {
           },
         ),*/
         HomePage(user: _currentUser),
-        ChangePasswordPage(user: _currentUser),
-        RemoveAccountPage(user: _currentUser),
+        ChangePasswordPage(),
+        RemoveAccountPage(),
         ChatPage(),
         ContactsPage(),
         SettingsPage(),
-        Placeholder(), //estudante
+        SchedulePage(), //estudante
         Placeholder(), //professor
         Placeholder(), //diretor
       ];
@@ -292,16 +295,24 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             widget.user.role == 'STUDENT' || widget.user.role == 'SU'
-                ? ListTile(
-                    leading: Icon(Icons.newspaper),
-                    title: Text('Student'),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 9;
-                      });
-                      Navigator.pop(context);
-                    },
-                  )
+                ? ExpansionTile(
+                    leading: Icon(
+                      Icons.person_add_alt_1_outlined,
+                    ),
+                    title: Text('Student',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    children: [
+                        ListTile(
+                          leading: Icon(Icons.schedule),
+                          title: Text('Schedule'),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 9;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ])
                 : Container(),
             widget.user.role == 'PROF' || widget.user.role == 'SU'
                 ? ListTile(
@@ -366,12 +377,12 @@ class _MainScreenState extends State<MainScreen> {
                   )
                 ]),
 
-            ExpansionTile(
+            /* ExpansionTile(
               leading: Icon(Icons.person),
               title:
                   Text('Profile', style: Theme.of(context).textTheme.bodyLarge),
               children: <Widget>[
-                ListTile(
+               ListTile(
                   title: Text('Modify Attributes',
                       style: Theme.of(context).textTheme.bodyLarge),
                   onTap: () {
@@ -402,7 +413,7 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 ),
               ],
-            ),
+            ),*/
             ListTile(
               leading: Icon(Icons.chat),
               title: Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
@@ -527,7 +538,31 @@ class _MainScreenState extends State<MainScreen> {
     );
 
     if (response.statusCode == 200) {
-      // Clear token from cache
+      final FirebaseAuth.User? _currentUser =
+          FirebaseAuth.FirebaseAuth.instance.currentUser;
+
+      if (_currentUser != null) {
+        DatabaseReference userRef = FirebaseDatabase.instance
+            .ref()
+            .child('chat')
+            .child(username);
+        DatabaseReference userGroupsRef = userRef.child('Groups');
+
+        // Retrieve user's group IDs from the database
+        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+        // Unsubscribe from all the groups
+        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+          Map<dynamic, dynamic> userGroups =
+              userGroupsSnapshot.value as Map<dynamic, dynamic>;
+          for (String groupId in userGroups.keys) {
+            await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+          }
+        }
+      }
+
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
 

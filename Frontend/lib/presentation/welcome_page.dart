@@ -17,44 +17,45 @@ class _WelcomePageState extends State<WelcomePage> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             children: [
-              Flexible(
-                child: Column(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.2,
-                        child: Image(
-                          image: AssetImage('assets/images/NOVA_Logo.png'),
-                        ),
+              Column(
+                children: [
+                  Center(
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: Image(
+                        image: AssetImage('assets/images/NOVA_Logo.png'),
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "Bem-vindo à nova plataforma UniLink!",
-                      style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Bem-vindo à nova plataforma UniLink!",
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: Text(
+                      "A tornar as faculdades mais acessiveis...",
+                      style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      child: Text(
-                        "A tornar as faculdades mais acessiveis...",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 300,
               ),
               Container(
-                height: 60,
+                height: 50,
                 decoration: BoxDecoration(
                   color: Colors.grey[850],
                   borderRadius: BorderRadius.circular(18),
@@ -71,7 +72,8 @@ class _WelcomePageState extends State<WelcomePage> {
                               CupertinoPageRoute(
                                   builder: (context) => RegisterPage()));
                         },
-                        textColor: Colors.black87, height: 60,
+                        textColor: Colors.black87,
+                        height: 60,
                       ),
                     ),
                     Expanded(
@@ -85,12 +87,13 @@ class _WelcomePageState extends State<WelcomePage> {
                                 builder: (context) => LoginPage(),
                               ));
                         },
-                        textColor: Colors.white, height: 60,
+                        textColor: Colors.white,
+                        height: 60,
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

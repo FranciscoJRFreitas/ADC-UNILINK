@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -30,10 +31,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late int messageCap = 10; //still experiment
   late bool isLoadning = false;
   FocusNode messageFocusNode = FocusNode();
+  late final FirebaseMessaging _messaging;
 
   @override
   void initState() {
     super.initState();
+
+    _messaging = FirebaseMessaging.instance;
+
+    _configureMessaging();
 
     messageFocusNode.requestFocus();
     chatsRef =
@@ -67,6 +73,27 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messageStream = streamController.stream;
       });
       _scrollToBottom();
+    });
+  }
+
+  void _configureMessaging() async {
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        // Handle your notification, you can show a dialog, a snackbar, etc.
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      // Handle when the app is opened from a notification
     });
   }
 
