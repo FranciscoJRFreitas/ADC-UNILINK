@@ -7,6 +7,8 @@ class FeedItem {
   final int likesCount;
   final int retweetsCount;
   List<String>? tags;
+  final String? title;
+  final String? date;
 
   FeedItem(
       {this.pageUrl,
@@ -16,7 +18,9 @@ class FeedItem {
       this.commentsCount = 0,
       this.likesCount = 0,
       this.retweetsCount = 0,
-      this.tags});
+      this.tags,
+      this.title,
+      this.date});
 }
 
 class UserNews {

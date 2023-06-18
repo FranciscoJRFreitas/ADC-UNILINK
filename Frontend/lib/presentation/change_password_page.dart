@@ -7,11 +7,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 //import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 import '../constants.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChangePasswordPage extends StatefulWidget {
-  final User user;
-
-  ChangePasswordPage({required this.user});
+  ChangePasswordPage();
 
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
@@ -25,9 +24,35 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool newPwdVisibility = true;
   bool confirmNewPwdVisibility = true;
 
+  String? _currentUsername;
+
+  void initState() {
+    super.initState();
+    getUser();
+  }
+
+  Future<void> getUser() async {
+    _currentUsername = await cacheFactory.get('users', 'username');
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: SvgPicture.asset(
+            'assets/images/back_arrow.svg',
+            width: 40,
+            height: 30,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -68,7 +93,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               onTap: () async {
                 await changePassword(
                   context,
-                  widget.user.username,
+                  _currentUsername!,
                   currentPwdController.text,
                   newPwdController.text,
                   confirmNewPwdController.text,
@@ -84,6 +109,19 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
+  void _showErrorSnackbar(String message, bool Error, bool show) {
+    if (!show) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
+  }
+
   Future<void> changePassword(
     BuildContext context,
     String username,
@@ -91,42 +129,67 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String newPassword,
     String confirmPassword,
   ) async {
-    final url = kBaseUrl + "rest/changePwd/";
-
-    final tokenID = await cacheFactory.get('users', 'token');
-    final storedUsername = await cacheFactory.get('users', 'username');
-
-    Token token = new Token(tokenID: tokenID, username: storedUsername);
-
-    final response = await http.patch(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${json.encode(token.toJson())}'
-      },
-      body: jsonEncode({
-        'username': username,
-        'currentPwd': currentPassword,
-        'newPwd': newPassword,
-        'confirmPwd': confirmPassword,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      //Navigator.pop(context);
+    if (currentPassword == '' && newPassword == '' && confirmPassword == '') {
+      //_showErrorSnackbar("Escreve alguma merda.", true, true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Password changed successfully."),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.body),
+          content: Text("Escreve alguma merda."),
           backgroundColor: Colors.red,
         ),
       );
+    } else {
+      final url = kBaseUrl + "rest/changePwd/";
+
+      final tokenID = await cacheFactory.get('users', 'token');
+      final storedUsername = await cacheFactory.get('users', 'username');
+
+      Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${json.encode(token.toJson())}'
+        },
+        body: jsonEncode({
+          'username': username,
+          'currentPwd': currentPassword,
+          'newPwd': newPassword,
+          'confirmPwd': confirmPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        //Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Password changed successfully."),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("User not found"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Incorrect password"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text("There was an error on our side please try again later"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

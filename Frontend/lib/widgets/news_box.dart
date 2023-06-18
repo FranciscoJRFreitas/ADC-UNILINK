@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CustomCard extends StatelessWidget {
   final String? imageUrl;
   final List<String>? tags;
   final String? content;
+  final String? title;
+  final String? date;
 
-  CustomCard({
-    required this.imageUrl,
-    required this.tags,
-    required this.content,
-  });
+  CustomCard(
+      {required this.imageUrl,
+      required this.tags,
+      required this.content,
+      required this.title,
+      required this.date});
 /*
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,7 @@ class CustomCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(15), // rounded corners
       ),
       elevation: 5,
-      color: Color.fromARGB(255, 8, 52, 88),
+      color: Theme.of(context).primaryColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -63,10 +67,25 @@ class CustomCard extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.all(8.0),
-            color: Color.fromARGB(255, 8, 52, 88), // light grey color for tags
+            color: Theme.of(context).primaryColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  title ?? 'N/A',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(fontSize: 20),
+                ),
+
+                if (date != null)
+                  Text(
+                    date!.trimLeft(),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+
+                SizedBox(height: 10.0),
                 Wrap(
                   spacing: 6.0, // gap between tags
                   runSpacing: 6.0, // gap between lines

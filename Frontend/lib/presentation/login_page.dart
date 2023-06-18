@@ -245,58 +245,64 @@ Future<int> login(
 
   http.Client client = http.Client();
   http.Response response;
-  try {
-    response = await client.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-      }),
-    );
-  } on http.ClientException {
-    showErrorSnackbar("Connection failed. Please try again later.", true, true);
+  debugPrint(username + " " + password);
+  if (username == '' && password == '') {
+    showErrorSnackbar("Escreve alguma merda.", true, true);
     return -1;
-  }
-
-  if (response.statusCode == 200) {
-    // Handle successful login
-    String authTokenHeader = response.headers['authorization'] ?? '';
-    List<String> token =
-        authTokenHeader.substring("Bearer ".length).trim().split("|");
-
-    // Compute the processing on a separate isolate
-    Map<String, dynamic> responseBody =
-        await compute(parseResponse, response.body);
-
-    User user = User(
-      displayName: responseBody['displayName'],
-      username: responseBody['username'],
-      email: responseBody['email'],
-      role: responseBody['role'],
-      educationLevel: responseBody['educationLevel'],
-      birthDate: responseBody['birthDate'],
-      profileVisibility: responseBody['profileVisibility'],
-      state: responseBody['state'],
-      landlinePhone: responseBody['landlinePhone'],
-      mobilePhone: responseBody['mobilePhone'],
-      occupation: responseBody['occupation'],
-      workplace: responseBody['workplace'],
-      address: responseBody['address'],
-      additionalAddress: responseBody['additionalAddress'],
-      locality: responseBody['locality'],
-      postalCode: responseBody['postalCode'],
-      nif: responseBody['nif'],
-      photoUrl: responseBody['photo'],
-    );
+  } else {
     try {
-      FirebaseAuth.UserCredential userCredential =
-          await FirebaseAuth.FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: user.email,
-        password: password,
+      response = await client.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+        }),
       );
+    } on http.ClientException {
+      showErrorSnackbar(
+          "Connection failed. Please try again later.", true, true);
+      return -1;
+    }
+
+    if (response.statusCode == 200) {
+      // Handle successful login
+      String authTokenHeader = response.headers['authorization'] ?? '';
+      List<String> token =
+          authTokenHeader.substring("Bearer ".length).trim().split("|");
+
+      // Compute the processing on a separate isolate
+      Map<String, dynamic> responseBody =
+          await compute(parseResponse, response.body);
+
+      User user = User(
+        displayName: responseBody['displayName'],
+        username: responseBody['username'],
+        email: responseBody['email'],
+        role: responseBody['role'],
+        educationLevel: responseBody['educationLevel'],
+        birthDate: responseBody['birthDate'],
+        profileVisibility: responseBody['profileVisibility'],
+        state: responseBody['state'],
+        landlinePhone: responseBody['landlinePhone'],
+        mobilePhone: responseBody['mobilePhone'],
+        occupation: responseBody['occupation'],
+        workplace: responseBody['workplace'],
+        address: responseBody['address'],
+        additionalAddress: responseBody['additionalAddress'],
+        locality: responseBody['locality'],
+        postalCode: responseBody['postalCode'],
+        nif: responseBody['nif'],
+        photoUrl: responseBody['photo'],
+      );
+      try {
+        FirebaseAuth.UserCredential userCredential =
+            await FirebaseAuth.FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: user.email,
+          password: password,
+        );
 
       final FirebaseAuth.User? _currentUser = userCredential.user;
 
@@ -340,19 +346,27 @@ Future<int> login(
     cacheFactory.set('displayName', user.displayName);
     cacheFactory.set('email', user.email);
 
-    cacheFactory.set('checkLogin', 'true');
+      cacheFactory.set('checkLogin', 'true');
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MainScreen(user: user)),
-    );
-    showErrorSnackbar("Login Successful!", false, true);
-  } else {
-    // Handle unexpected error
-    showErrorSnackbar(response.body, true, true);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+      );
+      showErrorSnackbar("Login Successful!", false, true);
+    } else {
+      // Handle unexpected error
+      if (response.statusCode == 500) {
+        showErrorSnackbar(
+            'There was a mistake on our side.Please try later.', true, true);
+      } else if (response.statusCode == 403) {
+        showErrorSnackbar('Wrong Password!', true, true);
+      } else if (response.statusCode == 404) {
+        showErrorSnackbar('Incorrect Info!', true, true);
+      }
+    }
+
+    return response.statusCode;
   }
-
-  return response.statusCode;
 }
 
 Map<String, dynamic> parseResponse(String responseBody) {

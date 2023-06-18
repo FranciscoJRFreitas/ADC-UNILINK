@@ -56,7 +56,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           constraints: const BoxConstraints(maxWidth: 400),
           child: ListView.separated(
             controller: _scrollController,
-            itemCount: _feedItems.length + (_hasMore ? 1 : 0),
+            itemCount: (_feedItems.length - 1) + (_hasMore ? 1 : 0),
             separatorBuilder: (BuildContext context, int index) {
               return const Divider();
             },
@@ -77,6 +77,8 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                     imageUrl: item.imageUrl,
                     tags: item.tags,
                     content: item.content,
+                    title: item.title,
+                    date: item.date,
                   ),
                 ),
               );
@@ -156,28 +158,7 @@ class _ActionsRow extends StatelessWidget {
   }
 }
 
-final List<UserNews> _users = [
-  UserNews(
-    "John Doe",
-    "john_doe",
-    "https://picsum.photos/id/1062/80/80",
-  ),
-  UserNews(
-    "Jane Doe",
-    "jane_doe",
-    "https://picsum.photos/id/1066/80/80",
-  ),
-  UserNews(
-    "Jack Doe",
-    "jack_doe",
-    "https://picsum.photos/id/1072/80/80",
-  ),
-  UserNews(
-    "Jill Doe",
-    "jill_doe",
-    "https://picsum.photos/id/133/80/80",
-  )
-];
+
 
 /*[
   FeedItem(

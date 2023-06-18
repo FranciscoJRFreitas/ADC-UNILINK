@@ -1,16 +1,5 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,6 +8,17 @@ import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.logging.Logger;
 
 @Path("/changePwd")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -74,22 +74,12 @@ public class ChangePasswordResource {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
             }
-            AuthToken newToken = new AuthToken(data.username);
-            Entity user_token = Entity.newBuilder(tokenKey)
-                    .set("user_tokenID", newToken.tokenID)
-                    .set("user_token_creation_date", newToken.creationDate)
-                    .set("user_token_expiration_date", newToken.expirationDate)
-                    .build();
-
-            Map<String, Object> tokenData = new HashMap<>();
-            tokenData.put("tokenID", newToken.tokenID);
-            tokenData.put("username", newToken.username);
 
             Entity updatedUser = Entity.newBuilder(user)
                     .set("user_pwd", DigestUtils.sha512Hex(data.newPwd))
                     .build();
 
-            txn.put(updatedUser, user_token);
+            txn.put(updatedUser);
             try {
                 FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                 UserRecord userRecord = firebaseAuth.getUserByEmail(user.getString("user_email"));
@@ -103,7 +93,7 @@ public class ChangePasswordResource {
                 System.err.println("Error updating password: " + e.getMessage());
             }
             txn.commit();
-            return Response.ok("{}").header("Authorization", "Bearer " + g.toJson(tokenData)).build();
+            return Response.ok("{}").build();
 
         } finally {
             if (txn.isActive()) txn.rollback();

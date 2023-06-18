@@ -27,7 +27,10 @@ class MyPasswordField extends StatelessWidget {
         onSubmitted: onSubmitted,
         focusNode: focusNode,
         controller: controller,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: Theme.of(context).secondaryHeaderColor),
         obscureText: isPasswordVisible,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,

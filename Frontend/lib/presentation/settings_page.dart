@@ -4,6 +4,8 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../widgets/ToggleButton.dart';
+import '../presentation/change_password_page.dart';
+import '../presentation/remove_account_page.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -28,36 +30,52 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final options = [
       Option(
-        icon: Icon(_currentTheme == "Dark" ? Icons.nights_stay : Icons.wb_sunny,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
-        title: 'Theme',
-        subtitle: 'Change between dark and light themes.',
-        toggleButton: true,
-      ),
+          icon: Icon(
+              _currentTheme == "Dark" ? Icons.nights_stay : Icons.wb_sunny,
+              color: Theme.of(context).secondaryHeaderColor,
+              size: 40.0),
+          title: 'Theme',
+          subtitle: 'Change between dark and light themes.',
+          toggleButton: true,
+          onTap: () {
+            setState(() {});
+          }),
       Option(
-        icon: Icon(Icons.waving_hand,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
-        title: 'Starting Page',
-        subtitle: 'Select your preferable starting page.',
-      ),
+          icon: Icon(Icons.waving_hand,
+              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+          title: 'Starting Page',
+          subtitle: 'Select your preferable starting page.',
+          onTap: () {}),
       Option(
-        icon: Icon(Icons.password,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
-        title: 'Change Password',
-        subtitle: 'Change your password for a new one.',
-      ),
+          icon: Icon(Icons.password,
+              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+          title: 'Change Password',
+          subtitle: 'Change your password for a new one.',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChangePasswordPage(),
+              ),
+            );
+          }),
       Option(
-        icon: Icon(Icons.delete_forever,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
-        title: 'Remove Account',
-        subtitle: 'Delete your current account.',
-      ),
+          icon: Icon(Icons.delete_forever,
+              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+          title: 'Remove Account',
+          subtitle: 'Delete your current account.',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RemoveAccountPage()),
+            );
+          }),
       Option(
-        icon: Icon(Icons.privacy_tip,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
-        title: 'About',
-        subtitle: 'Verify our terms and conditions and privacy policy.',
-      ),
+          icon: Icon(Icons.privacy_tip,
+              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+          title: 'About',
+          subtitle: 'Verify our terms and conditions and privacy policy.',
+          onTap: () {}),
     ];
 
     return Scaffold(
@@ -88,16 +106,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     subtitle: Text(
-                      options[index - 1].subtitle,
-                      style: TextStyle(
-                        color: Theme.of(context).cardColor,
-                      ),
+                      options[index - 1].subtitle.toString(),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    onTap: options[index - 1].toggleButton == true
-                        ? null
-                        : () {
-                            setState(() {});
-                          },
+                    onTap: options[index - 1].onTap,
                   ),
                 ),
                 if (options[index - 1].toggleButton == true) ...[
@@ -129,6 +141,7 @@ class Option {
   String title;
   String subtitle;
   bool? toggleButton;
+  VoidCallback onTap;
 
   Option({
     //this.isButton,
@@ -136,6 +149,7 @@ class Option {
     required this.title,
     required this.subtitle,
     this.toggleButton,
+    required this.onTap,
   });
 }
 
