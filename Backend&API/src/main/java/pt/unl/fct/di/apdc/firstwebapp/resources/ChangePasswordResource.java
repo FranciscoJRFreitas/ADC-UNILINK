@@ -74,7 +74,7 @@ public class ChangePasswordResource {
                 txn.rollback();
                 return Response.status(Status.UNAUTHORIZED).entity("Session expired.").build();
             }
-            AuthToken newToken = new AuthToken(data.username);
+            /*AuthToken newToken = new AuthToken(data.username);
             Entity user_token = Entity.newBuilder(tokenKey)
                     .set("user_tokenID", newToken.tokenID)
                     .set("user_token_creation_date", newToken.creationDate)
@@ -84,12 +84,12 @@ public class ChangePasswordResource {
             Map<String, Object> tokenData = new HashMap<>();
             tokenData.put("tokenID", newToken.tokenID);
             tokenData.put("username", newToken.username);
-
+*/
             Entity updatedUser = Entity.newBuilder(user)
                     .set("user_pwd", DigestUtils.sha512Hex(data.newPwd))
                     .build();
 
-            txn.put(updatedUser, user_token);
+            txn.put(updatedUser);
             try {
                 FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                 UserRecord userRecord = firebaseAuth.getUserByEmail(user.getString("user_email"));
@@ -102,8 +102,8 @@ public class ChangePasswordResource {
             } catch (FirebaseAuthException e) {
                 System.err.println("Error updating password: " + e.getMessage());
             }
-            txn.commit();
-            return Response.ok("{}").header("Authorization", "Bearer " + g.toJson(tokenData)).build();
+            txn.commit();//tokenData.header("Authorization", "Bearer " + g.toJson())
+            return Response.ok("{}").build();
 
         } finally {
             if (txn.isActive()) txn.rollback();

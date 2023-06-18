@@ -16,8 +16,6 @@ Future<List<FeedItem>> fetchNews(int page) async {
     List<FeedItem> feedItems = [];
 
     for (var newsItem in newsItems) {
-      var pageElement =
-          newsItem.querySelector('.views-field-title .field-content');
       var titleElement =
           newsItem.querySelector('.views-field-title .field-content a');
       var summaryElement = newsItem
@@ -27,6 +25,9 @@ Future<List<FeedItem>> fetchNews(int page) async {
       var imageElement =
           newsItem.querySelector('.noticia-imagem .field-content a img');
 
+      if (newsItem.querySelector('.views-field-title .field-content') == null) {
+        continue;
+      }
       var feedItem = FeedItem(
         pageUrl:
             'https://www.fct.unl.pt' + (titleElement?.attributes['href'] ?? ''),
@@ -36,8 +37,8 @@ Future<List<FeedItem>> fetchNews(int page) async {
         likesCount: 0, // Replace these with the appropriate values
         commentsCount: 0, // Replace these with the appropriate values
         retweetsCount: 0, // Replace these with the appropriate values
-        //title: titleElement?.text,
-        //date: dateElement?.text,
+        title: titleElement?.text,
+        date: dateElement?.text,
         tags: ['News', 'Clean', 'Getting fancy with it'],
       );
 

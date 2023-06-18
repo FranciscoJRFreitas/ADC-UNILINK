@@ -14,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
+import '../presentation/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -66,12 +67,12 @@ class _MainScreenState extends State<MainScreen> {
           },
         ),*/
         HomePage(user: _currentUser),
-        ChangePasswordPage(user: _currentUser),
-        RemoveAccountPage(user: _currentUser),
+        ChangePasswordPage(),
+        RemoveAccountPage(),
         ChatPage(),
         ContactsPage(),
         SettingsPage(),
-        Placeholder(), //estudante
+        SchedulePage(), //estudante
         Placeholder(), //professor
         Placeholder(), //diretor
       ];
@@ -292,16 +293,24 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             widget.user.role == 'STUDENT' || widget.user.role == 'SU'
-                ? ListTile(
-                    leading: Icon(Icons.newspaper),
-                    title: Text('Student'),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 9;
-                      });
-                      Navigator.pop(context);
-                    },
-                  )
+                ? ExpansionTile(
+                    leading: Icon(
+                      Icons.person_add_alt_1_outlined,
+                    ),
+                    title: Text('Student',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    children: [
+                        ListTile(
+                          leading: Icon(Icons.schedule),
+                          title: Text('Schedule'),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 9;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ])
                 : Container(),
             widget.user.role == 'PROF' || widget.user.role == 'SU'
                 ? ListTile(
@@ -366,12 +375,12 @@ class _MainScreenState extends State<MainScreen> {
                   )
                 ]),
 
-            ExpansionTile(
+            /* ExpansionTile(
               leading: Icon(Icons.person),
               title:
                   Text('Profile', style: Theme.of(context).textTheme.bodyLarge),
               children: <Widget>[
-                ListTile(
+               ListTile(
                   title: Text('Modify Attributes',
                       style: Theme.of(context).textTheme.bodyLarge),
                   onTap: () {
@@ -402,7 +411,7 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 ),
               ],
-            ),
+            ),*/
             ListTile(
               leading: Icon(Icons.chat),
               title: Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
