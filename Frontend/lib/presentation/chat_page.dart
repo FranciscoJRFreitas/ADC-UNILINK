@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:unilink2023/presentation/chat_msg_page.dart';
 import '../domain/Group.dart';
@@ -10,8 +11,6 @@ import 'dart:convert';
 import '../data/cache_factory_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
-
 
 class ChatPage extends StatefulWidget {
   ChatPage();
@@ -38,7 +37,8 @@ class _ChatPageState extends State<ChatPage> {
   Stream<List<Group>> listenForGroups() {
     DatabaseReference membersRef =
         FirebaseDatabase.instance.ref().child('members');
-    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('groups');
+    DatabaseReference chatsRef =
+        FirebaseDatabase.instance.ref().child('groups');
 
     StreamController<List<Group>> streamController = StreamController();
 
@@ -281,7 +281,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
-}
+  }
 
   void getUsername() async {
     username = await cacheFactory.get('users', 'username');
@@ -313,7 +313,7 @@ class _ChatPageState extends State<ChatPage> {
 
     if (response.statusCode == 200) {
       showErrorSnackbar('Created a group successfully!', false);
-      _firebaseMessaging.subscribeToTopic(groupName);
+      if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }

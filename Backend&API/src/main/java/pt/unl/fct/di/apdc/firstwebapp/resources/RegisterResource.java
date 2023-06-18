@@ -107,7 +107,7 @@ public class RegisterResource {
             txn.add(user);
             LOG.info("User registered: " + data.username);
             txn.commit();
-            initConversations(data.username);
+            initConversations(data.username, data.displayName);
 
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             UserRecord.CreateRequest request = new UserRecord.CreateRequest()
@@ -130,11 +130,12 @@ public class RegisterResource {
         }
         return Response.ok("{}").build();
     }
-        private void initConversations (String username){
+        private void initConversations (String username, String displayName){
             LOG.severe("Inserting data");
             DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
             DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
             // Set the data for the new chat
+            newChatsForUserRef.child("DisplayName").setValueAsync(displayName);
             newChatsForUserRef.child("DM").setValueAsync("DM");
             LOG.severe("Inserting data finished");
 
