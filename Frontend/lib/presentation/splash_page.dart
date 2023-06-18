@@ -21,10 +21,9 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     Timer(
-      const Duration(seconds: kIsWeb ? 6 : 0),
+      const Duration(seconds: kIsWeb ? 0 : 0),
       //TODO Changed for testing reasons
       () async {
-
 
         var loginB = await cacheFactory.get('settings', 'checkLogin');
         var introB = await cacheFactory.get('settings', 'checkIntro');

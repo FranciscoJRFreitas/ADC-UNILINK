@@ -1,10 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:unilink2023/presentation/screen.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
-
 import '../data/cache_factory_provider.dart';
+import 'package:android_intent/android_intent.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+void openNotificationSettings() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  final AndroidIntent intent = AndroidIntent(
+    action: 'android.settings.APPLICATION_DETAILS_SETTINGS',
+    data: 'package:${packageInfo.packageName}',
+  );
+  await intent.launch();
+}
 
 class IntroPage extends StatefulWidget {
   @override
@@ -78,6 +88,34 @@ class _IntroPageState extends State<IntroPage> {
               body: "Why are you waiting?",
               title: "Jump in!",
             ),
+            if (!kIsWeb)
+              PageViewModel(
+                title: "Activate Notifications",
+                body:
+                    "To receive updates and important information, please enable floating notifications.",
+                image: Center(
+                  child: Icon(Icons.notifications, size: 100),
+                ),
+                footer: Center(
+                  // Wrap the Container inside a Center widget
+                  child: Container(
+                    width: MediaQuery.of(context).size.width *
+                        0.5, // 50% of screen width
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: openNotificationSettings,
+                      child: Text('Enable Notifications'),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

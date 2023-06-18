@@ -9,6 +9,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../data/cache_factory_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+
 
 class ChatPage extends StatefulWidget {
   ChatPage();
@@ -22,6 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController descriptionController = TextEditingController();
   var username;
   Stream<List<Group>>? groupsStream;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
   Stream<List<Group>> listenForGroups() {
     DatabaseReference membersRef =
         FirebaseDatabase.instance.ref().child('members');
-    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('chats');
+    DatabaseReference chatsRef = FirebaseDatabase.instance.ref().child('groups');
 
     StreamController<List<Group>> streamController = StreamController();
 
@@ -309,6 +313,7 @@ class _ChatPageState extends State<ChatPage> {
 
     if (response.statusCode == 200) {
       showErrorSnackbar('Created a group successfully!', false);
+      _firebaseMessaging.subscribeToTopic(groupName);
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }

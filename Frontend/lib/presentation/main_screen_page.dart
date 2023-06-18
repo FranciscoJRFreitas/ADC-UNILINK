@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -527,7 +529,31 @@ class _MainScreenState extends State<MainScreen> {
     );
 
     if (response.statusCode == 200) {
-      // Clear token from cache
+      final FirebaseAuth.User? _currentUser =
+          FirebaseAuth.FirebaseAuth.instance.currentUser;
+
+      if (_currentUser != null) {
+        DatabaseReference userRef = FirebaseDatabase.instance
+            .ref()
+            .child('chat')
+            .child(username);
+        DatabaseReference userGroupsRef = userRef.child('Groups');
+
+        // Retrieve user's group IDs from the database
+        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+        // Unsubscribe from all the groups
+        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+          Map<dynamic, dynamic> userGroups =
+              userGroupsSnapshot.value as Map<dynamic, dynamic>;
+          for (String groupId in userGroups.keys) {
+            await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+          }
+        }
+      }
+
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
 

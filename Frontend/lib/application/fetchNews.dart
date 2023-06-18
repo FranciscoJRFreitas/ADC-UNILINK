@@ -27,6 +27,8 @@ Future<List<FeedItem>> fetchNews(int page) async {
       var imageElement =
           newsItem.querySelector('.noticia-imagem .field-content a img');
 
+          print(pageElement);
+
       var feedItem = FeedItem(
         pageUrl:
             'https://www.fct.unl.pt' + (titleElement?.attributes['href'] ?? ''),

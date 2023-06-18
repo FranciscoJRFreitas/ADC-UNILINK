@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
-import 'data/android_implementation.dart';
+import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
+import 'domain/Notification.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
 //import 'package:unilink2023/domain/cacheFactory.dart' as cache;
@@ -18,31 +18,61 @@ void main() async {
 
   cacheFactory.initDB();
   cacheFactory.printDb();
-  cacheFactory.set('theme', 'Dark');
+  if (await cacheFactory.get("settings", "theme") == null)
+    cacheFactory.set('theme', 'Dark');
   cacheFactory.printDb();
   dynamic themeSetting = await cacheFactory.get('settings', 'theme');
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeNotifier(themeSetting),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'UniLink',
-        theme: ThemeData(
-          //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-          scaffoldBackgroundColor: kBackgroundColor,
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => ThemeNotifier(themeSetting),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'UniLink',
+            theme: ThemeData(
+              //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+              scaffoldBackgroundColor: kBackgroundColor,
+              primarySwatch: Colors.blue,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+            ),
+          ),
         ),
-        home: MyApp(),
-      ),
+        Provider<NotificationService>(
+          create: (context) => NotificationService(),
+        ),
+        Provider<FirebaseMessagingService>(
+          create: (context) =>
+              FirebaseMessagingService(context.read<NotificationService>()),
+        ),
+      ],
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  
+  
+  void initState(BuildContext context) {
+    
+    initilizeFirebaseMessaging(context);
+    checkNotifications(context);
+  }
+
+  initilizeFirebaseMessaging(BuildContext context) async {
+    await Provider.of<FirebaseMessagingService>(context, listen: false).initialize();
+  }
+  checkNotifications(BuildContext context) async {
+    await Provider.of<NotificationService>(context, listen: false).checkForNotifications();
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  
+
+    initState(context);
+
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,

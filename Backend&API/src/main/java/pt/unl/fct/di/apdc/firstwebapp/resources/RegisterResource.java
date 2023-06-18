@@ -136,7 +136,6 @@ public class RegisterResource {
             DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
             // Set the data for the new chat
             newChatsForUserRef.child("DM").setValueAsync("DM");
-            newChatsForUserRef.child("Groups").setValueAsync("Groups");
             LOG.severe("Inserting data finished");
 
         }

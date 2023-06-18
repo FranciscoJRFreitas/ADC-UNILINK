@@ -21,6 +21,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response.Status;
@@ -51,18 +53,18 @@ public class ChatResources {
 
         Entity originalToken = datastore.get(tokenKey);
 
-        if(originalToken == null) {
+        if (originalToken == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
         }
 
-        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")){
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
 //        DatabaseReference groupForUser = FirebaseDatabase.getInstance().getReference("users");
 //        DatabaseReference userRef = groupForUser.child(group.adminID);
 //        DatabaseReference groupRef = userRef.child("Groups");
 
-        DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("chats");
+        DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat
 
         // Set the data for the new chat
@@ -82,6 +84,14 @@ public class ChatResources {
         newMessageRef.child("message").setValueAsync("Welcome to " + group.DisplayName + "!");
         newMessageRef.child("timestamp").setValueAsync(System.currentTimeMillis());
 
+        DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
+        DatabaseReference newChatsForUserRef = chatsByUser.child(token.username);
+
+        Map<String, Object> groupsUpdates = new HashMap<>();
+        groupsUpdates.put(group.DisplayName, true);
+
+        newChatsForUserRef.child("Groups").updateChildrenAsync(groupsUpdates);
+
         return Response.ok("{}").build();
     }
 
@@ -94,7 +104,7 @@ public class ChatResources {
 
         InviteToken Invtoken = new InviteToken(userId, groupId);
         Transaction txn = datastore.newTransaction();
-        try{
+        try {
             Key tokenKey = datastore.newKeyFactory().setKind("InviteToken").newKey(Invtoken.tokenID);
             Entity token = Entity.newBuilder(tokenKey)
                     .set("user", Invtoken.username)
@@ -107,8 +117,7 @@ public class ChatResources {
             sendInviteEmail(userEmail, userId, groupId, Invtoken.tokenID);
 
             return Response.ok().build();
-        }
-        finally {
+        } finally {
             if (txn.isActive()) txn.rollback();
         }
     }
@@ -116,10 +125,10 @@ public class ChatResources {
     @GET
     @Path("/join")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response joinGroup(@QueryParam("token") String token){
+    public Response joinGroup(@QueryParam("token") String token) {
         Key tokenkey = datastore.newKeyFactory().setKind("InviteToken").newKey(token);
         Entity invtoken = datastore.get(tokenkey);
-        if(invtoken == null){
+        if (invtoken == null) {
             return Response.status(Status.FORBIDDEN).build();
         }
         String group = invtoken.getString("groupId");
@@ -150,6 +159,9 @@ public class ChatResources {
                 "    border: 1px solid #cccccc;" +
                 "    border-radius: 5px;" +
                 "    text-align: center;" +
+                "}" +
+                ".email-container a {" +
+                "    color: #ffffff;" +
                 "}" +
                 ".email-header {" +
                 "    font-size: 1.5em;" +
