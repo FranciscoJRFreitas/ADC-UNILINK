@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
@@ -161,7 +162,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         border: InputBorder.none,
                       ),
                       onFieldSubmitted: (String value) {
-                        sendMessage(value);
+                        if(value != "") sendMessage(value);
                       },
                     ),
                   ),
@@ -248,6 +249,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   ? MessageTile(
                       message: message.text,
                       sender: message.name,
+                      time: formatTimeInMillis(message.timestamp),
                       sentByMe: widget.username == message.name,
                       isSystemMessage: index == 0,
                     )
@@ -261,6 +263,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     );
   }
 
+  String formatTimeInMillis(int timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis);
+    var formatter = DateFormat('HH:mm');
+    return formatter.format(date);
+  }
+
   sendMessage(String content) {
     final DatabaseReference messageRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
@@ -271,7 +279,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     };
     messageRef.push().set(messageData).then((value) {
       messageController.clear();
-      //Request focus on the message text field
       messageFocusNode.requestFocus();
     }).catchError((error) {
       // Handle the error if the message fails to send
