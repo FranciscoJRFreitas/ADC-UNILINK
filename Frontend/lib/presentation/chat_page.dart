@@ -13,7 +13,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class ChatPage extends StatefulWidget {
-  ChatPage();
+  final String username;
+
+  ChatPage({required this.username});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -22,43 +24,42 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  var username;
-  Stream<List<Group>>? groupsStream;
+  late Stream<List<Group>> groupsStream;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
     super.initState();
 
-    getUsername();
     groupsStream = listenForGroups();
   }
 
   Stream<List<Group>> listenForGroups() {
-    DatabaseReference membersRef =
-        FirebaseDatabase.instance.ref().child('members');
-    DatabaseReference chatsRef =
+    DatabaseReference chatRef = FirebaseDatabase.instance
+        .ref()
+        .child('chat')
+        .child(widget.username)
+        .child('Groups');
+    DatabaseReference groupsRef =
         FirebaseDatabase.instance.ref().child('groups');
 
     StreamController<List<Group>> streamController = StreamController();
 
-    membersRef.onValue.listen((event) {
-      DataSnapshot membersSnapshot = event.snapshot;
+    chatRef.onValue.listen((event) {
+      DataSnapshot chatSnapshot = event.snapshot;
       List<Group> groups = [];
-
-      Map<dynamic, dynamic> membersData =
-          membersSnapshot.value as Map<dynamic, dynamic>;
-
-      membersData.forEach((key, value) {
-        if (value != null && value[username] != null) {
-          String id = key;
-          chatsRef.child(id).once().then((chatSnapshot) {
+      Map<dynamic, dynamic> chatsData =
+          chatSnapshot.value as Map<dynamic, dynamic>;
+      chatsData.forEach((key, value) {
+        if (value != null) {
+          String groupid = key;
+          groupsRef.child(groupid).once().then((chatSnapshot) {
             Map<dynamic, dynamic> chatsData =
                 chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
             String displayName = chatsData['DisplayName'];
             String description = chatsData['description'];
             Group group = Group(
-              id: id,
+              id: groupid,
               DisplayName: displayName,
               description: description,
             );
@@ -108,7 +109,7 @@ class _ChatPageState extends State<ChatPage> {
                           MaterialPageRoute(
                             builder: (context) => GroupMessagesPage(
                               groupId: group.id,
-                              username: username,
+                              username: widget.username,
                             ),
                           ),
                         );
@@ -242,13 +243,6 @@ class _ChatPageState extends State<ChatPage> {
         });
   }
 
-  /*} else {
-              return Center(
-                child: CircularProgressIndicator(
-                    color: Theme.of(context).primaryColor),
-              );
-            }*/
-
   noGroupWidget() {
     return Center(
       child: Container(
@@ -281,10 +275,6 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
-  }
-
-  void getUsername() async {
-    username = await cacheFactory.get('users', 'username');
   }
 
   Future<void> createGroup(

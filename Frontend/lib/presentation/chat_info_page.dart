@@ -451,7 +451,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatPage(),
+                    builder: (context) => ChatPage(
+                      username: widget.username,
+                    ),
                   ),
                 );
               },
