@@ -34,7 +34,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+        _scrollController.position.maxScrollExtent - 1200) {
       _fetchMore();
     }
   }

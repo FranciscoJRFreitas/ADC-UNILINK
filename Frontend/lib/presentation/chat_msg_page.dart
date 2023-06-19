@@ -26,7 +26,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   Stream<List<Message>>? messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
-  late bool isLoadning = false;
+  late bool isLoading = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
 
@@ -133,7 +133,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 if (notification is ScrollEndNotification &&
                     _scrollController.position.pixels == 0) {
                   // Load older messages here
-                  isLoadning = true;
+                  isLoading = true;
                   loadOlderMessages();
                 }
                 return false;
@@ -233,11 +233,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       stream: messageStream,
       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
         if (snapshot.hasData) {
-          if (!isLoadning) {
+          if (!isLoading) {
             WidgetsBinding.instance
                 .addPostFrameCallback((_) => _scrollToBottom());
           } else {
-            isLoadning = false;
+            isLoading = false;
           }
           return ListView.builder(
             controller: _scrollController,
@@ -249,6 +249,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                       message: message.text,
                       sender: message.name,
                       sentByMe: widget.username == message.name,
+                      isSystemMessage: index == 0,
                     )
                   : Container();
             },
