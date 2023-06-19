@@ -268,22 +268,23 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   '${members.length} Participants',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                Container(
-                    padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                    child: SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                                onTap: () {
-                                  popUpDialog(context);
-                                },
-                                child: Icon(
-                                  Icons.group_add,
-                                  color: Colors.white,
-                                  size: 20,
-                                )))))
+                if (isAdmin)
+                  Container(
+                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                      child: SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                  onTap: () {
+                                    popUpDialog(context);
+                                  },
+                                  child: Icon(
+                                    Icons.group_add,
+                                    color: Colors.white,
+                                    size: 20,
+                                  )))))
               ]),
               SizedBox(height: 20),
               //...more info items...
