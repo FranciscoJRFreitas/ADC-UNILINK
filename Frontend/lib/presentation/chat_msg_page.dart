@@ -261,25 +261,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     );
   }
 
-  /*Future<void> inviteGroup(
-    BuildContext context,
-    String groupId,
-    String userId,
-    void Function(String, bool) showErrorSnackbar,
-  ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/chat/invite/" +
-        groupId +
-        "/" +
-        userId;
-
-    final response = await http.post(Uri.parse(url), headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${json.encode(token.toJson())}'
-    });
-
-    if (response.statusCode == 200) {}
-  }*/
-
   sendMessage(String content) {
     final DatabaseReference messageRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -5,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import '../constants.dart';
+import 'package:http/http.dart' as http;
+
+import '../data/cache_factory_provider.dart';
+import '../domain/Token.dart';
+import '../widgets/my_text_field.dart';
 
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
@@ -16,11 +22,13 @@ class ChatInfoPage extends StatefulWidget {
 }
 
 class _ChatInfoPageState extends State<ChatInfoPage> {
+  final TextEditingController userNameController = TextEditingController();
   late Future<Uint8List?> groupPic;
   late List<MembersData> members = [];
   late DatabaseReference membersRef;
   late DatabaseReference chatsRef;
   late String desc = "";
+  late bool isAdmin = false;
   @override
   void initState() {
     super.initState();
@@ -28,24 +36,30 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
     membersRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
     membersRef.onChildAdded.listen((event) async {
-      setState(() {
-        String memberId = event.snapshot.key as String;
-        DatabaseReference chatRef =
-            FirebaseDatabase.instance.ref().child('chat').child(memberId);
+      String memberId = event.snapshot.key as String;
 
-        chatRef.once().then((userDataSnapshot) {
-          if (userDataSnapshot.snapshot.value != null) {
-            dynamic userData = userDataSnapshot.snapshot.value;
-            String? dispName = userData['DisplayName'] as String?;
-
-            setState(() {
-              if (dispName != null) {
-                members
-                    .add(MembersData(username: memberId, dispName: dispName));
-              }
-            });
-          }
+      if (memberId == widget.username && event.snapshot.value as bool) {
+        setState(() {
+          isAdmin = true;
         });
+      }
+      DatabaseReference chatRef =
+          FirebaseDatabase.instance.ref().child('chat').child(memberId);
+
+      chatRef.once().then((userDataSnapshot) {
+        if (userDataSnapshot.snapshot.value != null) {
+          dynamic userData = userDataSnapshot.snapshot.value;
+          String? dispName = userData['DisplayName'] as String?;
+
+          setState(() {
+            if (dispName != null) {
+              members.add(MembersData(
+                  username: memberId,
+                  dispName: dispName,
+                  isAdmin: event.snapshot.value as bool));
+            }
+          });
+        }
       });
     });
 
@@ -58,6 +72,18 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         desc = chatsData["description"];
       });
     });
+  }
+
+  void _showErrorSnackbar(String message, bool Error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
   }
 
   void dispose() {
@@ -164,28 +190,29 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   child: groupPicture(context)),
             ),
           ),
-          Positioned(
-              bottom: 1,
-              right: 1,
-              child: Container(
-                height: 27.5,
-                width: 27.5,
-                decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius: BorderRadius.all(Radius.circular(15))),
-                child: InkWell(
-                  onTap: () async {
-                    await getImage(true);
-                    groupPic = downloadGroupPictureData();
-                    setState(() {});
-                  },
-                  child: Icon(
-                    Icons.add_a_photo,
-                    size: 22.765165125,
-                    color: Theme.of(context).secondaryHeaderColor,
+          if (isAdmin)
+            Positioned(
+                bottom: 1,
+                right: 1,
+                child: Container(
+                  height: 27.5,
+                  width: 27.5,
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      borderRadius: BorderRadius.all(Radius.circular(15))),
+                  child: InkWell(
+                    onTap: () async {
+                      await getImage(true);
+                      groupPic = downloadGroupPictureData();
+                      setState(() {});
+                    },
+                    child: Icon(
+                      Icons.add_a_photo,
+                      size: 22.765165125,
+                      color: Theme.of(context).secondaryHeaderColor,
+                    ),
                   ),
-                ),
-              ))
+                ))
         ],
       ),
     );
@@ -249,7 +276,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                         child: MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  popUpDialog(context);
+                                },
                                 child: Icon(
                                   Icons.group_add,
                                   color: Colors.white,
@@ -279,7 +308,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                   child: ListTile(
                                     leading: picture(context, member.username),
                                     title: Text(
-                                      '${member.dispName}${member.username == widget.username ? ' (You)' : ''}',
+                                      '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -310,6 +339,56 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             ],
           ),
         ));
+  }
+
+  popUpDialog(BuildContext context) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: const Text(
+                "Send an Invite",
+                textAlign: TextAlign.left,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  MyTextField(
+                    small: false,
+                    hintText: 'Username',
+                    inputType: TextInputType.text,
+                    controller: userNameController,
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    {
+                      inviteGroup(context, widget.groupId,
+                          userNameController.text, _showErrorSnackbar);
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("INVITE"),
+                )
+              ],
+            );
+          }));
+        });
   }
 
   Future<Uint8List?> downloadData(String username) async {
@@ -382,8 +461,36 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   }
 }
 
+Future<void> inviteGroup(
+  BuildContext context,
+  String groupId,
+  String userId,
+  void Function(String, bool) showErrorSnackbar,
+) async {
+  final url = "https://unilink23.oa.r.appspot.com/rest/chat/invite?groupId=" +
+      groupId +
+      "&userId=" +
+      userId;
+  final tokenID = await cacheFactory.get('users', 'token');
+  final storedUsername = await cacheFactory.get('users', 'username');
+  Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+  final response = await http.post(Uri.parse(url), headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${json.encode(token.toJson())}'
+  });
+
+  if (response.statusCode == 200) {
+    showErrorSnackbar('Invite sent!', false);
+  } else {
+    showErrorSnackbar('Error sending the invite!', true);
+  }
+}
+
 class MembersData {
   final String username;
   final String dispName;
-  MembersData({required this.username, required this.dispName});
+  final bool isAdmin;
+  MembersData(
+      {required this.username, required this.dispName, required this.isAdmin});
 }

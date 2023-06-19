@@ -20,7 +20,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -98,23 +97,40 @@ public class ChatResources {
     @POST
     @Path("/invite")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response inviteToGroup(@QueryParam("groupId") String groupId, @QueryParam("userId") String userId) {
+    public Response inviteToGroup(@QueryParam("groupId") String groupId, @QueryParam("userId") String userId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(userId);
         Entity user = datastore.get(userKey);
 
         InviteToken Invtoken = new InviteToken(userId, groupId);
         Transaction txn = datastore.newTransaction();
         try {
-            Key tokenKey = datastore.newKeyFactory().setKind("InviteToken").newKey(Invtoken.tokenID);
-            Entity token = Entity.newBuilder(tokenKey)
+            Key invtokenKey = datastore.newKeyFactory().setKind("InviteToken").newKey(Invtoken.tokenID);
+            Entity invtoken = Entity.newBuilder(invtokenKey)
                     .set("user", Invtoken.username)
                     .set("groupId", Invtoken.groupId)
                     .build();
-            txn.put(token);
+            txn.put(invtoken);
             txn.commit();
             String userEmail = user.getString("user_email");
 
-            sendInviteEmail(userEmail, userId, groupId, Invtoken.tokenID);
+            sendInviteEmail(userEmail, Invtoken.tokenID);
 
             return Response.ok().build();
         } finally {
@@ -140,7 +156,7 @@ public class ChatResources {
         return Response.ok().build();
     }
 
-    private void sendInviteEmail(String email, String userId, String groupId, String Token) {
+    private void sendInviteEmail(String email, String Token) {
         String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";
         String subject = "You received an invite";
