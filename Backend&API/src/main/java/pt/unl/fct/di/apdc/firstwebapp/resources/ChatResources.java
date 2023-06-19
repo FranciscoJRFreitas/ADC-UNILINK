@@ -157,8 +157,10 @@ public class ChatResources {
             String user = invtoken.getString("user");
 
             DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(group);
-
             membersRef.child(user).setValueAsync(false);
+            DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(user).child("Groups");
+            chatRef.child(group).setValueAsync(true);
+
             txn.delete(tokenkey);
             txn.commit();
             return Response.ok().build();
@@ -190,6 +192,9 @@ public class ChatResources {
 
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
+        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
+        chatRef.child(groupId).removeValueAsync();
+
 
         return Response.ok().build();
     }
