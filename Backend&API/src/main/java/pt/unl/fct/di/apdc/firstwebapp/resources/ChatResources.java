@@ -118,6 +118,10 @@ public class ChatResources {
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(userId);
         Entity user = datastore.get(userKey);
 
+        if(user == null){
+            return Response.status(Status.NOT_FOUND).entity("User not found.").build();
+        }
+
         InviteToken Invtoken = new InviteToken(userId, groupId);
         Transaction txn = datastore.newTransaction();
         try {
@@ -142,19 +146,55 @@ public class ChatResources {
     @Path("/join")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response joinGroup(@QueryParam("token") String token) {
-        Key tokenkey = datastore.newKeyFactory().setKind("InviteToken").newKey(token);
-        Entity invtoken = datastore.get(tokenkey);
-        if (invtoken == null) {
-            return Response.status(Status.FORBIDDEN).build();
+        Transaction txn = datastore.newTransaction();
+        try {
+            Key tokenkey = datastore.newKeyFactory().setKind("InviteToken").newKey(token);
+            Entity invtoken = txn.get(tokenkey);
+            if (invtoken == null) {
+                return Response.status(Status.FORBIDDEN).build();
+            }
+            String group = invtoken.getString("groupId");
+            String user = invtoken.getString("user");
+
+            DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(group);
+
+            membersRef.child(user).setValueAsync(false);
+            txn.delete(tokenkey);
+            txn.commit();
+            return Response.ok().build();
+        } finally {
+            if (txn.isActive()) txn.rollback();
         }
-        String group = invtoken.getString("groupId");
-        String user = invtoken.getString("user");
+    }
 
-        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(group);
+    @POST
+    @Path("/leave")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response laeveGroup(@QueryParam("groupId") String groupId, @QueryParam("userId") String userId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        membersRef.child(user).setValueAsync(false);
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
+        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
+        membersRef.child(userId).removeValueAsync();
+
         return Response.ok().build();
     }
+
+
 
     private void sendInviteEmail(String email, String Token) {
         String from = "fj.freitas@campus.fct.unl.pt";

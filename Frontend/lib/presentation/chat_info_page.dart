@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:unilink2023/presentation/chat_page.dart';
 
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
@@ -268,6 +269,22 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   '${members.length} Participants',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
+                Container(
+                    padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    child: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                                onTap: () {
+                                  leavePopUpDialog(context);
+                                },
+                                child: Icon(
+                                  Icons.group_remove,
+                                  color: Colors.white,
+                                  size: 20,
+                                ))))),
                 if (isAdmin)
                   Container(
                       padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -368,6 +385,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               actions: [
                 ElevatedButton(
                   onPressed: () {
+                    userNameController.clear();
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
@@ -379,6 +397,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     {
                       inviteGroup(context, widget.groupId,
                           userNameController.text, _showErrorSnackbar);
+                      userNameController.clear();
                       Navigator.of(context).pop();
                     }
                   },
@@ -390,6 +409,61 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             );
           }));
         });
+  }
+
+  //leave group
+  leavePopUpDialog(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: const Text(
+            "Leave Group",
+            textAlign: TextAlign.left,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Are you sure you want to leave this group?",
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).primaryColor,
+              ),
+              child: const Text("CANCEL"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Call the function to leave the group here
+                leaveGroup(context, widget.groupId, widget.username,
+                    _showErrorSnackbar);
+
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).primaryColor,
+              ),
+              child: const Text("LEAVE"),
+            )
+          ],
+        );
+      },
+    );
   }
 
   Future<Uint8List?> downloadData(String username) async {
@@ -485,6 +559,31 @@ Future<void> inviteGroup(
     showErrorSnackbar('Invite sent!', false);
   } else {
     showErrorSnackbar('Error sending the invite!', true);
+  }
+}
+
+Future<void> leaveGroup(
+  BuildContext context,
+  String groupId,
+  String userId,
+  void Function(String, bool) showErrorSnackbar,
+) async {
+  final url = "https://unilink23.oa.r.appspot.com/rest/chat/leave?groupId=" +
+      groupId +
+      "&userId=" +
+      userId;
+  final tokenID = await cacheFactory.get('users', 'token');
+  Token token = new Token(tokenID: tokenID, username: userId);
+
+  final response = await http.post(Uri.parse(url), headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${json.encode(token.toJson())}'
+  });
+
+  if (response.statusCode == 200) {
+    showErrorSnackbar('Left group!', false);
+  } else {
+    showErrorSnackbar('Error Leaving group!', true);
   }
 }
 
