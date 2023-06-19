@@ -13,8 +13,8 @@ class NewsFeedPage extends StatefulWidget {
 }
 
 class _NewsFeedPageState extends State<NewsFeedPage> {
-  ScrollController _scrollController = ScrollController();
-  List<FeedItem> _feedItems = [];
+  final ScrollController _scrollController = ScrollController();
+  final List<FeedItem> _feedItems = [];
   int _page = 0;
   bool _hasMore = true;
   bool _isLoading = false;
@@ -23,15 +23,23 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   void initState() {
     super.initState();
     _fetchMore();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        _fetchMore();
-      }
-    });
+    _scrollController.addListener(_scrollListener);
   }
 
-  void _fetchMore() async {
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _fetchMore();
+    }
+  }
+
+  Future<void> _fetchMore() async {
     if (_isLoading || !_hasMore) return;
     setState(() {
       _isLoading = true;
@@ -61,12 +69,10 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
               return const Divider();
             },
             itemBuilder: (BuildContext context, int index) {
-              if (index == _feedItems.length) {
-                if (_isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  return SizedBox.shrink();
-                }
+              if (index >= _feedItems.length) {
+                return _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : SizedBox.shrink();
               }
               final item = _feedItems[index];
               return MouseRegion(
@@ -90,7 +96,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   }
 }
 
-void _launchURL(String url) async {
+Future<void> _launchURL(String url) async {
   if (await canLaunch(url)) {
     await launch(url);
   } else {

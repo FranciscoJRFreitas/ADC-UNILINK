@@ -6,7 +6,7 @@ class FeedItem {
   final int commentsCount;
   final int likesCount;
   final int retweetsCount;
-  List<String>? tags;
+  Set<String?>? tags;
   final String? title;
   final String? date;
 

@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 class CustomCard extends StatelessWidget {
   final String? imageUrl;
-  final List<String>? tags;
+  final Set<String?>? tags;
   final String? content;
   final String? title;
   final String? date;
@@ -90,7 +90,7 @@ class CustomCard extends StatelessWidget {
                   spacing: 6.0, // gap between tags
                   runSpacing: 6.0, // gap between lines
                   children: tags != null && tags!.isNotEmpty
-                      ? tags!.map((tag) => Chip(label: Text(tag))).toList()
+                      ? tags!.map((tag) => Chip(label: Text(tag!))).toList()
                       : <Widget>[],
                 ),
                 SizedBox(

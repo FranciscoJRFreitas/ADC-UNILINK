@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'dart:js';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
-import '../presentation/screen.dart';
-import '../domain/User.dart';
+import 'package:unilink2023/domain/ExtractJSONfile.dart';
 import '../domain/FeedItem.dart';
 
 Future<List<FeedItem>> fetchNews(int page) async {
@@ -16,25 +17,18 @@ Future<List<FeedItem>> fetchNews(int page) async {
     var newsItems = document.getElementsByClassName('views-row');
 
     List<FeedItem> feedItems = [];
-    List<String> defaultTags = [
-      'Informática',
-      'Mecânica',
-      'Industrial',
-      'Biologia',
-      'Bioquímica',
-      'Matemática',
-      'Ambiente',
-      'Civil',
-      'Biomédica',
-      'Eletrotécnica',
-      'Física',
-      'Materiais',
-      'Nanotecnologias',
-      'Mestrado',
-      'Licenciatura',
-      'Doutoramento',
-      'Investigação'
-    ];
+    List<String> defaultTags = (await extractFromFile("tags"));
+    Map<String, String> defaultTagsMapping = Map.fromIterable(defaultTags,
+        key: (tag) => tag.toLowerCase(), value: (tag) => tag);
+    Map<String, List<String>> subtags = await extractSynonyms("subtags");
+
+    Map<String, String> inverseSynonyms = {}; // inverse dictionary for subtags
+    for (var baseWord in subtags.keys) {
+      if (subtags[baseWord] == null) continue;
+      for (var synonym in subtags[baseWord]!) {
+        inverseSynonyms[synonym.toLowerCase()] = baseWord;
+      }
+    }
 
     for (var newsItem in newsItems) {
       var titleElement =
@@ -66,11 +60,27 @@ Future<List<FeedItem>> fetchNews(int page) async {
           });
         }
 
-        List<String> tags = await extractKeywords(result);
+        Set<String?> tags = await extractKeywords(result);
+        tags = tags
+            .map((tag) {
+              String lowerCaseTag = tag!.toLowerCase();
+              if (inverseSynonyms.containsKey(lowerCaseTag)) {
+                return inverseSynonyms[
+                    lowerCaseTag]; // return the base word corresponding to the synonym
+              }
+              return tag; // return the original tag if it's not a synonym
+            })
+            .where((tag) => tag != null)
+            .toSet();
 
-        List<String> filteredTags = tags.where((tag) => defaultTags.contains(tag)).toList();
+        tags = tags
+            .map((tag) => defaultTagsMapping.containsKey(tag!.toLowerCase())
+                ? defaultTagsMapping[tag.toLowerCase()]
+                : null)
+            .where((tag) => tag != null)
+            .toSet(); // include only tags present in defaultTags
 
-        print(filteredTags);
+        print(tags);
 
         var feedItem = FeedItem(
           pageUrl: 'https://www.fct.unl.pt' +
@@ -83,7 +93,7 @@ Future<List<FeedItem>> fetchNews(int page) async {
           retweetsCount: 0, // Replace these with the appropriate values
           title: titleElement?.text,
           date: dateElement?.text,
-          tags: filteredTags,
+          tags: tags,
         );
 
         feedItems.add(feedItem);
@@ -96,15 +106,28 @@ Future<List<FeedItem>> fetchNews(int page) async {
   }
 }
 
-Future<List<String>> extractKeywords(String content) async {
+Future<Map<String, List<String>>> extractSynonyms(String filename) async {
+  String data = await rootBundle.loadString('assets/json/$filename.json');
+  var jsonData = jsonDecode(data);
+
+  Map<String, List<String>> subtags = {};
+  for (var baseWord in jsonData['subtags'].keys) {
+    List<String> wordSynonyms =
+        List<String>.from(jsonData['subtags'][baseWord]);
+    subtags[baseWord] = wordSynonyms.map((s) => s.toLowerCase()).toList();
+  }
+  return subtags;
+}
+
+Future<Set<String>> extractKeywords(String content) async {
   var client = http.Client();
   try {
     var uri = Uri.parse(
         'https://tm-websuiteapps.ipt.pt/yake/api/v2.0/extract_keywords');
     var request = http.MultipartRequest('POST', uri)
       ..fields['content'] = content
-      ..fields['max_ngram_size'] = '3'
-      ..fields['number_of_keywords'] = '20'
+      ..fields['max_ngram_size'] = '1'
+      ..fields['number_of_keywords'] = '10'
       ..fields['preTag'] = '<b style="color:white; background-color: #37517e;">'
       ..fields['posTag'] = '</b>';
 
@@ -114,8 +137,9 @@ Future<List<String>> extractKeywords(String content) async {
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       List<dynamic> keywordData = data['keywords'];
-      List<String> keywords = keywordData.map((keyword) => keyword['ngram'].toString()).toList();
-      return keywords;
+      List<String> keywords =
+          keywordData.map((keyword) => keyword['ngram'].toString()).toList();
+      return keywords.toSet();
     } else {
       throw Exception('Failed to extract keywords...');
     }
@@ -123,5 +147,3 @@ Future<List<String>> extractKeywords(String content) async {
     client.close();
   }
 }
-
-
