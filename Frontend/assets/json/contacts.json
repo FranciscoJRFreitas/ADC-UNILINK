@@ -1,93 +1,473 @@
 {
-    "departments": [
-      {
-        "name": "Departamentos Ciências e Engenharia do Ambiente",
-        "phoneNumber": "(+351) 212 948 397",
-        "email": "dcea.secretariado@fct.unl.pt",
-        "facebook":null,
-        "url":"https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-engenharia-do-ambiente"
-      },
-      {
-        "name": "Departamento de Ciência dos Materiais",
-        "phoneNumber": "(+351) 212 948 564",
-        "email": "dcm.secretariado@fct.unl.pt",
-        "facebook":null,
-        "url":"https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-engenharia-do-ambiente"
-      },
-      {
-        "name": "Departamento de Ciência dos Materiais",
-        "phoneNumber": "(+351) 212 948 322",
-        "email": "dcr.secretariado@fct.unl.pt",
-        "facebook":null,
-        "url":"https://www.fct.unl.pt/faculdade/departamentos/departamento-de-conservacao-e-restauro"
-      }
-    ],
-    "servicos":[
-      {
-        "name": "Divisão de Acompanhamento de Parcerias",
-        "phoneNumber": "+351 212 948 552 / 12202",
-        "email": "div.ap.coordenador@fct.unl.pt",
-        "facebook":null,
-        "url":"https://www.fct.unl.pt/faculdade/servicos/divisao-de-acompanhamento-de-parcerias"
-      }
-    ],
-    "nucleos":[
-      {
-        "name": "Nucleo de Cinema",
-        "phoneNumber": null,
-        "email": "ncinema@ae.fct.unl.pt",
-        "facebook":"https://www.facebook.com/NucleodeCinema.FCTUNL",
-        "instagram":"https://www.instagram.com/cinema.fct",
-        "url":"https://ae.fct.unl.pt/nc/"
-      },
-      {
-        "name": "Nucleo de Teatro",
-        "phoneNumber": null,
-        "email": "ncinema@ae.fct.unl.pt",
-        "facebook":"https://www.facebook.com/NNT.FCTUNL/",
-        "instagram":"https://www.instagram.com/nnt.fct/",
-        "url":"https://www.nntaefct.wixsite.com/novonucleoteatro"
-      },
-      {
-        "name": "Nucleo de Fotografia",
-        "phoneNumber": null,
-        "email": "nufoto@ae.fct.unl.pt",
-        "facebook":"https://www.facebook.com/nufoto.fct",
-        "instagram":"http://www.instagram.com/nufoto.fct",
-        "url":" https://ae.fct.unl.pt/nufoto/"
-      },
-      {
-        "name": "Nucleo de Literatura",
-        "phoneNumber": null,
-        "email": " nlit@ae.fct.unl.pt",
-        "facebook":null,
-        "instagram":"https://www.instagram.com/nulitfct/",
-        "url":" https://ae.fct.unl.pt/nucleo-de-literatura/"
-      },
-      {
-        "name": "Núcleo de Música, Arte e Cultura",
-        "phoneNumber": null,
-        "email": "numac@ae.fct.unl.pt",
-        "facebook":"https://www.facebook.com/NuMAC.FCTUNL",
-        "instagram":"https://www.instagram.com/numac.fct/",
-        "url":"https://ae.fct.unl.pt/numac/"
-      },
-      {
-        "name": "Núcleo PRIDE",
-        "phoneNumber": null,
-        "email": "nupride@ae.fct.unl.pt",
-        "facebook":"https://www.facebook.com/Nupridefct",
-        "instagram":"https://www.instagram.com/nupridefct/",
-        "url":"https://ae.fct.unl.pt/nupride/"
-      },
-      {
-        "name": "Núcleo PATA",
-        "phoneNumber": null,
-        "email": "pata@ae.fct.unl.pt",
-        "facebook":"https://www.facebook.com/ProjetoPATAFCT",
-        "instagram":"https://www.instagram.com/projeto_pata/",
-        "url":"https://ae.fct.unl.pt/pata/"
-      }
-    ]
-  }
-  
+  "departments": [
+    {
+      "name": "Departamento de Ciências e Engenharia do Ambiente",
+      "contactName": "Ciências e Engenharia do Ambiente",
+      "phoneNumber": "(+351) 212 948 397",
+      "email": "dcea.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-engenharia-do-ambiente"
+    },
+    {
+      "name": "Departamento de Ciência dos Materiais",
+      "contactName": "Ciência dos Materiais",
+      "phoneNumber": "(+351) 212 948 564",
+      "email": "dcm.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencia-dos-materiais"
+    },
+    {
+      "name": "Departamento de Conservação e Restauro",
+      "contactName": "Conservação e Restauro",
+      "phoneNumber": "(+351) 212 948 322",
+      "email": "dcr.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-conservacao-e-restauro"
+    },
+    {
+      "name": "Departamento de Ciências Sociais Aplicadas",
+      "contactName": "Ciências Sociais Aplicadas",
+      "phoneNumber": "(+351) 212 948 503",
+      "email": "dcsa.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-sociais-aplicadas"
+    },
+    {
+      "name": "Departamento de Ciências da Terra",
+      "contactName": "Ciências da Terra",
+      "phoneNumber": "(+351) 212 948 573",
+      "email": "dct.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-da-terra"
+    },
+    {
+      "name": "Acesso negado",
+      "contactName": "Ciências e Tecnologia da Biomassa",
+      "phoneNumber": null,
+      "email": null,
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-tecnologia-da-biomassa"
+    },
+    {
+      "name": "Departamento de Ciências da Vida",
+      "contactName": "Ciências da Vida",
+      "phoneNumber": "(+351) 212 948 530",
+      "email": "dcv.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-da-vida"
+    },
+    {
+      "name": "Departamento de Engenharia Civil",
+      "contactName": "Engenharia Civil",
+      "phoneNumber": "(+351) 212 948 580",
+      "email": "dec.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-engenharia-civil"
+    },
+    {
+      "name": "Departamento de Engenharia Eletrotécnica e de Computadores",
+      "contactName": "Engenharia Eletrotécnica e de Computadores",
+      "phoneNumber": "(+351) 212 947 876, (+351) 212 948 545, (+351) 212949631",
+      "email": "deec.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-engenharia-eletrotecnica-e-de-computadores"
+    },
+    {
+      "name": "Departamento de Engenharia Mecânica e Industrial",
+      "contactName": "Engenharia Mecânica e Industrial",
+      "phoneNumber": "(+351) 212 948 567",
+      "email": "demi.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-engenharia-mecanica-e-industrial"
+    },
+    {
+      "name": "Departamento de Física",
+      "contactName": "Física",
+      "phoneNumber": "(+351) 212 948 576",
+      "email": "df.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-fisica"
+    },
+    {
+      "name": "Departamento de Informática",
+      "contactName": "Informática",
+      "phoneNumber": "(+351) 212 948 536",
+      "email": "di.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-informatica"
+    },
+    {
+      "name": "Departamento de Matemática",
+      "contactName": "Matemática",
+      "phoneNumber": "(+351) 212 948 388",
+      "email": "dm.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-matematica"
+    },
+    {
+      "name": "Departamento de Química",
+      "contactName": "Química",
+      "phoneNumber": "(+351) 212 948 575",
+      "email": "dq.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-quimica"
+    }
+  ],
+  "services": [
+    {
+      "name": "Divisão Académica",
+      "contactName": "Divisão Académica",
+      "phoneNumber": null,
+      "email": "div.a.mestrados@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-academica"
+    },
+    {
+      "name": "Secção de Graduação",
+      "contactName": "Secção de Graduação",
+      "phoneNumber": "+351 212 948 300 | Extensão 12002, 12007",
+      "email": "div.a.g.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-academica"
+    },
+    {
+      "name": "Secção de Pós-Graduação",
+      "contactName": "Secção de Pós-Graduação",
+      "phoneNumber": "+351 212 948 300 | Extensão 12008, 12011",
+      "email": "div.a.mestrados@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-academica"
+    },
+    {
+      "name": "Divisão de Acompanhamento de Parcerias",
+      "contactName": "Acompanhamento de Parcerias",
+      "phoneNumber": "+351 212 948 552 / 12202 (extensão)",
+      "email": "div.ap.coordenador@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-acompanhamento-de-parcerias"
+    },
+    {
+      "name": "Divisão de Apoio à Formação Avançada",
+      "contactName": "Apoio à Formação Avançada",
+      "phoneNumber": "+351 212 948 300 / 12901/03/04 (extensão), +351 212 947 885",
+      "email": "div.afa.doutoramentos@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-apoio-formacao-avancada"
+    },
+    {
+      "name": "Divisão de Apoio Geral",
+      "contactName": "Apoio Geral",
+      "phoneNumber": "+351 212 947 845 / 15353 (extensão)",
+      "email": "div.ag.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "http://www.div-ag.fct.unl.pt"
+    },
+    {
+      "name": "Divisão de Apoio Técnico",
+      "contactName": "Apoio Técnico",
+      "phoneNumber": null,
+      "email": "div.at.sg.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-apoio-tecnico"
+    },
+    {
+      "name": "Divisão de Comunicação e Relações Exteriores",
+      "contactName": "Comunicação e Relações Exteriores",
+      "phoneNumber": null,
+      "email": "div.cre.coordenador@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-comunicacao-e-relacoes-exteriores"
+    },
+    {
+      "name": "Divisão de Documentação e Cultura",
+      "contactName": "Documentação e Cultura",
+      "phoneNumber": null,
+      "email": "div.dc.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-documentacao-e-cultura"
+    },
+    {
+      "name": "Secção Administrativa",
+      "contactName": "Secção Administrativa",
+      "phoneNumber": "+351 212 947 829 / 15701 (extensão)",
+      "email": "div.dc.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-documentacao-e-cultura"
+    },
+    {
+      "name": "Secção de Apoio ao Utilizador",
+      "contactName": "Secção de Apoio ao Utilizador",
+      "phoneNumber": "+351 212 947 829 / 15701 (extensão)",
+      "email": "div.dc.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-documentacao-e-cultura"
+    },
+    {
+      "name": "Secção de Biblioteconomia",
+      "contactName": "Secção de Biblioteconomia",
+      "phoneNumber": "+351 212 947 829 / 15701 (extensão)",
+      "email": "div.dc.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-documentacao-e-cultura"
+    },
+    {
+      "name": "Secção de Cultura",
+      "contactName": "Secção de Cultura",
+      "phoneNumber": "+351 212 947 829 / 15701 (extensão)",
+      "email": "div.dc.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-documentacao-e-cultura"
+    },
+    {
+      "name": "Secção de Sistemas de Informação",
+      "contactName": "Secção de Sistemas de Informação",
+      "phoneNumber": "+351 212 947 829 / 15701 (extensão)",
+      "email": "div.dc.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-documentacao-e-cultura"
+    },
+    {
+      "name": "Secção de Apoio ao Estudante e ao Diplomado",
+      "contactName": "Apoio ao Estudante e ao Diplomado",
+      "phoneNumber": "+351 212 948 504",
+      "email": "div.eaed.emprego@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-eventos-e-apoio-ao-estudante-e-ao-diplomado"
+    },
+    {
+      "name": "Secção de Eventos",
+      "contactName": "Eventos",
+      "phoneNumber": "+351 21 2948324/21 2948344 / 12801 (extensão)",
+      "email": "div.eaed.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-eventos-e-apoio-ao-estudante-e-ao-diplomado"
+    },
+    {
+      "name": "Divisão de Infraestruturas Informáticas",
+      "contactName": "Infraestruturas Informáticas",
+      "phoneNumber": "+351 212 948 596 (directo) / 15601 (extensão)",
+      "email": "div.ii.helpdesk@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.div-i.fct.unl.pt/"
+    },
+    {
+      "name": "Divisão de Planeamento e Gestão da Qualidade",
+      "contactName": "Planeamento e Gestão da Qualidade",
+      "phoneNumber": "+351 212 949 665 / 15201 / 15216 (extensão)",
+      "email": "div.pgq.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": null
+    },
+    {
+      "name": "Divisão de Relações Internacionais",
+      "contactName": "Relações Internacionais",
+      "phoneNumber": "+351 21 294 83 00 (Ext. 12301, 12302, 12303, 12304)",
+      "email": "div.ri.internationalstudents@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/internacional"
+    },
+    {
+      "name": "Gabinete de Assessoria Jurídica",
+      "contactName": "Assessoria Jurídica",
+      "phoneNumber": "+351 212 948 300 / 12520 (extensão)",
+      "email": "gab.ad.aj@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/gabinete-de-apoio-direccao"
+    },
+    {
+      "name": "Gabinete de Aconselhamento Vocacional e Psicológico",
+      "contactName": "Aconselhamento Vocacional e Psicológico",
+      "phoneNumber": "+351 212 948 579 / 15501 (extensão)",
+      "email": "gab.aed.psicologia@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/gabinete-de-apoio-direccao"
+    },
+    {
+      "name": "Gabinete de Aconselhamento Vocacional e Psicológico",
+      "contactName": "Aconselhamento Vocacional e Psicológico",
+      "phoneNumber": "212 947 897 - 12542 (extensão)",
+      "email": "gab.ad.iris@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/gabinete-de-apoio-direccao"
+    },
+    {
+      "name": "Laboratório de e-learning",
+      "contactName": "Laboratório de e-learning",
+      "phoneNumber": "+351 212 949 654 /12503 (extensão)",
+      "email": "elearning@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/gabinete-de-apoio-direccao"
+    },
+    {
+      "name": "Unidade de Alumni e Fundraising",
+      "contactName": "Unidade de Alumni e Fundraising",
+      "phoneNumber": "+351 212 948 305 / 12526 (internal number)",
+      "email": "gab.ad.uaf@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/gabinete-de-apoio-direccao"
+    },
+    {
+      "name": "Unidade de Contratos",
+      "contactName": "Unidade de Alumni e Fundraising",
+      "phoneNumber": "+351 212 948 300 / 12540 (extensão)",
+      "email": "gab.ad.c@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/gabinete-de-apoio-direccao"
+    },
+    {
+      "name": "Secção de Expediente Geral",
+      "contactName": "Expediente Geral",
+      "phoneNumber": "+351 212 949 607 (direto) / 12103 (extensão)",
+      "email": null,
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-humanos"
+    },
+    {
+      "name": "Secção de Pessoal",
+      "contactName": "Pessoal",
+      "phoneNumber": "+351 212 948 583 | 212 948 348",
+      "email": "lds@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-humanos"
+    },
+    {
+      "name": "Secção de Vencimentos e Outros Abonos",
+      "contactName": "Vencimentos e Outros Abonos",
+      "phoneNumber": "+351 212 948 583 (direto) / 12108 (extensão)",
+      "email": "lmmb@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-humanos"
+    },
+    {
+      "name": "Secção de Contabilidade",
+      "contactName": "Contabilidade",
+      "phoneNumber": "21 294 83 00 / 15806 (extensão)",
+      "email": "div.rf.c@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-financeiross"
+    },
+    {
+      "name": "Secção de Economato",
+      "contactName": "Economato",
+      "phoneNumber": "21 294 78 10 / 12518 (extensão)",
+      "email": "div.rf.e@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-financeiros"
+    },
+    {
+      "name": "Secção de Inventário",
+      "contactName": "Inventário",
+      "phoneNumber": "21 294 83 00 / 15801 (extensão)",
+      "email": "div.rf.i@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-financeiros"
+    },
+    {
+      "name": "Secção de Projectos",
+      "contactName": "Projectos",
+      "phoneNumber": "21 294 83 00 / 15813 (extensão)",
+      "email": "div.rf.cp@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-financeiros"
+    },
+    {
+      "name": "Tesouraria",
+      "contactName": "Tesouraria",
+      "phoneNumber": "+351 212 949 655 (directo) / 15811 (extensão)",
+      "email": "div.rf.t@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/servicos/divisao-de-recursos-financeiros"
+    }
+  ],
+  "nucleos": [
+    {
+      "name": "Nucleo de Cinema",
+      "contactName": "Cinema",
+      "phoneNumber": null,
+      "email": "ncinema@ae.fct.unl.pt",
+      "facebook": "https://www.facebook.com/NucleodeCinema.FCTUNL",
+      "instagram": "https://www.instagram.com/cinema.fct",
+      "url": "https://ae.fct.unl.pt/nc/"
+    },
+    {
+      "name": "Nucleo de Teatro",
+      "contactName": "Teatro",
+      "phoneNumber": null,
+      "email": "ncinema@ae.fct.unl.pt",
+      "facebook": "https://www.facebook.com/NNT.FCTUNL/",
+      "instagram": "https://www.instagram.com/nnt.fct/",
+      "url": "https://www.nntaefct.wixsite.com/novonucleoteatro"
+    },
+    {
+      "name": "Nucleo de Fotografia",
+      "contactName": "Fotografia",
+      "phoneNumber": null,
+      "email": "nufoto@ae.fct.unl.pt",
+      "facebook": "https://www.facebook.com/nufoto.fct",
+      "instagram": "http://www.instagram.com/nufoto.fct",
+      "url": " https://ae.fct.unl.pt/nufoto/"
+    },
+    {
+      "name": "Nucleo de Literatura",
+      "contactName": "Literatura",
+      "phoneNumber": null,
+      "email": " nlit@ae.fct.unl.pt",
+      "facebook": null,
+      "instagram": "https://www.instagram.com/nulitfct/",
+      "url": " https://ae.fct.unl.pt/nucleo-de-literatura/"
+    },
+    {
+      "name": "Núcleo de Música, Arte e Cultura",
+      "contactName": "Música, Arte e Cultura",
+      "phoneNumber": null,
+      "email": "numac@ae.fct.unl.pt",
+      "facebook": "https://www.facebook.com/NuMAC.FCTUNL",
+      "instagram": "https://www.instagram.com/numac.fct/",
+      "url": "https://ae.fct.unl.pt/numac/"
+    },
+    {
+      "name": "Núcleo PRIDE",
+      "contactName": "PRIDE",
+      "phoneNumber": null,
+      "email": "nupride@ae.fct.unl.pt",
+      "facebook": "https://www.facebook.com/Nupridefct",
+      "instagram": "https://www.instagram.com/nupridefct/",
+      "url": "https://ae.fct.unl.pt/nupride/"
+    },
+    {
+      "name": "Núcleo PATA",
+      "contactName": "PATA",
+      "phoneNumber": null,
+      "email": "pata@ae.fct.unl.pt",
+      "facebook": "https://www.facebook.com/ProjetoPATAFCT",
+      "instagram": "https://www.instagram.com/projeto_pata/",
+      "url": "https://ae.fct.unl.pt/pata/"
+    }
+  ],
+  "orgaos": [
+    {
+      "name": "Conselho de Faculdade",
+      "contactName": "Conselho de Faculdade",
+      "phoneNumber": "(+351) 212 948 587 (directo) 12110 (extensão)",
+      "email": "cf.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/orgaos-da-fct/conselho-de-faculdade"
+    },
+    {
+      "name": "Conselho de Gestão",
+      "contactName": "Conselho de Gestão",
+      "phoneNumber": "(+351) 212 948 300 - 15001 (extensão)",
+      "email": "direcao.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/orgaos-da-fct/conselho-de-gestao"
+    },
+    {
+      "name": "Conselho Pedagógico",
+      "contactName": "Conselho Pedagógico",
+      "phoneNumber": "(+351) 212 948 544 (directo) 12525 (extensão)",
+      "email": "cp.secretariado@fct.unl.pt",
+      "facebook": null,
+      "url": "https://www.fct.unl.pt/faculdade/orgaos-da-fct/conselho-pedagogico"
+    }
+  ]
+}
