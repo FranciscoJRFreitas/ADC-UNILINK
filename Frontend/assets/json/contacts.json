@@ -1,0 +1,93 @@
+{
+    "departments": [
+      {
+        "name": "Departamentos Ciências e Engenharia do Ambiente",
+        "phoneNumber": "(+351) 212 948 397",
+        "email": "dcea.secretariado@fct.unl.pt",
+        "facebook":null,
+        "url":"https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-engenharia-do-ambiente"
+      },
+      {
+        "name": "Departamento de Ciência dos Materiais",
+        "phoneNumber": "(+351) 212 948 564",
+        "email": "dcm.secretariado@fct.unl.pt",
+        "facebook":null,
+        "url":"https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-engenharia-do-ambiente"
+      },
+      {
+        "name": "Departamento de Ciência dos Materiais",
+        "phoneNumber": "(+351) 212 948 322",
+        "email": "dcr.secretariado@fct.unl.pt",
+        "facebook":null,
+        "url":"https://www.fct.unl.pt/faculdade/departamentos/departamento-de-conservacao-e-restauro"
+      }
+    ],
+    "servicos":[
+      {
+        "name": "Divisão de Acompanhamento de Parcerias",
+        "phoneNumber": "+351 212 948 552 / 12202",
+        "email": "div.ap.coordenador@fct.unl.pt",
+        "facebook":null,
+        "url":"https://www.fct.unl.pt/faculdade/servicos/divisao-de-acompanhamento-de-parcerias"
+      }
+    ],
+    "nucleos":[
+      {
+        "name": "Nucleo de Cinema",
+        "phoneNumber": null,
+        "email": "ncinema@ae.fct.unl.pt",
+        "facebook":"https://www.facebook.com/NucleodeCinema.FCTUNL",
+        "instagram":"https://www.instagram.com/cinema.fct",
+        "url":"https://ae.fct.unl.pt/nc/"
+      },
+      {
+        "name": "Nucleo de Teatro",
+        "phoneNumber": null,
+        "email": "ncinema@ae.fct.unl.pt",
+        "facebook":"https://www.facebook.com/NNT.FCTUNL/",
+        "instagram":"https://www.instagram.com/nnt.fct/",
+        "url":"https://www.nntaefct.wixsite.com/novonucleoteatro"
+      },
+      {
+        "name": "Nucleo de Fotografia",
+        "phoneNumber": null,
+        "email": "nufoto@ae.fct.unl.pt",
+        "facebook":"https://www.facebook.com/nufoto.fct",
+        "instagram":"http://www.instagram.com/nufoto.fct",
+        "url":" https://ae.fct.unl.pt/nufoto/"
+      },
+      {
+        "name": "Nucleo de Literatura",
+        "phoneNumber": null,
+        "email": " nlit@ae.fct.unl.pt",
+        "facebook":null,
+        "instagram":"https://www.instagram.com/nulitfct/",
+        "url":" https://ae.fct.unl.pt/nucleo-de-literatura/"
+      },
+      {
+        "name": "Núcleo de Música, Arte e Cultura",
+        "phoneNumber": null,
+        "email": "numac@ae.fct.unl.pt",
+        "facebook":"https://www.facebook.com/NuMAC.FCTUNL",
+        "instagram":"https://www.instagram.com/numac.fct/",
+        "url":"https://ae.fct.unl.pt/numac/"
+      },
+      {
+        "name": "Núcleo PRIDE",
+        "phoneNumber": null,
+        "email": "nupride@ae.fct.unl.pt",
+        "facebook":"https://www.facebook.com/Nupridefct",
+        "instagram":"https://www.instagram.com/nupridefct/",
+        "url":"https://ae.fct.unl.pt/nupride/"
+      },
+      {
+        "name": "Núcleo PATA",
+        "phoneNumber": null,
+        "email": "pata@ae.fct.unl.pt",
+        "facebook":"https://www.facebook.com/ProjetoPATAFCT",
+        "instagram":"https://www.instagram.com/projeto_pata/",
+        "url":"https://ae.fct.unl.pt/pata/"
+      }
+    ]
+  }
+  

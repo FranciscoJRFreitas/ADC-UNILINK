@@ -24,7 +24,10 @@ Future<Map<String, List<Contact>>> fetchContacts() async {
 
       mainContactList.add(Contact(
         name: contactName,
+        email: '',
         url: '',
+        facebook: '',
+        instagram: '',
         phoneNumber: contactPhone,
       ));
     }
@@ -45,6 +48,9 @@ Future<Map<String, List<Contact>>> fetchContacts() async {
       departmentsContactList.add(Contact(
         name: departmentName ?? '',
         url: departmentUrl ?? '',
+        email: '',
+        facebook: '',
+        instagram: '',
         phoneNumber: departmentPhone,
       ));
     }
