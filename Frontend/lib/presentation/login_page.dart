@@ -304,47 +304,46 @@ Future<int> login(
           password: password,
         );
 
-      final FirebaseAuth.User? _currentUser = userCredential.user;
+        final FirebaseAuth.User? _currentUser = userCredential.user;
 
-      if (_currentUser != null) {
-        DatabaseReference userRef = FirebaseDatabase.instance
-            .ref()
-            .child('chat')
-            .child(username);
-        DatabaseReference userGroupsRef = userRef.child('Groups');
+        if (_currentUser != null) {
+          DatabaseReference userRef =
+              FirebaseDatabase.instance.ref().child('chat').child(username);
+          DatabaseReference userGroupsRef = userRef.child('Groups');
 
-        /* // Store the token in the database
+          /* // Store the token in the database
         await userRef
             .child('token')
             .set(await FirebaseMessaging.instance.getToken()); */
 
-        // Retrieve user's group IDs from the database
-        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+          // Retrieve user's group IDs from the database
+          DatabaseEvent userGroupsEvent = await userGroupsRef.once();
 
-        // Retrieve the DataSnapshot from the Event
-        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+          // Retrieve the DataSnapshot from the Event
+          DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
 
-        // Subscribe to all the groups
-        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
-          Map<dynamic, dynamic> userGroups =
-              userGroupsSnapshot.value as Map<dynamic, dynamic>;
-          for (String groupId in userGroups.keys) {
-            await FirebaseMessaging.instance.subscribeToTopic(groupId);
+          // Subscribe to all the groups
+          if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+            Map<dynamic, dynamic> userGroups =
+                userGroupsSnapshot.value as Map<dynamic, dynamic>;
+            for (String groupId in userGroups.keys) {
+              if (!kIsWeb)
+                await FirebaseMessaging.instance.subscribeToTopic(groupId);
+            }
           }
         }
+      } catch (e) {
+        // Failed to authenticate user
+        print('Failed to authenticate user: $e');
       }
-    } catch (e) {
-      // Failed to authenticate user
-      print('Failed to authenticate user: $e');
-    }
 
-    cacheFactory.set('username', user.username);
-    cacheFactory.set('role', user.role);
-    cacheFactory.set('password', password);
-    cacheFactory.set('token', token[0]);
-    cacheFactory.setUser(user, token[0], password);
-    cacheFactory.set('displayName', user.displayName);
-    cacheFactory.set('email', user.email);
+      cacheFactory.set('username', user.username);
+      cacheFactory.set('role', user.role);
+      cacheFactory.set('password', password);
+      cacheFactory.set('token', token[0]);
+      cacheFactory.setUser(user, token[0], password);
+      cacheFactory.set('displayName', user.displayName);
+      cacheFactory.set('email', user.email);
 
       cacheFactory.set('checkLogin', 'true');
 
