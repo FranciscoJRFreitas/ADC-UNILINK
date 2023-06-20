@@ -66,35 +66,48 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   Future<void> _fetchNews() async {
     List<dom.Element> newsItems = await getNewsItems(_page);
     int sizeBeforeFetch = _filteredFeedItems.length;
-    print(sizeBeforeFetch);
+
     for (int i = 0; i < _newsPerPage + 1; i++) {
+
       if (_isLoading || !_hasMore) return;
+
       try {
+        if(mounted)
         setState(() {
+
           _isLoading = true;
         });
         FeedItem? feedItem = await fetchNews(newsItems, i);
+
         if (feedItem == null) continue;
+
+        if(mounted)
         setState(() {
           _feedItems.add(feedItem);
           _filterNews();
         });
       } catch (e) {
         // Handle exception here if needed
+
       } finally {
+        if(mounted)
         setState(() {
           _isLoading = false;
         });
       }
     }
+    if(mounted)
     setState(() {
       _page++;
     });
+
     int sizeAfterFetch = _filteredFeedItems.length;
-    print(sizeAfterFetch);
+
     if(sizeBeforeFetch == sizeAfterFetch && !isFetched())
       _fetchNews();
+    if(mounted)
       setState(() {});
+
   }
 
   @override

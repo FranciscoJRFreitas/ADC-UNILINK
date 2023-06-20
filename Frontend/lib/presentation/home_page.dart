@@ -5,9 +5,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/edit_profile_page.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
 import '../constants.dart';
+import '../domain/PictureNotifier.dart';
 import '../domain/User.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,7 +22,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late User _currentUser;
-  late Future<Uint8List?> profilePic;
 
   DocumentReference picsRef =
   FirebaseFirestore.instance.collection('ProfilePictures').doc();
@@ -29,34 +30,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _currentUser = widget.user;
-    profilePic = downloadData();
-  }
-
-  Future<Uint8List?> downloadData() async {
-    return FirebaseStorage.instance
-        .ref('ProfilePictures/' + _currentUser.username)
-        .getData()
-        .onError((error, stackTrace) => null);
-  }
-
-  Future getImage(bool gallery) async {
-    ImagePicker picker = ImagePicker();
-
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    final fileBytes = await pickedFile!.readAsBytes();
-
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('ProfilePictures/' + _currentUser.username);
-
-    await storageReference.putData(fileBytes);
-    setState(() {});
   }
 
   Widget picture(BuildContext context) {
+    final photoProvider = Provider.of<PictureNotifier>(context);
+    final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
+
     return FutureBuilder<Uint8List?>(
-        future: profilePic,
+        future: userPhoto,
         builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
           if (snapshot.hasData) {
             return GestureDetector(
@@ -140,6 +121,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
 
       body: SingleChildScrollView(
