@@ -4,6 +4,7 @@ import 'package:unilink2023/widgets/news_box.dart';
 import '../domain/FeedItem.dart';
 import '../application/fetchNews.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:html/dom.dart' as dom;
 
 class NewsFeedPage extends StatefulWidget {
   const NewsFeedPage({Key? key}) : super(key: key);
@@ -20,12 +21,14 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   int _page = 0;
   bool _hasMore = true;
   bool _isLoading = false;
-  bool _fetchedAllFromServer = false; // flag to know if all items fetched from server
+  bool _fetchedAllFromServer =
+      false; // flag to know if all items fetched from server
+  int _newsPerPage = 12;
 
   @override
   void initState() {
     super.initState();
-    _fetchMore();
+    _fetchNews();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -37,8 +40,8 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 1200) {
-      _fetchMore();
+        _scrollController.position.maxScrollExtent - 200 && !isFetched()) {
+      _fetchNews();
     }
   }
 
@@ -56,27 +59,42 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
         _activeTags.add(tag);
       }
       _filterNews();
-      if(_filteredFeedItems.isEmpty && !_fetchedAllFromServer) _hasMore = true;
+      if (_filteredFeedItems.isEmpty && !_fetchedAllFromServer) _hasMore = true;
     });
   }
 
-  Future<void> _fetchMore() async {
-    if (_isLoading || !_hasMore) return;
-    setState(() {
-      _isLoading = true;
-    });
-    List<FeedItem> newFeedItems = await fetchNews(_page);
-    setState(() {
-      _isLoading = false;
-      if (newFeedItems.isEmpty) {
-        _fetchedAllFromServer = true;
-        if(_filteredFeedItems.isEmpty) _hasMore = false;
-      } else {
-        _feedItems.addAll(newFeedItems);
-        _filterNews();
-        _page++;
+  Future<void> _fetchNews() async {
+    List<dom.Element> newsItems = await getNewsItems(_page);
+    int sizeBeforeFetch = _filteredFeedItems.length;
+    print(sizeBeforeFetch);
+    for (int i = 0; i < _newsPerPage + 1; i++) {
+      if (_isLoading || !_hasMore) return;
+      try {
+        setState(() {
+          _isLoading = true;
+        });
+        FeedItem? feedItem = await fetchNews(newsItems, i);
+        if (feedItem == null) continue;
+        setState(() {
+          _feedItems.add(feedItem);
+          _filterNews();
+        });
+      } catch (e) {
+        // Handle exception here if needed
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
+    }
+    setState(() {
+      _page++;
     });
+    int sizeAfterFetch = _filteredFeedItems.length;
+    print(sizeAfterFetch);
+    if(sizeBeforeFetch == sizeAfterFetch && !isFetched())
+      _fetchNews();
+      setState(() {});
   }
 
   @override
