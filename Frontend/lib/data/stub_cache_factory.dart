@@ -31,5 +31,9 @@ class CacheFactoryImpl extends CacheFactory{
   @override
   void setUser(User user, String token, String password) {
   }
+  
+  @override
+  void removeNewsCache() {
+  }
 
 }

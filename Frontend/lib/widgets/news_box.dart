@@ -7,14 +7,17 @@ class CustomCard extends StatelessWidget {
   final String? content;
   final String? title;
   final String? date;
+  final Function(String)? onTagClick;
 
   CustomCard(
       {required this.imageUrl,
       required this.tags,
       required this.content,
       required this.title,
-      required this.date});
-/*
+      required this.date,
+      this.onTagClick});
+
+  /*
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -90,7 +93,12 @@ class CustomCard extends StatelessWidget {
                   spacing: 6.0, // gap between tags
                   runSpacing: 6.0, // gap between lines
                   children: tags != null && tags!.isNotEmpty
-                      ? tags!.map((tag) => Chip(label: Text(tag!))).toList()
+                      ? tags!
+                          .map((tag) => GestureDetector(
+                                onTap: () => onTagClick?.call(tag),
+                                child: Chip(label: Text(tag!)),
+                              ))
+                          .toList()
                       : <Widget>[],
                 ),
                 SizedBox(

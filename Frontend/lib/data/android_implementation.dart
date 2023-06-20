@@ -84,4 +84,9 @@ class CacheFactoryImpl implements CacheFactory {
   void setUser(User user, String token, String password) {
     SqliteService().insertUser(user, token, password);
   }
+  
+  @override
+  void removeNewsCache() {
+    // TODO: implement removeNewsCache
+  }
 }

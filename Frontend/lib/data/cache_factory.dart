@@ -7,6 +7,6 @@ abstract class CacheFactory {
   void removeLoginCache();
   void initDB();
   void setUser(User user, String token, String password);
-
+  void removeNewsCache();
   void printDb();
 }

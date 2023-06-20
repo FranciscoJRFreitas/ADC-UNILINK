@@ -34,6 +34,10 @@ import 'stub_cache_factory.dart'
         void initDB() {
             impl.initDB();
         }
+
+        void removeNewsCache(){
+          impl.removeNewsCache();
+        }
     }
 
 final CacheGeneral cacheFactory = CacheGeneral();

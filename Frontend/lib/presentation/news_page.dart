@@ -15,9 +15,12 @@ class NewsFeedPage extends StatefulWidget {
 class _NewsFeedPageState extends State<NewsFeedPage> {
   final ScrollController _scrollController = ScrollController();
   final List<FeedItem> _feedItems = [];
+  List<String> _activeTags = [];
+  List<FeedItem> _filteredFeedItems = [];
   int _page = 0;
   bool _hasMore = true;
   bool _isLoading = false;
+  bool _fetchedAllFromServer = false; // flag to know if all items fetched from server
 
   @override
   void initState() {
@@ -39,6 +42,24 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     }
   }
 
+  void _filterNews() {
+    _filteredFeedItems = _feedItems
+        .where((item) => _activeTags.every((tag) => item.tags!.contains(tag)))
+        .toList();
+  }
+
+  void _toggleTag(String tag) {
+    setState(() {
+      if (_activeTags.contains(tag)) {
+        _activeTags.remove(tag);
+      } else {
+        _activeTags.add(tag);
+      }
+      _filterNews();
+      if(_filteredFeedItems.isEmpty && !_fetchedAllFromServer) _hasMore = true;
+    });
+  }
+
   Future<void> _fetchMore() async {
     if (_isLoading || !_hasMore) return;
     setState(() {
@@ -48,9 +69,11 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     setState(() {
       _isLoading = false;
       if (newFeedItems.isEmpty) {
-        _hasMore = false;
+        _fetchedAllFromServer = true;
+        if(_filteredFeedItems.isEmpty) _hasMore = false;
       } else {
         _feedItems.addAll(newFeedItems);
+        _filterNews();
         _page++;
       }
     });
@@ -61,34 +84,53 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     return Scaffold(
       body: Center(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: ListView.separated(
-            controller: _scrollController,
-            itemCount: (_feedItems.length - 1) + (_hasMore ? 1 : 0),
-            separatorBuilder: (BuildContext context, int index) {
-              return const Divider();
-            },
-            itemBuilder: (BuildContext context, int index) {
-              if (index >= _feedItems.length) {
-                return _isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : SizedBox.shrink();
-              }
-              final item = _feedItems[index];
-              return MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => _launchURL(item.pageUrl ?? ''),
-                  child: CustomCard(
-                    imageUrl: item.imageUrl,
-                    tags: item.tags,
-                    content: item.content,
-                    title: item.title,
-                    date: item.date,
-                  ),
+          constraints: BoxConstraints(maxWidth: 400),
+          child: Column(
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _activeTags
+                    .map((tag) => Chip(
+                          label: Text(tag),
+                          deleteIcon: Icon(Icons.close),
+                          onDeleted: () => _toggleTag(tag),
+                        ))
+                    .toList(),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  controller: _scrollController,
+                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index >= _filteredFeedItems.length) {
+                      return _isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : SizedBox.shrink();
+                    }
+                    final item = _filteredFeedItems[index];
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => _launchURL(item.pageUrl ?? ''),
+                        // When a tag is clicked, call _toggleTag.
+                        child: CustomCard(
+                          imageUrl: item.imageUrl,
+                          tags: item.tags,
+                          content: item.content,
+                          title: item.title,
+                          date: item.date,
+                          onTagClick: _toggleTag,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           ),
         ),
       ),
@@ -163,49 +205,3 @@ class _ActionsRow extends StatelessWidget {
     );
   }
 }
-
-
-
-/*[
-  FeedItem(
-      content:
-          "A son asked his father (a programmer) why the sun rises in the east, and sets in the west. His response? It works, don’t touch!",
-      user: _users[0],
-      imageUrl: "https://picsum.photos/id/1000/960/540",
-      likesCount: 100,
-      commentsCount: 10,
-      retweetsCount: 1,
-      tags: ['Eventos']),
-  FeedItem(
-      user: _users[1],
-      imageUrl: "https://picsum.photos/id/1001/960/540",
-      likesCount: 10,
-      commentsCount: 2,
-      tags: ['Investigação']),
-  FeedItem(
-      user: _users[1],
-      content:
-          "Programming today is a race between software engineers striving to build bigger and better idiot-proof programs, and the Universe trying to produce bigger and better idiots. So far, the Universe is winning.",
-      imageUrl: "https://picsum.photos/id/1002/960/540",
-      likesCount: 500,
-      commentsCount: 202,
-      retweetsCount: 120,
-      tags: ['Eventos']),
-  FeedItem(
-      user: _users[2],
-      content: "Good morning!",
-      imageUrl: "https://picsum.photos/id/1003/960/540",
-      tags: ['Eventos']),
-  FeedItem(
-      user: _users[1],
-      imageUrl: "https://picsum.photos/id/1004/960/540",
-      tags: ['Eventos']),
-  FeedItem(
-      user: _users[3],
-      imageUrl: "https://picsum.photos/id/1005/960/540",
-      tags: ['Eventos']),
-  FeedItem(
-      user: _users[0],
-      imageUrl: "https://picsum.photos/id/1006/960/540",
-      tags: ['Eventos']),
-];*/

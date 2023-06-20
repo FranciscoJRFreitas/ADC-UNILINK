@@ -21,11 +21,12 @@ import '../presentation/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
+  final int? index;
 
-  MainScreen({required this.user});
+  MainScreen({required this.user, this.index});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _MainScreenState createState() => _MainScreenState(index);
 }
 
 class _MainScreenState extends State<MainScreen> {
@@ -49,6 +50,11 @@ class _MainScreenState extends State<MainScreen> {
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
+      
+        _MainScreenState(int? index) {
+          if(index != null)
+          _selectedIndex = index;
+        }
 
   @override
   void initState() {

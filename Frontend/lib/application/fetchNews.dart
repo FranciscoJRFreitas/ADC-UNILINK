@@ -1,14 +1,19 @@
 import 'dart:convert';
 import 'dart:js';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:unilink2023/domain/ExtractJSONfile.dart';
 import '../domain/FeedItem.dart';
 
+var _firstTitleElement = null;
+bool _hasNoMoreNews = false;
+bool checked = true;
+
 Future<List<FeedItem>> fetchNews(int page) async {
+  if (_hasNoMoreNews) return [];
+
   final response =
       await http.get(Uri.parse('https://www.fct.unl.pt/noticias?page=$page'));
 
@@ -33,6 +38,22 @@ Future<List<FeedItem>> fetchNews(int page) async {
     for (var newsItem in newsItems) {
       var titleElement =
           newsItem.querySelector('.views-field-title .field-content a');
+
+      if (titleElement == null) continue;
+
+      print(titleElement.text);
+      
+      String txt = _firstTitleElement == null ? "placeholder" : _firstTitleElement.text;
+      print(txt);
+      if (titleElement.text == txt) {
+        _hasNoMoreNews = true;
+        return [];
+      }
+      if (checked) {
+        _firstTitleElement = titleElement;
+        checked = false;
+      }
+
       var summaryElement = newsItem
           .querySelector('.views-field-field-resumo-value .field-content p');
       var dateElement =
