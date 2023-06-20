@@ -23,14 +23,18 @@ Future<List<dom.Element>> getNewsItems(page) async {
 }
 
 Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
+
+  _firstTitleElement = null;
   if (_hasNoMoreNews) return null;
 
   List<String> defaultTags = await extractFromFile("tags");
+
   Map<String, String> defaultTagsMapping = Map.fromIterable(defaultTags,
       key: (tag) => tag.toLowerCase(), value: (tag) => tag);
   Map<String, List<String>> subtags = await extractSynonyms("subtags");
 
   Map<String, String> inverseSynonyms = {}; // inverse dictionary for subtags
+
   for (var baseWord in subtags.keys) {
     if (subtags[baseWord] == null) continue;
     for (var synonym in subtags[baseWord]!) {
@@ -51,7 +55,8 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
     _hasNoMoreNews = true;
     return null;
   }
-  
+
+
   if (checked) {
     _firstTitleElement = titleElement;
     checked = false;
@@ -67,6 +72,7 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
       'https://www.fct.unl.pt' + (titleElement.attributes['href'] ?? '')));
 
   if (responseText.statusCode == 200) {
+
     var document = parser.parse(responseText.body);
     var textNews = document.getElementsByClassName('noticia-corpo');
 
@@ -80,6 +86,7 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
     }
 
     Set<String?> tags = await extractKeywords(result);
+
     tags = tags
         .map((tag) {
           String lowerCaseTag = tag!.toLowerCase();
@@ -114,6 +121,7 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
 
     return feedItem;
   }
+
   return null;
 }
 
