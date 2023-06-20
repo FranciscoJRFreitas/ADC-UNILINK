@@ -6,8 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
+import '../domain/PictureNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/ToggleButton.dart';
@@ -54,8 +56,6 @@ class _EditProfilePage extends State<EditProfilePage> {
   final TextEditingController postalCodeController = TextEditingController();
   late TextEditingController nifController;
 
-  late Future<Uint8List?> profilePic;
-
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
@@ -68,7 +68,6 @@ class _EditProfilePage extends State<EditProfilePage> {
     addressController = TextEditingController(text: widget.user.address);
     nifController = TextEditingController(text: widget.user.nif);
 
-    profilePic = downloadData();
   }
 
   // Function to display the snackbar
@@ -185,13 +184,6 @@ class _EditProfilePage extends State<EditProfilePage> {
     }
   }
 
-  Future<Uint8List?> downloadData() async {
-    return FirebaseStorage.instance
-        .ref('ProfilePictures/' + widget.user.username)
-        .getData()
-        .onError((error, stackTrace) => null);
-  }
-
   Future getImage(bool gallery) async {
     ImagePicker picker = ImagePicker();
 
@@ -204,12 +196,16 @@ class _EditProfilePage extends State<EditProfilePage> {
         .child('ProfilePictures/' + widget.user.username);
 
     await storageReference.putData(fileBytes);
+    await Provider.of<PictureNotifier>(context, listen:false).downloadData();
     setState(() {});
   }
 
   Widget picture(BuildContext context) {
+    final photoProvider = Provider.of<PictureNotifier>(context);
+    final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
+
     return FutureBuilder<Uint8List?>(
-        future: profilePic,
+        future: userPhoto,
         builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
           if (snapshot.hasData) {
             return GestureDetector(
@@ -267,6 +263,7 @@ class _EditProfilePage extends State<EditProfilePage> {
           } else {
             return const Icon(
               Icons.account_circle,
+              color: Colors.green,
               size: 125,
             );
           }
@@ -298,7 +295,6 @@ class _EditProfilePage extends State<EditProfilePage> {
                 child: InkWell(
                   onTap: () async {
                     await getImage(true);
-                    profilePic = downloadData();
                     setState(() {});
                   },
                   child: Icon(

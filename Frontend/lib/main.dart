@@ -6,6 +6,7 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
 import 'domain/Notification.dart';
+import 'domain/PictureNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
 //import 'package:unilink2023/domain/cacheFactory.dart' as cache;
@@ -38,6 +39,9 @@ void main() async {
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PictureNotifier(),
         ),
         Provider<NotificationService>(
           create: (context) => NotificationService(),
@@ -73,6 +77,7 @@ class MyApp extends StatelessWidget {
     initState(context);
 
     final themeNotifier = Provider.of<ThemeNotifier>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'UniLink',

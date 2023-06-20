@@ -7,9 +7,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
+import '../domain/PictureNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'screen.dart';
@@ -46,7 +48,6 @@ class _MainScreenState extends State<MainScreen> {
     "Director",
   ];
   late User _currentUser;
-  late Future<Uint8List?> profilePic;
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
@@ -60,7 +61,6 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _currentUser = widget.user;
-    profilePic = downloadData();
   }
 
   List<Widget> _widgetOptions() => [
@@ -86,13 +86,6 @@ class _MainScreenState extends State<MainScreen> {
         Placeholder(), //diretor
       ];
 
-  Future<Uint8List?> downloadData() async {
-    return FirebaseStorage.instance
-        .ref('ProfilePictures/' + _currentUser.username)
-        .getData()
-        .onError((error, stackTrace) => null);
-  }
-
   Future getImage(bool gallery) async {
     ImagePicker picker = ImagePicker();
 
@@ -109,8 +102,11 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget picture(BuildContext context) {
+    final photoProvider = Provider.of<PictureNotifier>(context);
+    final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
+
     return FutureBuilder<Uint8List?>(
-        future: profilePic,
+        future: userPhoto,
         builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
           if (snapshot.hasData) {
             return GestureDetector(
