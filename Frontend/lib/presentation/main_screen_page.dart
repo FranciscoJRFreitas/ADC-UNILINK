@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
         HomePage(user: _currentUser),
         ChangePasswordPage(),
         RemoveAccountPage(),
-        ChatPage(),
+        ChatPage(username: _currentUser.username),
         ContactsPage(),
         SettingsPage(),
         SchedulePage(), //estudante
@@ -556,8 +556,8 @@ class _MainScreenState extends State<MainScreen> {
           Map<dynamic, dynamic> userGroups =
               userGroupsSnapshot.value as Map<dynamic, dynamic>;
           for (String groupId in userGroups.keys) {
-            if(!kIsWeb)//PROVISIONAL
-            await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+            if (!kIsWeb) //PROVISIONAL
+              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
           }
         }
       }

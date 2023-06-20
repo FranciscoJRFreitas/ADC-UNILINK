@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
@@ -447,15 +449,13 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 leaveGroup(context, widget.groupId, widget.username,
                     _showErrorSnackbar);
 
+                // Pop the current page off the navigation stack
+                if (!kIsWeb)
+                  await FirebaseMessaging.instance
+                      .unsubscribeFromTopic(widget.groupId);
                 Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatPage(
-                      username: widget.username,
-                    ),
-                  ),
-                );
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).primaryColor,
