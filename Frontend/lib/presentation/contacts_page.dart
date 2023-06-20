@@ -5,6 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../domain/Contact.dart';
 import '../widgets/contacts_box.dart';
 import '../application/fetchContacts.dart';
+import 'package:alphabet_list_scroll_view/alphabet_list_scroll_view.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:searchfield/searchfield.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({Key? key}) : super(key: key);
@@ -18,74 +22,111 @@ class _ContactsPageState extends State<ContactsPage> {
   List<Contact> _contacts = [];
   bool _hasMore = true;
   bool _isLoading = false;
-
+  TextEditingController _searchController = TextEditingController();
+  List<Contact> _searchContacts = [];
   @override
   void initState() {
     super.initState();
     _fetchContacts();
+    //_searchContacts = _contacts;
   }
 
   void _fetchContacts() async {
-    if (_isLoading) return;
+    String jsonString =
+        await rootBundle.loadString('assets/json/contacts.json');
+    var contactsJson = json.decode(jsonString);
+
+    var departmentsJson = contactsJson['departments'];
+    var servicesJson = contactsJson['servicos'];
+    var nucleosJson = contactsJson['nucleos'];
+
+    var departments = departmentsJson != null
+        ? (departmentsJson as List).map((i) => Contact.fromJson(i)).toList()
+        : [];
+    var services = servicesJson != null
+        ? (servicesJson as List).map((i) => Contact.fromJson(i)).toList()
+        : [];
+    var nucleos = nucleosJson != null
+        ? (nucleosJson as List).map((i) => Contact.fromJson(i)).toList()
+        : [];
+
     setState(() {
-      _isLoading = true;
-    });
-    Map<String, List<Contact>> fetchedContacts = await fetchContacts();
-    setState(() {
-      _isLoading = false;
-      if (fetchedContacts.isNotEmpty) {
-        _contacts.addAll(fetchedContacts['mainContacts'] ?? []);
-        _contacts.addAll(fetchedContacts['departmentsContacts'] ?? []);
-      } else {
-        _hasMore = false;
-      }
+      _contacts = [
+        ...departments,
+        ...services,
+        ...nucleos
+      ]; // Combining both lists
     });
   }
 
-  @override
+  /*Widget build(BuildContext context) {
+    return Scaffold(
+      body: AlphabetListScrollView(
+        strList: _contacts
+            .map((contact) => contact.name)
+            .toList(), // Assuming contact has a 'name' property
+        highlightTextStyle: TextStyle(color: Colors.white),
+        normalTextStyle: TextStyle(color: Colors.green),
+        showPreview: true,
+
+        itemBuilder: (context, index) {
+          final item = _contacts[index];
+
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => _launchURL(item.url ?? ''),
+              child: ContactCard(
+                contact: item,
+              ),
+            ),
+          );
+        },
+        indexedHeight: (index) => 150, // Set your item height
+      ),
+    );
+  }*/
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: ListView.separated(
-            controller: _scrollController,
-            itemCount: _contacts.length + (_hasMore ? 1 : 0),
-            separatorBuilder: (BuildContext context, int index) {
-              return const Divider();
-            },
-            itemBuilder: (BuildContext context, int index) {
-              if (index == _contacts.length) {
-                if (_isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  return SizedBox.shrink();
-                }
-              }
-              final item = _contacts[index];
-              return MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => _launchURL(item.url ?? ''),
-                  child: ContactCard(
-                    contact: item,
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: AlphabetListScrollView(
+              strList: _contacts
+                  .map((contact) => contact.name)
+                  .toList(), // Assuming contact has a 'name' property
+              highlightTextStyle: TextStyle(color: Colors.white),
+              normalTextStyle: TextStyle(color: Colors.green),
+              showPreview: true,
+
+              itemBuilder: (context, index) {
+                final item = _contacts[index];
+
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => _launchURL(item.url ?? ''),
+                    child: ContactCard(
+                      contact: item,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+              indexedHeight: (index) => 150, // Set your item height
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
-}
 
-void _launchURL(String url) async {
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    // can't launch url, there is some error
-    throw "Could not launch $url";
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      // can't launch url, there is some error
+      throw "Could not launch $url";
+    }
   }
 }
 
