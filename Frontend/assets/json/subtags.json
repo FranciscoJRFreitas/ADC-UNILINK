@@ -24,9 +24,13 @@
             "Andebol",
             "Ténis",
             "E-Sports",
+            "Esports",
             "Campos",
             "Modalidade",
-            "Sports Club Rackets"
+            "Sports Club Rackets",
+            "League of Legends",
+            "CS:GO",
+            "Gaming"
         ],
         "Empresas": [
             "Empresas Parceiras",
@@ -95,8 +99,9 @@
         "Núcleos": [
             "Núcleo"
         ],
-        "Associação": [
-            "Associações"
+        "Associações": [
+            "Associação",
+            "AEFCT"
         ],
         "Campus": [
             "Campus de Caparica"
