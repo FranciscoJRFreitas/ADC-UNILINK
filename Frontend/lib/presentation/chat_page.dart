@@ -12,9 +12,11 @@ import '../data/cache_factory_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-import 'blank_page.dart';
-
 class ChatPage extends StatefulWidget {
+  final String username;
+
+  ChatPage({required this.username});
+
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
@@ -24,17 +26,11 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController descriptionController = TextEditingController();
   late Stream<List<Group>> groupsStream;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  late String username;
 
   @override
   void initState() {
     super.initState();
-    initialize();
-    setState(() {});
-  }
 
-  Future<void> initialize() async {
-    username = await cacheFactory.get('users', 'username');
     groupsStream = listenForGroups();
   }
 
@@ -42,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
     DatabaseReference chatRef = FirebaseDatabase.instance
         .ref()
         .child('chat')
-        .child(username)
+        .child(widget.username)
         .child('Groups');
     DatabaseReference groupsRef =
         FirebaseDatabase.instance.ref().child('groups');
@@ -100,116 +96,101 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: cacheFactory.get('users', 'username'),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Data is still loading
-            return BlankPage();
-          } else if (snapshot.hasError) {
-            // Error occurred
-            return Text('Error: ${snapshot.error}');
-          }
-          username = snapshot.data!;
-          return Scaffold(
-            body: Stack(
-              children: <Widget>[
-                StreamBuilder<List<Group>>(
-                  stream: groupsStream, // Replace with your stream of groups
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<Group>> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (snapshot.hasData) {
-                      List<Group> groups = snapshot.data!;
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          StreamBuilder<List<Group>>(
+            stream: groupsStream, // Replace with your stream of groups
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                List<Group> groups = snapshot.data!;
 
-                      return ListView(
-                        padding: EdgeInsets.only(top: 10, bottom: 80),
-                        children: groups.map((group) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => GroupMessagesPage(
-                                    groupId: group.id,
-                                    username: username,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 5,
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 8),
-                                child: ListTile(
-                                  title: Text(
-                                    '${group.DisplayName}',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.person, size: 20),
-                                          SizedBox(width: 5),
-                                          Text(
-                                              'Description: ${group.description}'),
-                                        ],
-                                      ),
-                                      // ... Add other information rows with icons here
-                                      // Make sure to add some spacing (SizedBox) between rows for better readability
-                                    ],
-                                  ),
-                                ),
-                              ),
+                return ListView(
+                  padding: EdgeInsets.only(top: 10, bottom: 80),
+                  children: groups.map((group) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => GroupMessagesPage(
+                              groupId: group.id,
+                              username: widget.username,
                             ),
-                          );
-                        }).toList(),
-                      );
-                    } else {
-                      return noGroupWidget();
-                    }
-                  },
-                ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: IconButton(
-                      onPressed: () {
-                        // nextScreen(context, const Placeholder()); //searchPageChat
-                        // Replace the above line with your desired logic
+                          ),
+                        );
                       },
-                      icon: const Icon(Icons.search),
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                popUpDialog(context);
-              },
-              elevation: 0,
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(
-                Icons.add,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 5,
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          child: ListTile(
+                            title: Text(
+                              '${group.DisplayName}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.person, size: 20),
+                                    SizedBox(width: 5),
+                                    Text('Description: ${group.description}'),
+                                  ],
+                                ),
+                                // ... Add other information rows with icons here
+                                // Make sure to add some spacing (SizedBox) between rows for better readability
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              } else {
+                return noGroupWidget();
+              }
+            },
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: IconButton(
+                onPressed: () {
+                  // nextScreen(context, const Placeholder()); //searchPageChat
+                  // Replace the above line with your desired logic
+                },
+                icon: const Icon(Icons.search),
                 color: Colors.white,
-                size: 30,
               ),
             ),
-          );
-        });
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          popUpDialog(context);
+        },
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+      ),
+    );
   }
 
   popUpDialog(BuildContext context) {

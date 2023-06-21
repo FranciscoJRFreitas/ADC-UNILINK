@@ -10,26 +10,23 @@ import '../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../constants.dart';
-import 'blank_page.dart';
 
 class ListUsersPage extends StatefulWidget {
+  final User user;
+
+  ListUsersPage({required this.user});
+
   @override
   _ListUsersPageState createState() => _ListUsersPageState();
 }
 
 class _ListUsersPageState extends State<ListUsersPage> {
   List<User> users = [];
-  late User user;
 
   @override
   void initState() {
     super.initState();
-    initialize();
-    setState(() {});
-  }
-
-  Future<void> initialize() async {
-    user = await cacheFactory.get('users', 'user');
+    fetchUsers();
   }
 
   Future<void> fetchUsers() async {
@@ -63,39 +60,27 @@ class _ListUsersPageState extends State<ListUsersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: cacheFactory.get('users', 'user'),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Data is still loading
-            return BlankPage();
-          } else if (snapshot.hasError) {
-            // Error occurred
-            return Text('Error: ${snapshot.error}');
-          }
-          user = snapshot.data!;
-
-          return Scaffold(
-            body: Container(
-              padding: EdgeInsets.all(8),
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  User targetUser = users[index];
-                  bool isNotUser = true; //user.role != 'USER';
-                  if (users.isEmpty && !isNotUser)
-                    return Text(
-                        "There are no active and public to be displayed at the moment...");
-                  else if (users.isEmpty && user.role != 'SU')
-                    return Text(
-                        "There are no users to be displayed for your role...");
-                  //SU can always see his own info
-                  else
-                    /*return Card(
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.all(8),
+        child: ListView.builder(
+          itemCount: users.length,
+          itemBuilder: (context, index) {
+            User user = users[index];
+            bool isNotUser = true; //widget.user.role != 'USER';
+            if (users.isEmpty && !isNotUser)
+              return Text(
+                  "There are no active and public to be displayed at the moment...");
+            else if (users.isEmpty && widget.user.role != 'SU')
+              return Text(
+                  "There are no users to be displayed for your role...");
+            //SU can always see his own info
+            else
+              /*return Card(
                 color: Colors.white60,
                 child: ListTile(
                   title: Text(
-                      '${user.displayName}${user.username == user.username ? ' (You)' : ''}'),
+                      '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -119,55 +104,53 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   ),
                 ),
               );*/
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (context) => UserProfilePage(
-                                    user: user,
-                                    targetUser: user,
-                                    isNotUser: isNotUser,
-                                  )),
-                        );
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                        elevation: 5,
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                          child: ListTile(
-                            leading: picture(context, user.username),
-                            title: Text(
-                              '${targetUser.displayName}${targetUser.username == user.username ? ' (You)' : ''}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.person, size: 20),
-                                    SizedBox(width: 5),
-                                    Text('Username: ${targetUser.username}'),
-                                  ],
-                                ),
-                                // ... Add other information rows with icons here
-                                // Make sure to add some spacing (SizedBox) between rows for better readability
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => UserProfilePage(
+                              user: user,
+                              targetUser: widget.user,
+                              isNotUser: isNotUser,
+                            )),
+                  );
                 },
-              ),
-            ),
-          );
-        });
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: ListTile(
+                      leading: picture(context, user.username),
+                      title: Text(
+                        '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.person, size: 20),
+                              SizedBox(width: 5),
+                              Text('Username: ${user.username}'),
+                            ],
+                          ),
+                          // ... Add other information rows with icons here
+                          // Make sure to add some spacing (SizedBox) between rows for better readability
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+          },
+        ),
+      ),
+    );
   }
 
   Future<Uint8List?> downloadData(String username) async {

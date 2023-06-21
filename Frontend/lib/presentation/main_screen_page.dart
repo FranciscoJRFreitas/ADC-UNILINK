@@ -12,7 +12,6 @@ import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import 'blank_page.dart';
 import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -60,13 +59,21 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   List<Widget> _widgetOptions() => [
-        NewsFeedPage(),
-        SearchUsersPage(),
-        ListUsersPage(),
+        NewsFeedPage(), //futuramente as news
+        SearchUsersPage(user: _currentUser),
+        ListUsersPage(user: _currentUser),
+        /*ModifyAttributesPage(
+          user: _currentUser,
+          onUserUpdate: (updatedUser) {
+            setState(() {
+              _currentUser = updatedUser;
+            });
+          },
+        ),*/
         HomePage(),
         ChangePasswordPage(),
         RemoveAccountPage(),
-        ChatPage(),
+        ChatPage(username: _currentUser.username),
         ContactsPage(),
         SettingsPage(),
         SchedulePage(), //estudante
@@ -164,7 +171,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
 
@@ -254,8 +260,11 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                      ],
+                      ]),
                     ),
+                  ]),
+                  SizedBox(
+                    height: 5,
                   ),
                 ],
               ),
@@ -283,7 +292,7 @@ class _MainScreenState extends State<MainScreen> {
                           title: Text('Schedule'),
                           onTap: () {
                             setState(() {
-                              _selectedIndex = 10;
+                              _selectedIndex = 9;
                             });
                             Navigator.pop(context);
                           },
@@ -305,44 +314,55 @@ class _MainScreenState extends State<MainScreen> {
             _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
-                    title: Text('News'),
+                    title: Text('Director'),
                     onTap: () {
                       setState(() {
-                        _selectedIndex = 0;
+                        _selectedIndex = 11;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : Container(),
+            ListTile(
+              leading: Icon(Icons.newspaper),
+              title: Text('News'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 0;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ExpansionTile(
+                leading: Icon(
+                  Icons.group,
+                ),
+                title: Text('Community',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                children: [
+                  ListTile(
+                    title: Text('Search Users',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 1;
                       });
                       Navigator.pop(context);
                     },
                   ),
-                  ExpansionTile(
-                      leading: Icon(
-                        Icons.group,
-                      ),
-                      title: Text('Community',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      children: [
-                        ListTile(
-                          title: Text('Search Users',
-                              style: Theme.of(context).textTheme.bodyLarge),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 1;
-                            });
-                            Navigator.pop(context);
-                          },
-                        ),
-                        ListTile(
-                          title: Text('List Users',
-                              style: Theme.of(context).textTheme.bodyLarge),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 2;
-                            });
-                            Navigator.pop(context);
-                          },
-                        )
-                      ]),
+                  ListTile(
+                    title: Text('List Users',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                ]),
 
-                  /* ExpansionTile(
+            /* ExpansionTile(
               leading: Icon(Icons.person),
               title:
                   Text('Profile', style: Theme.of(context).textTheme.bodyLarge),
@@ -379,45 +399,44 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ],
             ),*/
-                  ListTile(
-                    leading: Icon(Icons.chat),
-                    title: Text('Chat',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 6;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(height: 125),
-                  Divider(
-                    // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                    thickness: 1, // Adjusts the divider's thickness.
-                    color: kBackgroundColor, // Adjusts the divider's color.
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.call),
-                    title: Text('Contacts',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 7;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Settings',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 8;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
+            ListTile(
+              leading: Icon(Icons.chat),
+              title: Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 6;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 125),
+            Divider(
+              // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
+              thickness: 1, // Adjusts the divider's thickness.
+              color: kBackgroundColor, // Adjusts the divider's color.
+            ),
+            ListTile(
+              leading: Icon(Icons.call),
+              title: Text('Contacts',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 7;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 8;
+                });
+                Navigator.pop(context);
+              },
+            ),
 
             ListTile(
               leading: Icon(Icons.logout_sharp),
