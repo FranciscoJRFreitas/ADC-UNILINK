@@ -3,15 +3,13 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/PictureNotifier.dart';
+import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'screen.dart';
@@ -51,11 +49,10 @@ class _MainScreenState extends State<MainScreen> {
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
-      
-        _MainScreenState(int? index) {
-          if(index != null)
-          _selectedIndex = index;
-        }
+
+  _MainScreenState(int? index) {
+    if (index != null) _selectedIndex = index;
+  }
 
   @override
   void initState() {
@@ -87,7 +84,7 @@ class _MainScreenState extends State<MainScreen> {
       ];
 
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(

@@ -14,7 +14,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;import com.google.cloud.datastore.*;
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+import com.google.cloud.datastore.*;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
@@ -64,8 +65,8 @@ public class ModifyAttributesResource {
                 txn.rollback();
                 return Response.status(Status.BAD_REQUEST).entity("User not found: " + data.username).build();
             }
-            
-            if(originalToken == null) {
+
+            if (originalToken == null) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
@@ -96,7 +97,7 @@ public class ModifyAttributesResource {
 
                 UserRole targetUserRole = UserRole.valueOf(targetUser.getString("user_role"));
 
-                if (!canModifyAttributes( userRole, targetUserRole)) {
+                if (!canModifyAttributes(userRole, targetUserRole)) {
                     txn.rollback();
                     return Response.status(Status.FORBIDDEN).entity("You do not have the required permissions for this action.").build();
                 }
@@ -112,11 +113,11 @@ public class ModifyAttributesResource {
         Entity.Builder userBuilder = Entity.newBuilder(user);
 
         if (!userRole.equals(UserRole.STUDENT)) {
-            if (StringUtils.isNotEmpty(data.displayName)) userBuilder.set("user_displayName", data.displayName);
             if (StringUtils.isNotEmpty(data.email)) userBuilder.set("user_email", data.email);
             if (StringUtils.isNotEmpty(data.role)) userBuilder.set("user_role", data.role);
             if (StringUtils.isNotEmpty(data.activityState)) userBuilder.set("user_state", data.activityState);
         }
+        if (StringUtils.isNotEmpty(data.displayName)) userBuilder.set("user_displayName", data.displayName);
         if (StringUtils.isNotEmpty(data.educationLevel))
             userBuilder.set("user_educationLevel", data.educationLevel);
         if (StringUtils.isNotEmpty(data.birthDate))
