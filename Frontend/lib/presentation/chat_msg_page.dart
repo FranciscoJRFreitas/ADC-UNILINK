@@ -63,6 +63,31 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       });
       _scrollToBottom();
     });
+
+    messagesRef.onChildChanged.listen((event) {
+      setState(() {
+        // Parse the data snapshot into a Message object
+        Message updatedMessage = Message.fromSnapshot(event.snapshot);
+        // Find the index of the message in the list
+        int index =
+            messages.indexWhere((message) => message.id == updatedMessage.id);
+        if (index >= 0) {
+          // Replace the existing message with the updated message
+          messages[index] = updatedMessage;
+          streamController.add(messages);
+        }
+      });
+    });
+
+    messagesRef.onChildRemoved.listen((event) {
+      setState(() {
+        // Parse the data snapshot into a Message object
+        Message removedMessage = Message.fromSnapshot(event.snapshot);
+        // Remove the message from the list
+        messages.removeWhere((message) => message.id == removedMessage.id);
+        streamController.add(messages);
+      });
+    });
   }
 
   void _configureMessaging() async {
@@ -286,6 +311,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
                 if (isDifferentDay(lastTimestamp, message.timestamp)) {
                   widgets.add(MessageTile(
+                    id: message.id,
+                    groupId: widget.groupId,
                     message: formatDateInMillis(message.timestamp),
                     sender: "",
                     time: "",
@@ -304,6 +331,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         groupId: widget.groupId,
                       )
                     : MessageTile(
+                        id: message.id,
+                        groupId: widget.groupId,
                         message: message.text,
                         sender: message.name,
                         time: formatTimeInMillis(message.timestamp),
