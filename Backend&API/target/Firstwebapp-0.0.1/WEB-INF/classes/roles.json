@@ -1,0 +1,24 @@
+{
+  "roles": {
+    "SU": {
+      "level": 4,
+      "modify_permissions": ["SU", "DIRECTOR", "PROF", "STUDENT"],
+      "remove_permissions": ["SU", "DIRECTOR", "PROF", "STUDENT"]
+    },
+    "DIRECTOR": {
+      "level": 3,
+      "modify_permissions": ["PROF", "STUDENT"],
+      "remove_permissions": ["PROF", "STUDENT"]
+    },
+    "PROF": {
+      "level": 2,
+      "modify_permissions": ["STUDENT"],
+      "remove_permissions": ["STUDENT"]
+    },
+    "STUDENT": {
+      "level": 1,
+      "modify_permissions": [],
+      "remove_permissions": []
+    }
+  }
+}
