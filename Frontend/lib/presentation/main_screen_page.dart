@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
         ),*/
-        HomePage(user: _currentUser),
+        HomePage(),
         ChangePasswordPage(),
         RemoveAccountPage(),
         ChatPage(username: _currentUser.username),
