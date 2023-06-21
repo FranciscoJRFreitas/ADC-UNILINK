@@ -20,10 +20,10 @@ import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'blank_page.dart';
 
 class EditProfilePage extends StatefulWidget {
-  EditProfilePage();
+  final User user;
+  EditProfilePage({required this.user});
 
   @override
   _EditProfilePage createState() => _EditProfilePage();
@@ -44,12 +44,11 @@ class _EditProfilePage extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
+    user = widget.user;
     initialize();
-    setState(() {});
   }
 
-  Future<void> initialize() async {
-    user = await cacheFactory.get('users', 'user');
+  void initialize() {
     displayNameController = TextEditingController(text: user.displayName);
     birthDateController = TextEditingController(text: user.birthDate);
     mobilePhoneController = TextEditingController(text: user.mobilePhone);
@@ -138,7 +137,7 @@ class _EditProfilePage extends State<EditProfilePage> {
       await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
 
       //cacheFactory.setUser(
-        //  user, await cacheFactory.get('users', 'token'), password);
+      //  user, await cacheFactory.get('users', 'token'), password);
       showErrorSnackbar('Changes applied successfully!', false);
       Navigator.pop(context);
     } else {
@@ -272,186 +271,168 @@ class _EditProfilePage extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: cacheFactory.get('users', 'user'),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Data is still loading
-            return BlankPage();
-          } else if (snapshot.hasError) {
-            // Error occurred
-            return Text('Error: ${snapshot.error}');
-          }
-          user = snapshot.data!;
-
-          bool _isPublic = user.profileVisibility!.toLowerCase() == 'public';
-          double offset = MediaQuery.of(context).size.width * 0.1;
-          return Dialog(
-            insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0)),
-            ),
-            child: Stack(
-              alignment: Alignment.topCenter,
-              clipBehavior: Clip.none,
-              children: [
-                SingleChildScrollView(
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 750, // Set the maximum width for the Dialog
+    bool _isPublic = user.profileVisibility!.toLowerCase() == 'public';
+    double offset = MediaQuery.of(context).size.width * 0.1;
+    return Dialog(
+      insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+      ),
+      child: Stack(
+        alignment: Alignment.topCenter,
+        clipBehavior: Clip.none,
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: 750, // Set the maximum width for the Dialog
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: 20), // Provide space for the image at the top
+                child: Column(
+                  children: [
+                    SizedBox(height: 40),
+                    Divider(
+                      thickness: 2,
+                      color: Theme.of(context).primaryColor,
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          top: 20), // Provide space for the image at the top
-                      child: Column(
-                        children: [
-                          SizedBox(height: 40),
-                          Divider(
-                            thickness: 2,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          SizedBox(height: 15),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: LineTextField(
-                                title: 'Display Name',
-                                icon: Icons.alternate_email,
-                                controller: displayNameController),
-                          ),
-                          SizedBox(height: 5),
-                          Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: LineComboBox(
-                                selectedValue: _selectedEducationLevel!,
-                                items: [
-                                  'Education Level',
-                                  'Primary Education',
-                                  'Secondary Education',
-                                  'Undergraduate Degree',
-                                  'Master\'s Degree',
-                                  'Doctorate'
-                                ],
-                                onChanged: (dynamic newValue) {
-                                  setState(() {
-                                    _selectedEducationLevel = newValue;
-                                  });
-                                },
-                                icon: Icons.school,
-                              )),
-                          SizedBox(height: 5),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: LineDateField(
-                                title: "Birth date",
-                                icon: Icons.schedule,
-                                controller: birthDateController),
-                          ),
-                          SizedBox(height: 15),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: LineTextField(
-                                title: "Mobile Phone",
-                                icon: Icons.phone,
-                                controller: mobilePhoneController),
-                          ),
-                          SizedBox(height: 15),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: LineTextField(
-                                title: "Occupation",
-                                icon: Icons.cases_rounded,
-                                controller: occupationController),
-                          ),
-                          SizedBox(height: 5),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: ToggleButton(
-                              active: _isPublic,
-                              title: "Profile Visibility",
-                              optionL: "Private",
-                              optionR: "Public",
-                              onToggle: (value) {
-                                _isPublic = value;
-                              },
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          Container(
-                            padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
-                            child: MyTextButton(
-                              alignment: Alignment.center,
-                              buttonName: 'Save Changes',
-                              onTap: () async {
-                                String? password;
-                                password =
-                                    await cacheFactory.get('users', 'password');
-                                modifyAttributes(
-                                  password!,
-                                  _selectedEducationLevel == 'Doctorate'
-                                      ? 'D'
-                                      : _selectedEducationLevel ==
-                                              'Secondary Education'
-                                          ? 'SE'
-                                          : _selectedEducationLevel ==
-                                                  'Undergraduate Degree'
-                                              ? 'UD'
-                                              : _selectedEducationLevel ==
-                                                      'Master\'s Degree'
-                                                  ? 'MD'
-                                                  : 'PE',
-                                  birthDateController.text,
-                                  user.username,
-                                  displayNameController.text,
-                                  user.role!,
-                                  'ACTIVE',
-                                  _isPublic ? 'PUBLIC' : 'PRIVATE',
-                                  mobilePhoneController.text,
-                                  occupationController.text,
-                                  _showErrorSnackbar,
-                                );
-                              },
-                              bgColor: Theme.of(context).primaryColor,
-                              textColor: Colors.white,
-                              height: 45,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                        ],
+                    SizedBox(height: 15),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: 'Display Name',
+                          icon: Icons.alternate_email,
+                          controller: displayNameController),
+                    ),
+                    SizedBox(height: 5),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: LineComboBox(
+                          selectedValue: _selectedEducationLevel!,
+                          items: [
+                            'Education Level',
+                            'Primary Education',
+                            'Secondary Education',
+                            'Undergraduate Degree',
+                            'Master\'s Degree',
+                            'Doctorate'
+                          ],
+                          onChanged: (dynamic newValue) {
+                            setState(() {
+                              _selectedEducationLevel = newValue;
+                            });
+                          },
+                          icon: Icons.school,
+                        )),
+                    SizedBox(height: 5),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineDateField(
+                          title: "Birth date",
+                          icon: Icons.schedule,
+                          controller: birthDateController),
+                    ),
+                    SizedBox(height: 15),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: "Mobile Phone",
+                          icon: Icons.phone,
+                          controller: mobilePhoneController),
+                    ),
+                    SizedBox(height: 15),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: "Occupation",
+                          icon: Icons.cases_rounded,
+                          controller: occupationController),
+                    ),
+                    SizedBox(height: 5),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: ToggleButton(
+                        active: _isPublic,
+                        title: "Profile Visibility",
+                        optionL: "Private",
+                        optionR: "Public",
+                        onToggle: (value) {
+                          _isPublic = value;
+                        },
                       ),
                     ),
-                  ),
-                ),
-                Positioned(top: -65, child: profilePicture(context)),
-                Positioned(
-                  top: 1,
-                  right: 1,
-                  child: IconButton(
-                    hoverColor:
-                        Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
-                    splashRadius: 20.0,
-                    icon: Container(
-                      height: 25,
-                      width: 25,
-                      child: Icon(
-                        Icons.close,
-                        color: Theme.of(context).secondaryHeaderColor,
+                    SizedBox(height: 15),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
+                      child: MyTextButton(
+                        alignment: Alignment.center,
+                        buttonName: 'Save Changes',
+                        onTap: () async {
+                          String? password;
+                          password =
+                              await cacheFactory.get('users', 'password');
+                          modifyAttributes(
+                            password!,
+                            _selectedEducationLevel == 'Doctorate'
+                                ? 'D'
+                                : _selectedEducationLevel ==
+                                        'Secondary Education'
+                                    ? 'SE'
+                                    : _selectedEducationLevel ==
+                                            'Undergraduate Degree'
+                                        ? 'UD'
+                                        : _selectedEducationLevel ==
+                                                'Master\'s Degree'
+                                            ? 'MD'
+                                            : 'PE',
+                            birthDateController.text,
+                            user.username,
+                            displayNameController.text,
+                            user.role!,
+                            'ACTIVE',
+                            _isPublic ? 'PUBLIC' : 'PRIVATE',
+                            mobilePhoneController.text,
+                            occupationController.text,
+                            _showErrorSnackbar,
+                          );
+                        },
+                        bgColor: Theme.of(context).primaryColor,
+                        textColor: Colors.white,
+                        height: 45,
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
+                    SizedBox(height: 20),
+                  ],
                 ),
-              ],
+              ),
             ),
-          );
-        });
+          ),
+          Positioned(top: -65, child: profilePicture(context)),
+          Positioned(
+            top: 1,
+            right: 1,
+            child: IconButton(
+              hoverColor:
+                  Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+              splashRadius: 20.0,
+              icon: Container(
+                height: 25,
+                width: 25,
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget textField(TextInputType inputType, TextEditingController controller) {

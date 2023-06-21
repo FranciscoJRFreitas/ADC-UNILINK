@@ -7,13 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/edit_profile_page.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
 import '../constants.dart';
-import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/User.dart';
-import 'blank_page.dart';
 
 class HomePage extends StatefulWidget {
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -27,12 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    //initialize();
-    //setState(() {});
-  }
 
-  void initialize() {
-    
   }
 
   Widget picture(BuildContext context) {
@@ -125,124 +117,121 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
 
-    return FutureBuilder<dynamic>(
-        future: cacheFactory.get('users', 'user'),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Data is still loading
-            return BlankPage();
-          } else if (snapshot.hasError) {
-            // Error occurred
-            return Text('Error: ${snapshot.error}');
-          }
-          _currentUser = snapshot.data!;
-          return Scaffold(
-            body: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      profilePicture(context),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          _currentUser.displayName,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                    ],
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
+            Row(
+              children: [
+                profilePicture(context),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    _currentUser.displayName,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  SizedBox(height: 20),
-                  Divider(
-                    // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                    thickness: 1, // Adjusts the divider's thickness.
-                    color: Style.lightBlue,
-                  ),
-                  SizedBox(height: 10),
-                  InfoItem(
-                    title: 'Role',
-                    value: _currentUser.role ?? 'N/A',
-                    icon: Icons.person,
-                  ),
-                  SizedBox(height: 5),
-                  Divider(
-                    // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                    thickness: 1, // Adjusts the divider's thickness.
-                    color: Style.lightBlue,
-                  ),
-                  SizedBox(height: 20),
-                  Row(children: [
-                    Text(
-                      'Personal Information',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Container(
-                        padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: SizedBox(
-                            height: 35,
-                            width: 100,
-                            child: MyTextButton(
-                              buttonName: 'Edit Profile',
-                              onTap: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return EditProfilePage();
-                                    });
-                              },
-                              bgColor: Style.lightBlue,
-                              textColor: Style.white,
-                              height: 60,
-                            )))
-                  ]),
-                  SizedBox(height: 20),
-                  InfoItem(
-                    title: 'Username',
-                    value: _currentUser.username,
-                    icon: Icons.alternate_email,
-                  ),
-                  InfoItem(
-                    title: 'Email',
-                    value: _currentUser.email,
-                    icon: Icons.mail,
-                  ),
-                  InfoItem(
-                    title: "Education Level",
-                    value: _currentUser.educationLevel ?? '',
-                    icon: Icons.school,
-                  ),
-                  InfoItem(
-                    title: "Birth date",
-                    value: _currentUser.birthDate ?? '',
-                    icon: Icons.schedule,
-                  ),
-                  InfoItem(
-                    title: "Mobile Phone",
-                    value: _currentUser.mobilePhone ?? '',
-                    icon: Icons.phone,
-                  ),
-                  InfoItem(
-                    title: "Occupation",
-                    value: _currentUser.occupation ?? '',
-                    icon: Icons.cases_rounded,
-                  ),
-                  InfoItem(
-                    title: "Profile Visibility",
-                    value: _currentUser.profileVisibility ?? '',
-                    icon: Icons.public,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        });
+            SizedBox(height: 20),
+            Divider(
+              // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
+              thickness: 1, // Adjusts the divider's thickness.
+              color: Style.lightBlue,
+            ),
+            SizedBox(height: 10),
+            InfoItem(
+              title: 'Role',
+              value: _currentUser.role ?? 'N/A',
+              icon: Icons.person,
+            ),
+            SizedBox(height: 5),
+            Divider(
+              // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
+              thickness: 1, // Adjusts the divider's thickness.
+              color: Style.lightBlue,
+            ),
+            SizedBox(height: 20),
+            Row(children: [
+              Text(
+                'Personal Information',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Container(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: SizedBox(
+                      height: 35,
+                      width: 100,
+                      child: MyTextButton(
+                        buttonName: 'Edit Profile',
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return EditProfilePage(user: _currentUser);
+                              });
+                        },
+                        bgColor: Style.lightBlue,
+                        textColor: Style.white,
+                        height: 60,
+                      )))
+            ]),
+            SizedBox(height: 20),
+            InfoItem(
+              title: 'Username',
+              value: _currentUser.username,
+              icon: Icons.alternate_email,
+            ),
+            InfoItem(
+              title: 'Email',
+              value: _currentUser.email,
+              icon: Icons.mail,
+            ),
+            InfoItem(
+              title: "Education Level",
+              value: _currentUser.educationLevel == 'D'
+                        ? 'Doctorate'
+                        : _currentUser.educationLevel == 'SE'
+                            ? 'Secondary Education'
+                            : _currentUser.educationLevel == 'UD'
+                                ? 'Undergraduate Degree'
+                                : _currentUser.educationLevel == 'MD'
+                                    ? 'Master\'s Degree'
+                                    : _currentUser.educationLevel == 'PE'
+                                        ? 'Primary Education'
+                                        : '',
+              icon: Icons.school,
+            ),
+            InfoItem(
+              title: "Birth date",
+              value: _currentUser.birthDate ?? '',
+              icon: Icons.schedule,
+            ),
+            InfoItem(
+              title: "Mobile Phone",
+              value: _currentUser.mobilePhone ?? '',
+              icon: Icons.phone,
+            ),
+            InfoItem(
+              title: "Occupation",
+              value: _currentUser.occupation ?? '',
+              icon: Icons.cases_rounded,
+            ),
+            InfoItem(
+              title: "Profile Visibility",
+              value: _currentUser.profileVisibility ?? '',
+              icon: Icons.public,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   //Widget editBuild(BuildContext context) {
