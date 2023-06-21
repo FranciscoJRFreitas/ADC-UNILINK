@@ -2,6 +2,9 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 
 import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Transaction;
+import com.google.firebase.database.*;
+import com.google.firebase.internal.NonNull;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
@@ -14,6 +17,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
+import pt.unl.fct.di.apdc.firstwebapp.resources.ChatResources;
+
 
 
 @Path("/remove")
@@ -88,6 +93,23 @@ public class RemoveResource {
 
             txn.delete(userKey, tokenKey);
             txn.commit();
+            DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).child("Groups");
+            chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        String childKey = childSnapshot.getKey();
+                        ChatResources.leaveGroup(childKey, targetUsername);
+                    }
+                    FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).removeValueAsync();
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Handle error
+                }
+            });
             LOG.info("User deleted: " + token.username);
             return Response.ok("{}").build();
 

@@ -1,8 +1,8 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.cloud.datastore.Transaction;
+import com.google.firebase.database.*;
 import com.google.gson.Gson;
 import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
@@ -195,11 +195,47 @@ public class ChatResources {
         membersRef.child(userId).removeValueAsync();
         DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
         chatRef.child(groupId).removeValueAsync();
+        membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
+                    groupsRef.child(groupId).removeValueAsync();
+                    DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
+                    messagesRef.child(groupId).removeValueAsync();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
 
 
         return Response.ok().build();
     }
 
+    public static void leaveGroup(String groupId, String userId) {
+        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
+        membersRef.child(userId).removeValueAsync();
+        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
+        chatRef.child(groupId).removeValueAsync();
+        membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
+                    groupsRef.child(groupId).removeValueAsync();
+                    DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
+                    messagesRef.child(groupId).removeValueAsync();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
 
 
     private void sendInviteEmail(String email, String Token) {
