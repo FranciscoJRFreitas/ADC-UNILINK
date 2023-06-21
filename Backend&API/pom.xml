@@ -157,7 +157,14 @@
     </dependencies>
 
     <build>
-        <!-- To allow interaction with Gcloud client through maven-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.json</include>
+                </includes>
+            </resource>
+        </resources>
         <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
         <plugins>
             <plugin>
@@ -167,4 +174,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

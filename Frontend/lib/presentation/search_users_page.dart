@@ -12,11 +12,9 @@ import '../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'blank_page.dart';
+
 class SearchUsersPage extends StatefulWidget {
-  final User user;
-
-  SearchUsersPage({required this.user});
-
   @override
   _SearchUsersPageState createState() => _SearchUsersPageState();
 }
@@ -24,18 +22,17 @@ class SearchUsersPage extends StatefulWidget {
 class _SearchUsersPageState extends State<SearchUsersPage> {
   TextEditingController _searchController = TextEditingController();
   List<User> _searchResults = [];
-  String? uUsername;
+  late User user;
 
   @override
   void initState() {
     super.initState();
-    loadData(); // Call the method in initState
+    initialize();
+    setState(() {});
   }
 
-  Future<void> loadData() async {
-    uUsername = await cacheFactory.get('users', 'username');
-    //TODO More data needs to be retrieved
-    setState(() {});
+  Future<void> initialize() async {
+    user = await cacheFactory.get('users', 'user');
   }
 
   Future<void> searchUsers(String query) async {
@@ -51,7 +48,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
         'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
       body: json.encode({
-        'username': widget.user.username,
+        'username': user.username,
         'searchQuery': query,
       }),
     );
@@ -72,42 +69,55 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              style: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-              decoration: InputDecoration(
-                labelText: 'Search',
-                labelStyle:
-                    TextStyle(color: Theme.of(context).secondaryHeaderColor),
-                prefixIcon: Icon(Icons.search,
-                    color: Theme.of(context).secondaryHeaderColor),
-              ),
-              onChanged: (value) {
-                if (value.trim().isNotEmpty) {
-                  searchUsers(value.trim());
-                } else {
-                  setState(() {
-                    _searchResults = [];
-                  });
-                }
-              },
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
-                User user = _searchResults[index];
-                bool isNotUser = widget.user.role != 'STUDENT';
-                /*return Card(
+    return FutureBuilder<dynamic>(
+        future: cacheFactory.get('users', 'user'),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Data is still loading
+            return BlankPage();
+          } else if (snapshot.hasError) {
+            // Error occurred
+            return Text('Error: ${snapshot.error}');
+          }
+          user = snapshot.data!;
+
+          return Scaffold(
+            body: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor),
+                    decoration: InputDecoration(
+                      labelText: 'Search',
+                      labelStyle: TextStyle(
+                          color: Theme.of(context).secondaryHeaderColor),
+                      prefixIcon: Icon(Icons.search,
+                          color: Theme.of(context).secondaryHeaderColor),
+                    ),
+                    onChanged: (value) {
+                      if (value.trim().isNotEmpty) {
+                        searchUsers(value.trim());
+                      } else {
+                        setState(() {
+                          _searchResults = [];
+                        });
+                      }
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      User targetUser = _searchResults[index];
+                      bool isNotUser = user.role != 'STUDENT';
+                      /*return Card(
                   child: ListTile(
                     title: Text(
-                        '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}'),
+                        '${user.displayName}${user.username == user.username ? ' (You)' : ''}'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -131,62 +141,62 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                     ),
                   ),
                 );*/
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => UserProfilePage(
-                                user: user,
-                                targetUser: widget.user,
-                                isNotUser: isNotUser,
-                              )),
-                    );
-                  },
-                  child: Card(
-                    color: Theme.of(context).cardColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    elevation: 5,
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                      child: ListTile(
-                        leading: picture(context, user.username),
-                        title: Text(
-                          '${user.displayName}${user.username == uUsername ? ' (You)' : ''}', //TODO Mudar para token em vez de widget
-                          //TODO Faz sentido user ver se a si próprio no search?
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor,
-                                    Icons.person,
-                                    size: 20),
-                                SizedBox(width: 5),
-                                Text('Username: ${user.username}'),
-                              ],
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => UserProfilePage(
+                                      user: user,
+                                      targetUser: targetUser,
+                                      isNotUser: isNotUser,
+                                    )),
+                          );
+                        },
+                        child: Card(
+                          color: Theme.of(context).cardColor,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 8),
+                            child: ListTile(
+                              leading: picture(context, user.username),
+                              title: Text(
+                                '${targetUser.displayName}${targetUser.username == user.username ? ' (You)' : ''}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                          color: Theme.of(context)
+                                              .secondaryHeaderColor,
+                                          Icons.person,
+                                          size: 20),
+                                      SizedBox(width: 5),
+                                      Text('Username: ${user.username}'),
+                                    ],
+                                  ),
+                                  // ... Add other information rows with icons here
+                                  // Make sure to add some spacing (SizedBox) between rows for better readability
+                                ],
+                              ),
                             ),
-                            // ... Add other information rows with icons here
-                            // Make sure to add some spacing (SizedBox) between rows for better readability
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 
   Future<Uint8List?> downloadData(String username) async {

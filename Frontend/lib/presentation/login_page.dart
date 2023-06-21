@@ -336,7 +336,7 @@ Future<int> login(
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
       showErrorSnackbar("Login Successful!", false, true);
     } else {

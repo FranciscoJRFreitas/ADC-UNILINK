@@ -8,11 +8,11 @@ import 'package:unilink2023/presentation/edit_profile_page.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/PictureNotifier.dart';
+import '../domain/UserNotifier.dart';
 import '../domain/User.dart';
+import 'blank_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage();
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -27,16 +27,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    initialize();
-    setState(() {});
+    //initialize();
+    //setState(() {});
   }
 
-  Future<void> initialize() async {
-    _currentUser = await cacheFactory.get('users', 'user');
+  void initialize() {
+    
   }
 
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(
@@ -125,12 +125,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserNotifier>(context);
+    _currentUser = userProvider.currentUser!;
+
     return FutureBuilder<dynamic>(
         future: cacheFactory.get('users', 'user'),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Data is still loading
-            return CircularProgressIndicator();
+            return BlankPage();
           } else if (snapshot.hasError) {
             // Error occurred
             return Text('Error: ${snapshot.error}');

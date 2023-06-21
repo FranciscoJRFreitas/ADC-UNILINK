@@ -141,7 +141,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
           if (redirect) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+              MaterialPageRoute(builder: (context) => MainScreen()),
             );
           }
         }

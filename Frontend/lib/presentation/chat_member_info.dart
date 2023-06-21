@@ -3,19 +3,18 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/edit_profile_page.dart';
-import 'package:unilink2023/widgets/my_text_button.dart';
+
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/PictureNotifier.dart';
+
 import '../domain/Token.dart';
-import '../domain/User.dart';
+
 import 'package:http/http.dart' as http;
+
+import '../domain/UserNotifier.dart';
 
 class chatMemberInfo extends StatefulWidget {
   final String username;
@@ -44,7 +43,7 @@ class _chatMemberInfoPageState extends State<chatMemberInfo> {
   }
 
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(

@@ -9,7 +9,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/PictureNotifier.dart';
+import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/LineComboBox.dart';
@@ -19,7 +19,8 @@ import '../widgets/widget.dart';
 import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'screen.dart';
+
+import 'blank_page.dart';
 
 class EditProfilePage extends StatefulWidget {
   EditProfilePage();
@@ -29,17 +30,13 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePage extends State<EditProfilePage> {
-  bool passwordVisibility = true;
-
   late User user;
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController targetUsernameController =
-      TextEditingController();
   late TextEditingController displayNameController;
-  String _selectedEducationLevel = 'Education Level';
+  late String? _selectedEducationLevel;
   late TextEditingController birthDateController;
-  final TextEditingController mobilePhoneController = TextEditingController();
-  final TextEditingController occupationController = TextEditingController();
+  late TextEditingController mobilePhoneController;
+  late TextEditingController occupationController;
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
@@ -55,6 +52,19 @@ class _EditProfilePage extends State<EditProfilePage> {
     user = await cacheFactory.get('users', 'user');
     displayNameController = TextEditingController(text: user.displayName);
     birthDateController = TextEditingController(text: user.birthDate);
+    mobilePhoneController = TextEditingController(text: user.mobilePhone);
+    occupationController = TextEditingController(text: user.occupation);
+    _selectedEducationLevel = user.educationLevel == 'D'
+        ? 'Doctorate'
+        : user.educationLevel == 'SE'
+            ? 'Secondary Education'
+            : user.educationLevel == 'UD'
+                ? 'Undergraduate Degree'
+                : user.educationLevel == 'MD'
+                    ? 'Master\'s Degree'
+                    : user.educationLevel == 'PE'
+                        ? 'Primary Education'
+                        : 'Education Level';
   }
 
   // Function to display the snackbar
@@ -100,7 +110,7 @@ class _EditProfilePage extends State<EditProfilePage> {
         'educationLevel': educationLevel,
         'birthDate': birthDate,
         'displayName': displayName,
-        'targetUsername': targetUsername,
+        'targetUsername': '',
         'role': role,
         'activityState': activityState,
         'profileVisibility': profileVisibility,
@@ -125,8 +135,10 @@ class _EditProfilePage extends State<EditProfilePage> {
         occupation: responseBody['occupation'],
       );
 
-      cacheFactory.setUser(
-          user, await cacheFactory.get('users', 'token'), password);
+      await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
+
+      //cacheFactory.setUser(
+        //  user, await cacheFactory.get('users', 'token'), password);
       showErrorSnackbar('Changes applied successfully!', false);
       Navigator.pop(context);
     } else {
@@ -145,12 +157,12 @@ class _EditProfilePage extends State<EditProfilePage> {
         'ProfilePictures/' + await cacheFactory.get('users', 'username'));
 
     await storageReference.putData(fileBytes);
-    await Provider.of<PictureNotifier>(context, listen: false).downloadData();
+    await Provider.of<UserNotifier>(context, listen: false).downloadData();
     setState(() {});
   }
 
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(
@@ -265,7 +277,7 @@ class _EditProfilePage extends State<EditProfilePage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Data is still loading
-            return CircularProgressIndicator();
+            return BlankPage();
           } else if (snapshot.hasError) {
             // Error occurred
             return Text('Error: ${snapshot.error}');
@@ -313,7 +325,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 16.0),
                               child: LineComboBox(
-                                selectedValue: _selectedEducationLevel,
+                                selectedValue: _selectedEducationLevel!,
                                 items: [
                                   'Education Level',
                                   'Primary Education',
@@ -360,10 +372,14 @@ class _EditProfilePage extends State<EditProfilePage> {
                           Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: ToggleButton(
-                                active: _isPublic,
-                                title: "Profile Visibility",
-                                optionL: "Private",
-                                optionR: "Public"),
+                              active: _isPublic,
+                              title: "Profile Visibility",
+                              optionL: "Private",
+                              optionR: "Public",
+                              onToggle: (value) {
+                                _isPublic = value;
+                              },
+                            ),
                           ),
                           SizedBox(height: 15),
                           Container(
@@ -377,7 +393,18 @@ class _EditProfilePage extends State<EditProfilePage> {
                                     await cacheFactory.get('users', 'password');
                                 modifyAttributes(
                                   password!,
-                                  _selectedEducationLevel,
+                                  _selectedEducationLevel == 'Doctorate'
+                                      ? 'D'
+                                      : _selectedEducationLevel ==
+                                              'Secondary Education'
+                                          ? 'SE'
+                                          : _selectedEducationLevel ==
+                                                  'Undergraduate Degree'
+                                              ? 'UD'
+                                              : _selectedEducationLevel ==
+                                                      'Master\'s Degree'
+                                                  ? 'MD'
+                                                  : 'PE',
                                   birthDateController.text,
                                   user.username,
                                   displayNameController.text,

@@ -5,8 +5,15 @@ class ToggleButton extends StatefulWidget {
   final bool active;
   final String? optionL;
   final String? optionR;
+  final ValueChanged<bool>? onToggle;
 
-   ToggleButton({this.title, required this.active, required this.optionL, required this.optionR });
+  ToggleButton({
+    this.title,
+    required this.active,
+    required this.optionL,
+    required this.optionR,
+    this.onToggle,
+  });
 
   @override
   _ToggleButtonState createState() => _ToggleButtonState();
@@ -24,23 +31,25 @@ class _ToggleButtonState extends State<ToggleButton> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: widget.title != null 
-        ? Text(
-            widget.title ?? "",
-            style: Theme.of(context).textTheme.bodyMedium,
-          ) 
-        : null,
+      title: widget.title != null
+          ? Text(
+              widget.title ?? "",
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
+          : null,
       trailing: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: widget.title != null ? double.infinity : 150, // adjust width as needed
+          maxWidth: widget.title != null ? double.infinity : 150,
         ),
-        child: 
-        Switch(
+        child: Switch(
           value: _isActive,
           onChanged: (value) {
             setState(() {
               _isActive = value;
             });
+            if (widget.onToggle != null) {
+              widget.onToggle!(_isActive); // Call the callback
+            }
           },
           activeTrackColor: Theme.of(context).primaryColor.withOpacity(0.5),
           activeColor: Theme.of(context).primaryColor,
