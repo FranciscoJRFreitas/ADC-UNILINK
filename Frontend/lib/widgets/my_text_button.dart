@@ -56,21 +56,23 @@ class _MyTextButtonState extends State<MyTextButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      // GestureDetector or InkWell
-      onTap: widget.onTap,
-      child: Container(
-        alignment: widget.alignment,
-        height: widget.height,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: widget.bgColor,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Center(
-          child: Text(
-            widget.buttonName,
-            style: kButtonText.copyWith(color: widget.textColor),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          alignment: widget.alignment,
+          height: widget.height,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: widget.bgColor,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Center(
+            child: Text(
+              widget.buttonName,
+              style: kButtonText.copyWith(color: widget.textColor),
+            ),
           ),
         ),
       ),

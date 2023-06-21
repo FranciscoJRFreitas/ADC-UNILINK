@@ -3,10 +3,8 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
@@ -59,12 +57,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    initialize();
-    setState(() {});
-  }
-
-  Future<void> initialize() async {
-    _currentUser = await cacheFactory.get('users', 'user');
   }
 
   List<Widget> _widgetOptions() => [
@@ -172,169 +164,146 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: cacheFactory.get('users', 'user'),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Data is still loading
-            return BlankPage();
-          } else if (snapshot.hasError) {
-            // Error occurred
-            return Text('Error: ${snapshot.error}');
-          }
-          _currentUser = snapshot.data!;
-          Color roleColor = _currentUser.getRoleColor(_currentUser.role);
-          bool _isExpanded = false;
+    
+    final userProvider = Provider.of<UserNotifier>(context);
+    _currentUser = userProvider.currentUser!;
 
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Color.fromARGB(255, 8, 52, 88), //roleColor,
-              title: Text(
-                _title[_selectedIndex],
-                style: Theme.of(context).textTheme.bodyLarge,
-                selectionColor: Colors.white,
-              ),
-              centerTitle: true,
-              actions: [
-                Tooltip(
-                  message: 'Quick Logout',
-                  child: IconButton(
-                    icon: Icon(Icons.logout),
-                    color: roleColor == Colors.yellow
-                        ? Colors.black
-                        : Colors.white,
-                    onPressed: () async {
-                      final token = await cacheFactory.get('users', 'token');
-                      if (token != null) {
-                        await logout(
-                            context, _currentUser.username, _showErrorSnackbar);
-                      } else {
-                        _showErrorSnackbar('Error logging out', true);
-                      }
-                    },
-                  ),
-                )
-              ],
+    Color roleColor = _currentUser.getRoleColor(_currentUser.role);
+    bool _isExpanded = false;
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 8, 52, 88), //roleColor,
+        title: Text(
+          _title[_selectedIndex],
+          style: Theme.of(context).textTheme.bodyLarge,
+          selectionColor: Colors.white,
+        ),
+        centerTitle: true,
+        actions: [
+          Tooltip(
+            message: 'Quick Logout',
+            child: IconButton(
+              icon: Icon(Icons.logout),
+              color: roleColor == Colors.yellow ? Colors.black : Colors.white,
+              onPressed: () async {
+                final token = await cacheFactory.get('users', 'token');
+                if (token != null) {
+                  await logout(
+                      context, _currentUser.username, _showErrorSnackbar);
+                } else {
+                  _showErrorSnackbar('Error logging out', true);
+                }
+              },
             ),
-            drawer: Drawer(
-              backgroundColor: Color.fromARGB(255, 8, 52, 88),
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  DrawerHeader(
-                    decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 8, 52, 88) //roleColor,
+          )
+        ],
+      ),
+      drawer: Drawer(
+        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 8, 52, 88) //roleColor,
+                  ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Row(children: [
+                    profilePicture(context),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                      child: Column(children: [
+                        SizedBox(
+                          width: 5,
                         ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Row(children: [
-                          profilePicture(context),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                            child: Column(children: [
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                processDisplayName(_currentUser.displayName),
-                                style: _currentUser.displayName.length < 5
-                                    ? Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(color: Colors.white)
-                                    : _currentUser.displayName.length < 10
-                                        ? Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(color: Colors.white)
-                                        : Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                //trocar por numero de aluno
-                                'Role: ${_currentUser.role}',
-                                style: TextStyle(
-                                  color: Colors.white60,
-                                  //roleColor == Colors.yellow ? Colors.black: Colors.white,
-                                  fontSize: 10,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ]),
-                          ),
-                        ]),
+                        Text(
+                          processDisplayName(_currentUser.displayName),
+                          style: _currentUser.displayName.length < 5
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(color: Colors.white)
+                              : _currentUser.displayName.length < 10
+                                  ? Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(color: Colors.white)
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
                         SizedBox(
                           height: 5,
+                        ),
+                        Text(
+                          //trocar por numero de aluno
+                          'Role: ${_currentUser.role}',
+                          style: TextStyle(
+                            color: Colors.white60,
+                            //roleColor == Colors.yellow ? Colors.black: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   ),
-                  ListTile(
-                    leading: Icon(Icons.person),
-                    title: Text('Profile'),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 3;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
-                      ? ExpansionTile(
-                          leading: Icon(
-                            Icons.person_add_alt_1_outlined,
-                          ),
-                          title: Text('Student',
-                              style: Theme.of(context).textTheme.bodyLarge),
-                          children: [
-                              ListTile(
-                                leading: Icon(Icons.schedule),
-                                title: Text('Schedule'),
-                                onTap: () {
-                                  setState(() {
-                                    _selectedIndex = 9;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ])
-                      : Container(),
-                  _currentUser.role == 'PROF' || _currentUser.role == 'SU'
-                      ? ListTile(
-                          leading: Icon(Icons.newspaper),
-                          title: Text('Professor'),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 3;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
+                ? ExpansionTile(
+                    leading: Icon(
+                      Icons.person_add_alt_1_outlined,
+                    ),
+                    title: Text('Student',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    children: [
+                        ListTile(
+                          leading: Icon(Icons.schedule),
+                          title: Text('Schedule'),
                           onTap: () {
                             setState(() {
                               _selectedIndex = 10;
                             });
                             Navigator.pop(context);
                           },
-                        )
-                      : Container(),
-                  _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
-                      ? ListTile(
-                          leading: Icon(Icons.newspaper),
-                          title: Text('Director'),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 11;
-                            });
-                            Navigator.pop(context);
-                          },
-                        )
-                      : Container(),
-                  ListTile(
+                        ),
+                      ])
+                : Container(),
+            _currentUser.role == 'PROF' || _currentUser.role == 'SU'
+                ? ListTile(
+                    leading: Icon(Icons.newspaper),
+                    title: Text('Professor'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 10;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : Container(),
+            _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
+                ? ListTile(
                     leading: Icon(Icons.newspaper),
                     title: Text('News'),
                     onTap: () {
@@ -450,28 +419,27 @@ class _MainScreenState extends State<MainScreen> {
                     },
                   ),
 
-                  ListTile(
-                    leading: Icon(Icons.logout_sharp),
-                    title: Text('Logout',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () async {
-                      final token = await cacheFactory.get('users', 'token');
-                      if (token != null) {
-                        await logout(
-                            context, _currentUser.username, _showErrorSnackbar);
-                      } else {
-                        _showErrorSnackbar('Error logging out', true);
-                      }
-                    },
-                  ),
-                  // ... other Drawer items
-                ],
-              ),
+            ListTile(
+              leading: Icon(Icons.logout_sharp),
+              title:
+                  Text('Logout', style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () async {
+                final token = await cacheFactory.get('users', 'token');
+                if (token != null) {
+                  await logout(
+                      context, _currentUser.username, _showErrorSnackbar);
+                } else {
+                  _showErrorSnackbar('Error logging out', true);
+                }
+              },
             ),
-            //body: _widgetOptions()[_selectedIndex],
-            body: getSelectedWidget(),
-          );
-        });
+            // ... other Drawer items
+          ],
+        ),
+      ),
+      //body: _widgetOptions()[_selectedIndex],
+      body: getSelectedWidget(),
+    );
   }
 
   String processDisplayName(String displayName) {
