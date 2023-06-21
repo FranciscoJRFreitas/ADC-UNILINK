@@ -86,21 +86,6 @@ class _MainScreenState extends State<MainScreen> {
         Placeholder(), //diretor
       ];
 
-  Future getImage(bool gallery) async {
-    ImagePicker picker = ImagePicker();
-
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    final fileBytes = await pickedFile!.readAsBytes();
-
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('ProfilePictures/' + _currentUser.username);
-
-    await storageReference.putData(fileBytes);
-    setState(() {});
-  }
-
   Widget picture(BuildContext context) {
     final photoProvider = Provider.of<PictureNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
@@ -286,6 +271,16 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 3;
+                });
+                Navigator.pop(context);
+              },
+            ),
             widget.user.role == 'STUDENT' || widget.user.role == 'SU'
                 ? ExpansionTile(
                     leading: Icon(
@@ -294,16 +289,6 @@ class _MainScreenState extends State<MainScreen> {
                     title: Text('Student',
                         style: Theme.of(context).textTheme.bodyLarge),
                     children: [
-                        ListTile(
-                          leading: Icon(Icons.person),
-                          title: Text('Profile'),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 3;
-                            });
-                            Navigator.pop(context);
-                          },
-                        ),
                         ListTile(
                           leading: Icon(Icons.schedule),
                           title: Text('Schedule'),
