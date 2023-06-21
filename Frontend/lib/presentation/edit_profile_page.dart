@@ -12,6 +12,8 @@ import '../data/cache_factory_provider.dart';
 import '../domain/PictureNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
+import '../widgets/LineComboBox.dart';
+import '../widgets/LineDateField.dart';
 import '../widgets/ToggleButton.dart';
 import '../widgets/widget.dart';
 import '../widgets/LineTextField.dart';
@@ -20,10 +22,7 @@ import 'dart:convert';
 import 'screen.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final User user;
-  final Function(User) onUserUpdate;
-
-  EditProfilePage({required this.user, required this.onUserUpdate});
+  EditProfilePage();
 
   @override
   _EditProfilePage createState() => _EditProfilePage();
@@ -32,42 +31,30 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePage extends State<EditProfilePage> {
   bool passwordVisibility = true;
 
+  late User user;
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController targetUsernameController =
       TextEditingController();
   late TextEditingController displayNameController;
-  late TextEditingController emailController;
-  String _selectedProfileVisibility = 'Profile Visibility';
-  String sv = '';
-  String _selectedUserRole = 'User Role';
-  String sr = '';
-  String _selectedActivityState = 'Activity State';
-  String sa = '';
   String _selectedEducationLevel = 'Education Level';
   late TextEditingController birthDateController;
-  final TextEditingController landlinePhoneController = TextEditingController();
   final TextEditingController mobilePhoneController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
-  final TextEditingController workplaceController = TextEditingController();
-  late TextEditingController addressController;
-  final TextEditingController additionalAddressController =
-      TextEditingController();
-  final TextEditingController localityController = TextEditingController();
-  final TextEditingController postalCodeController = TextEditingController();
-  late TextEditingController nifController;
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   @override
   void initState() {
-    displayNameController =
-        TextEditingController(text: widget.user.displayName);
-    emailController = TextEditingController(text: widget.user.email);
-    birthDateController = TextEditingController(text: widget.user.birthDate);
-    addressController = TextEditingController(text: widget.user.address);
-    nifController = TextEditingController(text: widget.user.nif);
+    super.initState();
+    initialize();
+    setState(() {});
+  }
 
+  Future<void> initialize() async {
+    user = await cacheFactory.get('users', 'user');
+    displayNameController = TextEditingController(text: user.displayName);
+    birthDateController = TextEditingController(text: user.birthDate);
   }
 
   // Function to display the snackbar
@@ -89,27 +76,16 @@ class _EditProfilePage extends State<EditProfilePage> {
     String birthDate,
     String targetUsername,
     String displayName,
-    String email,
     String role,
     String activityState,
     String profileVisibility,
-    String landlinePhone,
     String mobilePhone,
     String occupation,
-    String workplace,
-    String address,
-    String additionalAddress,
-    String locality,
-    String postalCode,
-    String nif,
-    String photo,
     void Function(String, bool) showErrorSnackbar,
-    bool redirect,
   ) async {
     final url = kBaseUrl + 'rest/modify/';
     final tokenID = await cacheFactory.get('users', 'token');
-    final storedUsername = await cacheFactory.get('users', 'username');
-    Token token = new Token(tokenID: tokenID, username: storedUsername);
+    Token token = new Token(tokenID: tokenID, username: user.username);
 
     final response = await http.patch(
       Uri.parse(url),
@@ -118,9 +94,9 @@ class _EditProfilePage extends State<EditProfilePage> {
         'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
       body: json.encode({
-        'username': widget.user.username,
-        'email': email,
+        'username': user.username,
         'password': password,
+        'email': user.email,
         'educationLevel': educationLevel,
         'birthDate': birthDate,
         'displayName': displayName,
@@ -128,16 +104,8 @@ class _EditProfilePage extends State<EditProfilePage> {
         'role': role,
         'activityState': activityState,
         'profileVisibility': profileVisibility,
-        'landlinePhone': landlinePhone,
         'mobilePhone': mobilePhone,
         'occupation': occupation,
-        'workplace': workplace,
-        'address': address,
-        'additionalAddress': additionalAddress,
-        'locality': locality,
-        'postalCode': postalCode,
-        'taxIdentificationNumber': nif,
-        'photo': photo,
       }),
     );
 
@@ -153,32 +121,14 @@ class _EditProfilePage extends State<EditProfilePage> {
         birthDate: responseBody['birthDate'],
         profileVisibility: responseBody['profileVisibility'],
         state: responseBody['state'],
-        landlinePhone: responseBody['landlinePhone'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
-        workplace: responseBody['workplace'],
-        address: responseBody['address'],
-        additionalAddress: responseBody['additionalAddress'],
-        locality: responseBody['locality'],
-        postalCode: responseBody['postalCode'],
-        nif: responseBody['nif'],
-        photoUrl: responseBody['photo'],
       );
 
-      if (responseBody['username'] == widget.user.username) {
-        if (widget.onUserUpdate != null) {
-          widget.onUserUpdate(user);
-          if (redirect) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MainScreen(user: user)),
-            );
-          }
-        }
-      }
-      if (redirect) {
-        showErrorSnackbar('Changes applied successfully!', false);
-      }
+      cacheFactory.setUser(
+          user, await cacheFactory.get('users', 'token'), password);
+      showErrorSnackbar('Changes applied successfully!', false);
+      Navigator.pop(context);
     } else {
       showErrorSnackbar('Failed to modify attributes: ${response.body}', true);
     }
@@ -191,12 +141,11 @@ class _EditProfilePage extends State<EditProfilePage> {
 
     final fileBytes = await pickedFile!.readAsBytes();
 
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('ProfilePictures/' + widget.user.username);
+    Reference storageReference = FirebaseStorage.instance.ref().child(
+        'ProfilePictures/' + await cacheFactory.get('users', 'username'));
 
     await storageReference.putData(fileBytes);
-    await Provider.of<PictureNotifier>(context, listen:false).downloadData();
+    await Provider.of<PictureNotifier>(context, listen: false).downloadData();
     setState(() {});
   }
 
@@ -311,151 +260,171 @@ class _EditProfilePage extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool _isPublic = widget.user.profileVisibility!.toLowerCase() == 'public';
-    double offset = MediaQuery.of(context).size.width * 0.1;
-    return Dialog(
-      insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20.0)),
-      ),
-      child: Stack(
-        alignment: Alignment.topCenter,
-        clipBehavior: Clip.none,
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: 750, // Set the maximum width for the Dialog
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                    top: 20), // Provide space for the image at the top
-                child: Column(
-                  children: [
-                    SizedBox(height: 40),
-                    Divider(
-                      thickness: 2,
-                      color: Theme.of(context).primaryColor,
+    return FutureBuilder<dynamic>(
+        future: cacheFactory.get('users', 'user'),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Data is still loading
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            // Error occurred
+            return Text('Error: ${snapshot.error}');
+          }
+          user = snapshot.data!;
+
+          bool _isPublic = user.profileVisibility!.toLowerCase() == 'public';
+          double offset = MediaQuery.of(context).size.width * 0.1;
+          return Dialog(
+            insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            ),
+            child: Stack(
+              alignment: Alignment.topCenter,
+              clipBehavior: Clip.none,
+              children: [
+                SingleChildScrollView(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: 750, // Set the maximum width for the Dialog
                     ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
-                          title: 'Display Name',
-                          icon: Icons.alternate_email,
-                          controller: displayNameController),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
-                          title: 'Email',
-                          icon: Icons.mail,
-                          controller: emailController),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
-                          title: "Birth date",
-                          icon: Icons.schedule,
-                          controller: birthDateController),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
-                          title: "Address",
-                          icon: Icons.home,
-                          controller: addressController),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
-                          title: "NIF",
-                          icon: Icons.perm_identity,
-                          controller: nifController),
-                    ),
-                    SizedBox(height: 5),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: ToggleButton(
-                          active: _isPublic,
-                          title: "Profile Visibility",
-                          optionL: "Private",
-                          optionR: "Public"),
-                    ),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
-                      child: MyTextButton(
-                        alignment: Alignment.center,
-                        buttonName: 'Save Changes',
-                        onTap: () async {
-                          String? password;
-                          password =
-                              await cacheFactory.get('users', 'password');
-                          print(password);
-                          print(nifController.text);
-                          modifyAttributes(
-                              password!,
-                              '',
-                              birthDateController.text,
-                              widget.user.username,
-                              displayNameController.text,
-                              emailController.text,
-                              'SU',
-                              '',
-                              '',
-                              '',
-                              '',
-                              '',
-                              '',
-                              addressController.text,
-                              '',
-                              '',
-                              '2012-666',
-                              nifController.text,
-                              '',
-                              _showErrorSnackbar,
-                              true);
-                        },
-                        bgColor: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        height: 45,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                          top: 20), // Provide space for the image at the top
+                      child: Column(
+                        children: [
+                          SizedBox(height: 40),
+                          Divider(
+                            thickness: 2,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          SizedBox(height: 15),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: LineTextField(
+                                title: 'Display Name',
+                                icon: Icons.alternate_email,
+                                controller: displayNameController),
+                          ),
+                          SizedBox(height: 5),
+                          Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: LineComboBox(
+                                selectedValue: _selectedEducationLevel,
+                                items: [
+                                  'Education Level',
+                                  'Primary Education',
+                                  'Secondary Education',
+                                  'Undergraduate Degree',
+                                  'Master\'s Degree',
+                                  'Doctorate'
+                                ],
+                                onChanged: (dynamic newValue) {
+                                  setState(() {
+                                    _selectedEducationLevel = newValue;
+                                  });
+                                },
+                                icon: Icons.school,
+                              )),
+                          SizedBox(height: 5),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: LineDateField(
+                                title: "Birth date",
+                                icon: Icons.schedule,
+                                controller: birthDateController),
+                          ),
+                          SizedBox(height: 15),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: LineTextField(
+                                title: "Mobile Phone",
+                                icon: Icons.phone,
+                                controller: mobilePhoneController),
+                          ),
+                          SizedBox(height: 15),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: LineTextField(
+                                title: "Occupation",
+                                icon: Icons.cases_rounded,
+                                controller: occupationController),
+                          ),
+                          SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
+                            child: ToggleButton(
+                                active: _isPublic,
+                                title: "Profile Visibility",
+                                optionL: "Private",
+                                optionR: "Public"),
+                          ),
+                          SizedBox(height: 15),
+                          Container(
+                            padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
+                            child: MyTextButton(
+                              alignment: Alignment.center,
+                              buttonName: 'Save Changes',
+                              onTap: () async {
+                                String? password;
+                                password =
+                                    await cacheFactory.get('users', 'password');
+                                modifyAttributes(
+                                  password!,
+                                  _selectedEducationLevel,
+                                  birthDateController.text,
+                                  user.username,
+                                  displayNameController.text,
+                                  user.role!,
+                                  'ACTIVE',
+                                  _isPublic ? 'PUBLIC' : 'PRIVATE',
+                                  mobilePhoneController.text,
+                                  occupationController.text,
+                                  _showErrorSnackbar,
+                                );
+                              },
+                              bgColor: Theme.of(context).primaryColor,
+                              textColor: Colors.white,
+                              height: 45,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 20),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Positioned(top: -65, child: profilePicture(context)),
-          Positioned(
-            top: 1,
-            right: 1,
-            child: IconButton(
-              hoverColor:
-                  Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
-              splashRadius: 20.0,
-              icon: Container(
-                height: 25,
-                width: 25,
-                child: Icon(
-                  Icons.close,
-                  color: Theme.of(context).secondaryHeaderColor,
+                Positioned(top: -65, child: profilePicture(context)),
+                Positioned(
+                  top: 1,
+                  right: 1,
+                  child: IconButton(
+                    hoverColor:
+                        Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+                    splashRadius: 20.0,
+                    icon: Container(
+                      height: 25,
+                      width: 25,
+                      child: Icon(
+                        Icons.close,
+                        color: Theme.of(context).secondaryHeaderColor,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 
   Widget textField(TextInputType inputType, TextEditingController controller) {

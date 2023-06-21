@@ -35,28 +35,10 @@ class UserProfilePage extends StatelessWidget {
                 _buildProfileCard('Profile Visibility',
                     user.profileVisibility ?? 'N/A', context),
               if (isNotUser)
-                _buildProfileCard(
-                    'Landline', user.landlinePhone ?? 'N/A', context),
-              if (isNotUser)
                 _buildProfileCard('Mobile', user.mobilePhone ?? 'N/A', context),
               if (isNotUser)
                 _buildProfileCard(
                     'Occupation', user.occupation ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard(
-                    'Workplace', user.workplace ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('Address', user.address ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('Additional Address',
-                    user.additionalAddress ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('Locality', user.locality ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard(
-                    'Postal Code', user.postalCode ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('NIF', user.nif ?? 'N/A', context),
             ],
           ),
         ),

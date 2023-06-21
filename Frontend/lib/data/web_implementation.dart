@@ -19,6 +19,7 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   Future<dynamic>? get(String table, String value) async {
+    if (table == 'users' && value == 'user') return getUser();
     final cookies = document.cookie?.split(';');
     for (final cookie in cookies!) {
       final parts = cookie.split('=');
@@ -32,6 +33,32 @@ class CacheFactoryImpl implements CacheFactory {
       }
     }
     return null;
+  }
+
+  Future<User> getUser() async {
+    String displayName = await get("", 'displayName') ?? '';
+    String username = await get("", 'username') ?? '';
+    String email = await get("", 'email') ?? '';
+    String? role = await get("", 'role') ?? '';
+    String? educationLevel = await get("", 'educationLevel') ?? '';
+    String? birthDate = await get("", 'birthDate')?? '';
+    String? profileVisibility = await get("", 'profileVisibility')?? '';
+    String? state = await get("", 'state')?? '';
+    String? mobilePhone = await get("", 'mobilePhone')?? '';
+    String? occupation = await get("", 'occupation')?? '';
+
+    return User(
+      displayName: displayName,
+      username: username,
+      email: email,
+      role: role,
+      educationLevel: educationLevel,
+      birthDate: birthDate,
+      profileVisibility: profileVisibility,
+      state: state,
+      mobilePhone: mobilePhone,
+      occupation: occupation,
+    );
   }
 
   @override
@@ -65,13 +92,24 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
-  void initDB() async {
-  }
+  void initDB() async {}
 
   @override
   void setUser(User user, String token, String password) {
+    set('displayName', user.displayName);
+    set('email', user.email);
+    set('educationLevel', user.educationLevel);
+    set('birthDate', user.birthDate);
+    set('profileVisibility', user.profileVisibility);
+    set('state', user.state);
+    set('mobilePhone', user.mobilePhone);
+    set('occupation', user.occupation);
+    set('username', user.username);
+    set('role', user.role);
+    set('password', password);
+    set('token', token);
   }
-  
+
   @override
   void removeNewsCache() {
     // TODO: implement removeNewsCache

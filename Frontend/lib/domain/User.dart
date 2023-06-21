@@ -18,16 +18,8 @@ class User {
   final String? birthDate;
   final String? profileVisibility;
   final String? state;
-  final String? landlinePhone;
   final String? mobilePhone;
   final String? occupation;
-  final String? workplace;
-  final String? address;
-  final String? additionalAddress;
-  final String? locality;
-  final String? postalCode;
-  final String? nif;
-  final String? photoUrl;
 
   User({
     required this.displayName,
@@ -38,16 +30,8 @@ class User {
     required this.birthDate,
     required this.profileVisibility,
     required this.state,
-    required this.landlinePhone,
     required this.mobilePhone,
     required this.occupation,
-    required this.workplace,
-    required this.address,
-    required this.additionalAddress,
-    required this.locality,
-    required this.postalCode,
-    required this.nif,
-    required this.photoUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -61,37 +45,21 @@ class User {
         birthDate: '',
         profileVisibility: '',
         state: '',
-        landlinePhone: '',
         mobilePhone: '',
         occupation: '',
-        workplace: '',
-        address: '',
-        additionalAddress: '',
-        locality: '',
-        postalCode: '',
-        nif: '',
-        photoUrl: '',
       );
     } else {
       return User(
-        additionalAddress: json['user_additionalAddress']['string'],
-        address: json['user_address']['string'],
         displayName: json['user_displayName']['string'],
         email: json['user_email']['string'],
-        landlinePhone: json['user_landlinePhone']['string'],
-        locality: json['user_locality']['string'],
         mobilePhone: json['user_mobilePhone']['string'],
         occupation: json['user_occupation']['string'],
-        postalCode: json['user_postalCode']['string'],
         educationLevel: json['user_educationLevel']['string'],
         birthDate: json['user_birthDate']['string'],
         profileVisibility: json['user_profileVisibility']['string'],
         role: json['user_role']['string'],
         state: json['user_state']['string'],
-        nif: json['user_taxIdentificationNumber']['string'],
         username: json['user_username']['string'],
-        workplace: json['user_workplace']['string'],
-        photoUrl: json['user_photo']['string'],
       );
     }
   }
@@ -145,16 +113,8 @@ class User {
       'birthDate': nullFormat(birthDate),
       'profileVisibility': nullFormat(profileVisibility),
       'state': nullFormat(state),
-      'landlinePhone': nullFormat(landlinePhone),
       'mobilePhone': nullFormat(mobilePhone),
       'occupation': nullFormat(occupation),
-      'workplace': nullFormat(workplace),
-      'address': nullFormat(address),
-      'additionalAddress': nullFormat(additionalAddress),
-      'locality': nullFormat(locality),
-      'postalCode': nullFormat(postalCode),
-      'nif': nullFormat(nif),
-      'photoUrl': nullFormat(photoUrl),
       'token': token,
       'password': password
     };
