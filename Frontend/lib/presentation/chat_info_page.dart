@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:unilink2023/presentation/chat_member_info.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
-import 'package:unilink2023/presentation/chat_page.dart';
 
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
@@ -62,6 +61,26 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   isAdmin: event.snapshot.value as bool));
             }
           });
+        }
+      });
+    });
+    membersRef.onChildRemoved.listen((event) {
+      String memberId = event.snapshot.key as String;
+
+      setState(() {
+        members.removeWhere((member) => member.username == memberId);
+      });
+    });
+
+// Listen for child changed events
+    membersRef.onChildChanged.listen((event) {
+      String memberId = event.snapshot.key as String;
+
+      setState(() {
+        // Find the member in the list and update its isAdmin value
+        int index = members.indexWhere((member) => member.username == memberId);
+        if (index != -1) {
+          members[index].isAdmin = event.snapshot.value as bool;
         }
       });
     });
@@ -316,7 +335,20 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                           itemBuilder: (context, index) {
                             MembersData member = members[index];
                             return GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                if (widget.username != member.username) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => chatMemberInfo(
+                                          username: member.username,
+                                          displayName: member.dispName,
+                                          sessionUsername: widget.username,
+                                          groupId: widget.groupId,
+                                          isAdmin: isAdmin),
+                                    ),
+                                  );
+                                }
+                              },
                               child: Card(
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
@@ -592,7 +624,7 @@ Future<void> leaveGroup(
 class MembersData {
   final String username;
   final String dispName;
-  final bool isAdmin;
+  bool isAdmin;
   MembersData(
       {required this.username, required this.dispName, required this.isAdmin});
 }

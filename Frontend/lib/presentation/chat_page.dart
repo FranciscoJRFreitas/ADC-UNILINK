@@ -44,10 +44,10 @@ class _ChatPageState extends State<ChatPage> {
         FirebaseDatabase.instance.ref().child('groups');
 
     StreamController<List<Group>> streamController = StreamController();
+    List<Group> groups = [];
 
     chatRef.onValue.listen((event) {
       DataSnapshot chatSnapshot = event.snapshot;
-      List<Group> groups = [];
       Map<dynamic, dynamic> chatsData =
           chatSnapshot.value as Map<dynamic, dynamic>;
       chatsData.forEach((key, value) {
@@ -67,6 +67,14 @@ class _ChatPageState extends State<ChatPage> {
             streamController.add(groups);
           });
         }
+      });
+    });
+
+    chatRef.onChildRemoved.listen((event) {
+      String groupId = event.snapshot.key as String;
+
+      setState(() {
+        groups.removeWhere((group) => group.id == groupId);
       });
     });
 
