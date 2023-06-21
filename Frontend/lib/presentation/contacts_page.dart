@@ -4,8 +4,7 @@ import 'package:unilink2023/widgets/news_box.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../domain/Contact.dart';
 import '../widgets/contacts_box.dart';
-import '../application/fetchContacts.dart';
-import 'package:alphabet_list_scroll_view/alphabet_list_scroll_view.dart';
+import 'package:alphabet_list_view/alphabet_list_view.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:searchfield/searchfield.dart';
@@ -24,11 +23,11 @@ class _ContactsPageState extends State<ContactsPage> {
   bool _isLoading = false;
   TextEditingController _searchController = TextEditingController();
   List<Contact> _searchContacts = [];
+
   @override
   void initState() {
     super.initState();
     _fetchContacts();
-    //_searchContacts = _contacts;
   }
 
   void _fetchContacts() async {
@@ -37,8 +36,9 @@ class _ContactsPageState extends State<ContactsPage> {
     var contactsJson = json.decode(jsonString);
 
     var departmentsJson = contactsJson['departments'];
-    var servicesJson = contactsJson['servicos'];
+    var servicesJson = contactsJson['services'];
     var nucleosJson = contactsJson['nucleos'];
+    var organsJson = contactsJson['orgaos'];
 
     var departments = departmentsJson != null
         ? (departmentsJson as List).map((i) => Contact.fromJson(i)).toList()
@@ -49,73 +49,90 @@ class _ContactsPageState extends State<ContactsPage> {
     var nucleos = nucleosJson != null
         ? (nucleosJson as List).map((i) => Contact.fromJson(i)).toList()
         : [];
+    var organs = organsJson != null
+        ? (organsJson as List).map((i) => Contact.fromJson(i)).toList()
+        : [];
 
     setState(() {
       _contacts = [
         ...departments,
         ...services,
-        ...nucleos
+        ...nucleos,
+        ...organs,
       ]; // Combining both lists
     });
   }
 
-  /*Widget build(BuildContext context) {
-    return Scaffold(
-      body: AlphabetListScrollView(
-        strList: _contacts
-            .map((contact) => contact.name)
-            .toList(), // Assuming contact has a 'name' property
-        highlightTextStyle: TextStyle(color: Colors.white),
-        normalTextStyle: TextStyle(color: Colors.green),
-        showPreview: true,
+  Widget build(BuildContext context) {
+    // Create a map that associates each starting letter with a list of contacts.
+    Map<String, List<Contact>> contactsByLetter = {};
+    for (Contact contact in _contacts) {
+      String startingLetter =
+          (contact.contactName != null && contact.contactName.isNotEmpty)
+              ? contact.contactName[0].toUpperCase()
+              : '#';
+      if (!contactsByLetter.containsKey(startingLetter)) {
+        contactsByLetter[startingLetter] = [];
+      }
+      contactsByLetter[startingLetter]!.add(contact);
+    }
 
-        itemBuilder: (context, index) {
-          final item = _contacts[index];
+    // Convert the map into a list of AlphabetListViewItemGroups.
+    List<AlphabetListViewItemGroup> itemGroups = [];
+    for (String letter in contactsByLetter.keys) {
+      List<Contact> contactsForLetter = contactsByLetter[letter]!;
+      itemGroups.add(
+        AlphabetListViewItemGroup(
+          tag: letter,
+          children: contactsForLetter.map((contact) {
+            /*return MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                //onTap: () => _launchURL(contact.url ?? ''),
+                child: ContactCard(
+                  contact: contact,
+                ),
+              ),
+            );*/
+            return ContactCard(
+              contact: contact,
+            );
+          }).toList(),
+        ),
+      );
+    }
 
-          return MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () => _launchURL(item.url ?? ''),
-              child: ContactCard(
-                contact: item,
+    final AlphabetListViewOptions options = AlphabetListViewOptions(
+      listOptions: ListOptions(
+        listHeaderBuilder: (context, symbol) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(
+                symbol,
+                style: TextStyle(color: Colors.black),
               ),
             ),
           );
         },
-        indexedHeight: (index) => 150, // Set your item height
+      ),
+      scrollbarOptions: const ScrollbarOptions(
+        backgroundColor: Color.fromARGB(255, 11, 76, 142),
+      ),
+      overlayOptions: const OverlayOptions(
+        showOverlay: false,
       ),
     );
-  }*/
-  Widget build(BuildContext context) {
+
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: AlphabetListScrollView(
-              strList: _contacts
-                  .map((contact) => contact.name)
-                  .toList(), // Assuming contact has a 'name' property
-              highlightTextStyle: TextStyle(color: Colors.white),
-              normalTextStyle: TextStyle(color: Colors.green),
-              showPreview: true,
-
-              itemBuilder: (context, index) {
-                final item = _contacts[index];
-
-                return MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () => _launchURL(item.url ?? ''),
-                    child: ContactCard(
-                      contact: item,
-                    ),
-                  ),
-                );
-              },
-              indexedHeight: (index) => 150, // Set your item height
-            ),
-          ),
-        ],
+      body: AlphabetListView(
+        items: itemGroups,
+        options: options,
       ),
     );
   }
