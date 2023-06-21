@@ -57,7 +57,10 @@ class _MyTextComboBoxState extends State<MyTextComboBox> {
               isExpanded: true,
               iconEnabledColor: Theme.of(context).primaryColor,
               dropdownColor: Theme.of(context).scaffoldBackgroundColor,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium!
+                  .copyWith(color: Theme.of(context).secondaryHeaderColor),
               onChanged: widget.onChanged,
               items: widget.items.map<DropdownMenuItem<String>>((String item) {
                 return DropdownMenuItem<String>(
@@ -67,7 +70,10 @@ class _MyTextComboBoxState extends State<MyTextComboBox> {
               }).toList(),
               hint: Text(
                 widget.hintText,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).secondaryHeaderColor),
               ),
             ),
           ),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../constants.dart';
-
+// ignore: must_be_immutable
 class regAge extends StatefulWidget {
-  const regAge({
+  regAge({
     Key? key,
     required this.textColor,
     required this.controller,
@@ -12,6 +11,7 @@ class regAge extends StatefulWidget {
 
   final Color textColor;
   final TextEditingController controller;
+  bool wasPicked = false;
 
   @override
   State<regAge> createState() => _regAgeState();
@@ -27,24 +27,30 @@ class _regAgeState extends State<regAge> {
           hintStyle: Theme.of(context).textTheme.bodyMedium,
           prefixIcon: Icon(
             Icons.calendar_month_outlined,
-            color: Theme.of(context).primaryIconTheme.color,
+            color: widget.wasPicked
+                ? Theme.of(context).secondaryHeaderColor
+                : Theme.of(context).textTheme.bodyMedium!.color,
           ),
         ),
-        style: Theme.of(context).textTheme.bodyMedium,
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium!
+            .copyWith(color: Theme.of(context).secondaryHeaderColor),
         readOnly: true, // when true user cannot edit text
         onTap: () async {
           try {
             DateTime? pickedDate = await showDatePicker(
                 context: context,
-                initialDate: DateTime(2010), //get today's date
+                initialDate: DateTime.now(), //get today's date
                 firstDate: DateTime(
-                    1940), //DateTime.now() - not to allow to choose before today.
-                lastDate: DateTime(2010));
+                    1940),
+                lastDate: DateTime.now());
             if (pickedDate != null) {
               String formattedDate =
                   DateFormat("yyyy-MM-dd").format(pickedDate);
               setState(() {
                 widget.controller.text = formattedDate.toString();
+                widget.wasPicked = true;
               });
             } else {
               print("Not selected");

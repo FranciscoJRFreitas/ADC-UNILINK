@@ -18,7 +18,6 @@ class PictureNotifier with ChangeNotifier {
 
   Future<void> initialize() async{
     await getUsername();
-    print(username);
     await downloadData();
   }
 

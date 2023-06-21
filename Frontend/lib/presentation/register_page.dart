@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import '../widgets/register_page.dart';
+import '../widgets/my_age_field.dart';
 import '../widgets/widget.dart';
 import '../constants.dart';
 
@@ -60,15 +60,8 @@ class _RegisterPageState extends State<RegisterPage> {
     String educationLevel,
     String birthDate,
     String profileVisibility,
-    String landlinePhone,
     String mobilePhone,
     String occupation,
-    String workplace,
-    String address,
-    String additionalAddress,
-    String locality,
-    String postalCode,
-    String nif,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + 'rest/register/';
@@ -84,15 +77,8 @@ class _RegisterPageState extends State<RegisterPage> {
         'educationLevel': educationLevel,
         'birthDate': birthDate,
         'profileVisibility': profileVisibility,
-        'landlinePhone': landlinePhone,
         'mobilePhone': mobilePhone,
         'occupation': occupation,
-        'workplace': workplace,
-        'address': address,
-        'additionalAddress': additionalAddress,
-        'locality': locality,
-        'postalCode': postalCode,
-        'taxIdentificationNumber': nif,
       }),
     );
 
@@ -229,6 +215,18 @@ class _RegisterPageState extends State<RegisterPage> {
                           SizedBox(
                             height: 25,
                           ),
+                          MyTextField(
+                            small: false,
+                            controller: mobilePhoneController,
+                            hintText: 'Mobile Phone',
+                            inputType: TextInputType.phone,
+                          ),
+                          MyTextField(
+                            small: false,
+                            controller: occupationController,
+                            hintText: 'Occupation',
+                            inputType: TextInputType.text,
+                          ),
                           MyTextComboBox(
                             selectedValue: _selectedEducationLevel,
                             hintText: 'Education Level',
@@ -250,7 +248,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             height: 10,
                           ),
                           regAge(
-                            textColor: Colors.grey,
+                            textColor: Theme.of(context).secondaryHeaderColor,
                             controller: registration_dateController,
                           ),
                           SizedBox(
@@ -265,60 +263,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _selectedProfileVisibility = newValue;
                               });
                             },
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: landlinePhoneController,
-                            hintText: 'Landline Phone',
-                            inputType: TextInputType.phone,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: mobilePhoneController,
-                            hintText: 'Mobile Phone',
-                            inputType: TextInputType.phone,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: occupationController,
-                            hintText: 'Occupation',
-                            inputType: TextInputType.text,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: workplaceController,
-                            hintText: 'Workplace',
-                            inputType: TextInputType.text,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: addressController,
-                            hintText: 'Address',
-                            inputType: TextInputType.text,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: additionalAddressController,
-                            hintText: 'Additional Address',
-                            inputType: TextInputType.text,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: localityController,
-                            hintText: 'Locality',
-                            inputType: TextInputType.text,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: postalCodeController,
-                            hintText: 'Postal Code (1234-567)',
-                            inputType: TextInputType.text,
-                          ),
-                          MyTextField(
-                            small: false,
-                            controller: nifController,
-                            hintText: 'NIF (123456789)',
-                            inputType: TextInputType.text,
                           ),
                         ],
                       ),
@@ -354,20 +298,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ? 'PUBLIC'
                                   : 'PRIVATE',
                               //Default Private
-                              landlinePhoneController.text,
                               mobilePhoneController.text,
                               occupationController.text,
-                              workplaceController.text,
-                              addressController.text,
-                              additionalAddressController.text,
-                              localityController.text,
-                              postalCodeController.text,
-                              nifController.text,
                               _showErrorSnackbar,
                             );
                           },
                           bgColor: Theme.of(context).primaryColor,
-                          textColor: Colors.black87, height: 60,
+                          textColor: Colors.black87,
+                          height: 60,
                         ),
                       ],
                     ),
