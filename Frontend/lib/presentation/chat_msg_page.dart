@@ -34,7 +34,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late List<Message> messages = [];
   XFile? pickedFile;
   FilePickerResult? picked;
-  Stream<List<Message>>? messageStream;
+  late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
   late bool isLoading = false;
@@ -55,43 +55,60 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    StreamController<List<Message>> streamController = StreamController();
+    StreamController<List<Message>> streamController =
+        StreamController<List<Message>>();
 
-    // Set up a listener to fetch and update the messages in real-time
-    messagesRef.limitToLast(messageCap).onChildAdded.listen((event) {
+    String lastFetchedMessageKey = '';
+
+    // Fetch the last 'messageCap' messages onc
+
+// Fetch the last 'messageCap' messages once
+    /*messagesRef.limitToLast(messageCap).once().then((snapshot) {
+      var data = snapshot.snapshot.value as Map<String, dynamic>;
+      data.forEach((key, nodeData) {
+        setState(() {
+          Message message = Message.fromSnapshot(nodeData);
+          messages.add(message);
+        });
+      });
+      lastFetchedMessageKey = data.keys.last;
+      _scrollToBottom();
+    });*/
+
+// Listen for new messages
+    messagesRef
+        .orderByKey()
+        .limitToLast(messageCap)
+        .onChildAdded
+        .listen((event) {
       setState(() {
-        // Parse the data snapshot into a Message object
         Message message = Message.fromSnapshot(event.snapshot);
-        // Add the message to the list
-        messages.add(message);
-        streamController.add(messages);
-        messageStream = streamController.stream;
+        if (!messages.contains(message)) {
+          // Only add if it's a new message
+          messages.add(message);
+        }
       });
       _scrollToBottom();
     });
 
+// Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
       setState(() {
-        // Parse the data snapshot into a Message object
         Message updatedMessage = Message.fromSnapshot(event.snapshot);
-        // Find the index of the message in the list
         int index =
             messages.indexWhere((message) => message.id == updatedMessage.id);
-        if (index >= 0) {
-          // Replace the existing message with the updated message
+        if (index != -1) {
+          // Update the existing message
           messages[index] = updatedMessage;
-          streamController.add(messages);
         }
       });
     });
 
+// Listen for removed messages
     messagesRef.onChildRemoved.listen((event) {
       setState(() {
-        // Parse the data snapshot into a Message object
         Message removedMessage = Message.fromSnapshot(event.snapshot);
-        // Remove the message from the list
         messages.removeWhere((message) => message.id == removedMessage.id);
-        streamController.add(messages);
       });
     });
     DatabaseReference memberRef =
@@ -373,73 +390,135 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   chatMessages() {
-    return StreamBuilder<List<Message>>(
-        stream: messageStream,
-        builder: (context, AsyncSnapshot<List<Message>> snapshot) {
-          if (snapshot.hasData) {
-            if (!isLoading) {
-              WidgetsBinding.instance
-                  .addPostFrameCallback((_) => _scrollToBottom());
-            } else {
-              isLoading = false;
-            }
-            int? lastTimestamp = 0;
-            return ListView.builder(
-              controller: _scrollController,
-              itemCount: snapshot.data?.length ?? 0,
-              itemBuilder: (context, index) {
-                Message? message = snapshot.data?[index];
-                if (message == null) return Container();
+    if (messages.isEmpty) {
+      return Container(); // Return an empty container if there are no messages
+    }
 
-                if (index != 0) {
-                  lastTimestamp = snapshot.data?[index - 1].timestamp;
-                }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-                List<Widget> widgets = [];
+    int? lastTimestamp = 0;
 
-                if (isDifferentDay(lastTimestamp, message.timestamp)) {
-                  widgets.add(MessageTile(
-                    message: formatDateInMillis(message.timestamp),
-                    sender: "",
-                    time: "",
-                    isAdmin: false,
-                    sentByMe: false,
-                    isSystemMessage: true,
-                    groupId: widget.groupId,
-                    id: message.id,
-                  ));
-                }
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        Message message = messages[index];
 
-                widgets.add(message.containsFile
-                    ? MessageWithFile(
-                        id: message.id,
-                        sender: message.name,
-                        time: formatTimeInMillis(message.timestamp),
-                        sentByMe: widget.username == message.name,
-                        groupId: widget.groupId,
-                        fileExtension: message.extension!,
-                        message: message.text,
-                      )
-                    : MessageTile(
-                        message: message.text,
-                        sender: message.name,
-                        time: formatTimeInMillis(message.timestamp),
-                        sentByMe: widget.username == message.name,
-                        isSystemMessage: message.isSystemMessage,
-                        groupId: widget.groupId,
-                        id: message.id,
-                        isAdmin: isAdmin,
-                      ));
+        if (index != 0) {
+          lastTimestamp = messages[index - 1].timestamp;
+        }
 
-                return Column(
-                  children: widgets,
-                );
-              },
-            );
-          } else
-            return Container();
-        });
+        List<Widget> widgets = [];
+
+        if (isDifferentDay(lastTimestamp, message.timestamp)) {
+          widgets.add(MessageTile(
+            message: formatDateInMillis(message.timestamp),
+            sender: "",
+            time: "",
+            isAdmin: false,
+            sentByMe: false,
+            isSystemMessage: true,
+            groupId: widget.groupId,
+            id: message.id,
+          ));
+        }
+
+        widgets.add(message.containsFile
+            ? MessageWithFile(
+                id: message.id,
+                sender: message.name,
+                time: formatTimeInMillis(message.timestamp),
+                sentByMe: widget.username == message.name,
+                groupId: widget.groupId,
+                fileExtension: message.extension!,
+                message: message.text,
+              )
+            : MessageTile(
+                message: message.text,
+                sender: message.name,
+                time: formatTimeInMillis(message.timestamp),
+                sentByMe: widget.username == message.name,
+                isSystemMessage: message.isSystemMessage,
+                groupId: widget.groupId,
+                id: message.id,
+                isAdmin: isAdmin,
+              ));
+
+        return Column(
+          children: widgets,
+        );
+      },
+    );
   }
+
+  // chatMessages() {
+  //   return StreamBuilder<List<Message>>(
+  //       stream: messageStream,
+  //       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
+  //         if (snapshot.hasData) {
+  //           if (!isLoading) {
+  //             WidgetsBinding.instance
+  //                 .addPostFrameCallback((_) => _scrollToBottom());
+  //           } else {
+  //             isLoading = false;
+  //           }
+  //           int? lastTimestamp = 0;
+  //           return ListView.builder(
+  //             controller: _scrollController,
+  //             itemCount: snapshot.data?.length ?? 0,
+  //             itemBuilder: (context, index) {
+  //               Message? message = snapshot.data?[index];
+  //               if (message == null) return Container();
+
+  //               if (index != 0) {
+  //                 lastTimestamp = snapshot.data?[index - 1].timestamp;
+  //               }
+
+  //               List<Widget> widgets = [];
+
+  //               if (isDifferentDay(lastTimestamp, message.timestamp)) {
+  //                 widgets.add(MessageTile(
+  //                   message: formatDateInMillis(message.timestamp),
+  //                   sender: "",
+  //                   time: "",
+  //                   isAdmin: false,
+  //                   sentByMe: false,
+  //                   isSystemMessage: true,
+  //                   groupId: widget.groupId,
+  //                   id: message.id,
+  //                 ));
+  //               }
+
+  //               widgets.add(message.containsFile
+  //                   ? MessageWithFile(
+  //                       id: message.id,
+  //                       sender: message.name,
+  //                       time: formatTimeInMillis(message.timestamp),
+  //                       sentByMe: widget.username == message.name,
+  //                       groupId: widget.groupId,
+  //                       fileExtension: message.extension!,
+  //                       message: message.text,
+  //                     )
+  //                   : MessageTile(
+  //                       message: message.text,
+  //                       sender: message.name,
+  //                       time: formatTimeInMillis(message.timestamp),
+  //                       sentByMe: widget.username == message.name,
+  //                       isSystemMessage: message.isSystemMessage,
+  //                       groupId: widget.groupId,
+  //                       id: message.id,
+  //                       isAdmin: isAdmin,
+  //                     ));
+
+  //               return Column(
+  //                 children: widgets,
+  //               );
+  //             },
+  //           );
+  //         } else
+  //           return Container();
+  //       });
+  // }
 
   String formatDateInMillis(int? timeInMillis) {
     var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis!);
