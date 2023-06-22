@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -32,6 +31,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   TextEditingController messageController = TextEditingController();
   late DatabaseReference messagesRef;
   late List<Message> messages = [];
+  late List<String> removedMessages = []; // Add this line
   XFile? pickedFile;
   FilePickerResult? picked;
   late Stream<List<Message>> messageStream;
@@ -55,27 +55,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    StreamController<List<Message>> streamController =
-        StreamController<List<Message>>();
 
-    String lastFetchedMessageKey = '';
-
-    // Fetch the last 'messageCap' messages onc
-
-// Fetch the last 'messageCap' messages once
-    /*messagesRef.limitToLast(messageCap).once().then((snapshot) {
-      var data = snapshot.snapshot.value as Map<String, dynamic>;
-      data.forEach((key, nodeData) {
-        setState(() {
-          Message message = Message.fromSnapshot(nodeData);
-          messages.add(message);
-        });
-      });
-      lastFetchedMessageKey = data.keys.last;
-      _scrollToBottom();
-    });*/
-
-// Listen for new messages
     messagesRef
         .orderByKey()
         .limitToLast(messageCap)
@@ -83,15 +63,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         .listen((event) {
       setState(() {
         Message message = Message.fromSnapshot(event.snapshot);
-        if (!messages.contains(message)) {
-          // Only add if it's a new message
+        if (!removedMessages.contains(message.id) &&
+            messages.indexWhere((m) => m.id == message.id) == -1) {
+          // Check if message was removed or already in the list
           messages.add(message);
         }
       });
       _scrollToBottom();
     });
 
-// Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
       setState(() {
         Message updatedMessage = Message.fromSnapshot(event.snapshot);
@@ -108,9 +88,14 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef.onChildRemoved.listen((event) {
       setState(() {
         Message removedMessage = Message.fromSnapshot(event.snapshot);
-        messages.removeWhere((message) => message.id == removedMessage.id);
+        removedMessages.add(removedMessage
+            .id); // Add removed message id to removedMessages list
+        messages.removeWhere((message) =>
+            message.id ==
+            removedMessage.id); // remove the message from messages
       });
     });
+
     DatabaseReference memberRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
@@ -378,7 +363,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messagesData.forEach((key, value) {
           Message message =
               Message.fromSnapshot(msgSnapshot.snapshot.child(key));
-          olderMessages.add(message);
+          if (!messages.contains(message) &&
+              !removedMessages.contains(message.id)) {
+            // Check if the message is already in the list or in the removedMessages list
+            olderMessages.add(message);
+          }
         });
 
         // Add the older messages at the beginning of the messages list
@@ -450,75 +439,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       },
     );
   }
-
-  // chatMessages() {
-  //   return StreamBuilder<List<Message>>(
-  //       stream: messageStream,
-  //       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
-  //         if (snapshot.hasData) {
-  //           if (!isLoading) {
-  //             WidgetsBinding.instance
-  //                 .addPostFrameCallback((_) => _scrollToBottom());
-  //           } else {
-  //             isLoading = false;
-  //           }
-  //           int? lastTimestamp = 0;
-  //           return ListView.builder(
-  //             controller: _scrollController,
-  //             itemCount: snapshot.data?.length ?? 0,
-  //             itemBuilder: (context, index) {
-  //               Message? message = snapshot.data?[index];
-  //               if (message == null) return Container();
-
-  //               if (index != 0) {
-  //                 lastTimestamp = snapshot.data?[index - 1].timestamp;
-  //               }
-
-  //               List<Widget> widgets = [];
-
-  //               if (isDifferentDay(lastTimestamp, message.timestamp)) {
-  //                 widgets.add(MessageTile(
-  //                   message: formatDateInMillis(message.timestamp),
-  //                   sender: "",
-  //                   time: "",
-  //                   isAdmin: false,
-  //                   sentByMe: false,
-  //                   isSystemMessage: true,
-  //                   groupId: widget.groupId,
-  //                   id: message.id,
-  //                 ));
-  //               }
-
-  //               widgets.add(message.containsFile
-  //                   ? MessageWithFile(
-  //                       id: message.id,
-  //                       sender: message.name,
-  //                       time: formatTimeInMillis(message.timestamp),
-  //                       sentByMe: widget.username == message.name,
-  //                       groupId: widget.groupId,
-  //                       fileExtension: message.extension!,
-  //                       message: message.text,
-  //                     )
-  //                   : MessageTile(
-  //                       message: message.text,
-  //                       sender: message.name,
-  //                       time: formatTimeInMillis(message.timestamp),
-  //                       sentByMe: widget.username == message.name,
-  //                       isSystemMessage: message.isSystemMessage,
-  //                       groupId: widget.groupId,
-  //                       id: message.id,
-  //                       isAdmin: isAdmin,
-  //                     ));
-
-  //               return Column(
-  //                 children: widgets,
-  //               );
-  //             },
-  //           );
-  //         } else
-  //           return Container();
-  //       });
-  // }
 
   String formatDateInMillis(int? timeInMillis) {
     var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis!);

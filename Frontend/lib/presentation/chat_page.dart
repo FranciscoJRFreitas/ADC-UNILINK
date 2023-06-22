@@ -40,8 +40,8 @@ class _ChatPageState extends State<ChatPage> {
         .child('chat')
         .child(widget.username)
         .child('Groups');
-    DatabaseReference groupsRef =
-        FirebaseDatabase.instance.ref().child('groups');
+    DatabaseReference groupsRef = FirebaseDatabase.instance.ref().child('groups');
+    DatabaseReference membersRef = FirebaseDatabase.instance.ref().child('members');
 
     StreamController<List<Group>> streamController = StreamController();
     List<Group> groups = [];
@@ -55,10 +55,15 @@ class _ChatPageState extends State<ChatPage> {
       Map<dynamic, dynamic> groupData =
           groupSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
+      // Fetch members details from membersRef
+      DatabaseEvent memberSnapshot = await membersRef.child(groupId).once();
+      Map<dynamic, dynamic> memberData =
+          memberSnapshot.snapshot.value as Map<dynamic, dynamic>;
+
       if (groupData != null) {
         String displayName = groupData['DisplayName'];
         String description = groupData['description'];
-        int numberOfMembers = groupData.length;
+        int numberOfMembers = memberData?.length ?? 0; // get the number of members
         Group group = Group(
           id: groupId,
           DisplayName: displayName,
@@ -82,6 +87,7 @@ class _ChatPageState extends State<ChatPage> {
 
     return streamController.stream;
   }
+
 
   // Function to display the snackbar
   void _showErrorSnackbar(String message, bool Error) {
