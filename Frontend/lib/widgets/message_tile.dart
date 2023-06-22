@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
@@ -198,15 +199,14 @@ class _MessageTileState extends State<MessageTile> {
                 ),
               )
             : GestureDetector(
-                onTapDown: (TapDownDetails details) {
+                onSecondaryTapDown: (TapDownDetails details) {
                   _tapPosition = details.globalPosition;
                   if (widget.sentByMe || widget.isAdmin) {
                     _showContextMenu(context);
                   }
                 },
-                onSecondaryTapDown: (TapDownDetails details) {
-                  _tapPosition = details.globalPosition;
-                  if (widget.sentByMe || widget.isAdmin) {
+                onLongPress: () {
+                  if (!kIsWeb && (widget.sentByMe || widget.isAdmin)) {
                     _showContextMenu(context);
                   }
                 },
