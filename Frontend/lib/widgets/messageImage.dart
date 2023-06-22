@@ -12,6 +12,7 @@ class MessageImage extends StatefulWidget {
   final bool sentByMe;
   final bool isSystemMessage;
   final String groupId;
+  final String message;
 
   const MessageImage({
     Key? key,
@@ -22,6 +23,7 @@ class MessageImage extends StatefulWidget {
     required this.sentByMe,
     required this.groupId,
     this.isSystemMessage = false,
+    required this.message,
   }) : super(key: key);
 
   @override
@@ -95,7 +97,6 @@ class _MessageImageState extends State<MessageImage> {
   }
 
   Future<Uint8List?> downloadMessagePictureData(String id) async {
-    print('GroupAttachements/${widget.groupId}/$id.${widget.extension}');
     return FirebaseStorage.instance
         .ref('GroupAttachements/${widget.groupId}/${id}.${widget.extension}')
         .getData()

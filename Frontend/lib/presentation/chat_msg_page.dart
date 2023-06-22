@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
+import 'package:unilink2023/widgets/MessageWithFile.dart';
 import 'package:unilink2023/widgets/messageImage.dart';
 import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
@@ -29,7 +31,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   TextEditingController messageController = TextEditingController();
   late DatabaseReference messagesRef;
   late List<Message> messages = [];
-  PlatformFile? pickedFile;
+  XFile? pickedFile;
+  FilePickerResult? picked;
   Stream<List<Message>>? messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
@@ -63,31 +66,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messageStream = streamController.stream;
       });
       _scrollToBottom();
-    });
-
-    messagesRef.onChildChanged.listen((event) {
-      setState(() {
-        // Parse the data snapshot into a Message object
-        Message updatedMessage = Message.fromSnapshot(event.snapshot);
-        // Find the index of the message in the list
-        int index =
-            messages.indexWhere((message) => message.id == updatedMessage.id);
-        if (index >= 0) {
-          // Replace the existing message with the updated message
-          messages[index] = updatedMessage;
-          streamController.add(messages);
-        }
-      });
-    });
-
-    messagesRef.onChildRemoved.listen((event) {
-      setState(() {
-        // Parse the data snapshot into a Message object
-        Message removedMessage = Message.fromSnapshot(event.snapshot);
-        // Remove the message from the list
-        messages.removeWhere((message) => message.id == removedMessage.id);
-        streamController.add(messages);
-      });
     });
   }
 
@@ -182,6 +160,27 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               color: Color.fromARGB(0, 0, 0, 0),
               child: Row(
                 children: [
+                  Container(
+                    width: 150,
+                    height: 150,
+                    child: pickedFile != null
+                        ? picture(context)
+                        : picked != null
+                            ? GestureDetector(
+                                onTap: () {},
+                                child: const Icon(
+                                  Icons.insert_drive_file,
+                                  size: 48,
+                                  color: Colors.white,
+                                ))
+                            : Icon(
+                                Icons.attach_file,
+                                color: Colors.white,
+                              ),
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
                   Expanded(
                     child: TextFormField(
                       controller: messageController,
@@ -202,7 +201,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      sendMessage(messageController.text);
+                      sendMessage(messageController.text.isEmpty
+                          ? ""
+                          : messageController.text);
                     },
                     child: Container(
                       height: 50,
@@ -224,7 +225,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      sendImageMessage();
+                      attachImage();
                     },
                     child: Container(
                       height: 50,
@@ -246,7 +247,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      sendFileMessage();
+                      attachFile();
                     },
                     child: Container(
                       height: 50,
@@ -331,42 +332,35 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
                 if (isDifferentDay(lastTimestamp, message.timestamp)) {
                   widgets.add(MessageTile(
-                    id: message.id,
-                    groupId: widget.groupId,
                     message: formatDateInMillis(message.timestamp),
                     sender: "",
                     time: "",
                     sentByMe: false,
                     isSystemMessage: true,
+                    groupId: widget.groupId,
+                    id: message.id,
                   ));
                 }
 
-                widgets.add(message.type == 'media'
-                    ? MessageImage(
+                widgets.add(message.containsFile
+                    ? MessageWithFile(
                         id: message.id,
-                        extension: message.extension!,
                         sender: message.name,
                         time: formatTimeInMillis(message.timestamp),
                         sentByMe: widget.username == message.name,
-                        isSystemMessage: message.type == "system",
                         groupId: widget.groupId,
+                        fileExtension: message.extension!,
+                        message: message.text,
                       )
-                    : message.type == "attachment"
-                        ? MessageFiles(
-                            id: message.id,
-                            sender: message.name,
-                            time: formatTimeInMillis(message.timestamp),
-                            sentByMe: widget.username == message.name,
-                            groupId: widget.groupId,
-                            fileExtension: message.extension!,
-                          )
-                        : MessageTile(
-                            message: message.text,
-                            sender: message.name,
-                            time: formatTimeInMillis(message.timestamp),
-                            sentByMe: widget.username == message.name,
-                            isSystemMessage: message.type == "system",
-                          ));
+                    : MessageTile(
+                        message: message.text,
+                        sender: message.name,
+                        time: formatTimeInMillis(message.timestamp),
+                        sentByMe: widget.username == message.name,
+                        isSystemMessage: false,
+                        groupId: widget.groupId,
+                        id: message.id,
+                      ));
 
                 return Column(
                   children: widgets,
@@ -400,89 +394,31 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         : false;
   }
 
-  sendMessage(String content) {
-    final DatabaseReference messageRef =
-        FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    Map<String, dynamic> messageData = {
-      'type': 'text',
-      'ending': "text",
-      'message': content,
-      'name': widget.username,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    messageRef.push().set(messageData).then((value) {
-      messageController.clear();
-      messageFocusNode.requestFocus();
-    }).catchError((error) {
-      // Handle the error if the message fails to send
-      print('Failed to send message: $error');
-    });
-    Future.delayed(Duration(milliseconds: 300), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  sendImageMessage() async {
+  sendMessage(String content) async {
     final DatabaseReference messageRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
     DatabaseReference newMessageRef = messageRef.push();
     String? generatedId = newMessageRef.key;
+    Map<String, dynamic> messageData;
+    if (pickedFile != null) {
+      final fileBytes = await pickedFile!.readAsBytes();
+      String? extension = pickedFile!.mimeType?.split("/")[1];
+      final Reference storageReference = FirebaseStorage.instance
+          .ref()
+          .child('GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
-    ImagePicker picker = ImagePicker();
+      await storageReference.putData(fileBytes);
 
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    final fileBytes = await pickedFile!.readAsBytes();
-    String? extension = pickedFile.mimeType?.split("/")[1];
-    final Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('GroupAttachements/${widget.groupId}/$generatedId.$extension');
-
-    await storageReference.putData(fileBytes);
-    setState(() {});
-    Map<String, dynamic> messageData = {
-      'type': "media",
-      'ending': extension,
-      'message': generatedId,
-      'name': widget.username,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    messageRef
-        .child(generatedId!)
-        .set(messageData)
-        .then((value) {})
-        .catchError((error) {
-      // Handle the error if the message fails to send
-      print('Failed to send attachment message: $error');
-    });
-
-    Future.delayed(Duration(milliseconds: 300), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  sendFileMessage() async {
-    final DatabaseReference messageRef =
-        FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    DatabaseReference newMessageRef = messageRef.push();
-    String? generatedId = newMessageRef.key;
-
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      allowMultiple: false,
-    );
-    String? extension;
-    if (result != null && result.files.isNotEmpty) {
-      final fileBytes = result.files.first.bytes;
-      extension = result.files.first.extension;
+      messageData = {
+        'containsFile': true,
+        'extension': extension,
+        'message': content,
+        'name': widget.username,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+    } else if (picked != null) {
+      final fileBytes = picked!.files.first.bytes;
+      String? extension = picked!.files.first.extension;
       Reference storageReference = FirebaseStorage.instance
           .ref()
           .child('GroupAttachements/${widget.groupId}/$generatedId.$extension');
@@ -490,26 +426,32 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       await storageReference.putData(fileBytes!);
 
       setState(() {});
-    }
-    Map<String, dynamic> messageData = {
-      'type': 'attachment',
-      'ending': extension,
-      'message': generatedId,
-      'name': widget.username,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    if (extension != null) {
-      messageRef
-          .child(generatedId!)
-          .set(messageData)
-          .then((value) {})
-          .catchError((error) {
-        // Handle the error if the message fails to send
-        print('Failed to send attachment message: $error');
-      });
-    }
-    ;
 
+      messageData = {
+        'containsFile': true,
+        'extension': extension,
+        'message': content,
+        'name': widget.username,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+    } else {
+      messageData = {
+        'containsFile': false,
+        'message': content,
+        'name': widget.username,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    messageRef.child(generatedId!).set(messageData).then((value) {
+      messageController.clear();
+      messageFocusNode.requestFocus();
+      pickedFile = null;
+      picked = null;
+    }).catchError((error) {
+      // Handle the error if the message fails to send
+      print('Failed to send message: $error');
+    });
+    setState(() {});
     Future.delayed(Duration(milliseconds: 300), () {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
@@ -517,5 +459,107 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         curve: Curves.easeInOut,
       );
     });
+  }
+
+  attachImage() async {
+    ImagePicker picker = ImagePicker();
+
+    pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {});
+  }
+
+  attachFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: false,
+    );
+    picked = result;
+    setState(() {});
+  }
+
+  Widget picture(BuildContext context) {
+    return FutureBuilder<Uint8List?>(
+        future: layoutImage(),
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    // Here
+                    return Dialog(
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          PhotoView(
+                            imageProvider: MemoryImage(snapshot.data!),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape
+                                      .rectangle, // use circle if the icon is circular
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ), // Choose your icon and color
+                              onPressed: () {
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Image.memory(snapshot.data!),
+            );
+          } else {
+            return const Icon(
+              Icons.image,
+              size: 80,
+            );
+          }
+        });
+  }
+
+  Widget profilePicture(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 200,
+            height: 200,
+            child: Container(
+              child: ClipRRect(
+                  borderRadius: BorderRadius.horizontal(),
+                  child: picture(context)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<Uint8List?> layoutImage() async {
+    return await pickedFile!.readAsBytes();
   }
 }
