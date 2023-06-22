@@ -34,6 +34,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
   late bool isLoading = false;
+  late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
 
@@ -88,6 +89,23 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messages.removeWhere((message) => message.id == removedMessage.id);
         streamController.add(messages);
       });
+    });
+    DatabaseReference memberRef =
+        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
+
+    memberRef.child(widget.username).once().then((event) {
+      bool isAdmin = event.snapshot.value as bool;
+      setState(() {
+        this.isAdmin = isAdmin;
+      });
+    });
+
+    memberRef.onChildChanged.listen((event) {
+      if (event.snapshot.key == widget.username) {
+        setState(() {
+          isAdmin = event.snapshot.value as bool;
+        });
+      }
     });
   }
 
@@ -336,6 +354,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     message: formatDateInMillis(message.timestamp),
                     sender: "",
                     time: "",
+                    isAdmin: false,
                     sentByMe: false,
                     isSystemMessage: true,
                   ));
@@ -358,14 +377,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                             time: formatTimeInMillis(message.timestamp),
                             sentByMe: widget.username == message.name,
                             groupId: widget.groupId,
-                            fileExtension: message.extension,
+                            fileExtension: message.extension!,
                           )
                         : MessageTile(
                             id: message.id,
+                            groupId: widget.groupId,
                             message: message.text,
                             sender: message.name,
-                            groupId: widget.groupId,
                             time: formatTimeInMillis(message.timestamp),
+                            isAdmin: isAdmin,
                             sentByMe: widget.username == message.name,
                             isSystemMessage: message.type == "system",
                           ));
