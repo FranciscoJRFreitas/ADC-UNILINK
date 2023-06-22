@@ -6,6 +6,7 @@ import 'package:photo_view/photo_view.dart';
 
 class MessageImage extends StatefulWidget {
   final String id;
+  final String extension;
   final String sender;
   final String time;
   final bool sentByMe;
@@ -15,6 +16,7 @@ class MessageImage extends StatefulWidget {
   const MessageImage({
     Key? key,
     required this.id,
+    required this.extension,
     required this.sender,
     required this.time,
     required this.sentByMe,
@@ -93,8 +95,9 @@ class _MessageImageState extends State<MessageImage> {
   }
 
   Future<Uint8List?> downloadMessagePictureData(String id) async {
+    print('GroupAttachements/${widget.groupId}/$id.${widget.extension}');
     return FirebaseStorage.instance
-        .ref('GroupAttachements/${widget.groupId}/' + id)
+        .ref('GroupAttachements/${widget.groupId}/${id}.${widget.extension}')
         .getData()
         .onError((error, stackTrace) => null);
   }
@@ -153,7 +156,7 @@ class _MessageImageState extends State<MessageImage> {
             );
           } else {
             return const Icon(
-              Icons.account_circle,
+              Icons.image,
               size: 80,
             );
           }

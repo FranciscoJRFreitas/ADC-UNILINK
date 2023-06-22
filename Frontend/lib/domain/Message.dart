@@ -5,10 +5,12 @@ class Message {
   final String id;
   final String text;
   final String name;
+  final String extension;
   final int timestamp;
 
   Message({
     required this.type,
+    required this.extension,
     required this.id,
     required this.text,
     required this.name,
@@ -23,6 +25,7 @@ class Message {
       text: data['message'] as String,
       name: data['name'] as String,
       timestamp: data['timestamp'] as int,
+      extension: data['ending'] as String,
     );
   }
 }

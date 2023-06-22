@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
-import 'package:unilink2023/presentation/chat_page.dart';
 
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
@@ -353,8 +351,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                 ),
                               ),
                             );
-
-                            return null;
                           })))
             ],
           ),
@@ -533,7 +529,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               size: 50,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 }
