@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -202,20 +203,43 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               width: MediaQuery.of(context).size.width,
               color: Color.fromARGB(0, 0, 0, 0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    width: 150,
-                    height: 150,
+                    constraints: BoxConstraints(
+                      maxHeight: 300,
+                      maxWidth: 300,
+                    ),
+                    // width: 150,
+                    // height: 150,
                     child: pickedFile != null
-                        ? picture(context)
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                                Align(
+                                    alignment: Alignment.topCenter,
+                                    child: Text(
+                                      pickedFile!.name,
+                                    )),
+                                picture(context)
+                              ])
                         : picked != null
-                            ? GestureDetector(
-                                onTap: () {},
-                                child: const Icon(
-                                  Icons.insert_drive_file,
-                                  size: 48,
-                                  color: Colors.white,
-                                ))
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                    Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Text(
+                                          picked!.files.first.name,
+                                        )),
+                                    GestureDetector(
+                                        onTap: () {},
+                                        child: const Icon(
+                                          Icons.insert_drive_file,
+                                          size: 100,
+                                          color: Colors.white,
+                                        ))
+                                  ])
                             : Icon(
                                 Icons.attach_file,
                                 color: Colors.white,
@@ -235,7 +259,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         border: InputBorder.none,
                       ),
                       onFieldSubmitted: (String value) {
-                        if (value != "") sendMessage(value);
+                        sendMessage(value);
                       },
                     ),
                   ),
@@ -440,79 +464,81 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   sendMessage(String content) async {
-    final DatabaseReference messageRef =
-        FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    DatabaseReference newMessageRef = messageRef.push();
-    String? generatedId = newMessageRef.key;
-    Map<String, dynamic> messageData;
-    if (pickedFile != null) {
-      final fileBytes = await pickedFile!.readAsBytes();
-      String? extension = pickedFile!.mimeType?.split("/")[1];
-      final Reference storageReference = FirebaseStorage.instance
+    if (content.isNotEmpty || picked != null || pickedFile != null) {
+      final DatabaseReference messageRef = FirebaseDatabase.instance
           .ref()
-          .child('GroupAttachements/${widget.groupId}/$generatedId.$extension');
+          .child('messages')
+          .child(widget.groupId);
+      DatabaseReference newMessageRef = messageRef.push();
+      String? generatedId = newMessageRef.key;
+      Map<String, dynamic> messageData;
+      if (pickedFile != null) {
+        final fileBytes = await pickedFile!.readAsBytes();
+        String? extension = pickedFile!.mimeType?.split("/")[1];
+        final Reference storageReference = FirebaseStorage.instance.ref().child(
+            'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
-      await storageReference.putData(fileBytes);
+        await storageReference.putData(fileBytes);
 
-      messageData = {
-        'containsFile': true,
-        'extension': extension,
-        'message': content,
-        'name': widget.username,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'isSystemMessage': false,
-      };
-    } else if (picked != null) {
-      final fileBytes = picked!.files.first.bytes;
-      String? extension = picked!.files.first.extension;
-      Reference storageReference = FirebaseStorage.instance
-          .ref()
-          .child('GroupAttachements/${widget.groupId}/$generatedId.$extension');
+        messageData = {
+          'containsFile': true,
+          'extension': extension,
+          'message': content,
+          'name': widget.username,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'isSystemMessage': false,
+        };
+      } else if (picked != null) {
+        final fileBytes = picked!.files.first.bytes;
+        String? extension = picked!.files.first.extension;
+        Reference storageReference = FirebaseStorage.instance.ref().child(
+            'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
-      await storageReference.putData(fileBytes!);
+        await storageReference.putData(fileBytes!);
 
-      setState(() {});
+        messageData = {
+          'containsFile': true,
+          'extension': extension,
+          'message': content,
+          'name': widget.username,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'isSystemMessage': false,
+        };
+      } else {
+        messageData = {
+          'containsFile': false,
+          'message': content,
+          'name': widget.username,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'isSystemMessage': false,
+        };
+      }
+      messageRef.child(generatedId!).set(messageData).then((value) {
+        messageController.clear();
+        messageFocusNode.requestFocus();
+        pickedFile = null;
+        picked = null;
+      }).catchError((error) {
+        // Handle the error if the message fails to send
+        print('Failed to send message: $error');
+      });
 
-      messageData = {
-        'containsFile': true,
-        'extension': extension,
-        'message': content,
-        'name': widget.username,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'isSystemMessage': false,
-      };
-    } else {
-      messageData = {
-        'containsFile': false,
-        'message': content,
-        'name': widget.username,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'isSystemMessage': false,
-      };
+      Future.delayed(Duration(milliseconds: 300), () {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+        setState(() {});
+      });
     }
-    messageRef.child(generatedId!).set(messageData).then((value) {
-      messageController.clear();
-      messageFocusNode.requestFocus();
-      pickedFile = null;
-      picked = null;
-    }).catchError((error) {
-      // Handle the error if the message fails to send
-      print('Failed to send message: $error');
-    });
-    setState(() {});
-    Future.delayed(Duration(milliseconds: 300), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    });
   }
 
   attachImage() async {
     ImagePicker picker = ImagePicker();
 
     pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) picked = null;
     setState(() {});
   }
 
@@ -521,7 +547,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       type: FileType.any,
       allowMultiple: false,
     );
-    picked = result;
+    if (result != null) {
+      pickedFile = null;
+      picked = result;
+    }
+
     setState(() {});
   }
 
