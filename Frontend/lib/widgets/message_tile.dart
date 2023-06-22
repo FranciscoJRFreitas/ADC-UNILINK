@@ -11,6 +11,7 @@ class MessageTile extends StatefulWidget {
   final String message;
   final String sender;
   final String time;
+  final bool isAdmin;
   final bool sentByMe;
   final bool isSystemMessage;
 
@@ -21,6 +22,7 @@ class MessageTile extends StatefulWidget {
     required this.message,
     required this.sender,
     required this.time,
+    required this.isAdmin,
     required this.sentByMe,
     this.isSystemMessage = false,
   }) : super(key: key);
@@ -38,16 +40,26 @@ class _MessageTileState extends State<MessageTile> {
       _isContextMenuVisible = true;
     });
 
-    final List<PopupMenuEntry<dynamic>> menuItems = [
-      PopupMenuItem(
-        child: Text('Edit'),
-        value: 'edit',
-      ),
-      PopupMenuItem(
-        child: Text('Delete'),
-        value: 'delete',
-      ),
-    ];
+    final List<PopupMenuEntry<dynamic>> menuItems;
+    if (widget.sentByMe) {
+      menuItems = [
+        PopupMenuItem(
+          child: Text('Edit'),
+          value: 'edit',
+        ),
+        PopupMenuItem(
+          child: Text('Delete'),
+          value: 'delete',
+        ),
+      ];
+    } else {
+      menuItems = [
+        PopupMenuItem(
+          child: Text('Delete'),
+          value: 'delete',
+        ),
+      ];
+    }
 
     showMenu(
       context: context,
@@ -188,13 +200,13 @@ class _MessageTileState extends State<MessageTile> {
             : GestureDetector(
                 onTapDown: (TapDownDetails details) {
                   _tapPosition = details.globalPosition;
-                  if (widget.sentByMe) {
+                  if (widget.sentByMe || widget.isAdmin) {
                     _showContextMenu(context);
                   }
                 },
                 onSecondaryTapDown: (TapDownDetails details) {
                   _tapPosition = details.globalPosition;
-                  if (widget.sentByMe) {
+                  if (widget.sentByMe || widget.isAdmin) {
                     _showContextMenu(context);
                   }
                 },
