@@ -11,8 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
-import 'package:unilink2023/widgets/messageImage.dart';
-import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -34,7 +32,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late List<Message> messages = [];
   XFile? pickedFile;
   FilePickerResult? picked;
-  Stream<List<Message>>? messageStream;
+  late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
   late bool isLoading = false;
@@ -55,45 +53,61 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    StreamController<List<Message>> streamController = StreamController();
+    StreamController<List<Message>> streamController = StreamController<List<Message>>();
 
-    // Set up a listener to fetch and update the messages in real-time
-    messagesRef.limitToLast(messageCap).onChildAdded.listen((event) {
-      setState(() {
-        // Parse the data snapshot into a Message object
-        Message message = Message.fromSnapshot(event.snapshot);
-        // Add the message to the list
-        messages.add(message);
-        streamController.add(messages);
-        messageStream = streamController.stream;
+    String lastFetchedMessageKey = '';
+
+    // Fetch the last 'messageCap' messages once
+    messagesRef.limitToLast(messageCap).once().then((DatabaseEvent snapshot) {
+      var data = snapshot.snapshot.value as Map;
+      data.forEach((index, data) {
+        setState(() {
+          Message message = Message.fromSnapshot(data);
+          messages.add(message);
+          streamController.add(messages.toList());
+          messageStream = streamController.stream;
+        });
       });
+      lastFetchedMessageKey = data.keys.last;
       _scrollToBottom();
     });
 
+    // Listen for new messages
+    /*messagesRef
+        .orderByKey()
+        .endAt(lastFetchedMessageKey)
+        .onChildAdded
+        .listen((event) {
+      setState(() {
+        Message message = Message.fromSnapshot(event.snapshot);
+        if (!messages.contains(message)) {
+          // Only add if it's a new message
+          messages.add(message);
+          streamController.add(messages.toList());
+        }
+      });
+      _scrollToBottom();
+    });*/
+
+    // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
       setState(() {
-        // Parse the data snapshot into a Message object
         Message updatedMessage = Message.fromSnapshot(event.snapshot);
-        // Find the index of the message in the list
-        int index =
-            messages.indexWhere((message) => message.id == updatedMessage.id);
-        if (index >= 0) {
-          // Replace the existing message with the updated message
-          messages[index] = updatedMessage;
-          streamController.add(messages);
-        }
+        messages.removeWhere((message) => message.id == updatedMessage.id);
+        messages.add(updatedMessage);
+        streamController.add(messages.toList());
       });
     });
 
+    // Listen for removed messages
     messagesRef.onChildRemoved.listen((event) {
       setState(() {
-        // Parse the data snapshot into a Message object
         Message removedMessage = Message.fromSnapshot(event.snapshot);
-        // Remove the message from the list
         messages.removeWhere((message) => message.id == removedMessage.id);
-        streamController.add(messages);
+        streamController.add(messages.toList());
       });
     });
+
     DatabaseReference memberRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
