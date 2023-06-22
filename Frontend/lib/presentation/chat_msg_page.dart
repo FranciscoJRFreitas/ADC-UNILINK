@@ -52,29 +52,30 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
-    StreamController<List<Message>> streamController = StreamController<List<Message>>();
+    StreamController<List<Message>> streamController =
+        StreamController<List<Message>>();
 
     String lastFetchedMessageKey = '';
 
-    // Fetch the last 'messageCap' messages once
-    messagesRef.limitToLast(messageCap).once().then((DatabaseEvent snapshot) {
-      var data = snapshot.snapshot.value as Map;
-      data.forEach((index, data) {
+    // Fetch the last 'messageCap' messages onc
+
+// Fetch the last 'messageCap' messages once
+    /*messagesRef.limitToLast(messageCap).once().then((snapshot) {
+      var data = snapshot.snapshot.value as Map<String, dynamic>;
+      data.forEach((key, nodeData) {
         setState(() {
-          Message message = Message.fromSnapshot(data);
+          Message message = Message.fromSnapshot(nodeData);
           messages.add(message);
-          streamController.add(messages.toList());
-          messageStream = streamController.stream;
         });
       });
       lastFetchedMessageKey = data.keys.last;
       _scrollToBottom();
-    });
+    });*/
 
-    // Listen for new messages
-    /*messagesRef
+// Listen for new messages
+    messagesRef
         .orderByKey()
-        .endAt(lastFetchedMessageKey)
+        .limitToLast(messageCap)
         .onChildAdded
         .listen((event) {
       setState(() {
@@ -82,28 +83,29 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         if (!messages.contains(message)) {
           // Only add if it's a new message
           messages.add(message);
-          streamController.add(messages.toList());
         }
       });
       _scrollToBottom();
-    });*/
+    });
 
-    // Listen for updated messages
+// Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
       setState(() {
         Message updatedMessage = Message.fromSnapshot(event.snapshot);
-        messages.removeWhere((message) => message.id == updatedMessage.id);
-        messages.add(updatedMessage);
-        streamController.add(messages.toList());
+        int index =
+            messages.indexWhere((message) => message.id == updatedMessage.id);
+        if (index != -1) {
+          // Update the existing message
+          messages[index] = updatedMessage;
+        }
       });
     });
 
-    // Listen for removed messages
+// Listen for removed messages
     messagesRef.onChildRemoved.listen((event) {
       setState(() {
         Message removedMessage = Message.fromSnapshot(event.snapshot);
         messages.removeWhere((message) => message.id == removedMessage.id);
-        streamController.add(messages.toList());
       });
     });
 
@@ -363,73 +365,135 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   chatMessages() {
-    return StreamBuilder<List<Message>>(
-        stream: messageStream,
-        builder: (context, AsyncSnapshot<List<Message>> snapshot) {
-          if (snapshot.hasData) {
-            if (!isLoading) {
-              WidgetsBinding.instance
-                  .addPostFrameCallback((_) => _scrollToBottom());
-            } else {
-              isLoading = false;
-            }
-            int? lastTimestamp = 0;
-            return ListView.builder(
-              controller: _scrollController,
-              itemCount: snapshot.data?.length ?? 0,
-              itemBuilder: (context, index) {
-                Message? message = snapshot.data?[index];
-                if (message == null) return Container();
+    if (messages.isEmpty) {
+      return Container(); // Return an empty container if there are no messages
+    }
 
-                if (index != 0) {
-                  lastTimestamp = snapshot.data?[index - 1].timestamp;
-                }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-                List<Widget> widgets = [];
+    int? lastTimestamp = 0;
 
-                if (isDifferentDay(lastTimestamp, message.timestamp)) {
-                  widgets.add(MessageTile(
-                    message: formatDateInMillis(message.timestamp),
-                    sender: "",
-                    time: "",
-                    isAdmin: false,
-                    sentByMe: false,
-                    isSystemMessage: true,
-                    groupId: widget.groupId,
-                    id: message.id,
-                  ));
-                }
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        Message message = messages[index];
 
-                widgets.add(message.containsFile
-                    ? MessageWithFile(
-                        id: message.id,
-                        sender: message.name,
-                        time: formatTimeInMillis(message.timestamp),
-                        sentByMe: widget.username == message.name,
-                        groupId: widget.groupId,
-                        fileExtension: message.extension!,
-                        message: message.text,
-                      )
-                    : MessageTile(
-                        message: message.text,
-                        sender: message.name,
-                        time: formatTimeInMillis(message.timestamp),
-                        sentByMe: widget.username == message.name,
-                        isSystemMessage: message.isSystemMessage,
-                        groupId: widget.groupId,
-                        id: message.id,
-                        isAdmin: isAdmin,
-                      ));
+        if (index != 0) {
+          lastTimestamp = messages[index - 1].timestamp;
+        }
 
-                return Column(
-                  children: widgets,
-                );
-              },
-            );
-          } else
-            return Container();
-        });
+        List<Widget> widgets = [];
+
+        if (isDifferentDay(lastTimestamp, message.timestamp)) {
+          widgets.add(MessageTile(
+            message: formatDateInMillis(message.timestamp),
+            sender: "",
+            time: "",
+            isAdmin: false,
+            sentByMe: false,
+            isSystemMessage: true,
+            groupId: widget.groupId,
+            id: message.id,
+          ));
+        }
+
+        widgets.add(message.containsFile
+            ? MessageWithFile(
+                id: message.id,
+                sender: message.name,
+                time: formatTimeInMillis(message.timestamp),
+                sentByMe: widget.username == message.name,
+                groupId: widget.groupId,
+                fileExtension: message.extension!,
+                message: message.text,
+              )
+            : MessageTile(
+                message: message.text,
+                sender: message.name,
+                time: formatTimeInMillis(message.timestamp),
+                sentByMe: widget.username == message.name,
+                isSystemMessage: message.isSystemMessage,
+                groupId: widget.groupId,
+                id: message.id,
+                isAdmin: isAdmin,
+              ));
+
+        return Column(
+          children: widgets,
+        );
+      },
+    );
   }
+
+  // chatMessages() {
+  //   return StreamBuilder<List<Message>>(
+  //       stream: messageStream,
+  //       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
+  //         if (snapshot.hasData) {
+  //           if (!isLoading) {
+  //             WidgetsBinding.instance
+  //                 .addPostFrameCallback((_) => _scrollToBottom());
+  //           } else {
+  //             isLoading = false;
+  //           }
+  //           int? lastTimestamp = 0;
+  //           return ListView.builder(
+  //             controller: _scrollController,
+  //             itemCount: snapshot.data?.length ?? 0,
+  //             itemBuilder: (context, index) {
+  //               Message? message = snapshot.data?[index];
+  //               if (message == null) return Container();
+
+  //               if (index != 0) {
+  //                 lastTimestamp = snapshot.data?[index - 1].timestamp;
+  //               }
+
+  //               List<Widget> widgets = [];
+
+  //               if (isDifferentDay(lastTimestamp, message.timestamp)) {
+  //                 widgets.add(MessageTile(
+  //                   message: formatDateInMillis(message.timestamp),
+  //                   sender: "",
+  //                   time: "",
+  //                   isAdmin: false,
+  //                   sentByMe: false,
+  //                   isSystemMessage: true,
+  //                   groupId: widget.groupId,
+  //                   id: message.id,
+  //                 ));
+  //               }
+
+  //               widgets.add(message.containsFile
+  //                   ? MessageWithFile(
+  //                       id: message.id,
+  //                       sender: message.name,
+  //                       time: formatTimeInMillis(message.timestamp),
+  //                       sentByMe: widget.username == message.name,
+  //                       groupId: widget.groupId,
+  //                       fileExtension: message.extension!,
+  //                       message: message.text,
+  //                     )
+  //                   : MessageTile(
+  //                       message: message.text,
+  //                       sender: message.name,
+  //                       time: formatTimeInMillis(message.timestamp),
+  //                       sentByMe: widget.username == message.name,
+  //                       isSystemMessage: message.isSystemMessage,
+  //                       groupId: widget.groupId,
+  //                       id: message.id,
+  //                       isAdmin: isAdmin,
+  //                     ));
+
+  //               return Column(
+  //                 children: widgets,
+  //               );
+  //             },
+  //           );
+  //         } else
+  //           return Container();
+  //       });
+  // }
 
   String formatDateInMillis(int? timeInMillis) {
     var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis!);
