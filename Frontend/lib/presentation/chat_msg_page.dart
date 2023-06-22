@@ -401,9 +401,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         sender: message.name,
                         time: formatTimeInMillis(message.timestamp),
                         sentByMe: widget.username == message.name,
-                        isSystemMessage: false,
+                        isSystemMessage: message.isSystemMessage,
                         groupId: widget.groupId,
                         id: message.id,
+                        isAdmin: isAdmin,
                       ));
 
                 return Column(
@@ -459,6 +460,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         'message': content,
         'name': widget.username,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'isSystemMessage': false,
       };
     } else if (picked != null) {
       final fileBytes = picked!.files.first.bytes;
@@ -477,6 +479,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         'message': content,
         'name': widget.username,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'isSystemMessage': false,
       };
     } else {
       messageData = {
@@ -484,6 +487,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         'message': content,
         'name': widget.username,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'isSystemMessage': false,
       };
     }
     messageRef.child(generatedId!).set(messageData).then((value) {

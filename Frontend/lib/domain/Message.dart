@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class Message {
   final bool containsFile;
+  final bool isSystemMessage;
   final String? extension;
   final String id;
   final String text;
@@ -9,6 +10,7 @@ class Message {
   final int timestamp;
 
   Message({
+    required this.isSystemMessage,
     required this.id,
     required this.containsFile,
     required this.text,
@@ -28,6 +30,7 @@ class Message {
             name: data['name'] as String,
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
+            isSystemMessage: data['isSystemMessage'] as bool,
           )
         : Message(
             id: snapshot.key!,
@@ -35,6 +38,7 @@ class Message {
             name: data['name'] as String,
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
+            isSystemMessage: data['isSystemMessage'] as bool,
           );
   }
 }

@@ -84,11 +84,11 @@ public class ChatResources {
 
         // Set the data for the new message
         //when the group is created put a welcome message in the group
-        newMessageRef.child("type").setValueAsync("system");
         newMessageRef.child("containsFile").setValueAsync(false);
         newMessageRef.child("name").setValueAsync(group.adminID);
         newMessageRef.child("message").setValueAsync("Welcome to " + group.DisplayName + "!");
         newMessageRef.child("timestamp").setValueAsync(System.currentTimeMillis());
+        newMessageRef.child("isSystemMessage").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
         DatabaseReference newChatsForUserRef = chatsByUser.child(token.username);
