@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response.Status;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
@@ -146,6 +148,9 @@ public class ModifyAttributesResource {
         txn.put(userUpdated);
         LOG.info("User attributes modified: " + data.username);
         txn.commit();
+
+        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userUpdated.getString("user_username"));
+        chatRef.child("DisplayName").setValueAsync(userUpdated.getString("user_displayName"));
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("displayName", userUpdated.getString("user_displayName"));

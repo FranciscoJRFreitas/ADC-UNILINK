@@ -58,10 +58,12 @@ class _ChatPageState extends State<ChatPage> {
       if (groupData != null) {
         String displayName = groupData['DisplayName'];
         String description = groupData['description'];
+        int numberOfMembers = groupData.length;
         Group group = Group(
           id: groupId,
           DisplayName: displayName,
           description: description,
+          numberOfMembers: numberOfMembers, // this is your new field
         );
         groups.add(group);
       }
@@ -145,6 +147,15 @@ class _ChatPageState extends State<ChatPage> {
                                     Icon(Icons.person, size: 20),
                                     SizedBox(width: 5),
                                     Text('Description: ${group.description}'),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.people, size: 20),
+                                    SizedBox(width: 5),
+                                     Text(
+                                    '${group.numberOfMembers} members'),
                                   ],
                                 ),
                                 // ... Add other information rows with icons here

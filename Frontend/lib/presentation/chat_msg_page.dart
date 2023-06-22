@@ -37,6 +37,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
   late bool isLoading = false;
+  late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
 
@@ -66,6 +67,48 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messageStream = streamController.stream;
       });
       _scrollToBottom();
+    });
+
+    messagesRef.onChildChanged.listen((event) {
+      setState(() {
+        // Parse the data snapshot into a Message object
+        Message updatedMessage = Message.fromSnapshot(event.snapshot);
+        // Find the index of the message in the list
+        int index =
+            messages.indexWhere((message) => message.id == updatedMessage.id);
+        if (index >= 0) {
+          // Replace the existing message with the updated message
+          messages[index] = updatedMessage;
+          streamController.add(messages);
+        }
+      });
+    });
+
+    messagesRef.onChildRemoved.listen((event) {
+      setState(() {
+        // Parse the data snapshot into a Message object
+        Message removedMessage = Message.fromSnapshot(event.snapshot);
+        // Remove the message from the list
+        messages.removeWhere((message) => message.id == removedMessage.id);
+        streamController.add(messages);
+      });
+    });
+    DatabaseReference memberRef =
+        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
+
+    memberRef.child(widget.username).once().then((event) {
+      bool isAdmin = event.snapshot.value as bool;
+      setState(() {
+        this.isAdmin = isAdmin;
+      });
+    });
+
+    memberRef.onChildChanged.listen((event) {
+      if (event.snapshot.key == widget.username) {
+        setState(() {
+          isAdmin = event.snapshot.value as bool;
+        });
+      }
     });
   }
 
@@ -335,6 +378,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     message: formatDateInMillis(message.timestamp),
                     sender: "",
                     time: "",
+                    isAdmin: false,
                     sentByMe: false,
                     isSystemMessage: true,
                     groupId: widget.groupId,

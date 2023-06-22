@@ -128,10 +128,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String confirmPassword,
   ) async {
     if (currentPassword == '' && newPassword == '' && confirmPassword == '') {
-      //_showErrorSnackbar("Escreve alguma merda.", true, true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Escreve alguma merda."),
+          content: Text("Form fields are empty!"),
           backgroundColor: Colors.red,
         ),
       );
