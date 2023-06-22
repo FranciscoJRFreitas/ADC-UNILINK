@@ -358,11 +358,13 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                             time: formatTimeInMillis(message.timestamp),
                             sentByMe: widget.username == message.name,
                             groupId: widget.groupId,
-                            fileExtension: message.extension!,
+                            fileExtension: message.extension,
                           )
                         : MessageTile(
+                            id: message.id,
                             message: message.text,
                             sender: message.name,
+                            groupId: widget.groupId,
                             time: formatTimeInMillis(message.timestamp),
                             sentByMe: widget.username == message.name,
                             isSystemMessage: message.type == "system",
