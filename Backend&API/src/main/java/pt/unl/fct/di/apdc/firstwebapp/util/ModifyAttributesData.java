@@ -36,12 +36,8 @@ public class ModifyAttributesData {
     public String validModifyAttributes() {
         if (StringUtils.isAnyEmpty(this.username, this.password)) {
             return "Missing parameters.";
-        } else if (StringUtils.isNotEmpty(this.taxIdentificationNumber) && !this.email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,}$")) {
+        } else if (StringUtils.isNotEmpty(this.email) && !this.email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,}$")) {
             return "Invalid email format.";
-        } else if (StringUtils.isNotEmpty(this.taxIdentificationNumber) && !this.taxIdentificationNumber.matches("^[0-9]{9}$")) {
-            return "Invalid tax identification number format.";
-        } else if (StringUtils.isNotEmpty(this.postalCode) && !this.postalCode.matches("^\\d{4}-\\d{3}$")) {
-            return "Invalid postal code format.";
         } else {
             return "OK";
         }

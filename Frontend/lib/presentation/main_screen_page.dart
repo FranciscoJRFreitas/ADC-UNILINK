@@ -3,15 +3,13 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/PictureNotifier.dart';
+import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import 'screen.dart';
@@ -22,10 +20,9 @@ import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import '../presentation/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
-  final User user;
   final int? index;
 
-  MainScreen({required this.user, this.index});
+  MainScreen({this.index});
 
   @override
   _MainScreenState createState() => _MainScreenState(index);
@@ -51,16 +48,14 @@ class _MainScreenState extends State<MainScreen> {
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
-      
-        _MainScreenState(int? index) {
-          if(index != null)
-          _selectedIndex = index;
-        }
+
+  _MainScreenState(int? index) {
+    if (index != null) _selectedIndex = index;
+  }
 
   @override
   void initState() {
     super.initState();
-    _currentUser = widget.user;
   }
 
   List<Widget> _widgetOptions() => [
@@ -75,7 +70,7 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
         ),*/
-        HomePage(user: _currentUser),
+        HomePage(),
         ChangePasswordPage(),
         RemoveAccountPage(),
         ChatPage(username: _currentUser.username),
@@ -86,23 +81,8 @@ class _MainScreenState extends State<MainScreen> {
         Placeholder(), //diretor
       ];
 
-  Future getImage(bool gallery) async {
-    ImagePicker picker = ImagePicker();
-
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    final fileBytes = await pickedFile!.readAsBytes();
-
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('ProfilePictures/' + _currentUser.username);
-
-    await storageReference.putData(fileBytes);
-    setState(() {});
-  }
-
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(
@@ -191,7 +171,10 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Color roleColor = _currentUser.getRoleColor(widget.user.role);
+    final userProvider = Provider.of<UserNotifier>(context);
+    _currentUser = userProvider.currentUser!;
+
+    Color roleColor = _currentUser.getRoleColor(_currentUser.role);
     bool _isExpanded = false;
 
     return Scaffold(
@@ -213,7 +196,7 @@ class _MainScreenState extends State<MainScreen> {
                 final token = await cacheFactory.get('users', 'token');
                 if (token != null) {
                   await logout(
-                      context, widget.user.username, _showErrorSnackbar);
+                      context, _currentUser.username, _showErrorSnackbar);
                 } else {
                   _showErrorSnackbar('Error logging out', true);
                 }
@@ -247,13 +230,13 @@ class _MainScreenState extends State<MainScreen> {
                           width: 5,
                         ),
                         Text(
-                          processDisplayName(widget.user.displayName),
-                          style: widget.user.displayName.length < 5
+                          processDisplayName(_currentUser.displayName),
+                          style: _currentUser.displayName.length < 5
                               ? Theme.of(context)
                                   .textTheme
                                   .titleLarge
                                   ?.copyWith(color: Colors.white)
-                              : widget.user.displayName.length < 10
+                              : _currentUser.displayName.length < 10
                                   ? Theme.of(context)
                                       .textTheme
                                       .titleMedium
@@ -269,7 +252,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         Text(
                           //trocar por numero de aluno
-                          'Role: ${widget.user.role}',
+                          'Role: ${_currentUser.role}',
                           style: TextStyle(
                             color: Colors.white60,
                             //roleColor == Colors.yellow ? Colors.black: Colors.white,
@@ -286,7 +269,17 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
-            widget.user.role == 'STUDENT' || widget.user.role == 'SU'
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 3;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
                 ? ExpansionTile(
                     leading: Icon(
                       Icons.person_add_alt_1_outlined,
@@ -294,16 +287,6 @@ class _MainScreenState extends State<MainScreen> {
                     title: Text('Student',
                         style: Theme.of(context).textTheme.bodyLarge),
                     children: [
-                        ListTile(
-                          leading: Icon(Icons.person),
-                          title: Text('Profile'),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 3;
-                            });
-                            Navigator.pop(context);
-                          },
-                        ),
                         ListTile(
                           leading: Icon(Icons.schedule),
                           title: Text('Schedule'),
@@ -316,7 +299,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ])
                 : Container(),
-            widget.user.role == 'PROF' || widget.user.role == 'SU'
+            _currentUser.role == 'PROF' || _currentUser.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
                     title: Text('Professor'),
@@ -328,7 +311,7 @@ class _MainScreenState extends State<MainScreen> {
                     },
                   )
                 : Container(),
-            widget.user.role == 'DIRECTOR' || widget.user.role == 'SU'
+            _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
                 ? ListTile(
                     leading: Icon(Icons.newspaper),
                     title: Text('Director'),
@@ -463,7 +446,7 @@ class _MainScreenState extends State<MainScreen> {
                 final token = await cacheFactory.get('users', 'token');
                 if (token != null) {
                   await logout(
-                      context, widget.user.username, _showErrorSnackbar);
+                      context, _currentUser.username, _showErrorSnackbar);
                 } else {
                   _showErrorSnackbar('Error logging out', true);
                 }

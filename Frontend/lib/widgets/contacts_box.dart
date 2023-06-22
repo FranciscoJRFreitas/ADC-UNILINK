@@ -168,174 +168,191 @@ class ContactCard extends StatelessWidget {
   }
 }*/
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height / 5,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15), // rounded corners
-        ),
-        elevation: 5,
-        color: Theme.of(context).primaryColor,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            // <-- Add this
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: AssetImage(
-                    'assets/images/NOVA_Logo.png'), // replace with your image file
-              ),
-              SizedBox(width: 20), // To give some space between image and text
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min, // new line
-                  children: [
-                    Text(
-                      contact?.name ?? 'N/A',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontSize: 18),
-                    ),
+    return LayoutBuilder(builder: (context, constraints) {
+      // Calculate available height and width
+      final double availableHeight = constraints.maxHeight;
+      final double availableWidth = constraints.maxWidth;
 
-                    if (contact?.phoneNumber != '') ...[
-                      // add some space between name and the other details
-                      SizedBox(height: 8.0),
+      // Calculate card height and font size based on available space
+      final double cardHeight =
+          availableHeight < MediaQuery.of(context).size.height
+              ? availableHeight / 5
+              : MediaQuery.of(context).size.height / 5;
+      final double fontSize = availableWidth < 400 ? 12 : 17;
+      final double iconSize = availableWidth < 400 ? 15 : 20;
+      debugPrint(
+          '$availableWidth $availableHeight $cardHeight $fontSize $iconSize'); // Adjust these values as per your needs
+      return Container(
+        height: cardHeight,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15), // rounded corners
+          ),
+          elevation: 5,
+          color: Theme.of(context).primaryColor,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              // <-- Add this
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundImage: AssetImage(
+                      'assets/images/NOVA_Logo.png'), // replace with your image file
+                ),
+                SizedBox(
+                    width: 20), // To give some space between image and text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // new line
+                    children: [
+                      Text(
+                        contact?.name ?? 'N/A',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge!
+                            .copyWith(fontSize: fontSize + 2),
+                      ),
+
+                      if (contact?.phoneNumber != '') ...[
+                        // add some space between name and the other details
+                        SizedBox(height: 8.0),
+                        Row(
+                          children: [
+                            Icon(Icons.phone,
+                                color: Colors.white, size: iconSize),
+                            SizedBox(width: 5.0),
+                            Expanded(
+                              // new line
+                              child: Text(
+                                contact?.phoneNumber ?? 'N/A',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(fontSize: fontSize),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      SizedBox(
+                          height:
+                              8.0), // add some space between phone number and email
                       Row(
                         children: [
-                          Icon(Icons.phone, color: Colors.white),
-                          SizedBox(width: 5.0),
+                          InkWell(
+                            child: Icon(Icons.email,
+                                color: Colors.white, size: iconSize),
+                            onTap: () async {
+                              var email = contact
+                                  ?.email; // replace with the email you want
+
+                              final uri = 'mailto:$email';
+
+                              Uri url = Uri.parse(uri);
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              } else {
+                                throw 'Could not launch $url';
+                              }
+                            },
+                          ),
+                          SizedBox(width: 8.0),
                           Expanded(
                             // new line
                             child: Text(
-                              contact?.phoneNumber ?? 'N/A',
+                              contact?.email ?? 'N/A',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyLarge!
-                                  .copyWith(fontSize: 18),
+                                  .copyWith(fontSize: fontSize),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.0),
+                      Row(
+                        children: [
+                          if (contact?.facebook != '') ...[
+                            SizedBox(
+                                height:
+                                    8.0), // add some space between email and Facebook
+                            Row(children: [
+                              SizedBox(width: 5.0),
+                              InkWell(
+                                onTap: () async {
+                                  String? uri = contact?.facebook;
+                                  if (uri != null) {
+                                    Uri url = Uri.parse(uri);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    } else {
+                                      throw 'Could not launch $url';
+                                    }
+                                  }
+                                },
+                                child: Icon(Icons.facebook,
+                                    color: Colors.white, size: iconSize),
+                              ),
+                            ])
+                          ],
+                          if (contact?.instagram != '') ...[
+                            SizedBox(
+                                height:
+                                    8.0), // add some space between email and Facebook
+                            Row(children: [
+                              SizedBox(width: 8.0),
+                              InkWell(
+                                onTap: () async {
+                                  String? uri = contact?.instagram;
+                                  if (uri != null) {
+                                    Uri url = Uri.parse(uri);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    } else {
+                                      throw 'Could not launch $url';
+                                    }
+                                  }
+                                },
+                                child: Icon(FontAwesomeIcons.instagram,
+                                    color: Colors.white, size: iconSize),
+                              ),
+                            ])
+                          ],
+                          SizedBox(width: 8.0),
+                          GestureDetector(
+                            onTap: () async {
+                              String? uri = contact?.url;
+                              if (uri != null) {
+                                Uri url = Uri.parse(uri);
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                } else {
+                                  throw 'Could not launch $url';
+                                }
+                              }
+                            },
+                            child: Text(
+                              'More Info',
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                color: Colors.green,
+                                fontSize: fontSize,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ],
-                    SizedBox(
-                        height:
-                            8.0), // add some space between phone number and email
-                    Row(
-                      children: [
-                        InkWell(
-                          child: Icon(Icons.email, color: Colors.white),
-                          onTap: () async {
-                            var email = contact
-                                ?.email; // replace with the email you want
-
-                            final uri = 'mailto:$email';
-
-                            Uri url = Uri.parse(uri);
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(url);
-                            } else {
-                              throw 'Could not launch $url';
-                            }
-                          },
-                        ),
-                        SizedBox(width: 8.0),
-                        Expanded(
-                          // new line
-                          child: Text(
-                            contact?.email ?? 'N/A',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0),
-                    Row(
-                      children: [
-                        if (contact?.facebook != '') ...[
-                          SizedBox(
-                              height:
-                                  8.0), // add some space between email and Facebook
-                          Row(children: [
-                            /*Text(
-                        'Facebook:',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(fontSize: 18),
-                      ),*/
-                            SizedBox(width: 5.0),
-                            InkWell(
-                              onTap: () async {
-                                String? uri = contact?.facebook;
-                                if (uri != null) {
-                                  Uri url = Uri.parse(uri);
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(url);
-                                  } else {
-                                    throw 'Could not launch $url';
-                                  }
-                                }
-                              },
-                              child: Icon(Icons.facebook, color: Colors.white),
-                            ),
-                          ])
-                        ],
-                        if (contact?.instagram != '') ...[
-                          SizedBox(
-                              height:
-                                  8.0), // add some space between email and Facebook
-                          Row(children: [
-                            /*Text(
-                        'Instagram:',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(fontSize: 18),
-                      ),*/
-                            SizedBox(width: 8.0),
-                            InkWell(
-                              onTap: () async {
-                                String? uri = contact?.instagram;
-                                if (uri != null) {
-                                  Uri url = Uri.parse(uri);
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(url);
-                                  } else {
-                                    throw 'Could not launch $url';
-                                  }
-                                }
-                              },
-                              child: Icon(FontAwesomeIcons.instagram,
-                                  color: Colors.white),
-                            ),
-                          ])
-                        ]
-                      ],
-                    ),
-                    /*Expanded(
-                      // new line
-                      child: Text(
-                        contact?.facebook ?? 'N/A',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(fontSize: 18),
-                      ),
-                    ),*/
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   void _launchURL(String url) async {

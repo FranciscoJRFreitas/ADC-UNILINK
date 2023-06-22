@@ -44,29 +44,37 @@ class _ChatPageState extends State<ChatPage> {
         FirebaseDatabase.instance.ref().child('groups');
 
     StreamController<List<Group>> streamController = StreamController();
+    List<Group> groups = [];
 
-    chatRef.onValue.listen((event) {
-      DataSnapshot chatSnapshot = event.snapshot;
-      List<Group> groups = [];
-      Map<dynamic, dynamic> chatsData =
-          chatSnapshot.value as Map<dynamic, dynamic>;
-      chatsData.forEach((key, value) {
-        if (value != null) {
-          String groupid = key;
-          groupsRef.child(groupid).once().then((chatSnapshot) {
-            Map<dynamic, dynamic> chatsData =
-                chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
-            String displayName = chatsData['DisplayName'];
-            String description = chatsData['description'];
-            Group group = Group(
-              id: groupid,
-              DisplayName: displayName,
-              description: description,
-            );
-            groups.add(group);
-            streamController.add(groups);
-          });
-        }
+    // Listen for initial data and subsequent child additions
+    chatRef.onChildAdded.listen((event) async {
+      String groupId = event.snapshot.key as String;
+
+      // Fetch group details from groupsRef
+      DatabaseEvent groupSnapshot = await groupsRef.child(groupId).once();
+      Map<dynamic, dynamic> groupData =
+          groupSnapshot.snapshot.value as Map<dynamic, dynamic>;
+
+      if (groupData != null) {
+        String displayName = groupData['DisplayName'];
+        String description = groupData['description'];
+        Group group = Group(
+          id: groupId,
+          DisplayName: displayName,
+          description: description,
+        );
+        groups.add(group);
+      }
+
+      streamController.add(groups); // Add groups to the stream
+    });
+
+    // Listen for child removal using onChildRemoved
+    chatRef.onChildRemoved.listen((event) {
+      String groupId = event.snapshot.key as String;
+
+      setState(() {
+        groups.removeWhere((group) => group.id == groupId);
       });
     });
 

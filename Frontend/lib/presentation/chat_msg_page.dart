@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/messageImage.dart';
 import '../widgets/MessagePDF.dart';
@@ -62,6 +63,31 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messageStream = streamController.stream;
       });
       _scrollToBottom();
+    });
+
+    messagesRef.onChildChanged.listen((event) {
+      setState(() {
+        // Parse the data snapshot into a Message object
+        Message updatedMessage = Message.fromSnapshot(event.snapshot);
+        // Find the index of the message in the list
+        int index =
+            messages.indexWhere((message) => message.id == updatedMessage.id);
+        if (index >= 0) {
+          // Replace the existing message with the updated message
+          messages[index] = updatedMessage;
+          streamController.add(messages);
+        }
+      });
+    });
+
+    messagesRef.onChildRemoved.listen((event) {
+      setState(() {
+        // Parse the data snapshot into a Message object
+        Message removedMessage = Message.fromSnapshot(event.snapshot);
+        // Remove the message from the list
+        messages.removeWhere((message) => message.id == removedMessage.id);
+        streamController.add(messages);
+      });
     });
   }
 
@@ -305,6 +331,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
                 if (isDifferentDay(lastTimestamp, message.timestamp)) {
                   widgets.add(MessageTile(
+                    id: message.id,
+                    groupId: widget.groupId,
                     message: formatDateInMillis(message.timestamp),
                     sender: "",
                     time: "",

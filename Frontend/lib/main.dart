@@ -6,7 +6,7 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
 import 'domain/Notification.dart';
-import 'domain/PictureNotifier.dart';
+import 'domain/UserNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
 //import 'package:unilink2023/domain/cacheFactory.dart' as cache;
@@ -41,7 +41,7 @@ void main() async {
           ),
         ),
         ChangeNotifierProvider(
-          create: (context) => PictureNotifier(),
+          create: (context) => UserNotifier(),
         ),
         Provider<NotificationService>(
           create: (context) => NotificationService(),

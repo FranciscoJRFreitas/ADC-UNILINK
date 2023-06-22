@@ -1,21 +1,17 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/edit_profile_page.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
 import '../constants.dart';
-import '../domain/PictureNotifier.dart';
+import '../domain/UserNotifier.dart';
 import '../domain/User.dart';
+import 'blank_page.dart';
 
 class HomePage extends StatefulWidget {
-  final User user;
-  const HomePage({required this.user});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -24,16 +20,16 @@ class _HomePageState extends State<HomePage> {
   late User _currentUser;
 
   DocumentReference picsRef =
-  FirebaseFirestore.instance.collection('ProfilePictures').doc();
+      FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   @override
   void initState() {
     super.initState();
-    _currentUser = widget.user;
+
   }
 
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(
@@ -56,26 +52,27 @@ class _HomePageState extends State<HomePage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: IconButton(
-                            icon: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle, // use circle if the icon is circular
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    blurRadius: 15.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ),
-                            ), // Choose your icon and color
-                            onPressed: () {
-                              Navigator.of(dialogContext)
-                                  .pop(); // Use dialogContext here
-                            },
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape
+                                      .circle, // use circle if the icon is circular
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ), // Choose your icon and color
+                              onPressed: () {
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
+                              },
                             ),
                           ),
                         ],
@@ -121,9 +118,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserNotifier>(context);
+    _currentUser = userProvider.currentUser!;
 
     return Scaffold(
-
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -136,7 +134,7 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    widget.user.displayName,
+                    _currentUser.displayName,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -149,10 +147,9 @@ class _HomePageState extends State<HomePage> {
               color: Style.lightBlue,
             ),
             SizedBox(height: 10),
-            //Text('User Info', style: Theme.of(context).textTheme.titleMedium),
             InfoItem(
               title: 'Role',
-              value: widget.user.role ?? 'N/A',
+              value: _currentUser.role ?? 'N/A',
               icon: Icons.person,
             ),
             SizedBox(height: 5),
@@ -162,62 +159,76 @@ class _HomePageState extends State<HomePage> {
               color: Style.lightBlue,
             ),
             SizedBox(height: 20),
-            Row( children: [
-            Text(
-              'Personal Information',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Container(padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                child: SizedBox(height: 30, width: 100,
-                    child: MyTextButton(buttonName: 'Edit Profile', 
-                        onTap: (){
+            Row(children: [
+              Text(
+                'Personal Information',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Container(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: SizedBox(
+                      height: 35,
+                      width: 100,
+                      child: MyTextButton(
+                        buttonName: 'Edit Profile',
+                        onTap: () {
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
-                                return EditProfilePage(
-                                  user: widget.user,
-                                  onUserUpdate: (updatedUser) {
-                                    setState(() {
-                                      _currentUser = updatedUser;
-                                    });
-                                  },
-                                );
+                                return EditProfilePage(user: _currentUser);
                               });
                         },
-                        bgColor: Style.lightBlue, textColor: Style.white, height: 60,)
-                )
-            )
+                        bgColor: Style.lightBlue,
+                        textColor: Style.white,
+                        height: 60,
+                      )))
             ]),
             SizedBox(height: 20),
             InfoItem(
               title: 'Username',
-              value: widget.user.username,
+              value: _currentUser.username,
               icon: Icons.alternate_email,
             ),
             InfoItem(
               title: 'Email',
-              value: widget.user.email,
+              value: _currentUser.email,
               icon: Icons.mail,
             ),
             InfoItem(
-                title: "Education Level",
-                value: widget.user.educationLevel ?? '',
-                icon: Icons.school, ),
+              title: "Education Level",
+              value: _currentUser.educationLevel == 'D'
+                        ? 'Doctorate'
+                        : _currentUser.educationLevel == 'SE'
+                            ? 'Secondary Education'
+                            : _currentUser.educationLevel == 'UD'
+                                ? 'Undergraduate Degree'
+                                : _currentUser.educationLevel == 'MD'
+                                    ? 'Master\'s Degree'
+                                    : _currentUser.educationLevel == 'PE'
+                                        ? 'Primary Education'
+                                        : '',
+              icon: Icons.school,
+            ),
             InfoItem(
-                title: "Birth date",
-                value: widget.user.birthDate ?? '',
-                icon: Icons.schedule, ),
+              title: "Birth date",
+              value: _currentUser.birthDate ?? '',
+              icon: Icons.schedule,
+            ),
             InfoItem(
-                title: "Profile Visibility",
-                value: widget.user.profileVisibility ?? '',
-                icon: Icons.public, ),
+              title: "Mobile Phone",
+              value: _currentUser.mobilePhone ?? '',
+              icon: Icons.phone,
+            ),
             InfoItem(
-                title: "Address",
-                value: widget.user.address ?? '',
-                icon: Icons.school, ),
+              title: "Occupation",
+              value: _currentUser.occupation ?? '',
+              icon: Icons.cases_rounded,
+            ),
             InfoItem(
-                title: "NIF", value: widget.user.nif ?? '', icon: Icons.school,),
-            // ...more info items...
+              title: "Profile Visibility",
+              value: _currentUser.profileVisibility ?? '',
+              icon: Icons.public,
+            ),
           ],
         ),
       ),
@@ -225,10 +236,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   //Widget editBuild(BuildContext context) {
-    //return
+  //return
   //}
-
-
 }
 
 class InfoItem extends StatelessWidget {

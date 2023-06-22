@@ -27,9 +27,14 @@ class MyTextField extends StatelessWidget {
         onSubmitted: onSubmitted,
         focusNode: focusNode,
         controller: controller,
-        style: style != null ? style : small
-              ? Theme.of(context).textTheme.bodySmall
-              : Theme.of(context).textTheme.bodyMedium,
+        style: style != null
+            ? style
+            : small
+                ? Theme.of(context).textTheme.bodySmall
+                : Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).secondaryHeaderColor),
         keyboardType: inputType,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(

@@ -150,6 +150,8 @@ public class LoginResource {
         responseData.put("username", user.getString("user_username"));
         responseData.put("email", user.getString("user_email"));
         responseData.put("role", user.getString("user_role"));
+        responseData.put("birthDate", user.getString("user_birthDate"));
+        responseData.put("educationLevel", user.getString("user_educationLevel"));
         responseData.put("profileVisibility", user.getString("user_profileVisibility"));
         responseData.put("state", user.getString("user_state"));
         responseData.put("landlinePhone", user.getString("user_landlinePhone"));

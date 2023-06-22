@@ -40,14 +40,7 @@
       "facebook": null,
       "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-da-terra"
     },
-    {
-      "name": "Acesso negado",
-      "contactName": "Ciências e Tecnologia da Biomassa",
-      "phoneNumber": null,
-      "email": null,
-      "facebook": null,
-      "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-ciencias-e-tecnologia-da-biomassa"
-    },
+    
     {
       "name": "Departamento de Ciências da Vida",
       "contactName": "Ciências da Vida",
@@ -67,7 +60,7 @@
     {
       "name": "Departamento de Engenharia Eletrotécnica e de Computadores",
       "contactName": "Engenharia Eletrotécnica e de Computadores",
-      "phoneNumber": "(+351) 212 947 876, (+351) 212 948 545, (+351) 212949631",
+      "phoneNumber": "(+351) 212 947 876",
       "email": "deec.secretariado@fct.unl.pt",
       "facebook": null,
       "url": "https://www.fct.unl.pt/faculdade/departamentos/departamento-de-engenharia-eletrotecnica-e-de-computadores"

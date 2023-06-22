@@ -286,16 +286,8 @@ Future<int> login(
         birthDate: responseBody['birthDate'],
         profileVisibility: responseBody['profileVisibility'],
         state: responseBody['state'],
-        landlinePhone: responseBody['landlinePhone'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
-        workplace: responseBody['workplace'],
-        address: responseBody['address'],
-        additionalAddress: responseBody['additionalAddress'],
-        locality: responseBody['locality'],
-        postalCode: responseBody['postalCode'],
-        nif: responseBody['nif'],
-        photoUrl: responseBody['photo'],
       );
       try {
         FirebaseAuth.UserCredential userCredential =
@@ -337,19 +329,14 @@ Future<int> login(
         print('Failed to authenticate user: $e');
       }
 
-      cacheFactory.set('username', user.username);
-      cacheFactory.set('role', user.role);
-      cacheFactory.set('password', password);
-      cacheFactory.set('token', token[0]);
       cacheFactory.setUser(user, token[0], password);
-      cacheFactory.set('displayName', user.displayName);
-      cacheFactory.set('email', user.email);
 
       cacheFactory.set('checkLogin', 'true');
+      cacheFactory.printDb();
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
       showErrorSnackbar("Login Successful!", false, true);
     } else {

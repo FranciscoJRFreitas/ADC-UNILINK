@@ -9,65 +9,62 @@ import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/PictureNotifier.dart';
+import '../domain/UserNotifier.dart';
+import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
+import '../widgets/LineComboBox.dart';
+import '../widgets/LineDateField.dart';
 import '../widgets/ToggleButton.dart';
 import '../widgets/widget.dart';
 import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'screen.dart';
+
 
 class EditProfilePage extends StatefulWidget {
   final User user;
-  final Function(User) onUserUpdate;
-
-  EditProfilePage({required this.user, required this.onUserUpdate});
+  EditProfilePage({required this.user});
 
   @override
   _EditProfilePage createState() => _EditProfilePage();
 }
 
 class _EditProfilePage extends State<EditProfilePage> {
-  bool passwordVisibility = true;
-
+  late User user;
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController targetUsernameController =
-      TextEditingController();
   late TextEditingController displayNameController;
-  late TextEditingController emailController;
-  String _selectedProfileVisibility = 'Profile Visibility';
-  String sv = '';
-  String _selectedUserRole = 'User Role';
-  String sr = '';
-  String _selectedActivityState = 'Activity State';
-  String sa = '';
-  String _selectedEducationLevel = 'Education Level';
+  late String? _selectedEducationLevel;
   late TextEditingController birthDateController;
-  final TextEditingController landlinePhoneController = TextEditingController();
-  final TextEditingController mobilePhoneController = TextEditingController();
-  final TextEditingController occupationController = TextEditingController();
-  final TextEditingController workplaceController = TextEditingController();
-  late TextEditingController addressController;
-  final TextEditingController additionalAddressController =
-      TextEditingController();
-  final TextEditingController localityController = TextEditingController();
-  final TextEditingController postalCodeController = TextEditingController();
-  late TextEditingController nifController;
+  late TextEditingController mobilePhoneController;
+  late TextEditingController occupationController;
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   @override
   void initState() {
-    displayNameController =
-        TextEditingController(text: widget.user.displayName);
-    emailController = TextEditingController(text: widget.user.email);
-    birthDateController = TextEditingController(text: widget.user.birthDate);
-    addressController = TextEditingController(text: widget.user.address);
-    nifController = TextEditingController(text: widget.user.nif);
+    super.initState();
+    user = widget.user;
+    initialize();
+  }
 
+  void initialize() {
+    displayNameController = TextEditingController(text: user.displayName);
+    birthDateController = TextEditingController(text: user.birthDate);
+    mobilePhoneController = TextEditingController(text: user.mobilePhone);
+    occupationController = TextEditingController(text: user.occupation);
+    _selectedEducationLevel = user.educationLevel == 'D'
+        ? 'Doctorate'
+        : user.educationLevel == 'SE'
+            ? 'Secondary Education'
+            : user.educationLevel == 'UD'
+                ? 'Undergraduate Degree'
+                : user.educationLevel == 'MD'
+                    ? 'Master\'s Degree'
+                    : user.educationLevel == 'PE'
+                        ? 'Primary Education'
+                        : 'Education Level';
   }
 
   // Function to display the snackbar
@@ -89,27 +86,16 @@ class _EditProfilePage extends State<EditProfilePage> {
     String birthDate,
     String targetUsername,
     String displayName,
-    String email,
     String role,
     String activityState,
     String profileVisibility,
-    String landlinePhone,
     String mobilePhone,
     String occupation,
-    String workplace,
-    String address,
-    String additionalAddress,
-    String locality,
-    String postalCode,
-    String nif,
-    String photo,
     void Function(String, bool) showErrorSnackbar,
-    bool redirect,
   ) async {
     final url = kBaseUrl + 'rest/modify/';
     final tokenID = await cacheFactory.get('users', 'token');
-    final storedUsername = await cacheFactory.get('users', 'username');
-    Token token = new Token(tokenID: tokenID, username: storedUsername);
+    Token token = new Token(tokenID: tokenID, username: user.username);
 
     final response = await http.patch(
       Uri.parse(url),
@@ -118,26 +104,18 @@ class _EditProfilePage extends State<EditProfilePage> {
         'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
       body: json.encode({
-        'username': widget.user.username,
-        'email': email,
+        'username': user.username,
         'password': password,
+        'email': user.email,
         'educationLevel': educationLevel,
         'birthDate': birthDate,
         'displayName': displayName,
-        'targetUsername': targetUsername,
+        'targetUsername': '',
         'role': role,
         'activityState': activityState,
         'profileVisibility': profileVisibility,
-        'landlinePhone': landlinePhone,
         'mobilePhone': mobilePhone,
         'occupation': occupation,
-        'workplace': workplace,
-        'address': address,
-        'additionalAddress': additionalAddress,
-        'locality': locality,
-        'postalCode': postalCode,
-        'taxIdentificationNumber': nif,
-        'photo': photo,
       }),
     );
 
@@ -153,32 +131,16 @@ class _EditProfilePage extends State<EditProfilePage> {
         birthDate: responseBody['birthDate'],
         profileVisibility: responseBody['profileVisibility'],
         state: responseBody['state'],
-        landlinePhone: responseBody['landlinePhone'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
-        workplace: responseBody['workplace'],
-        address: responseBody['address'],
-        additionalAddress: responseBody['additionalAddress'],
-        locality: responseBody['locality'],
-        postalCode: responseBody['postalCode'],
-        nif: responseBody['nif'],
-        photoUrl: responseBody['photo'],
       );
 
-      if (responseBody['username'] == widget.user.username) {
-        if (widget.onUserUpdate != null) {
-          widget.onUserUpdate(user);
-          if (redirect) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MainScreen(user: user)),
-            );
-          }
-        }
-      }
-      if (redirect) {
-        showErrorSnackbar('Changes applied successfully!', false);
-      }
+      await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
+
+      //cacheFactory.setUser(
+      //  user, await cacheFactory.get('users', 'token'), password);
+      showErrorSnackbar('Changes applied successfully!', false);
+      Navigator.pop(context);
     } else {
       showErrorSnackbar('Failed to modify attributes: ${response.body}', true);
     }
@@ -191,17 +153,16 @@ class _EditProfilePage extends State<EditProfilePage> {
 
     final fileBytes = await pickedFile!.readAsBytes();
 
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('ProfilePictures/' + widget.user.username);
+    Reference storageReference = FirebaseStorage.instance.ref().child(
+        'ProfilePictures/' + await cacheFactory.get('users', 'username'));
 
     await storageReference.putData(fileBytes);
-    await Provider.of<PictureNotifier>(context, listen:false).downloadData();
+    await Provider.of<UserNotifier>(context, listen: false).downloadData();
     setState(() {});
   }
 
   Widget picture(BuildContext context) {
-    final photoProvider = Provider.of<PictureNotifier>(context);
+    final photoProvider = Provider.of<UserNotifier>(context);
     final Future<Uint8List?>? userPhoto = photoProvider.currentPic;
 
     return FutureBuilder<Uint8List?>(
@@ -311,7 +272,7 @@ class _EditProfilePage extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool _isPublic = widget.user.profileVisibility!.toLowerCase() == 'public';
+    bool _isPublic = user.profileVisibility!.toLowerCase() == 'public';
     double offset = MediaQuery.of(context).size.width * 0.1;
     return Dialog(
       insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
@@ -338,7 +299,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                       thickness: 2,
                       color: Theme.of(context).primaryColor,
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 15),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: LineTextField(
@@ -346,47 +307,64 @@ class _EditProfilePage extends State<EditProfilePage> {
                           icon: Icons.alternate_email,
                           controller: displayNameController),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 5),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: LineComboBox(
+                          selectedValue: _selectedEducationLevel!,
+                          items: [
+                            'Education Level',
+                            'Primary Education',
+                            'Secondary Education',
+                            'Undergraduate Degree',
+                            'Master\'s Degree',
+                            'Doctorate'
+                          ],
+                          onChanged: (dynamic newValue) {
+                            setState(() {
+                              _selectedEducationLevel = newValue;
+                            });
+                          },
+                          icon: Icons.school,
+                        )),
+                    SizedBox(height: 5),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
-                          title: 'Email',
-                          icon: Icons.mail,
-                          controller: emailController),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: LineTextField(
+                      child: LineDateField(
                           title: "Birth date",
                           icon: Icons.schedule,
                           controller: birthDateController),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 15),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: LineTextField(
-                          title: "Address",
-                          icon: Icons.home,
-                          controller: addressController),
+                          title: "Mobile Phone",
+                          icon: Icons.phone,
+                          controller: mobilePhoneController),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 15),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: LineTextField(
-                          title: "NIF",
-                          icon: Icons.perm_identity,
-                          controller: nifController),
+                          title: "Occupation",
+                          icon: Icons.cases_rounded,
+                          controller: occupationController),
                     ),
                     SizedBox(height: 5),
                     Padding(
                       padding: const EdgeInsets.only(left: 10.0),
                       child: ToggleButton(
-                          active: _isPublic,
-                          title: "Profile Visibility",
-                          optionL: "Private",
-                          optionR: "Public"),
+                        active: _isPublic,
+                        title: "Profile Visibility",
+                        optionL: "Private",
+                        optionR: "Public",
+                        onToggle: (value) {
+                          _isPublic = value;
+                        },
+                      ),
                     ),
+                    SizedBox(height: 15),
                     Container(
                       padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
                       child: MyTextButton(
@@ -396,30 +374,30 @@ class _EditProfilePage extends State<EditProfilePage> {
                           String? password;
                           password =
                               await cacheFactory.get('users', 'password');
-                          print(password);
-                          print(nifController.text);
                           modifyAttributes(
-                              password!,
-                              '',
-                              birthDateController.text,
-                              widget.user.username,
-                              displayNameController.text,
-                              emailController.text,
-                              'SU',
-                              '',
-                              '',
-                              '',
-                              '',
-                              '',
-                              '',
-                              addressController.text,
-                              '',
-                              '',
-                              '2012-666',
-                              nifController.text,
-                              '',
-                              _showErrorSnackbar,
-                              true);
+                            password!,
+                            _selectedEducationLevel == 'Doctorate'
+                                ? 'D'
+                                : _selectedEducationLevel ==
+                                        'Secondary Education'
+                                    ? 'SE'
+                                    : _selectedEducationLevel ==
+                                            'Undergraduate Degree'
+                                        ? 'UD'
+                                        : _selectedEducationLevel ==
+                                                'Master\'s Degree'
+                                            ? 'MD'
+                                            : 'PE',
+                            birthDateController.text,
+                            user.username,
+                            displayNameController.text,
+                            user.role!,
+                            'ACTIVE',
+                            _isPublic ? 'PUBLIC' : 'PRIVATE',
+                            mobilePhoneController.text,
+                            occupationController.text,
+                            _showErrorSnackbar,
+                          );
                         },
                         bgColor: Theme.of(context).primaryColor,
                         textColor: Colors.white,

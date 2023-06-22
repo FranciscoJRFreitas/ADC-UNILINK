@@ -24,9 +24,8 @@ class SqliteService {
       onCreate: (database, version) async {
         await database.execute(
             'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
-            'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT, landlinePhone TEXT,'
-            'mobilePhone TEXT, occupation TEXT, workplace TEXT, address TEXT, additionalAddress TEXT, locality TEXT,'
-            'postalCode TEXT, nif TEXT, photoUrl TEXT, token TEXT, password TEXT)');
+            'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT,'
+            'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
             'theme TEXT, pageIndex TEXT)');
@@ -140,16 +139,8 @@ class SqliteService {
       birthDate: maps[0]['birthDate'],
       profileVisibility: maps[0]['profileVisibility'],
       state: maps[0]['state'],
-      landlinePhone: maps[0]['landlinePhone'],
       mobilePhone: maps[0]['mobilePhone'],
       occupation: maps[0]['occupation'],
-      workplace: maps[0]['workplace'],
-      address: maps[0]['address'],
-      additionalAddress: maps[0]['additionalAddress'],
-      locality: maps[0]['locality'],
-      postalCode: maps[0]['postalCode'],
-      nif: maps[0]['nif'],
-      photoUrl: maps[0]['photoUrl'],
     );
   }
 

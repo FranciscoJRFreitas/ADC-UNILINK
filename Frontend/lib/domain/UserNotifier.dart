@@ -7,22 +7,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'User.dart';
 
-class PictureNotifier with ChangeNotifier {
+class UserNotifier with ChangeNotifier {
 
   String? username;
   Future<Uint8List?>? profilePic;
+  User? _user;
 
-  PictureNotifier(){
+  UserNotifier(){
     initialize();
   }
 
   Future<void> initialize() async{
     await getUsername();
-    print(username);
     await downloadData();
+    _user = await cacheFactory.get("users", "user");
   }
 
   Future<Uint8List?>? get currentPic => profilePic;
+
+  User? get currentUser => _user;
 
   Future<void> downloadData() async {
 
@@ -39,5 +42,14 @@ class PictureNotifier with ChangeNotifier {
     username = await cacheFactory.get('users', 'username');
     print(await cacheFactory.get('users', 'username'));
   }
+
+  Future<void> updateUser(User user) async{
+
+    _user = user;
+    cacheFactory.setUser(user, await cacheFactory.get('users', 'token'), await cacheFactory.get('users', 'password') );
+
+    notifyListeners();
+  }
+
 
 }

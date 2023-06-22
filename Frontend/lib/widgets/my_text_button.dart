@@ -48,34 +48,34 @@ class _MyTextButtonState extends State<MyTextButton> {
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
-    if (event is RawKeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+    if (event is RawKeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.enter) {
       widget.onTap();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: widget.alignment,
-      height: widget.height,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: widget.bgColor,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: TextButton(
-        style: ButtonStyle(
-          overlayColor: MaterialStateProperty.resolveWith(
-            (states) => Colors.black12,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          alignment: widget.alignment,
+          height: widget.height,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: widget.bgColor,
+            borderRadius: BorderRadius.circular(18),
           ),
-        ),
-        onPressed: widget.onTap,
-        child: Text(
-          widget.buttonName,
-          style: kButtonText.copyWith(color: widget.textColor),
+          child: Center(
+            child: Text(
+              widget.buttonName,
+              style: kButtonText.copyWith(color: widget.textColor),
+            ),
+          ),
         ),
       ),
     );
   }
 }
-

@@ -3,7 +3,7 @@ import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import '../widgets/register_page.dart';
+import '../widgets/my_age_field.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -131,16 +131,8 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
         birthDate: responseBody['birthDate'],
         profileVisibility: responseBody['profileVisibility'],
         state: responseBody['state'],
-        landlinePhone: responseBody['landlinePhone'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
-        workplace: responseBody['workplace'],
-        address: responseBody['address'],
-        additionalAddress: responseBody['additionalAddress'],
-        locality: responseBody['locality'],
-        postalCode: responseBody['postalCode'],
-        nif: responseBody['nif'],
-        photoUrl: responseBody['photo'],
       );
 
       if (responseBody['username'] == widget.user.username) {
@@ -149,7 +141,7 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
           if (redirect) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+              MaterialPageRoute(builder: (context) => MainScreen()),
             );
           }
         }
