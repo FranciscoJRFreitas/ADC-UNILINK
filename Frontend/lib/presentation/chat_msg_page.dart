@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,6 +16,7 @@ import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -34,6 +36,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late List<String> removedMessages = []; // Add this line
   XFile? pickedFile;
   FilePickerResult? picked;
+  ImageDetail? pickedDetails;
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10; //still experiment
@@ -113,6 +116,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
       }
     });
+
+    pickedDetails = ImageDetail(
+      width: 0,
+      height: 0,
+      bytes: Uint8List(0),
+    );
   }
 
   void _configureMessaging() async {
@@ -209,8 +218,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 children: [
                   Container(
                     constraints: BoxConstraints(
-                      maxHeight: 300,
-                      maxWidth: 200,
+                      maxHeight: 300,//pickedDetails!.height as double, //KIsWeb? dimensao maior : dimensao mais pequena
+                      maxWidth: 150,//pickedDetails!.width as double,
                     ),
                     child: pickedFile != null
                         ? Column(
@@ -538,6 +547,18 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
     pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) picked = null;
+
+    var bytes = await pickedFile!.readAsBytes();
+
+    final buffer = await ImmutableBuffer.fromUint8List(bytes);
+
+    final descriptor = await ImageDescriptor.encoded(buffer);
+
+    pickedDetails = ImageDetail(
+      width: descriptor.width,
+      height: descriptor.height,
+      bytes: bytes,
+    );
     setState(() {});
   }
 
@@ -639,4 +660,14 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   Future<Uint8List?> layoutImage() async {
     return await pickedFile!.readAsBytes();
   }
+}
+
+class ImageDetail {
+  final int width;
+
+  final int height;
+
+  final Uint8List? bytes;
+
+  ImageDetail({required this.width, required this.height, this.bytes});
 }
