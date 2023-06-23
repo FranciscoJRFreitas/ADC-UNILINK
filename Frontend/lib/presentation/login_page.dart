@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/Notification.dart';
+import '../domain/UserNotifier.dart';
 import '../presentation/screen.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
@@ -333,6 +334,9 @@ Future<int> login(
 
       cacheFactory.set('checkLogin', 'true');
       cacheFactory.printDb();
+
+      await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
+      await Provider.of<UserNotifier>(context, listen: false).downloadData();
 
       Navigator.push(
         context,

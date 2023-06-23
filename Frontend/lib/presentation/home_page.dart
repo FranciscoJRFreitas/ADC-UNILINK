@@ -161,11 +161,11 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 20),
             Row(children: [
               Text(
-                'Personal Information',
+                'Profile Information',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Container(
-                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                   child: SizedBox(
                       height: 35,
                       width: 100,
