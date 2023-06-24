@@ -180,8 +180,7 @@ class ContactCard extends StatelessWidget {
               : MediaQuery.of(context).size.height / 5;
       final double fontSize = availableWidth < 400 ? 12 : 17;
       final double iconSize = availableWidth < 400 ? 15 : 20;
-      debugPrint(
-          '$availableWidth $availableHeight $cardHeight $fontSize $iconSize'); // Adjust these values as per your needs
+
       return Container(
         height: cardHeight,
         child: Card(
