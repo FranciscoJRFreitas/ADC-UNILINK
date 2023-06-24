@@ -89,6 +89,7 @@ final ThemeData kLightTheme = ThemeData(
   primaryIconTheme: IconThemeData(color: Style.lightBlack),
   secondaryHeaderColor: Colors.black,
   cardColor: Colors.white10,
+  iconTheme: IconThemeData(color: Colors.white),
   // customize other properties as needed
 );
 
@@ -145,7 +146,8 @@ final ThemeData kDarkTheme = ThemeData(
   ),
   primaryIconTheme: IconThemeData(color: Style.grey),
   secondaryHeaderColor: Colors.white,
-  cardColor: Colors.white30,
+  cardColor: Colors.white30, iconTheme: IconThemeData(color: Colors.white),
+
   // customize other properties as needed
 );
 
