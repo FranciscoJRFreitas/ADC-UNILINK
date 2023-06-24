@@ -468,6 +468,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 time: formatTimeInMillis(message.timestamp),
                 sentByMe: widget.username == message.name,
                 groupId: widget.groupId,
+                isAdmin: isAdmin,
                 fileExtension: message.extension!,
                 message: message.text,
               )

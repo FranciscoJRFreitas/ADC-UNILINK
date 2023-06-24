@@ -1,9 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'context_menu_stub.dart';
-import 'package:flutter/scheduler.dart';
 
 class MessageTile extends StatefulWidget {
   final String groupId;
@@ -33,12 +30,9 @@ class MessageTile extends StatefulWidget {
 
 class _MessageTileState extends State<MessageTile> {
   Offset? _tapPosition;
-  bool _isContextMenuVisible = false;
 
   void _showContextMenu(BuildContext context) {
-    setState(() {
-      _isContextMenuVisible = true;
-    });
+    setState(() {});
 
     final List<PopupMenuEntry<dynamic>> menuItems;
     if (widget.sentByMe) {
@@ -51,12 +45,20 @@ class _MessageTileState extends State<MessageTile> {
           child: Text('Delete'),
           value: 'delete',
         ),
+        PopupMenuItem(
+          child: Text('Details'),
+          value: 'details',
+        ),
       ];
     } else {
       menuItems = [
         PopupMenuItem(
           child: Text('Delete'),
           value: 'delete',
+        ),
+        PopupMenuItem(
+          child: Text('Details'),
+          value: 'details',
         ),
       ];
     }
@@ -78,11 +80,11 @@ class _MessageTileState extends State<MessageTile> {
         _handleEdit();
       } else if (value == 'delete') {
         _handleDelete();
+      } else if (value == 'details') {
+        _handleDetails();
       }
 
-      setState(() {
-        _isContextMenuVisible = false;
-      });
+      setState(() {});
     });
   }
 
@@ -160,11 +162,25 @@ class _MessageTileState extends State<MessageTile> {
     );
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final contextMenu = ContextMenu();
-    contextMenu.onContextMenu();
+  void _handleDetails() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text('Details'),
+          content: Text("Username : ${widget.sender}"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Ok'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -240,7 +256,7 @@ class _MessageTileState extends State<MessageTile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.sender.toUpperCase(),
+                          widget.sender,
                           textAlign: TextAlign.start,
                           style: const TextStyle(
                               fontSize: 13,

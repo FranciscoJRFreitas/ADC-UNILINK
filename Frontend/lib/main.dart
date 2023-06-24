@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
+import 'data/disabler_provider.dart';
 import 'domain/Notification.dart';
 import 'domain/UserNotifier.dart';
 import 'firebase_options.dart';
@@ -16,6 +17,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  disablerFactory.disable();
 
   cacheFactory.initDB();
   cacheFactory.printDb();
@@ -57,23 +60,20 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  
-  
   void initState(BuildContext context) {
-    
-    FirebaseMessagingService messagingService = FirebaseMessagingService(context.read<NotificationService>());
+    FirebaseMessagingService messagingService =
+        FirebaseMessagingService(context.read<NotificationService>());
     messagingService.requestPermission();
     checkNotifications(context);
   }
 
- 
   checkNotifications(BuildContext context) async {
-    await Provider.of<NotificationService>(context, listen: false).checkForNotifications();
+    await Provider.of<NotificationService>(context, listen: false)
+        .checkForNotifications();
   }
 
   @override
-  Widget build(BuildContext context) {  
-
+  Widget build(BuildContext context) {
     initState(context);
 
     final themeNotifier = Provider.of<ThemeNotifier>(context);
