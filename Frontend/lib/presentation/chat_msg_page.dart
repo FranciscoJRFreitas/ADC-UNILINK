@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -11,9 +12,12 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
+import 'package:unilink2023/widgets/messageImage.dart';
+import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -202,6 +206,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               width: MediaQuery.of(context).size.width,
+              color: Color.fromARGB(0, 0, 0, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -681,5 +686,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         ],
       ),
     );
+  }
+
+  Future<Uint8List?> layoutImage() async {
+    return await pickedFile!.readAsBytes();
   }
 }

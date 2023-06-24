@@ -9,7 +9,6 @@ import 'User.dart';
 
 class UserNotifier with ChangeNotifier {
 
-  String? username;
   Future<Uint8List?>? profilePic;
   User? _user;
 
@@ -18,7 +17,7 @@ class UserNotifier with ChangeNotifier {
   }
 
   Future<void> initialize() async{
-    await getUsername();
+    //await getUsername();
     await downloadData();
     _user = await cacheFactory.get("users", "user");
   }
@@ -30,18 +29,18 @@ class UserNotifier with ChangeNotifier {
   Future<void> downloadData() async {
 
     profilePic = FirebaseStorage.instance
-        .ref('ProfilePictures/' + username!)
+        .ref('ProfilePictures/' + _user!.username)
         .getData()
         .onError((error, stackTrace) => null);
 
     notifyListeners();
   }
 
-  Future<void> getUsername() async{
+  /*Future<void> getUsername() async{
 
     username = await cacheFactory.get('users', 'username');
     print(await cacheFactory.get('users', 'username'));
-  }
+  }*/
 
   Future<void> updateUser(User user) async{
 

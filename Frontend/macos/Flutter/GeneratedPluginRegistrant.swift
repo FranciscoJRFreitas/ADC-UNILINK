@@ -14,7 +14,7 @@ import firebase_messaging
 import firebase_storage
 import flutter_local_notifications
 import flutter_native_timezone
-import package_info_plus_macos
+import package_info_plus
 import path_provider_foundation
 import shared_preferences_foundation
 import sqflite

@@ -2,9 +2,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
+import 'context_menu_stub.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:sqflite/sqflite.dart';
 
 class MessageTile extends StatefulWidget {
   final String groupId;
@@ -164,11 +163,8 @@ class _MessageTileState extends State<MessageTile> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      html.window.onContextMenu.listen((event) {
-        event.preventDefault();
-      });
-    });
+    final contextMenu = ContextMenu();
+    contextMenu.onContextMenu();
   }
 
   @override
