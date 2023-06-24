@@ -162,7 +162,10 @@ class _MessageWithFileState extends State<MessageWithFile> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                final storageRef = FirebaseStorage.instance.ref(
+                    'GroupAttachements/${widget.groupId}/${widget.id}.${widget.fileExtension}');
+                await storageRef.delete();
                 final DatabaseReference messageRef = FirebaseDatabase.instance
                     .ref()
                     .child('messages')
