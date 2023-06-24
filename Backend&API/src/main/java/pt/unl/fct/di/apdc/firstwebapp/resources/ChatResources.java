@@ -3,10 +3,8 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.Transaction;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.*;
+import com.google.cloud.storage.Blob;
 import com.google.firebase.database.*;
 import com.google.gson.Gson;
 import com.mailjet.client.ClientOptions;
@@ -30,6 +28,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response.Status;
+
 
 @Path("/chat")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -221,34 +220,49 @@ public class ChatResources {
         return Response.ok().build();
     }
 
+    public static void deleteFolder(String folderPath) {
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+        String bucketName = "unilink23.appspot.com";
+        Bucket bucket = storage.get(bucketName);
+
+        // List the blobs in the folder
+        Page<Blob> blobs = bucket.list(Storage.BlobListOption.prefix(folderPath));
+        for (Blob blob : blobs.iterateAll()) {
+            blob.delete();
+            System.out.println("Deleted blob: " + blob.getName());
+        }
+    }
+
     public static void leaveGroup(String groupId, String userId) {
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
         DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
         chatRef.child(groupId).removeValueAsync();
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-        String bucketName = "unilink23.appspot.com";
-        membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
+        DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
+
+        groupsRef.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
-                    DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
-                    groupsRef.child(groupId).removeValueAsync();
-                    DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
-                    messagesRef.child(groupId).removeValueAsync();
-
-                    /*String groupPicturesPath = "GroupPictures/" + groupId;
-                    storage.get(BlobId.of(bucketName, srcFilename));
-
-                    // Remove GroupAttachments/groupid
+                    String groupPicturesPath = "GroupPictures/" + groupId;
                     String groupAttachmentsPath = "GroupAttachments/" + groupId;
-                    removeFolderFromStorage(storage, bucketName, groupAttachmentsPath);*/
 
+                    messagesRef.child(groupId).removeValueAsync();
+                    groupsRef.child(groupId).removeValueAsync();
+
+                    LOG.info("Deleting folder: " + groupPicturesPath);
+                    deleteFolder(groupPicturesPath);
+
+                    LOG.info("Deleting folder: " + groupAttachmentsPath);
+                    deleteFolder(groupAttachmentsPath);
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                Logger.getLogger("LeaveGroup").severe("Error: " + databaseError.getMessage());
             }
         });
     }
