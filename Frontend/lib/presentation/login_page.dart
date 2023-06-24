@@ -338,9 +338,18 @@ Future<int> login(
       await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
       await Provider.of<UserNotifier>(context, listen: false).downloadData();
 
+      String page = await cacheFactory.get("settings", "index");
+      int index = 0;
+
+      if (page == "News") index = 0;
+      if (page == "Profile") index = 3;
+      if (page == "Schedule") index = 9;
+      if (page == "Chat") index = 6;
+      if (page == "Contacts") index = 7;
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => MainScreen(index: index)),
       );
       showErrorSnackbar("Login Successful!", false, true);
     } else {

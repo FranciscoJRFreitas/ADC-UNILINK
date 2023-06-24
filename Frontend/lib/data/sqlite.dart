@@ -28,8 +28,8 @@ class SqliteService {
             'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT, pageIndex TEXT)');
-        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'pageIndex': null});
+            'theme TEXT, `index` TEXT)');
+        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'index': "News"});
       },
       version: 1,
     );
@@ -81,9 +81,7 @@ class SqliteService {
   Future<void> updateIndex(String value) async {
     Database db = await getDatabase();
 
-    await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO settings(pageIndex) VALUES($value)')
-        : await db.rawUpdate('UPDATE settings SET pageIndex = $value');
+    await db.rawUpdate('UPDATE settings SET `index` = \'$value\'');
   }
 
   Future<String?> getCheckIntro() async {

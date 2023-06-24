@@ -18,8 +18,8 @@ class UserNotifier with ChangeNotifier {
 
   Future<void> initialize() async{
     //await getUsername();
-    await downloadData();
     _user = await cacheFactory.get("users", "user");
+    await downloadData();
   }
 
   Future<Uint8List?>? get currentPic => profilePic;
