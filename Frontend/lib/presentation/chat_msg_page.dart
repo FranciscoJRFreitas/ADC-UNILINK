@@ -9,9 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
+import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
-import 'package:unilink2023/widgets/messageImage.dart';
-import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -203,35 +202,42 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               width: MediaQuery.of(context).size.width,
-              color: Color.fromARGB(0, 0, 0, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    constraints: BoxConstraints(
-                      maxHeight: 300,
-                      maxWidth: 200,
-                    ),
                     child: pickedFile != null
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                                 Align(
-                                    alignment: Alignment.topCenter,
-                                    child: Text(
-                                      pickedFile!.name,
-                                    )),
-                                picture(context)
+                                  alignment: Alignment.topCenter,
+                                  child: Container(
+                                      width: MediaQuery.of(context).size.width /
+                                          10,
+                                      child: Text(
+                                        pickedFile!.name,
+                                        textAlign: TextAlign.center,
+                                      )),
+                                ),
+                                messageImageWidget(context)
                               ])
                         : picked != null
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                     Align(
-                                        alignment: Alignment.topCenter,
-                                        child: Text(
-                                          picked!.files.first.name,
-                                        )),
+                                      alignment: Alignment.topCenter,
+                                      child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              10,
+                                          child: Text(
+                                            picked!.files.first.name,
+                                            textAlign: TextAlign.center,
+                                          )),
+                                    ),
                                     GestureDetector(
                                         onTap: () {},
                                         child: const Icon(
@@ -241,11 +247,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                         ))
                                   ])
                             : const SizedBox(),
-                    // : Icon(
-                    //     Icons.attach_file,
-                    //     size: 60,
-                    //     color: Colors.white,
-                    //   ),
                   ),
                   const SizedBox(
                     width: 12,
@@ -292,43 +293,86 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   const SizedBox(
                     width: 12,
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      attachImage();
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.image,
-                          color: Colors.white,
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     attachImage();
+                  //   },
+                  //   child: Container(
+                  //     height: 50,
+                  //     width: 50,
+                  //     decoration: BoxDecoration(
+                  //       color: Theme.of(context).primaryColor,
+                  //       borderRadius: BorderRadius.circular(30),
+                  //     ),
+                  //     child: Center(
+                  //       child: Icon(
+                  //         Icons.image,
+                  //         color: Colors.white,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(
+                  //   width: 12,
+                  // ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     attachFile();
+                  //   },
+                  //   child: Container(
+                  //     height: 50,
+                  //     width: 50,
+                  //     decoration: BoxDecoration(
+                  //       color: Theme.of(context).primaryColor,
+                  //       borderRadius: BorderRadius.circular(30),
+                  //     ),
+                  //     child: Center(
+                  //       child: Icon(
+                  //         Icons.picture_as_pdf_rounded,
+                  //         color: Colors.white,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  CombinedButton(
+                    image: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          attachImage();
+                        });
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.image,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      attachFile();
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.picture_as_pdf_rounded,
-                          color: Colors.white,
+                    file: GestureDetector(
+                      onTap: () {
+                        attachFile();
+                        setState(() {});
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.picture_as_pdf_rounded,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -494,7 +538,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
         await storageReference.putData(fileBytes!);
-
         messageData = {
           'containsFile': true,
           'extension': extension,
@@ -615,7 +658,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
   }
 
-  Widget profilePicture(BuildContext context) {
+  Future<Uint8List?> layoutImage() async {
+    return await pickedFile!.readAsBytes();
+  }
+
+  Widget messageImageWidget(BuildContext context) {
     return InkWell(
       onTap: () {
         //edit image link click as per your need.
@@ -623,8 +670,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       child: Stack(
         children: <Widget>[
           Container(
-            width: 200,
-            height: 200,
+            width: MediaQuery.of(context).size.width / 10,
+            height: MediaQuery.of(context).size.width / 10,
             child: Container(
               child: ClipRRect(
                   borderRadius: BorderRadius.horizontal(),
@@ -634,9 +681,5 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         ],
       ),
     );
-  }
-
-  Future<Uint8List?> layoutImage() async {
-    return await pickedFile!.readAsBytes();
   }
 }
