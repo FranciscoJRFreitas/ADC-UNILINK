@@ -687,8 +687,4 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       ),
     );
   }
-
-  Future<Uint8List?> layoutImage() async {
-    return await pickedFile!.readAsBytes();
-  }
 }
