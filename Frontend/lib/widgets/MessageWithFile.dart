@@ -207,14 +207,19 @@ class _MessageWithFileState extends State<MessageWithFile> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onSecondaryTapDown: (TapDownDetails details) {
-        _tapPosition = details.globalPosition;
-        if (widget.sentByMe || widget.isAdmin) {
-          _showContextMenu(context);
+      onTapDown: (TapDownDetails details) {
+        if (!kIsWeb && (widget.sentByMe || widget.isAdmin)) {
+          _tapPosition = details.globalPosition;
         }
       },
       onLongPress: () {
         if (!kIsWeb && (widget.sentByMe || widget.isAdmin)) {
+          _showContextMenu(context);
+        }
+      },
+      onSecondaryTapDown: (TapDownDetails details) {
+        _tapPosition = details.globalPosition;
+        if (widget.sentByMe || widget.isAdmin) {
           _showContextMenu(context);
         }
       },
