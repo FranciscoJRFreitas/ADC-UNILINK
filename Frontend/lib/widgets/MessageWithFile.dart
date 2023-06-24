@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MessageWithFile extends StatefulWidget {
@@ -12,6 +13,7 @@ class MessageWithFile extends StatefulWidget {
   final bool isSystemMessage;
   final String groupId;
   final String fileExtension;
+  final String message;
 
   const MessageWithFile({
     Key? key,
@@ -22,6 +24,7 @@ class MessageWithFile extends StatefulWidget {
     required this.groupId,
     required this.fileExtension,
     this.isSystemMessage = false,
+    required this.message,
   }) : super(key: key);
 
   @override
@@ -85,7 +88,20 @@ class _MessageWithFileState extends State<MessageWithFile> {
               alignment: WrapAlignment.start,
               crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                profilePicture(context),
+                Column(children: [
+                  if (widget.fileExtension == 'png' ||
+                      widget.fileExtension == 'jpeg')
+                    messageImageWidget(context)
+                  else
+                    profilePicture(context),
+                  Text(
+                    widget.message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ]),
+
+                //profilePicture(context),
                 Padding(
                   padding: const EdgeInsets.only(left: 10),
                   child: Text(
@@ -169,76 +185,94 @@ class _MessageWithFileState extends State<MessageWithFile> {
       ),
     );
   }
+
+  Future<Uint8List?> downloadMessagePictureData(String id) async {
+    return FirebaseStorage.instance
+        .ref(
+            'GroupAttachements/${widget.groupId}/${id}.${widget.fileExtension}')
+        .getData()
+        .onError((error, stackTrace) => null);
+  }
+
+  Widget picture(BuildContext context) {
+    return FutureBuilder<Uint8List?>(
+        future: downloadMessagePictureData(widget.id),
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    // Here
+                    return Dialog(
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          PhotoView(
+                            imageProvider: MemoryImage(snapshot.data!),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape
+                                      .rectangle, // use circle if the icon is circular
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ), // Choose your icon and color
+                              onPressed: () {
+                                Navigator.of(dialogContext)
+                                    .pop(); // Use dialogContext here
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Image.memory(snapshot.data!),
+            );
+          } else {
+            return const Icon(
+              Icons.image,
+              size: 80,
+            );
+          }
+        });
+  }
+
+  Widget messageImageWidget(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 80,
+            height: 80,
+            child: Container(
+              child: ClipRRect(
+                  borderRadius: BorderRadius.horizontal(),
+                  child: picture(context)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
-
-// chatMessages() {
-//   return StreamBuilder<List<Message>>(
-//       stream: messageStream,
-//       builder: (context, AsyncSnapshot<List<Message>> snapshot) {
-//         if (snapshot.hasData) {
-//           if (!isLoading) {
-//             WidgetsBinding.instance
-//                 .addPostFrameCallback((_) => _scrollToBottom());
-//           } else {
-//             isLoading = false;
-//           }
-//           int? lastTimestamp = 0;
-//           return ListView.builder(
-//             controller: _scrollController,
-//             itemCount: snapshot.data?.length ?? 0,
-//             itemBuilder: (context, index) {
-//               Message? message = snapshot.data?[index];
-//               if (message == null) return Container();
-
-//               if (index != 0) {
-//                 lastTimestamp = snapshot.data?[index - 1].timestamp;
-//               }
-
-//               List<Widget> widgets = [];
-
-//               if (isDifferentDay(lastTimestamp, message.timestamp)) {
-//                 widgets.add(MessageTile(
-//                   message: formatDateInMillis(message.timestamp),
-//                   sender: "",
-//                   time: "",
-//                   sentByMe: false,
-//                   isSystemMessage: true,
-//                 ));
-//               }
-
-//               widgets.add(message.containsFile
-//                   ? MessageImage(
-//                       id: message.id,
-//                       extension: message.extension!,
-//                       sender: message.name,
-//                       time: formatTimeInMillis(message.timestamp),
-//                       sentByMe: widget.username == message.name,
-//                       isSystemMessage: message.type == "system",
-//                       groupId: widget.groupId,
-//                     )
-//                   : message.type == "attachment"
-//                       ? MessageFiles(
-//                           id: message.id,
-//                           sender: message.name,
-//                           time: formatTimeInMillis(message.timestamp),
-//                           sentByMe: widget.username == message.name,
-//                           groupId: widget.groupId,
-//                           fileExtension: message.extension!,
-//                         )
-//                       : MessageTile(
-//                           message: message.text,
-//                           sender: message.name,
-//                           time: formatTimeInMillis(message.timestamp),
-//                           sentByMe: widget.username == message.name,
-//                           isSystemMessage: message.type == "system",
-//                         ));
-
-//               return Column(
-//                 children: widgets,
-//               );
-//             },
-//           );
-//         } else
-//           return Container();
-//       });
-// }

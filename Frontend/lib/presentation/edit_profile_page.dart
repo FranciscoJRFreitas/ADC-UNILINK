@@ -273,7 +273,7 @@ class _EditProfilePage extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     bool _isPublic = user.profileVisibility!.toLowerCase() == 'public';
-    double offset = MediaQuery.of(context).size.width * 0.1;
+    double offset = MediaQuery.of(context).size.width * 0.08;
     return Dialog(
       insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

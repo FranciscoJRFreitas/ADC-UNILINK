@@ -1,7 +1,12 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
+import com.google.api.gax.paging.Page;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.Transaction;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.firebase.database.*;
 import com.google.gson.Gson;
 import com.mailjet.client.ClientOptions;
@@ -79,10 +84,11 @@ public class ChatResources {
 
         // Set the data for the new message
         //when the group is created put a welcome message in the group
-        newMessageRef.child("type").setValueAsync("system");
+        newMessageRef.child("containsFile").setValueAsync(false);
         newMessageRef.child("name").setValueAsync(group.adminID);
         newMessageRef.child("message").setValueAsync("Welcome to " + group.DisplayName + "!");
         newMessageRef.child("timestamp").setValueAsync(System.currentTimeMillis());
+        newMessageRef.child("isSystemMessage").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
         DatabaseReference newChatsForUserRef = chatsByUser.child(token.username);
@@ -220,6 +226,8 @@ public class ChatResources {
         membersRef.child(userId).removeValueAsync();
         DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
         chatRef.child(groupId).removeValueAsync();
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+        String bucketName = "unilink23.appspot.com";
         membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -228,6 +236,14 @@ public class ChatResources {
                     groupsRef.child(groupId).removeValueAsync();
                     DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
                     messagesRef.child(groupId).removeValueAsync();
+
+                    /*String groupPicturesPath = "GroupPictures/" + groupId;
+                    storage.get(BlobId.of(bucketName, srcFilename));
+
+                    // Remove GroupAttachments/groupid
+                    String groupAttachmentsPath = "GroupAttachments/" + groupId;
+                    removeFolderFromStorage(storage, bucketName, groupAttachmentsPath);*/
+
                 }
             }
 
@@ -236,6 +252,7 @@ public class ChatResources {
             }
         });
     }
+
 
 
     private void sendInviteEmail(String email, String Token) {
