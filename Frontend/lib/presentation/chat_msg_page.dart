@@ -215,22 +215,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                                Align(
-                                  alignment: Alignment.topCenter,
-                                  child: Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          10,
-                                      child: Text(
-                                        pickedFile!.name,
-                                        textAlign: TextAlign.center,
-                                      )),
-                                ),
-                                messageImageWidget(context)
-                              ])
-                        : picked != null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
+                                Row(
+                                  children: [
                                     Align(
                                       alignment: Alignment.topCenter,
                                       child: Container(
@@ -239,18 +225,99 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                                   .width /
                                               10,
                                           child: Text(
-                                            picked!.files.first.name,
+                                            pickedFile!.name,
                                             textAlign: TextAlign.center,
                                           )),
                                     ),
-                                    GestureDetector(
-                                        onTap: () {},
-                                        child: const Icon(
-                                          Icons.insert_drive_file,
-                                          size: 60,
-                                          color: Colors.white,
-                                        ))
-                                  ])
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: IconButton(
+                                        icon: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape
+                                                .rectangle, // use circle if the icon is circular
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black,
+                                                blurRadius: 15.0,
+                                                spreadRadius: 2.0,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                        ), // Choose your icon and color
+                                        onPressed: () {
+                                          setState(() {
+                                            pickedFile = null;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                messageImageWidget(context),
+                              ])
+                        : picked != null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              10,
+                                          child: Text(
+                                            picked!.files.first.name,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: IconButton(
+                                          icon: Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape
+                                                  .rectangle, // use circle if the icon is circular
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black,
+                                                  blurRadius: 15.0,
+                                                  spreadRadius: 2.0,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                          ), // Choose your icon and color
+                                          onPressed: () {
+                                            setState(() {
+                                              picked = null;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: const Icon(
+                                      Icons.insert_drive_file,
+                                      size: 60,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                              )
                             : const SizedBox(),
                   ),
                   const SizedBox(
@@ -298,47 +365,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   const SizedBox(
                     width: 12,
                   ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     attachImage();
-                  //   },
-                  //   child: Container(
-                  //     height: 50,
-                  //     width: 50,
-                  //     decoration: BoxDecoration(
-                  //       color: Theme.of(context).primaryColor,
-                  //       borderRadius: BorderRadius.circular(30),
-                  //     ),
-                  //     child: Center(
-                  //       child: Icon(
-                  //         Icons.image,
-                  //         color: Colors.white,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(
-                  //   width: 12,
-                  // ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     attachFile();
-                  //   },
-                  //   child: Container(
-                  //     height: 50,
-                  //     width: 50,
-                  //     decoration: BoxDecoration(
-                  //       color: Theme.of(context).primaryColor,
-                  //       borderRadius: BorderRadius.circular(30),
-                  //     ),
-                  //     child: Center(
-                  //       child: Icon(
-                  //         Icons.picture_as_pdf_rounded,
-                  //         color: Colors.white,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                   CombinedButton(
                     image: GestureDetector(
                       onTap: () {
@@ -524,6 +550,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       if (pickedFile != null) {
         final fileBytes = await pickedFile!.readAsBytes();
         String? extension = pickedFile!.mimeType?.split("/")[1];
+        extension == null
+            ? extension = pickedFile!.path.split("/").last.split(".")[1]
+            : print("Extension was ook");
         final Reference storageReference = FirebaseStorage.instance.ref().child(
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
@@ -540,6 +569,14 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       } else if (picked != null) {
         final fileBytes = picked!.files.first.bytes;
         String? extension = picked!.files.first.extension;
+        print(
+            "----------------------------------------------------------------------------------------------------------------------------------------------");
+        print("ola");
+        print(picked!.files.first.bytes);
+        print(extension);
+        print(
+            "----------------------------------------------------------------------------------------------------------------------------------------------");
+
         Reference storageReference = FirebaseStorage.instance.ref().child(
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
@@ -594,6 +631,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
       allowMultiple: false,
+      withData: true,
     );
     if (result != null) {
       pickedFile = null;
