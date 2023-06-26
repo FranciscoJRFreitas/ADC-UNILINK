@@ -44,6 +44,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
+  final GlobalKey<CombinedButtonState> _combinedButtonKey =
+      GlobalKey<CombinedButtonState>();
 
   @override
   void initState() {
@@ -171,6 +173,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         actions: [
           IconButton(
             onPressed: () {
+               _combinedButtonKey.currentState?.collapseOverlay();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
@@ -366,6 +369,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     width: 12,
                   ),
                   CombinedButton(
+                    key: _combinedButtonKey,
                     image: GestureDetector(
                       onTap: () {
                         setState(() {
