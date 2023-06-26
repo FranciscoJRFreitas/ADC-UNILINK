@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:unilink2023/presentation/take_picture_screen.dart';
+import 'package:unilink2023/presentation/chat_msg_page.dart';
 
 class CombinedButton extends StatefulWidget {
   final GestureDetector image;
@@ -101,6 +101,7 @@ class CombinedButtonState extends State<CombinedButton>
                   SizedBox(height: 12),
                   GestureDetector(
                     onTap: () {
+                      collapseOverlay();
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => TakePictureScreen(
