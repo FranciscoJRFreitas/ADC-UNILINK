@@ -1,10 +1,14 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:unilink2023/presentation/take_picture_screen.dart';
 
 class CombinedButton extends StatefulWidget {
   final GestureDetector image;
   final GestureDetector file;
+  final CameraDescription takePicture;
 
-  const CombinedButton({required this.image, required this.file});
+  const CombinedButton(
+      {required this.image, required this.file, required this.takePicture});
   @override
   _CombinedButtonState createState() => _CombinedButtonState();
 }
@@ -76,7 +80,7 @@ class _CombinedButtonState extends State<CombinedButton>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         left: offset.dx,
-        top: offset.dy - size.height * (_isExpanded ? 2.5 : 0.5),
+        top: offset.dy - size.height * (_isExpanded ? 4.0 : 0.5),
         width: size.width,
         child: SlideTransition(
           position: _offsetAnimation,
@@ -89,6 +93,32 @@ class _CombinedButtonState extends State<CombinedButton>
                   widget.image,
                   SizedBox(height: 12),
                   widget.file,
+                  SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => TakePictureScreen(
+                            camera: widget.takePicture,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.add_a_photo,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
