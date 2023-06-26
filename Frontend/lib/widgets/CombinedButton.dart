@@ -6,11 +6,9 @@ class CombinedButton extends StatefulWidget {
   final GestureDetector image;
   final GestureDetector file;
   final CameraDescription takePicture;
-  final GlobalKey<CombinedButtonState> key;
 
   const CombinedButton(
       {required this.image, required this.file, required this.takePicture});
-  const CombinedButton({required this.key,required this.image, required this.file});
   @override
   CombinedButtonState createState() => CombinedButtonState();
 }

@@ -175,7 +175,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         actions: [
           IconButton(
             onPressed: () {
-               _combinedButtonKey.currentState?.collapseOverlay();
+              _combinedButtonKey.currentState?.collapseOverlay();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
@@ -413,49 +413,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         ),
                       ),
                       takePicture: camera),
-                    key: _combinedButtonKey,
-                    image: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          attachImage();
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.image,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    file: GestureDetector(
-                      onTap: () {
-                        attachFile();
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.picture_as_pdf_rounded,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
