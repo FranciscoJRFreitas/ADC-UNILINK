@@ -6,14 +6,16 @@ class CombinedButton extends StatefulWidget {
   final GestureDetector image;
   final GestureDetector file;
   final CameraDescription takePicture;
+  final GlobalKey<CombinedButtonState> key;
 
   const CombinedButton(
       {required this.image, required this.file, required this.takePicture});
+  const CombinedButton({required this.key,required this.image, required this.file});
   @override
-  _CombinedButtonState createState() => _CombinedButtonState();
+  CombinedButtonState createState() => CombinedButtonState();
 }
 
-class _CombinedButtonState extends State<CombinedButton>
+class CombinedButtonState extends State<CombinedButton>
     with TickerProviderStateMixin {
   late AnimationController _expandAnimationController;
   late AnimationController _opacityAnimationController;
@@ -54,10 +56,7 @@ class _CombinedButtonState extends State<CombinedButton>
 
   void toggleExpandedState() {
     if (_isExpanded) {
-      _expandAnimationController.reverse();
-      _opacityAnimationController.reverse().then((value) {
-        _overlayEntry?.remove();
-      });
+      collapseOverlay();
     } else {
       _overlayEntry = _createOverlayEntry();
       Overlay.of(context).insert(_overlayEntry!);
@@ -68,6 +67,14 @@ class _CombinedButtonState extends State<CombinedButton>
     setState(() {
       _isExpanded = !_isExpanded;
     });
+  }
+
+  void collapseOverlay() {
+    _expandAnimationController.reverse();
+    _opacityAnimationController.reverse().then((value) {
+      _overlayEntry?.remove();
+    });
+    _isExpanded = false;
   }
 
   OverlayEntry _createOverlayEntry() {

@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
-import 'data/disabler_provider.dart';
+import 'widgets/rightClickDisabler/disabler_provider.dart';
 import 'domain/Notification.dart';
 import 'domain/UserNotifier.dart';
 import 'firebase_options.dart';
