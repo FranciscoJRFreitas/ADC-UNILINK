@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,6 +10,7 @@ import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
+import 'MapPage.dart';
 import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -41,6 +40,7 @@ class _MainScreenState extends State<MainScreen> {
     "Contacts",
     "Settings",
     "Student",
+    "Map",
     "Teacher",
     "Director",
   ];
@@ -77,6 +77,7 @@ class _MainScreenState extends State<MainScreen> {
         ContactsPage(),
         SettingsPage(),
         SchedulePage(), //estudante
+        MapPage(),
         Placeholder(), //professor
         Placeholder(), //diretor
       ];
@@ -405,6 +406,16 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 6;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.map),
+              title: Text('Map', style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 10;
                 });
                 Navigator.pop(context);
               },
