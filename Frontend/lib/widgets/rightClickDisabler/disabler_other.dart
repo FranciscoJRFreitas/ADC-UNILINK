@@ -1,4 +1,4 @@
-import 'package:unilink2023/data/disabler.dart';
+import 'package:unilink2023/widgets/rightClickDisabler/disabler.dart';
 
 class disabler_stub implements disabler {
   disabler_stub._();
