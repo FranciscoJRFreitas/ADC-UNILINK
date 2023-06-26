@@ -475,11 +475,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                // Call the function to leave the group here
                 leaveGroup(context, widget.groupId, widget.username,
                     _showErrorSnackbar);
 
-                // Pop the current page off the navigation stack
                 if (!kIsWeb)
                   await FirebaseMessaging.instance
                       .unsubscribeFromTopic(widget.groupId);

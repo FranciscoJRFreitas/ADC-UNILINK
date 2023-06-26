@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -44,15 +45,18 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
+  final GlobalKey<CombinedButtonState> _combinedButtonKey =
+      GlobalKey<CombinedButtonState>();
+
+  late CameraDescription camera;
 
   @override
   void initState() {
     super.initState();
 
     _messaging = FirebaseMessaging.instance;
-
+    _initCamera();
     _configureMessaging();
-
     messageFocusNode.requestFocus();
 
     // Get a reference to the messages node for the specific group
@@ -171,6 +175,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         actions: [
           IconButton(
             onPressed: () {
+              _combinedButtonKey.currentState?.collapseOverlay();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
@@ -366,48 +371,48 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     width: 12,
                   ),
                   CombinedButton(
-                    image: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          attachImage();
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.image,
-                            color: Colors.white,
+                      image: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            attachImage();
+                          });
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.image,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    file: GestureDetector(
-                      onTap: () {
-                        attachFile();
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.picture_as_pdf_rounded,
-                            color: Colors.white,
+                      file: GestureDetector(
+                        onTap: () {
+                          attachFile();
+                          setState(() {});
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.picture_as_pdf_rounded,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                      takePicture: camera),
                 ],
               ),
             ),
@@ -725,5 +730,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _initCamera() async {
+    final cameras = await availableCameras();
+    camera = cameras.first;
   }
 }
