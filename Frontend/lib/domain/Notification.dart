@@ -70,11 +70,12 @@ class NotificationService {
 
   _onSelectNotification(String? payload) {
     if (payload != null && payload.isNotEmpty) {
-      print("pushed notification");//Navigator.push...
+      print("pushed notification"); //Navigator.push...
     }
   }
 
-  showNotificationScheduled(CustomNotification notification, Duration duration) {
+  showNotificationScheduled(
+      CustomNotification notification, Duration duration) {
     final date = DateTime.now().add(duration);
 
     localNotificationsPlugin.zonedSchedule(
@@ -87,7 +88,8 @@ class NotificationService {
       ),
       payload: notification.payload,
       androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -104,7 +106,8 @@ class NotificationService {
   }
 
   checkForNotifications() async {
-    final details = await localNotificationsPlugin.getNotificationAppLaunchDetails();
+    final details =
+        await localNotificationsPlugin.getNotificationAppLaunchDetails();
     if (details != null && details.didNotificationLaunchApp) {
       _onSelectNotification(details.payload);
     }

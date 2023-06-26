@@ -25,15 +25,38 @@ class Message {
     return files
         ? Message(
             id: snapshot.key!,
-            extension: data['extension'] as String,
             text: data['message'] as String,
             name: data['name'] as String,
+            extension: data['extension'] as String,
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,
           )
         : Message(
             id: snapshot.key!,
+            text: data['message'] as String,
+            name: data['name'] as String,
+            timestamp: data['timestamp'] as int,
+            containsFile: data['containsFile'] as bool,
+            isSystemMessage: data['isSystemMessage'] as bool,
+          );
+  }
+
+  factory Message.fromMap(String key, dynamic value) {
+    final Map<dynamic, dynamic> data = value as Map<dynamic, dynamic>;
+    bool files = data["containsFile"] as bool;
+    return files
+        ? Message(
+            id: key!,
+            text: data['message'] as String,
+            name: data['name'] as String,
+            extension: data['extension'] as String,
+            timestamp: data['timestamp'] as int,
+            containsFile: data['containsFile'] as bool,
+            isSystemMessage: data['isSystemMessage'] as bool,
+          )
+        : Message(
+            id: key!,
             text: data['message'] as String,
             name: data['name'] as String,
             timestamp: data['timestamp'] as int,
