@@ -1,0 +1,45 @@
+{
+    "schedule": [
+      {
+        "day": "Monday",
+        "classes": [
+          {
+            "name": "ADC",
+            "startTime": "09:00",
+            "endTime": "10:30"
+          },
+          {
+            "name": "ADA",
+            "startTime": "11:00",
+            "endTime": "12:30"
+          },
+          {
+            "name": "SD",
+            "startTime": "13:00",
+            "endTime": "14:30"
+          }
+        ]
+      },
+      {
+        "day": "Tuesday",
+        "classes": [
+          {
+            "name": "ADC",
+            "startTime": "09:00",
+            "endTime": "10:30"
+          },
+          {
+            "name": "ADA",
+            "startTime": "11:00",
+            "endTime": "12:30"
+          },
+          {
+            "name": "SD",
+            "startTime": "13:00",
+            "endTime": "14:30"
+          }
+        ]
+      }
+    ]
+  }
+  
