@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
@@ -15,7 +16,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import 'package:flutter/foundation.dart';
-
 
 class LoginPage extends StatefulWidget {
   @override
@@ -285,6 +285,9 @@ Future<int> login(
         state: responseBody['state'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
+        creationTime: DateFormat('dd/MM/yyyy').format(
+            DateTime.fromMillisecondsSinceEpoch(
+                responseBody['creationTime']['seconds'] * 1000)),
       );
       try {
         FirebaseAuth.UserCredential userCredential =

@@ -226,6 +226,11 @@ class _HomePageState extends State<HomePage> {
               value: _currentUser.profileVisibility ?? '',
               icon: Icons.public,
             ),
+            InfoItem(
+              title: "Account Creation Date",
+              value: _currentUser.creationTime ?? '',
+              icon: Icons.app_registration_rounded,
+            ),
           ],
         ),
       ),
