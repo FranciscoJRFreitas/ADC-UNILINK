@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:firebase_database/firebase_database.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:ui' as ui;
 
 class MessageWithFile extends StatefulWidget {
   final String id;
@@ -400,63 +402,108 @@ class _MessageWithFileState extends State<MessageWithFile> {
 
   Widget picture(BuildContext context) {
     return FutureBuilder<Uint8List?>(
-        future: downloadMessagePictureData(widget.id),
-        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
-          if (snapshot.hasData) {
-            return GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    // Here
-                    return Dialog(
-                      child: Stack(
-                        alignment: Alignment.topRight,
-                        children: [
-                          PhotoView(
-                            imageProvider: MemoryImage(snapshot.data!),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: IconButton(
-                              icon: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .rectangle, // use circle if the icon is circular
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black,
-                                      blurRadius: 15.0,
-                                      spreadRadius: 2.0,
+      future: downloadMessagePictureData(widget.id),
+      builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+        if (snapshot.hasData) {
+          final Completer<ui.Image> completer = Completer();
+          final Uint8List imageData = snapshot.data!;
+
+          ui.decodeImageFromList(imageData, (ui.Image image) {
+            completer.complete(image);
+          });
+
+          return FutureBuilder<ui.Image>(
+            future: completer.future,
+            builder:
+                (BuildContext context, AsyncSnapshot<ui.Image> imageSnapshot) {
+              if (imageSnapshot.hasData) {
+                final double screenWidth = MediaQuery.of(context).size.width;
+                final double screenHeight = MediaQuery.of(context).size.height;
+
+                final double aspectRatio =
+                    imageSnapshot.data!.width.toDouble() /
+                        imageSnapshot.data!.height.toDouble();
+                double containerWidth;
+                double containerHeight;
+
+                if (aspectRatio >= 1) {
+                  // Landscape or square image
+                  containerWidth =
+                      screenWidth / 4.0; // Adjust the width of the container
+                  containerHeight = containerWidth / aspectRatio;
+                } else {
+                  // Portrait image
+                  containerHeight =
+                      screenHeight / 2.0; // Adjust the height of the container
+                  containerWidth = containerHeight * aspectRatio;
+                }
+
+                return GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) {
+                        return Dialog(
+                          child: Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              PhotoView(
+                                imageProvider: MemoryImage(imageData),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: IconButton(
+                                  icon: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.rectangle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black,
+                                          blurRadius: 15.0,
+                                          spreadRadius: 2.0,
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                    child: Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop();
+                                  },
                                 ),
-                                child: Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                ),
-                              ), // Choose your icon and color
-                              onPressed: () {
-                                Navigator.of(dialogContext)
-                                    .pop(); // Use dialogContext here
-                              },
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
+                  child: Image.memory(
+                    imageData,
+                    fit: BoxFit.contain,
+                    width: containerWidth,
+                    height: containerHeight,
+                  ),
                 );
-              },
-              child: Image.memory(snapshot.data!),
-            );
-          } else {
-            return const Icon(
-              Icons.image,
-              size: 80,
-            );
-          }
-        });
+              } else {
+                return const Icon(
+                  Icons.image,
+                  size: 80,
+                );
+              }
+            },
+          );
+        } else {
+          return const Icon(
+            Icons.image,
+            size: 80,
+          );
+        }
+      },
+    );
   }
 
   Widget messageImageWidget(BuildContext context) {
@@ -467,12 +514,9 @@ class _MessageWithFileState extends State<MessageWithFile> {
       child: Stack(
         children: <Widget>[
           Container(
-            width: 80,
-            height: 80,
-            child: Container(
-              child: ClipRRect(
-                  borderRadius: BorderRadius.horizontal(),
-                  child: picture(context)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.horizontal(),
+              child: picture(context),
             ),
           ),
         ],
