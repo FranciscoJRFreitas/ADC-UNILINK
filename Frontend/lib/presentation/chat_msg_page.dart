@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
@@ -42,7 +43,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
-  final GlobalKey<CombinedButtonState> _combinedButtonKey =
+  final GlobalKey<CombinedButtonState> combinedButtonKey =
       GlobalKey<CombinedButtonState>();
 
   //late CameraDescription camera;
@@ -54,7 +55,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     _messaging = FirebaseMessaging.instance;
     // _initCamera();
     _configureMessaging();
-    messageFocusNode.requestFocus();
+    if(kIsWeb) messageFocusNode.requestFocus();
 
     // Get a reference to the messages node for the specific group
     messagesRef =
@@ -172,7 +173,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         actions: [
           IconButton(
             onPressed: () {
-              _combinedButtonKey.currentState?.collapseOverlay();
+              combinedButtonKey.currentState?.collapseOverlay();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
@@ -345,9 +346,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   ),
                   GestureDetector(
                     onTap: () {
+                      combinedButtonKey.currentState?.collapseOverlay();
                       sendMessage(messageController.text.isEmpty
                           ? ""
                           : messageController.text);
+                      setState(() {});
                     },
                     child: Container(
                       height: 50,
@@ -368,6 +371,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     width: 12,
                   ),
                   CombinedButton(
+                    key: combinedButtonKey,
                     image: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -409,26 +413,23 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         ),
                       ),
                     ),
-                  ),
-                  //takePicture: camera),
-                  SizedBox(
-                    width: 12,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      takePicture();
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.add_a_photo,
-                          color: Colors.white,
+                    camera: GestureDetector(
+                      onTap: () {
+                        takePicture();
+                        setState(() {});
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.add_a_photo,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -707,6 +708,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                 ),
                               ), // Choose your icon and color
                               onPressed: () {
+                                combinedButtonKey.currentState
+                                    ?.collapseOverlay();
                                 Navigator.of(dialogContext)
                                     .pop(); // Use dialogContext here
                               },

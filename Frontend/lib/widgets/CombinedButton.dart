@@ -1,14 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class CombinedButton extends StatefulWidget {
   final GestureDetector image;
   final GestureDetector file;
+  final GestureDetector camera;
   //final CameraDescription takePicture;
 
   const CombinedButton({
+    Key? key,
     required this.image,
     required this.file,
-  });
+    required this.camera,
+  }) : super(key: key);
   @override
   CombinedButtonState createState() => CombinedButtonState();
 }
@@ -60,20 +64,25 @@ class CombinedButtonState extends State<CombinedButton>
       Overlay.of(context).insert(_overlayEntry!);
       _expandAnimationController.forward();
       _opacityAnimationController.forward();
+      setState(() {
+        _isExpanded = true;
+      });
     }
-
-    setState(() {
-      _isExpanded = !_isExpanded;
-    });
   }
 
-  void collapseOverlay() {
+    void collapseOverlay() {
     _expandAnimationController.reverse();
     _opacityAnimationController.reverse().then((value) {
-      _overlayEntry?.remove();
+      if (_overlayEntry != null) {
+        _overlayEntry!.remove();
+        _overlayEntry = null; // Set to null after removing
+      }
     });
-    _isExpanded = false;
+    setState(() {
+      _isExpanded = false;
+    });
   }
+
 
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
@@ -85,7 +94,7 @@ class CombinedButtonState extends State<CombinedButton>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         left: offset.dx,
-        top: offset.dy - size.height * (_isExpanded ? 2.5 : 0.5),
+        top: offset.dy - size.height * (_isExpanded ? kIsWeb ? 2.5 : 3.75 : 1.5),
         width: size.width,
         child: SlideTransition(
           position: _offsetAnimation,
@@ -98,32 +107,10 @@ class CombinedButtonState extends State<CombinedButton>
                   widget.image,
                   SizedBox(height: 12),
                   widget.file,
-                  SizedBox(height: 12),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     Navigator.of(context).push(
-                  //       MaterialPageRoute(
-                  //         builder: (context) => TakePictureScreen(
-                  //           camera: widget.takePicture,
-                  //         ),
-                  //       ),
-                  //     );
-                  //   },
-                  //   child: Container(
-                  //     height: 50,
-                  //     width: 50,
-                  //     decoration: BoxDecoration(
-                  //       color: Theme.of(context).primaryColor,
-                  //       borderRadius: BorderRadius.circular(30),
-                  //     ),
-                  //     child: Center(
-                  //       child: Icon(
-                  //         Icons.add_a_photo,
-                  //         color: Colors.white,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
+                  if (!kIsWeb) ...[
+                    SizedBox(height: 12),
+                    widget.camera,
+                  ],
                 ],
               ),
             ),
