@@ -83,15 +83,6 @@ class _ContactsPageState extends State<ContactsPage> {
         AlphabetListViewItemGroup(
           tag: letter,
           children: contactsForLetter.map((contact) {
-            /*return MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                //onTap: () => _launchURL(contact.url ?? ''),
-                child: ContactCard(
-                  contact: contact,
-                ),
-              ),
-            );*/
             return ContactCard(
               contact: contact,
             );

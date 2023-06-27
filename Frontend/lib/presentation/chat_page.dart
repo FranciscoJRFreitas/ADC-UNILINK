@@ -26,6 +26,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController descriptionController = TextEditingController();
   late Stream<List<Group>> groupsStream;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  Group? selectedGroup;
 
   @override
   void initState() {
@@ -40,8 +41,10 @@ class _ChatPageState extends State<ChatPage> {
         .child('chat')
         .child(widget.username)
         .child('Groups');
-    DatabaseReference groupsRef = FirebaseDatabase.instance.ref().child('groups');
-    DatabaseReference membersRef = FirebaseDatabase.instance.ref().child('members');
+    DatabaseReference groupsRef =
+        FirebaseDatabase.instance.ref().child('groups');
+    DatabaseReference membersRef =
+        FirebaseDatabase.instance.ref().child('members');
 
     StreamController<List<Group>> streamController = StreamController();
     List<Group> groups = [];
@@ -63,7 +66,8 @@ class _ChatPageState extends State<ChatPage> {
       if (groupData != null) {
         String displayName = groupData['DisplayName'];
         String description = groupData['description'];
-        int numberOfMembers = memberData?.length ?? 0; // get the number of members
+        int numberOfMembers =
+            memberData?.length ?? 0; // get the number of members
         Group group = Group(
           id: groupId,
           DisplayName: displayName,
@@ -88,7 +92,6 @@ class _ChatPageState extends State<ChatPage> {
     return streamController.stream;
   }
 
-
   // Function to display the snackbar
   void _showErrorSnackbar(String message, bool Error) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -104,6 +107,131 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    return kIsWeb
+        ? _buildWebLayout(context, selectedGroup)
+        : _buildMobileLayout(context);
+  }
+
+  Widget _buildWebLayout(BuildContext context, Group? selectedGroup) {
+    return LayoutBuilder(builder: (context, constraints) {
+      // Calculate available height and width
+      final double availableHeight = constraints.maxHeight;
+      final double availableWidth = constraints.maxWidth;
+      bool resize = availableWidth < 600;
+      // Calculate card height and font size based on available space
+
+      return resize
+          ? _buildMobileLayout(context)
+          : Scaffold(
+              body: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: _buildLeftWidget(context),
+                  ),
+                  if (selectedGroup != null)
+                    Expanded(
+                      flex: 2,
+                      child: GroupMessagesPage(
+                        key: ValueKey(selectedGroup.id),
+                        groupId: selectedGroup.id,
+                        username: widget.username,
+                      ),
+                    ),
+                ],
+              ),
+            );
+    });
+  }
+
+  Widget _buildLeftWidget(BuildContext context) {
+    // Your existing widget code, with modifications to onTap:
+    return Stack(
+      children: <Widget>[
+        StreamBuilder<List<Group>>(
+          stream: groupsStream,
+          builder: (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else if (snapshot.hasData) {
+              List<Group> groups = snapshot.data!;
+              return ListView(
+                padding: EdgeInsets.only(top: 10, bottom: 80),
+                children: groups.map((group) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedGroup = group;
+                      });
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 5,
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        child: ListTile(
+                          title: Text(
+                            '${group.DisplayName}',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(Icons.person, size: 20),
+                                  SizedBox(width: 5),
+                                  Text('Description: ${group.description}'),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(Icons.people, size: 20),
+                                  SizedBox(width: 5),
+                                  Text('${group.numberOfMembers} members'),
+                                ],
+                              ),
+                              // ... Add other information rows with icons here
+                              // Make sure to add some spacing (SizedBox) between rows for better readability
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            } else {
+              return noGroupWidget();
+            }
+          },
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: IconButton(
+              onPressed: () {
+                // Add your logic here...
+              },
+              icon: const Icon(Icons.search),
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Remaining of your code...
+
+  Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -124,6 +252,7 @@ class _ChatPageState extends State<ChatPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => GroupMessagesPage(
+                              key: ValueKey(group.id),
                               groupId: group.id,
                               username: widget.username,
                             ),
@@ -160,8 +289,7 @@ class _ChatPageState extends State<ChatPage> {
                                   children: [
                                     Icon(Icons.people, size: 20),
                                     SizedBox(width: 5),
-                                     Text(
-                                    '${group.numberOfMembers} members'),
+                                    Text('${group.numberOfMembers} members'),
                                   ],
                                 ),
                                 // ... Add other information rows with icons here

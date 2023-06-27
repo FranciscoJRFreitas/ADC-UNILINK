@@ -21,9 +21,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
   final String username;
+
   final TextEditingController emailUsernameController = TextEditingController();
 
-  GroupMessagesPage({required this.groupId, required this.username});
+  GroupMessagesPage({Key? key, required this.groupId, required this.username})
+      : super(key: key); // Pass the key to the super constructor
 
   @override
   _GroupMessagesPageState createState() => _GroupMessagesPageState();
@@ -55,7 +57,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     _messaging = FirebaseMessaging.instance;
     // _initCamera();
     _configureMessaging();
-    if(kIsWeb) messageFocusNode.requestFocus();
+    if (kIsWeb) messageFocusNode.requestFocus();
 
     // Get a reference to the messages node for the specific group
     messagesRef =
@@ -162,15 +164,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _layoutForWeb() {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: Text(widget.groupId),
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
-        actions: [
+      body: Column(
+        children: <Widget>[
           IconButton(
             onPressed: () {
               combinedButtonKey.currentState?.collapseOverlay();
@@ -185,10 +182,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             },
             icon: const Icon(Icons.info),
           ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {
@@ -441,6 +434,305 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         ],
       ),
     );
+  }
+
+  Widget _layoutForMobile() {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        elevation: 0,
+        title: Text(widget.groupId),
+        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        actions: [
+          IconButton(
+            onPressed: () {
+              combinedButtonKey.currentState?.collapseOverlay();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ChatInfoPage(
+                    groupId: widget.groupId,
+                    username: widget.username,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.info),
+          ),
+        ],
+      ),
+      body: Column(
+        children: <Widget>[
+          IconButton(
+            onPressed: () {
+              combinedButtonKey.currentState?.collapseOverlay();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ChatInfoPage(
+                    groupId: widget.groupId,
+                    username: widget.username,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.info),
+          ),
+          Expanded(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification notification) {
+                if (notification is ScrollEndNotification &&
+                    _scrollController.position.pixels == 0) {
+                  // Load older messages here
+                  isLoading = true;
+                  loadOlderMessages();
+                }
+                return false;
+              },
+              child: chatMessages(),
+            ),
+          ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              width: MediaQuery.of(context).size.width,
+              color: Color.fromARGB(0, 0, 0, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    child: pickedFile != null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                                Row(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.topCenter,
+                                      child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              10,
+                                          child: Text(
+                                            pickedFile!.name,
+                                            textAlign: TextAlign.center,
+                                          )),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: IconButton(
+                                        icon: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape
+                                                .rectangle, // use circle if the icon is circular
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black,
+                                                blurRadius: 15.0,
+                                                spreadRadius: 2.0,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                        ), // Choose your icon and color
+                                        onPressed: () {
+                                          setState(() {
+                                            pickedFile = null;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                messageImageWidget(context),
+                              ])
+                        : picked != null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              10,
+                                          child: Text(
+                                            picked!.files.first.name,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: IconButton(
+                                          icon: Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape
+                                                  .rectangle, // use circle if the icon is circular
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black,
+                                                  blurRadius: 15.0,
+                                                  spreadRadius: 2.0,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                          ), // Choose your icon and color
+                                          onPressed: () {
+                                            setState(() {
+                                              picked = null;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: const Icon(
+                                      Icons.insert_drive_file,
+                                      size: 60,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                              )
+                            : const SizedBox(),
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      controller: messageController,
+                      focusNode: messageFocusNode,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: "Send a message...",
+                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
+                        border: InputBorder.none,
+                      ),
+                      onFieldSubmitted: (String value) {
+                        sendMessage(value);
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      combinedButtonKey.currentState?.collapseOverlay();
+                      sendMessage(messageController.text.isEmpty
+                          ? ""
+                          : messageController.text);
+                      setState(() {});
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  CombinedButton(
+                    key: combinedButtonKey,
+                    image: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          attachImage();
+                        });
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.image,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    file: GestureDetector(
+                      onTap: () {
+                        attachFile();
+                        setState(() {});
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.picture_as_pdf_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    camera: GestureDetector(
+                      onTap: () {
+                        takePicture();
+                        setState(() {});
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.add_a_photo,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return kIsWeb ? _layoutForWeb() : _layoutForMobile();
   }
 
   void loadOlderMessages() {
