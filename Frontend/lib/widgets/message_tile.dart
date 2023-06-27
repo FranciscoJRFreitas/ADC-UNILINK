@@ -50,12 +50,19 @@ class _MessageTileState extends State<MessageTile> {
           value: 'details',
         ),
       ];
-    } else {
+    } else if (widget.isAdmin) {
       menuItems = [
         PopupMenuItem(
           child: Text('Delete'),
           value: 'delete',
         ),
+        PopupMenuItem(
+          child: Text('Details'),
+          value: 'details',
+        ),
+      ];
+    } else {
+      menuItems = [
         PopupMenuItem(
           child: Text('Details'),
           value: 'details',
@@ -212,20 +219,18 @@ class _MessageTileState extends State<MessageTile> {
               )
             : GestureDetector(
                 onTapDown: (TapDownDetails details) {
-                  if (!kIsWeb && (widget.sentByMe || widget.isAdmin)) {
+                  if (!kIsWeb) {
                     _tapPosition = details.globalPosition;
                   }
                 },
                 onLongPress: () {
-                  if (!kIsWeb && (widget.sentByMe || widget.isAdmin)) {
+                  if (!kIsWeb) {
                     _showContextMenu(context);
                   }
                 },
                 onSecondaryTapDown: (TapDownDetails details) {
                   _tapPosition = details.globalPosition;
-                  if (widget.sentByMe || widget.isAdmin) {
-                    _showContextMenu(context);
-                  }
+                  _showContextMenu(context);
                 },
                 child: Container(
                   padding: EdgeInsets.only(
