@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 class Token {
   final String? tokenID;
   final String? username;
@@ -15,5 +13,4 @@ class Token {
       'username': username,
     };
   }
-
 }

@@ -14,12 +14,9 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
-import 'package:unilink2023/widgets/messageImage.dart';
-import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:http/http.dart' as http;
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -49,14 +46,14 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   final GlobalKey<CombinedButtonState> _combinedButtonKey =
       GlobalKey<CombinedButtonState>();
 
-  late CameraDescription camera;
+  //late CameraDescription camera;
 
   @override
   void initState() {
     super.initState();
 
     _messaging = FirebaseMessaging.instance;
-    _initCamera();
+    // _initCamera();
     _configureMessaging();
     messageFocusNode.requestFocus();
 
@@ -372,48 +369,71 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     width: 12,
                   ),
                   CombinedButton(
-                      image: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            attachImage();
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.image,
-                              color: Colors.white,
-                            ),
+                    image: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          attachImage();
+                        });
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.image,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                      file: GestureDetector(
-                        onTap: () {
-                          attachFile();
-                          setState(() {});
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.picture_as_pdf_rounded,
-                              color: Colors.white,
-                            ),
+                    ),
+                    file: GestureDetector(
+                      onTap: () {
+                        attachFile();
+                        setState(() {});
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.picture_as_pdf_rounded,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                      takePicture: camera),
+                    ),
+                  ),
+                  //takePicture: camera),
+                  SizedBox(
+                    width: 12,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      takePicture();
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.add_a_photo,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -575,13 +595,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       } else if (picked != null) {
         final fileBytes = picked!.files.first.bytes;
         String? extension = picked!.files.first.extension;
-        print(
-            "----------------------------------------------------------------------------------------------------------------------------------------------");
-        print("ola");
-        print(picked!.files.first.bytes);
-        print(extension);
-        print(
-            "----------------------------------------------------------------------------------------------------------------------------------------------");
 
         Reference storageReference = FirebaseStorage.instance.ref().child(
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
@@ -623,6 +636,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         setState(() {});
       });
     }
+  }
+
+  takePicture() async {
+    ImagePicker picker = ImagePicker();
+    XFile? image = await picker.pickImage(source: ImageSource.camera);
+    setState(() {
+      pickedFile = image;
+      if (pickedFile != null) picked = null;
+    });
   }
 
   attachImage() async {
@@ -733,10 +755,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     );
   }
 
-  Future<void> _initCamera() async {
-    final cameras = await availableCameras();
-    camera = cameras.first;
-  }
+  // Future<void> _initCamera() async {
+  //   final cameras = await availableCameras();
+  //   camera = cameras.first;
+  // }
 }
 
 class DisplayPictureScreen extends StatelessWidget {

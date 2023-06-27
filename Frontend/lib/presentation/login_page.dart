@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,18 +7,15 @@ import 'package:provider/provider.dart';
 
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/Notification.dart';
 import '../domain/UserNotifier.dart';
 import '../presentation/screen.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../domain/User.dart';
 import 'package:flutter/foundation.dart';
-import '../application/firebase_messaging_service.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override

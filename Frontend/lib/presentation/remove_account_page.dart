@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
-import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import '../data/cache_factory.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class RemoveAccountPage extends StatefulWidget {

@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/presentation/edit_starting_page.dart';
-import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../widgets/LineComboBox.dart';
-import '../widgets/LineTextField.dart';
-import '../widgets/ToggleButton.dart';
 import '../presentation/change_password_page.dart';
 import '../presentation/remove_account_page.dart';
-import '../widgets/my_text_button.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -53,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                     return EditStartingPage();
+                  return EditStartingPage();
                 });
           }),
       Option(
@@ -144,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
- /* Widget startingPage(BuildContext context) {
+  /* Widget startingPage(BuildContext context) {
 
     double offset = MediaQuery.of(context).size.width * 0.08;
     return Dialog(
@@ -240,5 +235,3 @@ class Option {
     required this.onTap,
   });
 }
-
-
