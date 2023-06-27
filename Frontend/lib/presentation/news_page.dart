@@ -42,7 +42,9 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
+            (kIsWeb
+                ? _scrollController.position.maxScrollExtent - 650
+                : _scrollController.position.maxScrollExtent - 200) &&
         !isFetched()) {
       _fetchNews();
     }
@@ -71,16 +73,20 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     int sizeBeforeFetch = _filteredFeedItems.length;
 
     for (int i = 0; i < _newsPerPage + 1; i++) {
-      if (_isLoading || !_hasMore) return;
+      if (_isLoading || !_hasMore) {
+        return;}
 
       try {
         if (mounted)
           setState(() {
             _isLoading = true;
           });
+
         FeedItem? feedItem = await fetchNews(newsItems, i);
 
-        if (feedItem == null) continue;
+        if (feedItem == null) {
+          continue;
+        }
 
         if (mounted)
           setState(() {
@@ -232,6 +238,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   Widget _buildWebLayout() {
     return GridView.builder(
+      controller: _scrollController,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3, // Number of items in a row
         crossAxisSpacing: 4.0, // Spacing between items horizontally
