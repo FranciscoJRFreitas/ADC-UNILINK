@@ -9,7 +9,7 @@ class EditStartingPage extends StatefulWidget {
 }
 
 class _EditStartingPageState extends State<EditStartingPage> {
-  String _startingPage = " ";
+  String _startingPage = "News";
   IconData icon = Icons.pages;
 
   @override
