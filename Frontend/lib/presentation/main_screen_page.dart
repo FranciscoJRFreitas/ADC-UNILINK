@@ -179,7 +179,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 8, 52, 88), //roleColor,
+        backgroundColor: Theme.of(context).primaryColor, //roleColor,
         title: Text(
           _title[_selectedIndex],
           style: Theme.of(context).textTheme.bodyLarge,
@@ -206,13 +206,13 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       drawer: Drawer(
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        backgroundColor: Theme.of(context).primaryColor,
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 8, 52, 88) //roleColor,
+                  color: Theme.of(context).primaryColor //roleColor,
                   ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

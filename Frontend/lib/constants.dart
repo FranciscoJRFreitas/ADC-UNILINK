@@ -59,6 +59,10 @@ final ThemeData kLightTheme = ThemeData(
   ),
   buttonTheme: ButtonThemeData(
     buttonColor: Color.fromARGB(255, 111, 175, 76),
+    textTheme: ButtonTextTheme.primary, // This will make the text color white
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12), // Rounded corners
+    ), //
   ),
   appBarTheme: AppBarTheme(
     backgroundColor: Style.lightBlue,
@@ -114,8 +118,11 @@ final ThemeData kDarkTheme = ThemeData(
         fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),
   ),
   buttonTheme: ButtonThemeData(
-    buttonColor:
-        Color.fromARGB(255, 111, 175, 76), // Blue buttons for dark theme
+    buttonColor: Color.fromARGB(255, 111, 175, 76),
+    textTheme: ButtonTextTheme.primary, // This will make the text color white
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12), // Rounded corners
+    ), // Blue buttons for dark theme
   ),
   appBarTheme: AppBarTheme(
     backgroundColor: Style.darkBlue,
