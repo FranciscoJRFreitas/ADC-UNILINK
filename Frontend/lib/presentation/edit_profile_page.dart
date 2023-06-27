@@ -5,11 +5,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/UserNotifier.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
@@ -20,7 +20,6 @@ import '../widgets/widget.dart';
 import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 
 class EditProfilePage extends StatefulWidget {
   final User user;
@@ -133,6 +132,9 @@ class _EditProfilePage extends State<EditProfilePage> {
         state: responseBody['state'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
+        creationTime: DateFormat('dd/MM/yyyy').format(
+            DateTime.fromMillisecondsSinceEpoch(
+                responseBody['creationTime']['seconds'] * 1000)),
       );
 
       await Provider.of<UserNotifier>(context, listen: false).updateUser(user);

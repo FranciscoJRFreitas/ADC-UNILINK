@@ -25,11 +25,11 @@ class SqliteService {
         await database.execute(
             'CREATE TABLE users(username TEXT PRIMARY KEY, displayName TEXT NOT NULL, email TEXT NOT NULL,'
             'role TEXT, educationLevel TEXT, birthDate TEXT, profileVisibility TEXT, state TEXT,'
-            'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT)');
+            'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT, creationTime TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT, pageIndex TEXT)');
-        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'pageIndex': null});
+            'theme TEXT, `index` TEXT)');
+        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'index': "News"});
       },
       version: 1,
     );
@@ -81,9 +81,7 @@ class SqliteService {
   Future<void> updateIndex(String value) async {
     Database db = await getDatabase();
 
-    await getCheckLogin() == null
-        ? await db.rawInsert('INSERT INTO settings(pageIndex) VALUES($value)')
-        : await db.rawUpdate('UPDATE settings SET pageIndex = $value');
+    await db.rawUpdate('UPDATE settings SET `index` = \'$value\'');
   }
 
   Future<String?> getCheckIntro() async {
@@ -141,6 +139,7 @@ class SqliteService {
       state: maps[0]['state'],
       mobilePhone: maps[0]['mobilePhone'],
       occupation: maps[0]['occupation'],
+      creationTime: maps[0]['creationTime'],
     );
   }
 

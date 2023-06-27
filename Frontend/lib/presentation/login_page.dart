@@ -1,25 +1,21 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
-import '../domain/Notification.dart';
 import '../domain/UserNotifier.dart';
 import '../presentation/screen.dart';
 import '../domain/User.dart';
 import '../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../domain/User.dart';
 import 'package:flutter/foundation.dart';
-import '../application/firebase_messaging_service.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -289,6 +285,9 @@ Future<int> login(
         state: responseBody['state'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
+        creationTime: DateFormat('dd/MM/yyyy').format(
+            DateTime.fromMillisecondsSinceEpoch(
+                responseBody['creationTime']['seconds'] * 1000)),
       );
       try {
         FirebaseAuth.UserCredential userCredential =
@@ -338,9 +337,18 @@ Future<int> login(
       await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
       await Provider.of<UserNotifier>(context, listen: false).downloadData();
 
+      String page = await cacheFactory.get("settings", "index");
+      int index = 0;
+
+      if (page == "News") index = 0;
+      if (page == "Profile") index = 3;
+      if (page == "Schedule") index = 9;
+      if (page == "Chat") index = 6;
+      if (page == "Contacts") index = 7;
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => MainScreen(index: index)),
       );
       showErrorSnackbar("Login Successful!", false, true);
     } else {

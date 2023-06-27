@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
+import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,12 +14,9 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
-import 'package:unilink2023/widgets/messageImage.dart';
-import '../widgets/MessagePDF.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:http/http.dart' as http;
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -44,16 +43,19 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
   late final FirebaseMessaging _messaging;
+  final GlobalKey<CombinedButtonState> combinedButtonKey =
+      GlobalKey<CombinedButtonState>();
+
+  //late CameraDescription camera;
 
   @override
   void initState() {
     super.initState();
 
     _messaging = FirebaseMessaging.instance;
-
+    // _initCamera();
     _configureMessaging();
-
-    messageFocusNode.requestFocus();
+    if(kIsWeb) messageFocusNode.requestFocus();
 
     // Get a reference to the messages node for the specific group
     messagesRef =
@@ -171,6 +173,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         actions: [
           IconButton(
             onPressed: () {
+              combinedButtonKey.currentState?.collapseOverlay();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
@@ -215,22 +218,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                                Align(
-                                  alignment: Alignment.topCenter,
-                                  child: Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          10,
-                                      child: Text(
-                                        pickedFile!.name,
-                                        textAlign: TextAlign.center,
-                                      )),
-                                ),
-                                messageImageWidget(context)
-                              ])
-                        : picked != null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
+                                Row(
+                                  children: [
                                     Align(
                                       alignment: Alignment.topCenter,
                                       child: Container(
@@ -239,18 +228,99 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                                   .width /
                                               10,
                                           child: Text(
-                                            picked!.files.first.name,
+                                            pickedFile!.name,
                                             textAlign: TextAlign.center,
                                           )),
                                     ),
-                                    GestureDetector(
-                                        onTap: () {},
-                                        child: const Icon(
-                                          Icons.insert_drive_file,
-                                          size: 60,
-                                          color: Colors.white,
-                                        ))
-                                  ])
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: IconButton(
+                                        icon: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape
+                                                .rectangle, // use circle if the icon is circular
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black,
+                                                blurRadius: 15.0,
+                                                spreadRadius: 2.0,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                        ), // Choose your icon and color
+                                        onPressed: () {
+                                          setState(() {
+                                            pickedFile = null;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                messageImageWidget(context),
+                              ])
+                        : picked != null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              10,
+                                          child: Text(
+                                            picked!.files.first.name,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: IconButton(
+                                          icon: Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape
+                                                  .rectangle, // use circle if the icon is circular
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black,
+                                                  blurRadius: 15.0,
+                                                  spreadRadius: 2.0,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                          ), // Choose your icon and color
+                                          onPressed: () {
+                                            setState(() {
+                                              picked = null;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: const Icon(
+                                      Icons.insert_drive_file,
+                                      size: 60,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                              )
                             : const SizedBox(),
                   ),
                   const SizedBox(
@@ -276,9 +346,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   ),
                   GestureDetector(
                     onTap: () {
+                      combinedButtonKey.currentState?.collapseOverlay();
                       sendMessage(messageController.text.isEmpty
                           ? ""
                           : messageController.text);
+                      setState(() {});
                     },
                     child: Container(
                       height: 50,
@@ -298,48 +370,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   const SizedBox(
                     width: 12,
                   ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     attachImage();
-                  //   },
-                  //   child: Container(
-                  //     height: 50,
-                  //     width: 50,
-                  //     decoration: BoxDecoration(
-                  //       color: Theme.of(context).primaryColor,
-                  //       borderRadius: BorderRadius.circular(30),
-                  //     ),
-                  //     child: Center(
-                  //       child: Icon(
-                  //         Icons.image,
-                  //         color: Colors.white,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(
-                  //   width: 12,
-                  // ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     attachFile();
-                  //   },
-                  //   child: Container(
-                  //     height: 50,
-                  //     width: 50,
-                  //     decoration: BoxDecoration(
-                  //       color: Theme.of(context).primaryColor,
-                  //       borderRadius: BorderRadius.circular(30),
-                  //     ),
-                  //     child: Center(
-                  //       child: Icon(
-                  //         Icons.picture_as_pdf_rounded,
-                  //         color: Colors.white,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                   CombinedButton(
+                    key: combinedButtonKey,
                     image: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -376,6 +408,26 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         child: Center(
                           child: Icon(
                             Icons.picture_as_pdf_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    camera: GestureDetector(
+                      onTap: () {
+                        takePicture();
+                        setState(() {});
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.add_a_photo,
                             color: Colors.white,
                           ),
                         ),
@@ -468,6 +520,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 time: formatTimeInMillis(message.timestamp),
                 sentByMe: widget.username == message.name,
                 groupId: widget.groupId,
+                isAdmin: isAdmin,
                 fileExtension: message.extension!,
                 message: message.text,
               )
@@ -523,6 +576,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       if (pickedFile != null) {
         final fileBytes = await pickedFile!.readAsBytes();
         String? extension = pickedFile!.mimeType?.split("/")[1];
+        extension == null
+            ? extension = pickedFile!.path.split("/").last.split(".")[1]
+            : print("Extension was ook");
         final Reference storageReference = FirebaseStorage.instance.ref().child(
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
@@ -539,6 +595,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       } else if (picked != null) {
         final fileBytes = picked!.files.first.bytes;
         String? extension = picked!.files.first.extension;
+
         Reference storageReference = FirebaseStorage.instance.ref().child(
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 
@@ -581,6 +638,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     }
   }
 
+  takePicture() async {
+    ImagePicker picker = ImagePicker();
+    XFile? image = await picker.pickImage(source: ImageSource.camera);
+    setState(() {
+      pickedFile = image;
+      if (pickedFile != null) picked = null;
+    });
+  }
+
   attachImage() async {
     ImagePicker picker = ImagePicker();
 
@@ -593,6 +659,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
       allowMultiple: false,
+      withData: true,
     );
     if (result != null) {
       pickedFile = null;
@@ -641,6 +708,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                 ),
                               ), // Choose your icon and color
                               onPressed: () {
+                                combinedButtonKey.currentState
+                                    ?.collapseOverlay();
                                 Navigator.of(dialogContext)
                                     .pop(); // Use dialogContext here
                               },
@@ -684,6 +753,129 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Future<void> _initCamera() async {
+  //   final cameras = await availableCameras();
+  //   camera = cameras.first;
+  // }
+}
+
+class DisplayPictureScreen extends StatelessWidget {
+  final String imagePath;
+
+  const DisplayPictureScreen({Key? key, required this.imagePath})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Image.file(File(imagePath)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          sendPicture(imagePath);
+        },
+        child: Icon(Icons.send),
+        backgroundColor: Colors.blue,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  void sendPicture(String imagePath) {}
+}
+
+class TakePictureScreen extends StatefulWidget {
+  const TakePictureScreen({
+    super.key,
+    required this.camera,
+  });
+
+  final CameraDescription camera;
+
+  @override
+  TakePictureScreenState createState() => TakePictureScreenState();
+}
+
+class TakePictureScreenState extends State<TakePictureScreen> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // To display the current output from the Camera,
+    // create a CameraController.
+    _controller = CameraController(
+      // Get a specific camera from the list of available cameras.
+      widget.camera,
+      // Define the resolution to use.
+      ResolutionPreset.medium,
+    );
+
+    // Next, initialize the controller. This returns a Future.
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    // Dispose of the controller when the widget is disposed.
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // You must wait until the controller is initialized before displaying the
+      // camera preview. Use a FutureBuilder to display a loading spinner until the
+      // controller has finished initializing.
+      body: FutureBuilder<void>(
+        future: _initializeControllerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            // If the Future is complete, display the preview.
+            return CameraPreview(_controller);
+          } else {
+            // Otherwise, display a loading indicator.
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        // Provide an onPressed callback.
+        onPressed: () async {
+          // Take the Picture in a try / catch block. If anything goes wrong,
+          // catch the error.
+          try {
+            // Ensure that the camera is initialized.
+            await _initializeControllerFuture;
+
+            // Attempt to take a picture and get the file `image`
+            // where it was saved.
+            final image = await _controller.takePicture();
+
+            if (!mounted) return;
+
+            // If the picture was taken, display it on a new screen.
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DisplayPictureScreen(
+                  // Pass the automatically generated path to
+                  // the DisplayPictureScreen widget.
+                  imagePath: image.path,
+                ),
+              ),
+            );
+          } catch (e) {
+            // If an error occurs, log the error to the console.
+            print(e);
+          }
+        },
+        child: const Icon(Icons.camera_alt),
+        backgroundColor: Colors.blue,
       ),
     );
   }

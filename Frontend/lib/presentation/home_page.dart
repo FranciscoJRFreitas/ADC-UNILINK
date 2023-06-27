@@ -9,7 +9,6 @@ import 'package:unilink2023/widgets/my_text_button.dart';
 import '../constants.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/User.dart';
-import 'blank_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -25,7 +24,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
   }
 
   Widget picture(BuildContext context) {
@@ -89,7 +87,6 @@ class _HomePageState extends State<HomePage> {
               size: 80,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 
@@ -197,16 +194,16 @@ class _HomePageState extends State<HomePage> {
             InfoItem(
               title: "Education Level",
               value: _currentUser.educationLevel == 'D'
-                        ? 'Doctorate'
-                        : _currentUser.educationLevel == 'SE'
-                            ? 'Secondary Education'
-                            : _currentUser.educationLevel == 'UD'
-                                ? 'Undergraduate Degree'
-                                : _currentUser.educationLevel == 'MD'
-                                    ? 'Master\'s Degree'
-                                    : _currentUser.educationLevel == 'PE'
-                                        ? 'Primary Education'
-                                        : '',
+                  ? 'Doctorate'
+                  : _currentUser.educationLevel == 'SE'
+                      ? 'Secondary Education'
+                      : _currentUser.educationLevel == 'UD'
+                          ? 'Undergraduate Degree'
+                          : _currentUser.educationLevel == 'MD'
+                              ? 'Master\'s Degree'
+                              : _currentUser.educationLevel == 'PE'
+                                  ? 'Primary Education'
+                                  : '',
               icon: Icons.school,
             ),
             InfoItem(
@@ -228,6 +225,11 @@ class _HomePageState extends State<HomePage> {
               title: "Profile Visibility",
               value: _currentUser.profileVisibility ?? '',
               icon: Icons.public,
+            ),
+            InfoItem(
+              title: "Account Creation Date",
+              value: _currentUser.creationTime ?? '',
+              icon: Icons.app_registration_rounded,
             ),
           ],
         ),

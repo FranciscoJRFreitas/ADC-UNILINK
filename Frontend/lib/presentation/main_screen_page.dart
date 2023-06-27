@@ -142,7 +142,6 @@ class _MainScreenState extends State<MainScreen> {
               size: 80,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 
@@ -175,7 +174,6 @@ class _MainScreenState extends State<MainScreen> {
     _currentUser = userProvider.currentUser!;
 
     Color roleColor = _currentUser.getRoleColor(_currentUser.role);
-    bool _isExpanded = false;
 
     return Scaffold(
       appBar: AppBar(

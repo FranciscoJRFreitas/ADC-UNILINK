@@ -1,15 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class CombinedButton extends StatefulWidget {
   final GestureDetector image;
   final GestureDetector file;
+  final GestureDetector camera;
+  //final CameraDescription takePicture;
 
-  const CombinedButton({required this.image, required this.file});
+  const CombinedButton({
+    Key? key,
+    required this.image,
+    required this.file,
+    required this.camera,
+  }) : super(key: key);
   @override
-  _CombinedButtonState createState() => _CombinedButtonState();
+  CombinedButtonState createState() => CombinedButtonState();
 }
 
-class _CombinedButtonState extends State<CombinedButton>
+class CombinedButtonState extends State<CombinedButton>
     with TickerProviderStateMixin {
   late AnimationController _expandAnimationController;
   late AnimationController _opacityAnimationController;
@@ -50,21 +58,31 @@ class _CombinedButtonState extends State<CombinedButton>
 
   void toggleExpandedState() {
     if (_isExpanded) {
-      _expandAnimationController.reverse();
-      _opacityAnimationController.reverse().then((value) {
-        _overlayEntry?.remove();
-      });
+      collapseOverlay();
     } else {
       _overlayEntry = _createOverlayEntry();
       Overlay.of(context).insert(_overlayEntry!);
       _expandAnimationController.forward();
       _opacityAnimationController.forward();
+      setState(() {
+        _isExpanded = true;
+      });
     }
+  }
 
+    void collapseOverlay() {
+    _expandAnimationController.reverse();
+    _opacityAnimationController.reverse().then((value) {
+      if (_overlayEntry != null) {
+        _overlayEntry!.remove();
+        _overlayEntry = null; // Set to null after removing
+      }
+    });
     setState(() {
-      _isExpanded = !_isExpanded;
+      _isExpanded = false;
     });
   }
+
 
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
@@ -76,7 +94,7 @@ class _CombinedButtonState extends State<CombinedButton>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         left: offset.dx,
-        top: offset.dy - size.height * (_isExpanded ? 2.5 : 0.5),
+        top: offset.dy - size.height * (_isExpanded ? kIsWeb ? 2.5 : 3.75 : 1.5),
         width: size.width,
         child: SlideTransition(
           position: _offsetAnimation,
@@ -89,6 +107,10 @@ class _CombinedButtonState extends State<CombinedButton>
                   widget.image,
                   SizedBox(height: 12),
                   widget.file,
+                  if (!kIsWeb) ...[
+                    SizedBox(height: 12),
+                    widget.camera,
+                  ],
                 ],
               ),
             ),

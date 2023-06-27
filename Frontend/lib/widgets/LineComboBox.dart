@@ -56,6 +56,7 @@ class _LineComboBoxState extends State<LineComboBox> {
                 dropdownColor: Theme.of(context).scaffoldBackgroundColor,
                 style: Theme.of(context).textTheme.bodyLarge,
                 onChanged: widget.onChanged,
+                isExpanded: true,
                 items:
                     widget.items.map<DropdownMenuItem<String>>((String item) {
                   return DropdownMenuItem<String>(

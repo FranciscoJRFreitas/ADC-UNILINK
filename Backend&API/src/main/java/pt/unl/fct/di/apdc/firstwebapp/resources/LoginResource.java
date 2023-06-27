@@ -164,6 +164,7 @@ public class LoginResource {
         responseData.put("postalCode", user.getString("user_postalCode"));
         responseData.put("nif", user.getString("user_taxIdentificationNumber"));
         responseData.put("photo", user.getString("user_photo"));
+        responseData.put("creationTime", user.getTimestamp("user_creation_time"));
 
         LOG.info("User " + user.getString("user_username") + " logged in successfully.");
         LOG.info("The tokenID for the current session is " + token.tokenID + "\n  Creation time: " + token.creationDate + "\n  Expiration time: " + token.expirationDate);

@@ -46,6 +46,7 @@ class CacheFactoryImpl implements CacheFactory {
     String? state = await get("", 'state')?? '';
     String? mobilePhone = await get("", 'mobilePhone')?? '';
     String? occupation = await get("", 'occupation')?? '';
+    String? creationTime = await get("", 'creationTime')?? '';
 
     return User(
       displayName: displayName,
@@ -58,6 +59,7 @@ class CacheFactoryImpl implements CacheFactory {
       state: state,
       mobilePhone: mobilePhone,
       occupation: occupation,
+      creationTime: creationTime,
     );
   }
 
@@ -108,6 +110,7 @@ class CacheFactoryImpl implements CacheFactory {
     set('role', user.role);
     set('password', password);
     set('token', token);
+    set('creationTime', user.creationTime);
   }
 
   @override

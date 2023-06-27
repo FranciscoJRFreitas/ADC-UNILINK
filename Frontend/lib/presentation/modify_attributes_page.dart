@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
@@ -133,6 +134,9 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
         state: responseBody['state'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
+       creationTime: DateFormat('dd/MM/yyyy').format(
+            DateTime.fromMillisecondsSinceEpoch(
+                responseBody['creationTime']['seconds'] * 1000)),
       );
 
       if (responseBody['username'] == widget.user.username) {

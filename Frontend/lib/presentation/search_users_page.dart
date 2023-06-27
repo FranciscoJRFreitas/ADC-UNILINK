@@ -255,7 +255,6 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
               size: 50,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 }

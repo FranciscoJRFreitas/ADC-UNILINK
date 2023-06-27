@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:unilink2023/widgets/news_box.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../domain/Contact.dart';
 import '../widgets/contacts_box.dart';
 import 'package:alphabet_list_view/alphabet_list_view.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:searchfield/searchfield.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({Key? key}) : super(key: key);

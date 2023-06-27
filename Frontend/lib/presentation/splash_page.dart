@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:unilink2023/presentation/intro_page.dart';
 import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-import 'package:unilink2023/presentation/login_page.dart';
 import 'package:flutter/src/foundation/constants.dart';
 
 import '../data/cache_factory_provider.dart';
@@ -24,7 +22,6 @@ class _SplashPageState extends State<SplashPage> {
       const Duration(seconds: kIsWeb ? 0 : 0),
       //TODO Changed for testing reasons
       () async {
-
         var loginB = await cacheFactory.get('settings', 'checkLogin');
         var introB = await cacheFactory.get('settings', 'checkIntro');
 
@@ -35,18 +32,13 @@ class _SplashPageState extends State<SplashPage> {
 
         if (introB == 'true' || introB == '1') {
           if (loginB == 'true' || loginB == '1') {
-
             void doNothingSnackbar(String message, bool isError, bool show) {}
             final username = await cacheFactory.get('users', 'username');
             final password = await cacheFactory.get('users', 'password');
 
-            if(username != null && password != null) {
-              final response = await login(
-                  context,
-                  username as String,
-                  password as String,
-                  doNothingSnackbar
-              );
+            if (username != null && password != null) {
+              final response = await login(context, username as String,
+                  password as String, doNothingSnackbar);
 
               if (response != 200) {
                 cacheFactory.removeLoginCache();
@@ -58,11 +50,9 @@ class _SplashPageState extends State<SplashPage> {
                   ),
                 );
               }
-
             } else {
               print("Error in users cache.");
             }
-
           } else {
             Navigator.push(
               context,

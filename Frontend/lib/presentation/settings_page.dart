@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
-import '../constants.dart';
+import 'package:unilink2023/presentation/edit_starting_page.dart';
 import '../data/cache_factory_provider.dart';
-import '../widgets/ToggleButton.dart';
 import '../presentation/change_password_page.dart';
 import '../presentation/remove_account_page.dart';
 
@@ -18,10 +17,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    getTheme();
+    getSettings();
   }
 
-  Future<void> getTheme() async {
+  Future<void> getSettings() async {
     _currentTheme = await cacheFactory.get('settings', 'theme');
     setState(() {});
   }
@@ -45,7 +44,13 @@ class _SettingsPageState extends State<SettingsPage> {
               color: Theme.of(context).secondaryHeaderColor, size: 40.0),
           title: 'Starting Page',
           subtitle: 'Select your preferable starting page.',
-          onTap: () {}),
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return EditStartingPage();
+                });
+          }),
       Option(
           icon: Icon(Icons.password,
               color: Theme.of(context).secondaryHeaderColor, size: 40.0),
@@ -133,6 +138,84 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
+  /* Widget startingPage(BuildContext context) {
+
+    double offset = MediaQuery.of(context).size.width * 0.08;
+    return Dialog(
+      insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
+      backgroundColor: Theme
+          .of(context)
+          .scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+      ),
+      child: Stack(
+        alignment: Alignment.topCenter,
+        clipBehavior: Clip.none,
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: 750, // Set the maximum width for the Dialog
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: 20), // Provide space for the image at the top
+                child: Column(
+                  children: [
+                    SizedBox(height: 40),
+                    Divider(
+                      thickness: 2,
+                      color: Theme
+                          .of(context)
+                          .primaryColor,
+                    ),
+                    SizedBox(height: 15),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: LineComboBox(
+                          selectedValue: _startingPage,
+                          items: [
+                            'News',
+                            'Profile',
+                            'Chat',
+                            'Contacts',
+                          ],
+                          onChanged: (dynamic newValue) {
+                            setState(() {
+                                print(_startingPage);
+                                _startingPage = newValue;
+                                print(_startingPage);
+                            });
+                          },
+                          icon: Icons.school,
+                        )),
+
+                    SizedBox(height: 15),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
+                      child: MyTextButton(
+                        alignment: Alignment.center,
+                        buttonName: 'Save Changes',
+                        onTap: () async {
+
+                        },
+                        bgColor: Theme.of(context).primaryColor,
+                        textColor: Colors.white,
+                        height: 45,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  } */
 }
 
 class Option {
@@ -152,58 +235,3 @@ class Option {
     required this.onTap,
   });
 }
-
-/*Widget build(BuildContext context) {
-Row(
-              children: [
-              ListTile(
-              leading: options[index - 1].icon,
-              title: Text(
-                options[index - 1].title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              subtitle: Text(
-                options[index - 1].subtitle,
-                style: TextStyle(
-                  color:
-                      Theme.of(context).cardColor,
-                ),
-              ),
-              
-              onTap: () {
-                //if (options[index - 1].isButton == true) {//has to be == true, because can be null
-                  setState(() {
-                    _selectedOption = index - 1;
-                  });
-                //} else {
-                  //Navigator.push
-                //}
-              },
-            ),
-            Switch(
-              value: _isActive,
-              onChanged: (value) {
-                setState(() {
-                  _isActive = value;
-                });
-              },
-              activeTrackColor: Theme.of(context).primaryColor.withOpacity(0.5),
-              activeColor: Theme.of(context).primaryColor,
-            ),
-            ])    return Scaffold(
-      body: Center(
-        child: IconButton(
-          iconSize: 50.0,
-          icon: Icon(
-            _currentTheme == kDarkTheme
-                ? Icons.nights_stay
-                : Icons.wb_sunny,
-          ),
-          onPressed: () {
-            Provider.of<ThemeNotifier>(context, listen: false).toggleTheme();
-          },
-        ),
-      ),
-    );
-  }
-}*/

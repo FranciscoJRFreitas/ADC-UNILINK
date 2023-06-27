@@ -218,7 +218,6 @@ class _ListUsersPageState extends State<ListUsersPage> {
               size: 50,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 }
