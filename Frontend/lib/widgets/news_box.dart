@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class CustomCard extends StatelessWidget {
   final String? imageUrl;

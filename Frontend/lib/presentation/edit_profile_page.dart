@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
-import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
 import '../widgets/LineComboBox.dart';
@@ -20,7 +19,6 @@ import '../widgets/widget.dart';
 import '../widgets/LineTextField.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 
 class EditProfilePage extends StatefulWidget {
   final User user;

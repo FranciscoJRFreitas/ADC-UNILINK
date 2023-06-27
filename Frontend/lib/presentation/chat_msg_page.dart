@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
@@ -764,7 +763,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
 
-  const DisplayPictureScreen({Key? key, required this.imagePath}) : super(key: key);
+  const DisplayPictureScreen({Key? key, required this.imagePath})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -780,10 +780,8 @@ class DisplayPictureScreen extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
-  
-  void sendPicture(String imagePath) {
-    
-  }
+
+  void sendPicture(String imagePath) {}
 }
 
 class TakePictureScreen extends StatefulWidget {

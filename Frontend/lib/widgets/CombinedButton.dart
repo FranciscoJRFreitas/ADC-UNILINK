@@ -1,6 +1,4 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:unilink2023/presentation/take_picture_screen.dart';
 
 class CombinedButton extends StatefulWidget {
   final GestureDetector image;

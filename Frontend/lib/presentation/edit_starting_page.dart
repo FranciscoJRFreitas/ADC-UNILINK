@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:unilink2023/domain/ThemeNotifier.dart';
-import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../widgets/LineComboBox.dart';
-import '../widgets/LineTextField.dart';
-import '../widgets/ToggleButton.dart';
-import '../presentation/change_password_page.dart';
-import '../presentation/remove_account_page.dart';
 import '../widgets/my_text_button.dart';
 
 class EditStartingPage extends StatefulWidget {
@@ -16,7 +9,6 @@ class EditStartingPage extends StatefulWidget {
 }
 
 class _EditStartingPageState extends State<EditStartingPage> {
-
   String _startingPage = " ";
   IconData icon = Icons.pages;
 
@@ -53,73 +45,74 @@ class _EditStartingPageState extends State<EditStartingPage> {
         alignment: Alignment.topCenter,
         clipBehavior: Clip.none,
         children: [
-
           SingleChildScrollView(
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: 300, // Set the maximum width for the Dialog
               ),
               //child: Padding(
-                //padding: EdgeInsets.only(
-                  //  top: 20), // Provide space for the image at the top
-                child: Column(
-                  children: [
-                    SizedBox(height: 10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
-                        child: Text("Starting Page", style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                    Divider(
-                      thickness: 2,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    SizedBox(height: 15),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: LineComboBox(
-                          selectedValue: _startingPage,
-                          items: [
-                            'News',
-                            'Profile',
-                            'Schedule',
-                            'Chat',
-                            'Contacts'
-                          ],
-                          onChanged: (dynamic newValue) {
-                            setState(() {
-                              _startingPage = newValue;
-                              updateIcon();
-                            });
-                          },
-                          icon: icon,
-                        )),
-                    SizedBox(height: 15),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                      child: MyTextButton(
-                        alignment: Alignment.center,
-                        buttonName: 'Save Changes',
-                        onTap: () {
-                              cacheFactory.set('index', _startingPage);
-                              Navigator.pop(context);
+              //padding: EdgeInsets.only(
+              //  top: 20), // Provide space for the image at the top
+              child: Column(
+                children: [
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 5.0),
+                    child: Text("Starting Page",
+                        style: Theme.of(context).textTheme.bodyLarge),
+                  ),
+                  Divider(
+                    thickness: 2,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  SizedBox(height: 15),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineComboBox(
+                        selectedValue: _startingPage,
+                        items: [
+                          'News',
+                          'Profile',
+                          'Schedule',
+                          'Chat',
+                          'Contacts'
+                        ],
+                        onChanged: (dynamic newValue) {
+                          setState(() {
+                            _startingPage = newValue;
+                            updateIcon();
+                          });
                         },
-                        bgColor: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        height: 45,
-                      ),
+                        icon: icon,
+                      )),
+                  SizedBox(height: 15),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: MyTextButton(
+                      alignment: Alignment.center,
+                      buttonName: 'Save Changes',
+                      onTap: () {
+                        cacheFactory.set('index', _startingPage);
+                        Navigator.pop(context);
+                      },
+                      bgColor: Theme.of(context).primaryColor,
+                      textColor: Colors.white,
+                      height: 45,
                     ),
-                    SizedBox(height: 20),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 20),
+                ],
               ),
             ),
-         // ),
+          ),
+          // ),
           Positioned(
             top: 1,
             right: 1,
             child: IconButton(
               hoverColor:
-              Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
+                  Theme.of(context).secondaryHeaderColor.withOpacity(0.6),
               splashRadius: 20.0,
               icon: Container(
                 height: 25,
@@ -138,6 +131,4 @@ class _EditStartingPageState extends State<EditStartingPage> {
       ),
     );
   }
-
 }
-

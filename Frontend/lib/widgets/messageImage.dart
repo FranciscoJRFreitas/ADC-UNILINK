@@ -161,7 +161,6 @@ class _MessageImageState extends State<MessageImage> {
               size: 80,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 
