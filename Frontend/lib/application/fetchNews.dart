@@ -108,13 +108,13 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
 
     var feedItem = FeedItem(
       pageUrl:
-          'https://www.fct.unl.pt' + (titleElement?.attributes['href'] ?? ''),
+          'https://www.fct.unl.pt' + (titleElement.attributes['href'] ?? ''),
       content: summaryElement?.text,
       imageUrl: imageElement?.attributes['src'],
       likesCount: 0,
       commentsCount: 0,
       retweetsCount: 0,
-      title: titleElement?.text,
+      title: titleElement.text,
       date: dateElement?.text,
       tags: tags,
     );

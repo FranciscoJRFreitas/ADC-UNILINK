@@ -22,8 +22,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   int _page = 0;
   bool _hasMore = true;
   bool _isLoading = false;
-  bool _fetchedAllFromServer =
-      false; // flag to know if all items fetched from server
+  bool _fetchedAllFromServer = false;
   int _newsPerPage = 12;
   bool web = false;
 
@@ -43,7 +42,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   void _scrollListener() {
     if (_scrollController.position.pixels >=
             (kIsWeb
-                ? _scrollController.position.maxScrollExtent - 650
+                ? _scrollController.position.maxScrollExtent - 600
                 : _scrollController.position.maxScrollExtent - 200) &&
         !isFetched()) {
       _fetchNews();
@@ -74,7 +73,8 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
     for (int i = 0; i < _newsPerPage + 1; i++) {
       if (_isLoading || !_hasMore) {
-        return;}
+        return;
+      }
 
       try {
         if (mounted)
@@ -90,7 +90,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
         if (mounted)
           setState(() {
-            _feedItems.add(feedItem);
+            if (!_feedItems.contains(feedItem)) _feedItems.add(feedItem);
             _filterNews();
           });
       } catch (e) {
@@ -109,94 +109,28 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
     int sizeAfterFetch = _filteredFeedItems.length;
 
-    if (sizeBeforeFetch == sizeAfterFetch && !isFetched()) _fetchNews();
+    if ((sizeBeforeFetch == sizeAfterFetch && !isFetched()) ||
+        _activeTags.isNotEmpty) _fetchNews();
     if (mounted) setState(() {});
   }
 
-/*
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          constraints: BoxConstraints(maxWidth: 400),
-          child: Column(
-            children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _activeTags
-                    .map((tag) => Chip(
-                          label: Text(tag),
-                          deleteIcon: Icon(Icons.close),
-                          onDeleted: () => _toggleTag(tag),
-                        ))
-                    .toList(),
-              ),
-              Expanded(
-                child: ListView.separated(
-                  controller: _scrollController,
-                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider();
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index >= _filteredFeedItems.length) {
-                      return _isLoading
-                          ? Center(child: CircularProgressIndicator())
-                          : SizedBox.shrink();
-                    }
-                    final item = _filteredFeedItems[index];
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () => _launchURL(item.pageUrl ?? ''),
-                        // When a tag is clicked, call _toggleTag.
-                        child: CustomCard(
-                          imageUrl: item.imageUrl,
-                          tags: item.tags,
-                          content: item.content,
-                          title: item.title,
-                          date: item.date,
-                          onTagClick: _toggleTag,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-*/
-  @override
-  Widget build(BuildContext context) {
-    return kIsWeb ? _buildWebLayout() : _buildMobileLayout();
+    if (!kIsWeb) {
+      return _buildMobileLayout();
+    } else {
+      return _buildWebLayout();
+    }
   }
 
   Widget _buildMobileLayout() {
-    // Mobile-specific layout goes here
     return Scaffold(
       body: Center(
         child: Container(
           constraints: BoxConstraints(maxWidth: 400),
           child: Column(
             children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _activeTags
-                    .map((tag) => Chip(
-                          label: Text(tag),
-                          deleteIcon: Icon(Icons.close),
-                          onDeleted: () => _toggleTag(tag),
-                        ))
-                    .toList(),
-              ),
+              _buildColumn(),
               Expanded(
                 child: ListView.separated(
                   controller: _scrollController,
@@ -222,7 +156,9 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                           content: item.content,
                           title: item.title,
                           date: item.date,
+                          index: index,
                           onTagClick: _toggleTag,
+                          isSingleCrossAxisCount: true,
                         ),
                       ),
                     );
@@ -237,120 +173,117 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   }
 
   Widget _buildWebLayout() {
-    return GridView.builder(
-      controller: _scrollController,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Number of items in a row
-        crossAxisSpacing: 4.0, // Spacing between items horizontally
-        mainAxisSpacing: 4.0, // Spacing between items vertically
-      ),
-      itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
-      itemBuilder: (BuildContext context, int index) {
-        if (index >= _filteredFeedItems.length) {
-          return _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : SizedBox.shrink();
-        }
-        final item = _filteredFeedItems[index];
-        return MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => _launchURL(item.pageUrl ?? ''),
-            // When a tag is clicked, call _toggleTag.
-            child: CustomCard(
-              imageUrl: item.imageUrl,
-              tags: item.tags,
-              content: item.content,
-              title: item.title,
-              date: item.date,
-              onTagClick: _toggleTag,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
+    final width = MediaQuery.of(context).size.width;
+    final maxItemWidth = 400.0;
+    final crossAxisCount = (width / maxItemWidth).floor();
+    final isSingleCrossAxisCount = crossAxisCount == 1;
 
-/*
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            if (constraints.maxWidth < 600) {
-              // Mobile layout
-              web = false;
-              return Container(
-                child: _buildColumn(),
-              );
-            } else {
-              // Web and larger screens layout
-              web = true;
-              return Container(
-               
-                child: _buildColumn(),
-              );
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  // Moved the column to a separate method to avoid duplication
-  Widget _buildColumn() {
     return Column(
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _activeTags
-              .map((tag) => Chip(
-                    label: Text(tag),
-                    deleteIcon: Icon(Icons.close),
-                    onDeleted: () => _toggleTag(tag),
-                  ))
-              .toList(),
-        ),
-        Expanded(
-          child: ListView.separated(
-            controller: _scrollController,
-            itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
-            separatorBuilder: (BuildContext context, int index) {
-              return const Divider();
-            },
-            itemBuilder: (BuildContext context, int index) {
-              if (index >= _filteredFeedItems.length) {
-                return _isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : SizedBox.shrink();
-              }
-              final item = _filteredFeedItems[index];
-              return MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => _launchURL(item.pageUrl ?? ''),
-                  child: CustomCard(
-                    imageUrl: item.imageUrl,
-                    tags: item.tags,
-                    content: item.content,
-                    title: item.title,
-                    date: item.date,
-                    onTagClick: _toggleTag,
-                    
+        _buildColumn(),
+        if (isSingleCrossAxisCount) ...[
+          Expanded(
+            child: ListView.separated(
+              controller: _scrollController,
+              itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider();
+              },
+              itemBuilder: (BuildContext context, int index) {
+                if (index >= _filteredFeedItems.length) {
+                  return _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : SizedBox.shrink();
+                }
+                final item = _filteredFeedItems[index];
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 400),
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => _launchURL(item.pageUrl ?? ''),
+                        // When a tag is clicked, call _toggleTag.
+                        child: CustomCard(
+                          imageUrl: item.imageUrl,
+                          tags: item.tags,
+                          content: item.content,
+                          title: item.title,
+                          date: item.date,
+                          index: index,
+                          onTagClick: _toggleTag,
+                          isSingleCrossAxisCount: isSingleCrossAxisCount,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
+        ] else
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxWidth: crossAxisCount * maxItemWidth),
+                child: GridView.builder(
+                  controller: _scrollController,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount > 0 ? crossAxisCount : 1,
+                    crossAxisSpacing: 4.0,
+                    mainAxisSpacing: 4.0,
+                    childAspectRatio: crossAxisCount > 1 ? 0.6 : 1.2,
+                  ),
+                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index >= _filteredFeedItems.length) {
+                      return _isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : SizedBox.shrink();
+                    }
+                    final item = _filteredFeedItems[index];
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => _launchURL(item.pageUrl ?? ''),
+                        child: CustomCard(
+                          imageUrl: item.imageUrl,
+                          tags: item.tags,
+                          content: item.content,
+                          title: item.title,
+                          date: item.date,
+                          index: index,
+                          onTagClick: _toggleTag,
+                          isSingleCrossAxisCount: isSingleCrossAxisCount,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
+
+  Widget _buildColumn() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _activeTags
+          .map((tag) => Chip(
+                label: Text(tag),
+                deleteIcon: Icon(Icons.close),
+                onDeleted: () => _toggleTag(tag),
+              ))
+          .toList(),
+    );
+  }
 }
-*/
+
 Future<void> _launchURL(String url) async {
   if (await canLaunch(url)) {
     await launch(url);

@@ -68,10 +68,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
           itemBuilder: (context, index) {
             User user = users[index];
             bool isNotUser = true; //widget.user.role != 'USER';
-            if (users.isEmpty && !isNotUser)
-              return Text(
-                  "There are no active and public to be displayed at the moment...");
-            else if (users.isEmpty && widget.user.role != 'SU')
+            if (users.isEmpty && widget.user.role != 'SU')
               return Text(
                   "There are no users to be displayed for your role...");
             //SU can always see his own info

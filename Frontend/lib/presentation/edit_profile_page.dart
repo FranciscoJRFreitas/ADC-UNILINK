@@ -230,7 +230,6 @@ class _EditProfilePage extends State<EditProfilePage> {
               size: 125,
             );
           }
-          return const CircularProgressIndicator();
         });
   }
 

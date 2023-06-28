@@ -134,20 +134,18 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
         state: responseBody['state'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
-       creationTime: DateFormat('dd/MM/yyyy').format(
+        creationTime: DateFormat('dd/MM/yyyy').format(
             DateTime.fromMillisecondsSinceEpoch(
                 responseBody['creationTime']['seconds'] * 1000)),
       );
 
       if (responseBody['username'] == widget.user.username) {
-        if (widget.onUserUpdate != null) {
-          widget.onUserUpdate(user);
-          if (redirect) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MainScreen()),
-            );
-          }
+        widget.onUserUpdate(user);
+        if (redirect) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MainScreen()),
+          );
         }
       }
       if (redirect) {

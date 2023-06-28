@@ -63,19 +63,16 @@ class _ChatPageState extends State<ChatPage> {
       Map<dynamic, dynamic> memberData =
           memberSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
-      if (groupData != null) {
-        String displayName = groupData['DisplayName'];
-        String description = groupData['description'];
-        int numberOfMembers =
-            memberData?.length ?? 0; // get the number of members
-        Group group = Group(
-          id: groupId,
-          DisplayName: displayName,
-          description: description,
-          numberOfMembers: numberOfMembers, // this is your new field
-        );
-        groups.add(group);
-      }
+      String displayName = groupData['DisplayName'];
+      String description = groupData['description'];
+      int numberOfMembers = memberData.length; // get the number of members
+      Group group = Group(
+        id: groupId,
+        DisplayName: displayName,
+        description: description,
+        numberOfMembers: numberOfMembers, // this is your new field
+      );
+      groups.add(group);
 
       streamController.add(groups); // Add groups to the stream
     });
@@ -115,7 +112,6 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildWebLayout(BuildContext context, Group? selectedGroup) {
     return LayoutBuilder(builder: (context, constraints) {
       // Calculate available height and width
-      final double availableHeight = constraints.maxHeight;
       final double availableWidth = constraints.maxWidth;
       bool resize = availableWidth < 600;
       // Calculate card height and font size based on available space

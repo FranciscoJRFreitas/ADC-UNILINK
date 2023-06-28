@@ -15,12 +15,7 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
-  ScrollController _scrollController = ScrollController();
   List<Contact> _contacts = [];
-  bool _hasMore = true;
-  bool _isLoading = false;
-  TextEditingController _searchController = TextEditingController();
-  List<Contact> _searchContacts = [];
 
   @override
   void initState() {
@@ -65,10 +60,9 @@ class _ContactsPageState extends State<ContactsPage> {
     // Create a map that associates each starting letter with a list of contacts.
     Map<String, List<Contact>> contactsByLetter = {};
     for (Contact contact in _contacts) {
-      String startingLetter =
-          (contact.contactName != null && contact.contactName.isNotEmpty)
-              ? contact.contactName[0].toUpperCase()
-              : '#';
+      String startingLetter = (contact.contactName.isNotEmpty)
+          ? contact.contactName[0].toUpperCase()
+          : '#';
       if (!contactsByLetter.containsKey(startingLetter)) {
         contactsByLetter[startingLetter] = [];
       }

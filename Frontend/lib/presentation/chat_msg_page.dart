@@ -123,7 +123,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   void _configureMessaging() async {
-    NotificationSettings settings = await _messaging.requestPermission(
+    await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
@@ -481,7 +481,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               onNotification: (ScrollNotification notification) {
                 if (notification is ScrollEndNotification &&
                     _scrollController.position.pixels == 0) {
-                  // Load older messages here
                   isLoading = true;
                   loadOlderMessages();
                 }
