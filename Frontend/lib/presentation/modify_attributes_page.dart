@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
@@ -124,20 +123,17 @@ class _ModifyAttributesPage extends State<ModifyAttributesPage> {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
 
       User user = User(
-        displayName: responseBody['displayName'],
-        username: responseBody['username'],
-        email: responseBody['email'],
-        role: responseBody['role'],
-        educationLevel: responseBody['educationLevel'],
-        birthDate: responseBody['birthDate'],
-        profileVisibility: responseBody['profileVisibility'],
-        state: responseBody['state'],
-        mobilePhone: responseBody['mobilePhone'],
-        occupation: responseBody['occupation'],
-        creationTime: DateFormat('dd/MM/yyyy').format(
-            DateTime.fromMillisecondsSinceEpoch(
-                responseBody['creationTime']['seconds'] * 1000)),
-      );
+          displayName: responseBody['displayName'],
+          username: responseBody['username'],
+          email: responseBody['email'],
+          role: responseBody['role'],
+          educationLevel: responseBody['educationLevel'],
+          birthDate: responseBody['birthDate'],
+          profileVisibility: responseBody['profileVisibility'],
+          state: responseBody['state'],
+          mobilePhone: responseBody['mobilePhone'],
+          occupation: responseBody['occupation'],
+          creationTime: '');
 
       if (responseBody['username'] == widget.user.username) {
         widget.onUserUpdate(user);

@@ -104,15 +104,11 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth > 600) {
+        if (kIsWeb) {
           return _buildWebLayout(context, selectedGroup);
         } else {
           return _buildMobileLayout(context);
         }
-      },
-    );
   }
 
   Widget _buildWebLayout(BuildContext context, Group? selectedGroup) {
