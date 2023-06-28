@@ -7,6 +7,7 @@ class Message {
   final String id;
   final String text;
   final String name;
+  final String displayName;
   final int timestamp;
 
   Message({
@@ -15,6 +16,7 @@ class Message {
     required this.containsFile,
     required this.text,
     required this.name,
+    required this.displayName,
     required this.timestamp,
     this.extension,
   });
@@ -28,6 +30,7 @@ class Message {
             extension: data['extension'] as String,
             text: data['message'] as String,
             name: data['name'] as String,
+            displayName: data['displayName'] as String,
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,
@@ -36,6 +39,7 @@ class Message {
             id: snapshot.key!,
             text: data['message'] as String,
             name: data['name'] as String,
+            displayName: data['displayName'] as String,
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,

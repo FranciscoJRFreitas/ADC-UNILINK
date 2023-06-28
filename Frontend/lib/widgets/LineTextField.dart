@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class LineTextField extends StatelessWidget {
-  LineTextField({this.title, this.icon, this.lableText, required this.controller});
+  LineTextField({this.title, this.icon, this.lableText, required this.controller, required this.padding});
   final String? title;
   final IconData? icon;
   final String? lableText;
+  final EdgeInsets padding;
 
   final TextEditingController controller;
 
@@ -20,7 +21,7 @@ class LineTextField extends StatelessWidget {
         hintText: title,
         hintStyle: Theme.of(context).textTheme.bodyMedium,
         labelStyle: Theme.of(context).textTheme.bodyMedium,
-        contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+        contentPadding: padding,
         focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.grey)),
         enabledBorder: UnderlineInputBorder(

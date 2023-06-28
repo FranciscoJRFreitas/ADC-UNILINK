@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:unilink2023/presentation/chat_msg_page.dart';
 import '../domain/Group.dart';
 import '../domain/Token.dart';
+import '../domain/User.dart';
 import '../widgets/my_text_field.dart';
 import '../widgets/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -13,9 +14,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class ChatPage extends StatefulWidget {
-  final String username;
+  final User user;
 
-  ChatPage({required this.username});
+  ChatPage({required this.user});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -39,7 +40,7 @@ class _ChatPageState extends State<ChatPage> {
     DatabaseReference chatRef = FirebaseDatabase.instance
         .ref()
         .child('chat')
-        .child(widget.username)
+        .child(widget.user.username)
         .child('Groups');
     DatabaseReference groupsRef =
         FirebaseDatabase.instance.ref().child('groups');
@@ -125,7 +126,7 @@ class _ChatPageState extends State<ChatPage> {
               child: GroupMessagesPage(
                 key: ValueKey(selectedGroup.id),
                 groupId: selectedGroup.id,
-                username: widget.username,
+                user: widget.user,
               ),
             ),
         ],
@@ -244,7 +245,7 @@ class _ChatPageState extends State<ChatPage> {
                             builder: (context) => GroupMessagesPage(
                               key: ValueKey(group.id),
                               groupId: group.id,
-                              username: widget.username,
+                              user: widget.user,
                             ),
                           ),
                         );

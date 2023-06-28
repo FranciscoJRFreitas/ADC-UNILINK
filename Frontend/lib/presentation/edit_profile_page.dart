@@ -303,7 +303,8 @@ class _EditProfilePage extends State<EditProfilePage> {
                       child: LineTextField(
                           title: 'Display Name',
                           icon: Icons.alternate_email,
-                          controller: displayNameController),
+                          controller: displayNameController,
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10)),
                     ),
                     SizedBox(height: 5),
                     Padding(
@@ -339,7 +340,8 @@ class _EditProfilePage extends State<EditProfilePage> {
                       child: LineTextField(
                           title: "Mobile Phone",
                           icon: Icons.phone,
-                          controller: mobilePhoneController),
+                          controller: mobilePhoneController,
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10)),
                     ),
                     SizedBox(height: 15),
                     Padding(
@@ -347,7 +349,8 @@ class _EditProfilePage extends State<EditProfilePage> {
                       child: LineTextField(
                           title: "Occupation",
                           icon: Icons.cases_rounded,
-                          controller: occupationController),
+                          controller: occupationController,
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),)
                     ),
                     SizedBox(height: 5),
                     Padding(
@@ -434,30 +437,4 @@ class _EditProfilePage extends State<EditProfilePage> {
     );
   }
 
-  Widget textField(TextInputType inputType, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      style: TextStyle(fontSize: 20.0, height: 1.0),
-      keyboardType: inputType,
-      decoration: InputDecoration(
-        contentPadding:
-            EdgeInsets.only(top: 15), // you can control this as you want
-        border: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.black,
-          ),
-        ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.black,
-          ),
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
 }

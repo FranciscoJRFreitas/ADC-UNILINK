@@ -14,17 +14,18 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
+import '../domain/User.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
-  final String username;
+  final User user;
 
   final TextEditingController emailUsernameController = TextEditingController();
 
-  GroupMessagesPage({Key? key, required this.groupId, required this.username})
+  GroupMessagesPage({Key? key, required this.groupId, required this.user})
       : super(key: key); // Pass the key to the super constructor
 
   @override
@@ -107,7 +108,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     DatabaseReference memberRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
-    memberRef.child(widget.username).once().then((event) {
+    memberRef.child(widget.user.username).once().then((event) {
       bool isAdmin = event.snapshot.value as bool;
       setState(() {
         this.isAdmin = isAdmin;
@@ -115,7 +116,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     });
 
     memberRef.onChildChanged.listen((event) {
-      if (event.snapshot.key == widget.username) {
+      if (event.snapshot.key == widget.user.username) {
         setState(() {
           isAdmin = event.snapshot.value as bool;
         });
@@ -317,7 +318,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                           child: TextFormField(
                             controller: messageController,
                             focusNode: messageFocusNode,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white, fontSize: 16),
                             decoration: const InputDecoration(
                               hintText: "Send a message...",
                               hintStyle:
@@ -429,7 +430,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               ],
             ),
           )
-        : ChatInfoPage(groupId: widget.groupId, username: widget.username);
+        : ChatInfoPage(groupId: widget.groupId, username: widget.user.username);
   }
 
   Widget _layoutForMobile() {
@@ -447,7 +448,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
                     groupId: widget.groupId,
-                    username: widget.username,
+                    username: widget.user.username,
                   ),
                 ),
               );
@@ -465,7 +466,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 MaterialPageRoute(
                   builder: (context) => ChatInfoPage(
                     groupId: widget.groupId,
-                    username: widget.username,
+                    username: widget.user.username,
                   ),
                 ),
               );
@@ -828,7 +829,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           widgets.add(MessageTile(
             message: formatDateInMillis(message.timestamp),
             sender: "",
-            time: "",
+            senderDisplay: "",
+            time: 0,
             isAdmin: false,
             sentByMe: false,
             isSystemMessage: true,
@@ -841,8 +843,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             ? MessageWithFile(
                 id: message.id,
                 sender: message.name,
-                time: formatTimeInMillis(message.timestamp),
-                sentByMe: widget.username == message.name,
+                senderDisplay: message.displayName,
+                time: message.timestamp,
+                sentByMe: widget.user.username == message.name,
                 groupId: widget.groupId,
                 isAdmin: isAdmin,
                 fileExtension: message.extension!,
@@ -851,8 +854,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             : MessageTile(
                 message: message.text,
                 sender: message.name,
-                time: formatTimeInMillis(message.timestamp),
-                sentByMe: widget.username == message.name,
+                senderDisplay: message.displayName,
+                time: message.timestamp,
+                sentByMe: widget.user.username == message.name,
                 isSystemMessage: message.isSystemMessage,
                 groupId: widget.groupId,
                 id: message.id,
@@ -912,7 +916,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'containsFile': true,
           'extension': extension,
           'message': content,
-          'name': widget.username,
+          'name': widget.user.username,
+          'displayName' : widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
         };
@@ -928,7 +933,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'containsFile': true,
           'extension': extension,
           'message': content,
-          'name': widget.username,
+          'name': widget.user.username,
+          'displayName' : widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
         };
@@ -936,7 +942,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messageData = {
           'containsFile': false,
           'message': content,
-          'name': widget.username,
+          'name': widget.user.username,
+          'displayName' : widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
         };

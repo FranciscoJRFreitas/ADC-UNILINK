@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
+import '../widgets/LineTextField.dart';
 import '../widgets/my_text_field.dart';
 
 class ChatInfoPage extends StatefulWidget {
@@ -402,31 +403,32 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: const Text(
+              title: Text(
                 "Send an Invite",
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.left,
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MyTextField(
-                    small: false,
-                    hintText: 'Username',
-                    inputType: TextInputType.text,
+                  TextField(
+                    style: Theme.of(context).textTheme.bodyLarge,
                     controller: userNameController,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
+                      errorBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red, width: 2.0)),
+                      focusedErrorBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red, width: 2.0)),
+                    ),// Set initial value
                   ),
                 ],
               ),
               actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    userNameController.clear();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).primaryColor),
-                  child: const Text("CANCEL"),
-                ),
                 ElevatedButton(
                   onPressed: () async {
                     {
@@ -439,7 +441,16 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
                   child: const Text("INVITE"),
-                )
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    userNameController.clear();
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
               ],
             );
           }));
@@ -454,28 +465,21 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: const Text(
+          title: Text(
             "Leave Group",
+            style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.left,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 "Are you sure you want to leave this group?",
+                  style: Theme.of(context).textTheme.bodyLarge
               ),
             ],
           ),
           actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Theme.of(context).primaryColor,
-              ),
-              child: const Text("CANCEL"),
-            ),
             ElevatedButton(
               onPressed: () async {
                 leaveGroup(context, widget.groupId, widget.username,
@@ -492,7 +496,16 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 primary: Theme.of(context).primaryColor,
               ),
               child: const Text("LEAVE"),
-            )
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).primaryColor,
+              ),
+              child: const Text("CANCEL"),
+            ),
           ],
         );
       },
