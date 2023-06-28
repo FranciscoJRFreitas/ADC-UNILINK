@@ -166,7 +166,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Container(
                 margin: EdgeInsets.all(10.0),
                 width: double.infinity,
-                height: 80.0,
+                height: 85.0,
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(10.0),
@@ -174,45 +174,51 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Center(
+                  child: IntrinsicHeight(
                     child: Row(
                       children: [
+                        options[index - 1].icon,
+                        SizedBox(width: 10.0),
                         Expanded(
-                          child: ListTile(
-                            leading: options[index - 1].icon,
-                            title: Text(
-                              options[index - 1].title,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            subtitle: Text(
-                              options[index - 1].subtitle.toString(),
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            trailing: options[index - 1].toggleButton == true
-                                ? Switch(
-                                    value: _currentTheme != "Dark",
-                                    onChanged: (value) {
-                                      setState(() {
-                                        Provider.of<ThemeNotifier>(context,
-                                                listen: false)
-                                            .toggleTheme();
-                                        _currentTheme = _currentTheme == "Dark"
-                                            ? "Light"
-                                            : "Dark";
-                                      });
-                                    },
-                                    activeTrackColor: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.5),
-                                    activeColor: Theme.of(context).primaryColor,
-                                  )
-                                : null,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                options[index - 1].title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              Text(
+                                options[index - 1].subtitle.toString(),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
                           ),
                         ),
-                        if (options[index - 1].rightWidget != null) ...[
-                          Spacer(),
+                        if (options[index - 1].toggleButton == true)
+                          Switch(
+                            value: _currentTheme != "Dark",
+                            onChanged: (value) {
+                              setState(() {
+                                Provider.of<ThemeNotifier>(context,
+                                        listen: false)
+                                    .toggleTheme();
+                                _currentTheme =
+                                    _currentTheme == "Dark" ? "Light" : "Dark";
+                              });
+                            },
+                            activeTrackColor:
+                                Theme.of(context).primaryColor.withOpacity(0.5),
+                            activeColor: Theme.of(context).primaryColor,
+                          )
+                        else
+                          SizedBox.shrink(),
+                        if (options[index - 1].rightWidget != null)
                           options[index - 1].rightWidget!,
-                        ],
                       ],
                     ),
                   ),
