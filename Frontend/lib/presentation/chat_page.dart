@@ -136,93 +136,103 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildLeftWidget(BuildContext context) {
     // Your existing widget code, with modifications to onTap:
-    return Stack(
-      children: <Widget>[
-        StreamBuilder<List<Group>>(
-          stream: groupsStream,
-          builder: (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData) {
-              List<Group> groups = snapshot.data!;
-              return ListView(
-                padding: EdgeInsets.only(top: 10, bottom: 80),
-                children: groups.map((group) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedGroup = group;
-                      });
-                    },
-                    child: Card(
-                      color: selectedGroup == group
-                          ? Theme.of(context).primaryColorDark
-                          : null,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 5,
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        child: ListTile(
-                          title: Text(
-                            '${group.DisplayName}',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(Icons.person, size: 20),
-                                  SizedBox(width: 5),
-                                  Text('Description: ${group.description}'),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(Icons.people, size: 20),
-                                  SizedBox(width: 5),
-                                  Text('${group.numberOfMembers} members'),
-                                ],
-                              ),
-                              // ... Add other information rows with icons here
-                              // Make sure to add some spacing (SizedBox) between rows for better readability
-                            ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        elevation: 0,
+        title: Text("Grupos"),
+        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+      ),
+      body: Stack(
+        children: <Widget>[
+          StreamBuilder<List<Group>>(
+            stream: groupsStream,
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                List<Group> groups = snapshot.data!;
+                return ListView(
+                  padding: EdgeInsets.only(top: 10, bottom: 80),
+                  children: groups.map((group) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedGroup = group;
+                        });
+                      },
+                      child: Card(
+                        color: selectedGroup == group
+                            ? Theme.of(context).primaryColorDark
+                            : null,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 5,
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          child: ListTile(
+                            title: Text(
+                              '${group.DisplayName}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.person, size: 20),
+                                    SizedBox(width: 5),
+                                    Text('Description: ${group.description}'),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.people, size: 20),
+                                    SizedBox(width: 5),
+                                    Text('${group.numberOfMembers} members'),
+                                  ],
+                                ),
+                                // ... Add other information rows with icons here
+                                // Make sure to add some spacing (SizedBox) between rows for better readability
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              );
-            } else {
-              return noGroupWidget();
-            }
-          },
-        ),
-        Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-              child: FloatingActionButton(
-                onPressed: () {
-                  popUpDialog(context);
-                },
-                elevation: 6,
-                backgroundColor: Theme.of(context).primaryColor,
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 30,
+                    );
+                  }).toList(),
+                );
+              } else {
+                return noGroupWidget();
+              }
+            },
+          ),
+          Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    popUpDialog(context);
+                  },
+                  elevation: 6,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
-              ),
-            )),
-      ],
+              )),
+        ],
+      ),
     );
   }
 
