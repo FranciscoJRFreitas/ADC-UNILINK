@@ -81,7 +81,7 @@ class _MessageWithFileState extends State<MessageWithFile> {
           value: 'details',
         ),
       ];
-    } else {
+    } else if (widget.isAdmin) {
       menuItems = [
         PopupMenuItem(
           child: Text('Download', style: Theme.of(context).textTheme.bodyLarge),
@@ -89,6 +89,17 @@ class _MessageWithFileState extends State<MessageWithFile> {
         ),
         PopupMenuItem(
           child: Text('Details', style: Theme.of(context).textTheme.bodyLarge),
+          value: 'details',
+        ),
+      ];
+    } else {
+      menuItems = [
+        PopupMenuItem(
+          child: Text('Download'),
+          value: 'download',
+        ),
+        PopupMenuItem(
+          child: Text('Details'),
           value: 'details',
         ),
       ];

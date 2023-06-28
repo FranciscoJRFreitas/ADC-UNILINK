@@ -64,10 +64,17 @@ class _MessageTileState extends State<MessageTile> {
           value: 'details',
         ),
       ];
-    } else {
+    } else if (widget.isAdmin) {
       menuItems = [
         PopupMenuItem(
           child: Text('Details', style: Theme.of(context).textTheme.bodyLarge),
+          value: 'details',
+        ),
+      ];
+    } else {
+      menuItems = [
+        PopupMenuItem(
+          child: Text('Details'),
           value: 'details',
         ),
       ];
