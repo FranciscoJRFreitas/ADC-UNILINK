@@ -10,7 +10,7 @@ import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
-import 'MapPage.dart';
+import 'newMapPage.dart';
 import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -77,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
         ContactsPage(),
         SettingsPage(),
         SchedulePage(), //estudante
-        MapPage(),
+        MapPage(username: _currentUser.username),
         Placeholder(), //professor
         Placeholder(), //diretor
       ];
