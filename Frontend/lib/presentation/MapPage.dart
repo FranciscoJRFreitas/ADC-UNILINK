@@ -56,6 +56,20 @@ class _MyMapState extends State<MyMap> {
           final latitude = data?[widget.userId]?['latitude'];
           final longitude = data?[widget.userId]?['longitude'];
 
+          _markers.add(
+            Marker(
+              markerId: MarkerId('dept1'),
+              position: LatLng(latitude, longitude),
+              infoWindow: InfoWindow(
+                title: 'me',
+                snippet: 'yo',
+              ),
+              // Optional: Set a custom icon for the marker
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueMagenta),
+            ),
+          );
+
           if (latitude == null || longitude == null) {
             return Center(child: Text('Location not found'));
           }

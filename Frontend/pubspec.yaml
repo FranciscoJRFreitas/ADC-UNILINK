@@ -66,6 +66,7 @@ dependencies:
   camera: ^0.10.5+2
   location: ^4.4.0
   flutter_polyline_points: any
+  permission_handler: ^10.3.0
 
 dev_dependencies:
   flutter_test:

@@ -41,7 +41,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   FilePickerResult? picked;
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
-  late int messageCap = 10; //still experiment
+  late int messageCap = 20; //still experiment
   late bool isLoading = false;
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
@@ -78,7 +78,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           messages.add(message);
         }
       });
-      _scrollToBottom();
     });
 
     messagesRef.onChildChanged.listen((event) {
@@ -318,7 +317,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                           child: TextFormField(
                             controller: messageController,
                             focusNode: messageFocusNode,
-                            style: const TextStyle(color: Colors.white, fontSize: 16),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 16),
                             decoration: const InputDecoration(
                               hintText: "Send a message...",
                               hintStyle:
@@ -809,8 +809,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       return Container(); // Return an empty container if there are no messages
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-
+    if (isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    } else {
+      isLoading = false;
+    }
     int? lastTimestamp = 0;
 
     return ListView.builder(
@@ -917,7 +920,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'extension': extension,
           'message': content,
           'name': widget.user.username,
-          'displayName' : widget.user.displayName,
+          'displayName': widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
         };
@@ -934,7 +937,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'extension': extension,
           'message': content,
           'name': widget.user.username,
-          'displayName' : widget.user.displayName,
+          'displayName': widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
         };
@@ -943,7 +946,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'containsFile': false,
           'message': content,
           'name': widget.user.username,
-          'displayName' : widget.user.displayName,
+          'displayName': widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
         };
