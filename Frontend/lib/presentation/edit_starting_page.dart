@@ -4,6 +4,10 @@ import '../widgets/LineComboBox.dart';
 import '../widgets/my_text_button.dart';
 
 class EditStartingPage extends StatefulWidget {
+  final VoidCallback? onDialogClosed;
+
+  const EditStartingPage({Key? key, this.onDialogClosed}) : super(key: key);
+
   @override
   _EditStartingPageState createState() => _EditStartingPageState();
 }
@@ -95,6 +99,7 @@ class _EditStartingPageState extends State<EditStartingPage> {
                       onTap: () {
                         cacheFactory.set('index', _startingPage);
                         Navigator.pop(context);
+                        widget.onDialogClosed?.call();
                       },
                       bgColor: Theme.of(context).primaryColor,
                       textColor: Colors.white,

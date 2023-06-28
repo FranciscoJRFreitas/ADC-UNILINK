@@ -37,20 +37,78 @@ class _SettingsPageState extends State<SettingsPage> {
           subtitle: 'Change between dark and light themes.',
           toggleButton: true,
           onTap: () {
-            setState(() {});
+            getSettings();
           }),
       Option(
-          icon: Icon(Icons.waving_hand,
-              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
-          title: 'Starting Page',
-          subtitle: 'Select your preferable starting page.',
-          onTap: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return EditStartingPage();
-                });
-          }),
+        icon: Icon(Icons.waving_hand,
+            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+        title: 'Starting Page',
+        subtitle: 'Select your preferable starting page.',
+        rightWidget: Padding(
+          padding: EdgeInsets.only(right: 20.0),
+          child: Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween, // Distribute space evenly
+            children: [
+              FutureBuilder(
+                future: cacheFactory.get('settings', 'index'),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else {
+                    IconData iconData;
+                    switch (snapshot.data) {
+                      case 'News':
+                        iconData = Icons.newspaper;
+                        break;
+                      case 'Profile':
+                        iconData = Icons.person;
+                        break;
+                      case 'Schedule':
+                        iconData = Icons.schedule;
+                        break;
+                      case 'Chat':
+                        iconData = Icons.chat;
+                        break;
+                      case 'Contacts':
+                        iconData = Icons.call;
+                        break;
+                      default:
+                        iconData = Icons.pages;
+                    }
+                    return Row(
+                      children: [
+                        Icon(iconData,
+                            color: Theme.of(context).secondaryHeaderColor),
+                        SizedBox(
+                            width: 5.0), // Add space between the icon and text
+                        Text(
+                          snapshot.data,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+              SizedBox(), // Add an empty SizedBox to ensure proper alignment
+            ],
+          ),
+        ),
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return EditStartingPage(
+                onDialogClosed: () {
+                  setState(() {});
+                },
+              );
+            },
+          );
+        },
+      ),
       Option(
           icon: Icon(Icons.password,
               color: Theme.of(context).secondaryHeaderColor, size: 40.0),
@@ -92,48 +150,76 @@ class _SettingsPageState extends State<SettingsPage> {
           } else if (index == options.length + 1) {
             return SizedBox(height: 100.0);
           }
-          return Container(
-              alignment: Alignment.center,
-              margin: EdgeInsets.all(10.0),
-              width: double.infinity,
-              height: 80.0,
-              decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.black26)),
-              child: Row(children: [
-                Expanded(
-                  // You need to use Expanded widget here
-                  child: ListTile(
-                    leading: options[index - 1].icon,
-                    title: Text(
-                      options[index - 1].title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    subtitle: Text(
-                      options[index - 1].subtitle.toString(),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    onTap: options[index - 1].onTap,
-                  ),
-                ),
-                if (options[index - 1].toggleButton == true) ...[
-                  Switch(
-                    value: _currentTheme != "Dark",
-                    onChanged: (value) {
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: options[index - 1].toggleButton == true
+                  ? () {
                       setState(() {
                         Provider.of<ThemeNotifier>(context, listen: false)
                             .toggleTheme();
                         _currentTheme =
                             _currentTheme == "Dark" ? "Light" : "Dark";
                       });
-                    },
-                    activeTrackColor:
-                        Theme.of(context).primaryColor.withOpacity(0.5),
-                    activeColor: Theme.of(context).primaryColor,
+                    }
+                  : options[index - 1].onTap,
+              child: Container(
+                margin: EdgeInsets.all(10.0),
+                width: double.infinity,
+                height: 80.0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.black26),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            leading: options[index - 1].icon,
+                            title: Text(
+                              options[index - 1].title,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            subtitle: Text(
+                              options[index - 1].subtitle.toString(),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            trailing: options[index - 1].toggleButton == true
+                                ? Switch(
+                                    value: _currentTheme != "Dark",
+                                    onChanged: (value) {
+                                      setState(() {
+                                        Provider.of<ThemeNotifier>(context,
+                                                listen: false)
+                                            .toggleTheme();
+                                        _currentTheme = _currentTheme == "Dark"
+                                            ? "Light"
+                                            : "Dark";
+                                      });
+                                    },
+                                    activeTrackColor: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.5),
+                                    activeColor: Theme.of(context).primaryColor,
+                                  )
+                                : null,
+                          ),
+                        ),
+                        if (options[index - 1].rightWidget != null) ...[
+                          Spacer(),
+                          options[index - 1].rightWidget!,
+                        ],
+                      ],
+                    ),
                   ),
-                ]
-              ]));
+                ),
+              ),
+            ),
+          );
         },
       ),
     );
@@ -147,13 +233,14 @@ class Option {
   String subtitle;
   bool? toggleButton;
   VoidCallback onTap;
+  Widget? rightWidget;
 
   Option({
-    //this.isButton,
     required this.icon,
     required this.title,
     required this.subtitle,
     this.toggleButton,
     required this.onTap,
+    this.rightWidget,
   });
 }
