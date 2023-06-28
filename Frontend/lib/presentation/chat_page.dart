@@ -327,7 +327,7 @@ class _ChatPageState extends State<ChatPage> {
         onPressed: () {
           popUpDialog(context);
         },
-        elevation: 0,
+        elevation: 6,
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(
           Icons.add,

@@ -47,6 +47,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late final FirebaseMessaging _messaging;
   final GlobalKey<CombinedButtonState> combinedButtonKey =
       GlobalKey<CombinedButtonState>();
+  late bool info = false;
 
   //late CameraDescription camera;
 
@@ -164,276 +165,271 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     super.dispose();
   }
 
-  Widget _layoutForWeb() {
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          IconButton(
-            onPressed: () {
-              combinedButtonKey.currentState?.collapseOverlay();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ChatInfoPage(
-                    groupId: widget.groupId,
-                    username: widget.username,
+  // Widget _body() {
+  //   return null;
+  // }
+
+  Widget _bodyForWeb() {
+    return info == false
+        ? Scaffold(
+            body: Column(
+              children: <Widget>[
+                Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      if (notification is ScrollEndNotification &&
+                          _scrollController.position.pixels == 0) {
+                        // Load older messages here
+                        isLoading = true;
+                        loadOlderMessages();
+                      }
+                      return false;
+                    },
+                    child: chatMessages(),
                   ),
                 ),
-              );
-            },
-            icon: const Icon(Icons.info),
-          ),
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification notification) {
-                if (notification is ScrollEndNotification &&
-                    _scrollController.position.pixels == 0) {
-                  // Load older messages here
-                  isLoading = true;
-                  loadOlderMessages();
-                }
-                return false;
-              },
-              child: chatMessages(),
-            ),
-          ),
-          Container(
-            alignment: Alignment.bottomCenter,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              width: MediaQuery.of(context).size.width,
-              color: Color.fromARGB(0, 0, 0, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    child: pickedFile != null
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                                Row(
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  width: MediaQuery.of(context).size.width,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 18),
+                    width: MediaQuery.of(context).size.width,
+                    color: Color.fromARGB(0, 0, 0, 0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          child: pickedFile != null
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Align(
-                                      alignment: Alignment.topCenter,
-                                      child: Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              10,
-                                          child: Text(
-                                            pickedFile!.name,
-                                            textAlign: TextAlign.center,
-                                          )),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: IconButton(
-                                        icon: Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape
-                                                .rectangle, // use circle if the icon is circular
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black,
-                                                blurRadius: 15.0,
-                                                spreadRadius: 2.0,
-                                              ),
-                                            ],
+                                      Row(
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.topCenter,
+                                            child: Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    10,
+                                                child: Text(
+                                                  pickedFile!.name,
+                                                  textAlign: TextAlign.center,
+                                                )),
                                           ),
-                                          child: Icon(
-                                            Icons.close,
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: IconButton(
+                                              icon: Container(
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape
+                                                      .rectangle, // use circle if the icon is circular
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black,
+                                                      blurRadius: 15.0,
+                                                      spreadRadius: 2.0,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Icon(
+                                                  Icons.close,
+                                                  color: Colors.white,
+                                                ),
+                                              ), // Choose your icon and color
+                                              onPressed: () {
+                                                setState(() {
+                                                  pickedFile = null;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      messageImageWidget(context),
+                                    ])
+                              : picked != null
+                                  ? Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.topCenter,
+                                              child: Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    10,
+                                                child: Text(
+                                                  picked!.files.first.name,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: IconButton(
+                                                icon: Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape
+                                                        .rectangle, // use circle if the icon is circular
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black,
+                                                        blurRadius: 15.0,
+                                                        spreadRadius: 2.0,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.close,
+                                                    color: Colors.white,
+                                                  ),
+                                                ), // Choose your icon and color
+                                                onPressed: () {
+                                                  setState(() {
+                                                    picked = null;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {},
+                                          child: const Icon(
+                                            Icons.insert_drive_file,
+                                            size: 60,
                                             color: Colors.white,
                                           ),
-                                        ), // Choose your icon and color
-                                        onPressed: () {
-                                          setState(() {
-                                            pickedFile = null;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                                        )
+                                      ],
+                                    )
+                                  : const SizedBox(),
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            controller: messageController,
+                            focusNode: messageFocusNode,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              hintText: "Send a message...",
+                              hintStyle:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                              border: InputBorder.none,
+                            ),
+                            onFieldSubmitted: (String value) {
+                              sendMessage(value);
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            combinedButtonKey.currentState?.collapseOverlay();
+                            sendMessage(messageController.text.isEmpty
+                                ? ""
+                                : messageController.text);
+                            setState(() {});
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.send,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        CombinedButton(
+                          key: combinedButtonKey,
+                          image: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                attachImage();
+                              });
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.image,
+                                  color: Colors.white,
                                 ),
-                                messageImageWidget(context),
-                              ])
-                        : picked != null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.topCenter,
-                                        child: Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              10,
-                                          child: Text(
-                                            picked!.files.first.name,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: IconButton(
-                                          icon: Container(
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape
-                                                  .rectangle, // use circle if the icon is circular
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black,
-                                                  blurRadius: 15.0,
-                                                  spreadRadius: 2.0,
-                                                ),
-                                              ],
-                                            ),
-                                            child: Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            ),
-                                          ), // Choose your icon and color
-                                          onPressed: () {
-                                            setState(() {
-                                              picked = null;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: const Icon(
-                                      Icons.insert_drive_file,
-                                      size: 60,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
-                              )
-                            : const SizedBox(),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      controller: messageController,
-                      focusNode: messageFocusNode,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: "Send a message...",
-                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
-                        border: InputBorder.none,
-                      ),
-                      onFieldSubmitted: (String value) {
-                        sendMessage(value);
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      combinedButtonKey.currentState?.collapseOverlay();
-                      sendMessage(messageController.text.isEmpty
-                          ? ""
-                          : messageController.text);
-                      setState(() {});
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  CombinedButton(
-                    key: combinedButtonKey,
-                    image: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          attachImage();
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.image,
-                            color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          file: GestureDetector(
+                            onTap: () {
+                              attachFile();
+                              setState(() {});
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          camera: GestureDetector(
+                            onTap: () {
+                              takePicture();
+                              setState(() {});
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.add_a_photo,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    file: GestureDetector(
-                      onTap: () {
-                        attachFile();
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.picture_as_pdf_rounded,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    camera: GestureDetector(
-                      onTap: () {
-                        takePicture();
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.add_a_photo,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+        : ChatInfoPage(groupId: widget.groupId, username: widget.username);
   }
 
   Widget _layoutForMobile() {
@@ -727,6 +723,40 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _layoutForWeb() {
+    return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(
+          color: Colors.white,
+          onPressed: () {
+            setState(() {
+              info = false;
+            });
+          },
+        ),
+        backgroundColor: Theme.of(context).primaryColorDark, //roleColor,
+        title: Text(
+          widget.groupId,
+          style: Theme.of(context).textTheme.bodyLarge,
+          selectionColor: Colors.white,
+        ),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                info = true;
+              });
+            },
+            icon: const Icon(Icons.info),
+          ),
+        ],
+      ),
+      body: _bodyForWeb(),
     );
   }
 
