@@ -105,11 +105,11 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-        if (kIsWeb) {
-          return _buildWebLayout(context, selectedGroup);
-        } else {
-          return _buildMobileLayout(context);
-        }
+    if (kIsWeb) {
+      return _buildWebLayout(context, selectedGroup);
+    } else {
+      return _buildMobileLayout(context);
+    }
   }
 
   Widget _buildWebLayout(BuildContext context, Group? selectedGroup) {
@@ -205,19 +205,23 @@ class _ChatPageState extends State<ChatPage> {
             }
           },
         ),
-        /*Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: IconButton(
-              onPressed: () {
-                // Add your logic here...
-              },
-              icon: const Icon(Icons.search),
-              color: Colors.white,
-            ),
-          ),
-        ),*/
+        Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+              child: FloatingActionButton(
+                onPressed: () {
+                  popUpDialog(context);
+                },
+                elevation: 6,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            )),
       ],
     );
   }
@@ -318,7 +322,7 @@ class _ChatPageState extends State<ChatPage> {
         onPressed: () {
           popUpDialog(context);
         },
-        elevation: 6,
+        elevation: 50,
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(
           Icons.add,
