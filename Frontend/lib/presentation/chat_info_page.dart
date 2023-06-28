@@ -245,27 +245,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: <Widget>[
-        _showXButton(),
-        Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: IconButton(
-              onPressed: () {
-                // nextScreen(context, const Placeholder()); //searchPageChat
-                // Replace the above line with your desired logic
-                setState(() {
-                  memberData = null;
-                  memberInfo = false;
-                });
-              },
-              icon: const Icon(Icons.close),
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ]),
+      body: _showXButton(),
     );
   }
 

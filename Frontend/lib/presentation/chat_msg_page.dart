@@ -728,15 +728,18 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   Widget _layoutForWeb() {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(
-          color: Colors.white,
-          onPressed: () {
-            setState(() {
-              info = false;
-            });
-          },
-        ),
-        backgroundColor: Theme.of(context).primaryColorDark, //roleColor,
+        leading: info || MediaQuery.of(context).size.width <= 600
+            ? BackButton(
+                color: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    if (info == false) Navigator.pop(context);
+                    info = false;
+                  });
+                },
+              )
+            : null,
+        backgroundColor: Theme.of(context).primaryColorDark,
         title: Text(
           widget.groupId,
           style: Theme.of(context).textTheme.bodyLarge,

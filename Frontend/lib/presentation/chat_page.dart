@@ -104,40 +104,37 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return kIsWeb
-        ? _buildWebLayout(context, selectedGroup)
-        : _buildMobileLayout(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          return _buildWebLayout(context, selectedGroup);
+        } else {
+          return _buildMobileLayout(context);
+        }
+      },
+    );
   }
 
   Widget _buildWebLayout(BuildContext context, Group? selectedGroup) {
-    return LayoutBuilder(builder: (context, constraints) {
-      // Calculate available height and width
-      final double availableWidth = constraints.maxWidth;
-      bool resize = availableWidth < 600;
-      // Calculate card height and font size based on available space
-
-      return resize
-          ? _buildMobileLayout(context)
-          : Scaffold(
-              body: Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: _buildLeftWidget(context),
-                  ),
-                  if (selectedGroup != null)
-                    Expanded(
-                      flex: 2,
-                      child: GroupMessagesPage(
-                        key: ValueKey(selectedGroup.id),
-                        groupId: selectedGroup.id,
-                        username: widget.username,
-                      ),
-                    ),
-                ],
+    return Scaffold(
+      body: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: _buildLeftWidget(context),
+          ),
+          if (selectedGroup != null)
+            Expanded(
+              flex: 2,
+              child: GroupMessagesPage(
+                key: ValueKey(selectedGroup.id),
+                groupId: selectedGroup.id,
+                username: widget.username,
               ),
-            );
-    });
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLeftWidget(BuildContext context) {
@@ -161,6 +158,9 @@ class _ChatPageState extends State<ChatPage> {
                       });
                     },
                     child: Card(
+                      color: selectedGroup == group
+                          ? Theme.of(context).primaryColorDark
+                          : null,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -208,7 +208,7 @@ class _ChatPageState extends State<ChatPage> {
             }
           },
         ),
-        Align(
+        /*Align(
           alignment: Alignment.topRight,
           child: Padding(
             padding: EdgeInsets.all(16.0),
@@ -220,12 +220,10 @@ class _ChatPageState extends State<ChatPage> {
               color: Colors.white,
             ),
           ),
-        ),
+        ),*/
       ],
     );
   }
-
-  // Remaining of your code...
 
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
