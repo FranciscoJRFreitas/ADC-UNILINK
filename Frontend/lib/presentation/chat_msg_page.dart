@@ -439,7 +439,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         centerTitle: true,
         elevation: 0,
         title: Text(widget.groupId),
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
             onPressed: () {
@@ -459,20 +459,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       ),
       body: Column(
         children: <Widget>[
-          IconButton(
-            onPressed: () {
-              combinedButtonKey.currentState?.collapseOverlay();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ChatInfoPage(
-                    groupId: widget.groupId,
-                    username: widget.user.username,
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.info),
-          ),
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {
