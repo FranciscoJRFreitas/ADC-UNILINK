@@ -50,7 +50,7 @@ class User {
         state: '',
         mobilePhone: '',
         occupation: '',
-        creationTime: json['user_creation_time']['string']
+        creationTime: ''
       );
     } else {
       return User(
