@@ -21,9 +21,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   List<String> _activeTags = [];
   List<FeedItem> _filteredFeedItems = [];
   int _page = 0;
-  bool _hasMore = true;
   bool _isLoading = false;
-  bool _fetchedAllFromServer = false;
   int _newsPerPage = 12;
   bool web = false;
   int newsCounter = 0;
@@ -46,8 +44,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
             (kIsWeb
                 ? _scrollController.position.maxScrollExtent - 600
                 : _scrollController.position.maxScrollExtent - 200) &&
-        _hasMore) {
-      // change isFetched() to _hasMore
+        !isFetched()) {
       _fetchNews();
     }
   }
@@ -66,11 +63,12 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
         _activeTags.add(tag);
       }
       _filterNews();
-      if (_filteredFeedItems.isEmpty && !_fetchedAllFromServer) _hasMore = true;
     });
   }
 
   Future<void> _fetchNews() async {
+    print(isFetched());
+    if (isFetched()) return;
     int currentPageInCache =
         int.parse(await cacheFactory.get('settings', 'currentPage'));
     int currentNewsInCache =
@@ -86,7 +84,6 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           _filterNews();
         });
       }
-      return;
     }
     if (mounted) {
       setState(() {
@@ -97,27 +94,22 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     try {
       List<dom.Element> newsItems = await getNewsItems(_page);
 
-      if (newsItems.length < _newsPerPage + 1) {
-        _hasMore = false;
-        _fetchedAllFromServer = true;
-      }
-
-      // Start the loop from the currentNewsInCache index if it's not zero
       int start = currentNewsInCache != 0 ? currentNewsInCache : 0;
 
-      for (int i = start; i < newsItems.length; i++) {
+      for (int i = start; i < _newsPerPage + 1; i++) {
         FeedItem? feedItem = await fetchNews(newsItems, i);
         if (feedItem != null) {
           if (mounted) {
             setState(() {
-              if (!_feedItems.any((item) => item.title == feedItem.title)) {
+              if (!_filteredFeedItems
+                  .any((item) => item.title == feedItem.title)) {
                 _feedItems.add(feedItem);
                 _filterNews();
+                cacheFactory.setNews(feedItem);
+                cacheFactory.set('currentNews', i.toString());
               }
             });
           }
-          cacheFactory.setNews(feedItem);
-          cacheFactory.set('currentNews', i.toString());
         }
       }
 
@@ -126,7 +118,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
       if (mounted) {
         setState(() {
-          if (currentNewsInCache == 12) {
+          if (currentNewsInCache == 12 && !isFetched()) {
             _page++;
             cacheFactory.set('currentPage', _page.toString());
             cacheFactory.set('currentNews', "0");
@@ -141,6 +133,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
         });
       }
     }
+    if (_activeTags.isNotEmpty && !isFetched()) _fetchNews();
   }
 
   @override
@@ -163,7 +156,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
               Expanded(
                 child: ListView.separated(
                   controller: _scrollController,
-                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+                  itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
                   separatorBuilder: (BuildContext context, int index) {
                     return const Divider();
                   },
@@ -214,7 +207,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           Expanded(
             child: ListView.separated(
               controller: _scrollController,
-              itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+              itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
               separatorBuilder: (BuildContext context, int index) {
                 return const Divider();
               },
@@ -265,7 +258,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                     mainAxisSpacing: 4.0,
                     childAspectRatio: crossAxisCount > 1 ? 0.6 : 1.2,
                   ),
-                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+                  itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
                   itemBuilder: (BuildContext context, int index) {
                     if (index >= _filteredFeedItems.length) {
                       return _isLoading
