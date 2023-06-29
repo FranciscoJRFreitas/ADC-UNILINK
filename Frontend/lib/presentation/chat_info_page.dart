@@ -18,6 +18,7 @@ import '../widgets/my_text_field.dart';
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
   final String username;
+
   ChatInfoPage({required this.groupId, required this.username});
 
   @override
@@ -34,6 +35,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   late bool isAdmin = false;
   late bool memberInfo = false;
   late MembersData? memberData;
+
   @override
   void initState() {
     super.initState();
@@ -159,8 +161,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -245,9 +247,18 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _showXButton(),
-    );
+    return kIsWeb
+        ? Scaffold(
+            body: _showXButton(),
+          )
+        : Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              elevation: 0,
+              title: Text(widget.groupId),
+              backgroundColor: Theme.of(context).primaryColor,
+            ),
+            body: _showXButton());
   }
 
   Widget _showXButton() {
@@ -547,8 +558,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -641,6 +652,7 @@ class MembersData {
   final String username;
   final String dispName;
   bool isAdmin;
+
   MembersData(
       {required this.username, required this.dispName, required this.isAdmin});
 }
