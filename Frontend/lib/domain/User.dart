@@ -50,7 +50,7 @@ class User {
         state: '',
         mobilePhone: '',
         occupation: '',
-        creationTime: (json['user_creation_time'] as Timestamp).toDate().toString(),
+        creationTime: json['user_creation_time']['string']
       );
     } else {
       return User(
@@ -64,7 +64,7 @@ class User {
         role: json['user_role']['string'],
         state: json['user_state']['string'],
         username: json['user_username']['string'],
-        creationTime: (json['user_creation_time'] as Timestamp).toDate().toString()
+        creationTime: json['user_creation_time']['string']
       );
     }
   }
