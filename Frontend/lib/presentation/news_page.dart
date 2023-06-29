@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/widgets/news_box.dart';
 import '../domain/FeedItem.dart';
 import '../application/fetchNews.dart';
@@ -16,7 +17,7 @@ class NewsFeedPage extends StatefulWidget {
 
 class _NewsFeedPageState extends State<NewsFeedPage> {
   final ScrollController _scrollController = ScrollController();
-  final List<FeedItem> _feedItems = [];
+  List<FeedItem> _feedItems = [];
   List<String> _activeTags = [];
   List<FeedItem> _filteredFeedItems = [];
   int _page = 0;
@@ -25,6 +26,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   bool _fetchedAllFromServer = false;
   int _newsPerPage = 12;
   bool web = false;
+  int newsCounter = 0;
 
   @override
   void initState() {
@@ -44,7 +46,8 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
             (kIsWeb
                 ? _scrollController.position.maxScrollExtent - 600
                 : _scrollController.position.maxScrollExtent - 200) &&
-        !isFetched()) {
+        _hasMore) {
+      // change isFetched() to _hasMore
       _fetchNews();
     }
   }
@@ -68,50 +71,67 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   }
 
   Future<void> _fetchNews() async {
-    List<dom.Element> newsItems = await getNewsItems(_page);
-    int sizeBeforeFetch = _filteredFeedItems.length;
+    int currentPageInCache =
+        int.parse(await cacheFactory.get('settings', 'currentPage'));
+    int currentNewsInCache =
+        int.parse(await cacheFactory.get('settings', 'currentNews'));
+    List<FeedItem> itemsInCache =
+        await cacheFactory.get('news', '') as List<FeedItem>;
 
-    for (int i = 0; i < _newsPerPage + 1; i++) {
-      if (_isLoading || !_hasMore) {
-        return;
-      }
-
-      try {
-        if (mounted)
-          setState(() {
-            _isLoading = true;
-          });
-
-        FeedItem? feedItem = await fetchNews(newsItems, i);
-
-        if (feedItem == null) {
-          continue;
-        }
-
-        if (mounted)
-          setState(() {
-            if (!_feedItems.contains(feedItem)) _feedItems.add(feedItem);
-            _filterNews();
-          });
-      } catch (e) {
-        // Handle exception here if needed
-      } finally {
-        if (mounted)
-          setState(() {
-            _isLoading = false;
-          });
-      }
-    }
-    if (mounted)
+    if (itemsInCache.isNotEmpty && currentPageInCache > _page) {
       setState(() {
-        _page++;
+        _page = currentPageInCache;
+        _feedItems = itemsInCache;
+        _filterNews();
       });
+      return;
+    }
 
-    int sizeAfterFetch = _filteredFeedItems.length;
+    setState(() {
+      _isLoading = true;
+    });
 
-    if ((sizeBeforeFetch == sizeAfterFetch && !isFetched()) ||
-        _activeTags.isNotEmpty) _fetchNews();
-    if (mounted) setState(() {});
+    try {
+      List<dom.Element> newsItems = await getNewsItems(_page);
+
+      if (newsItems.length < _newsPerPage + 1) {
+        _hasMore = false;
+        _fetchedAllFromServer = true;
+      }
+
+      // Start the loop from the currentNewsInCache index if it's not zero
+      int start = currentNewsInCache != 0 ? currentNewsInCache : 0;
+
+      for (int i = start; i < newsItems.length; i++) {
+        FeedItem? feedItem = await fetchNews(newsItems, i);
+        if (feedItem != null) {
+          setState(() {
+            if (!_feedItems.any((item) => item.title == feedItem.title)) {
+              _feedItems.add(feedItem);
+              _filterNews();
+            }
+          });
+          cacheFactory.setNews(feedItem);
+          cacheFactory.set('currentNews', i);
+        }
+      }
+
+      currentNewsInCache =
+          int.parse(await cacheFactory.get('settings', 'currentNews'));
+
+      setState(() {
+        if (currentNewsInCache == 12) {
+          _page++;
+          cacheFactory.set('currentPage', _page);
+          cacheFactory.set('currentNews', 0);
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override

@@ -85,7 +85,7 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
       });
     }
 
-    Set<String?> tags = await extractKeywords(result);
+    Set<String?> tags = {};//await extractKeywords(result);
 
     tags = tags
         .map((tag) {

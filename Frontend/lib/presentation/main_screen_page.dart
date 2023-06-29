@@ -558,6 +558,11 @@ class _MainScreenState extends State<MainScreen> {
 
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
+      cacheFactory.removeNewsCache();
+      if (await cacheFactory.get("settings", "currentPage") == null)
+        cacheFactory.set('currentPage', 0);
+      if (await cacheFactory.get("settings", "currentNews") == null)
+        cacheFactory.set('currentNews', 0);
 
       Navigator.push(
         context,

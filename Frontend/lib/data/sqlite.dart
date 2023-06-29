@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../domain/FeedItem.dart';
 import '../domain/User.dart';
 
 class SqliteService {
@@ -28,8 +29,15 @@ class SqliteService {
             'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT, creationTime TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT, `index` TEXT)');
-        await database.insert('settings', {'checkIntro': null, 'checkLogin': null, 'theme': null, 'index': "News"});
+            'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT)');
+        await database.execute(
+            'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
+        await database.insert('settings', {
+          'checkIntro': null,
+          'checkLogin': null,
+          'theme': null,
+          'index': "News"
+        });
       },
       version: 1,
     );
@@ -53,35 +61,32 @@ class SqliteService {
 
   Future<void> updateCheckIntro(String value) async {
     Database db = await getDatabase();
-
-    //await getCheckIntro() == null
-      //  ? await db.rawInsert('INSERT INTO settings(checkIntro) VALUES($value)')
-      //  : await db.rawUpdate('UPDATE settings SET checkIntro = $value');
     await db.rawUpdate('UPDATE settings SET checkIntro = $value');
   }
 
   Future<void> updateCheckLogin(String value) async {
     Database db = await getDatabase();
-
-    //await getCheckLogin() == null
-        //? await db.rawInsert('INSERT INTO settings(checkLogin) VALUES($value)')
-        //: await db.rawUpdate('UPDATE settings SET checkLogin = $value');
     await db.rawUpdate('UPDATE settings SET checkLogin = $value');
   }
 
   Future<void> updateTheme(String value) async {
     Database db = await getDatabase();
-
-    //await getTheme() == null
-      //  ? await db.rawInsert("INSERT INTO settings(theme) VALUES('$value')")
-       // : await db.rawUpdate("UPDATE settings SET theme = '$value'");
     await db.rawUpdate("UPDATE settings SET theme = '$value'");
   }
 
   Future<void> updateIndex(String value) async {
     Database db = await getDatabase();
-
     await db.rawUpdate('UPDATE settings SET `index` = \'$value\'');
+  }
+
+  Future<void> updateCurrentPage(String value) async {
+    Database db = await getDatabase();
+    await db.rawUpdate('UPDATE settings SET currentPage = \'$value\'');
+  }
+
+  Future<void> updateCurrentNews(String value) async {
+    Database db = await getDatabase();
+    await db.rawUpdate('UPDATE settings SET currentNews = \'$value\'');
   }
 
   Future<String?> getCheckIntro() async {
@@ -201,5 +206,43 @@ class SqliteService {
     Database db = await getDatabase();
 
     await db.rawDelete('DELETE FROM users');
+  }
+
+  Future<void> insertNews(FeedItem feedItem) async {
+    // Get a reference to the database.
+    Database db = await getDatabase();
+
+    await db.insert(
+      'news',
+      feedItem.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<FeedItem>> getNews() async {
+    // Get a reference to the database.
+    final db = await getDatabase();
+
+    // Query the table for all The News.
+    final List<Map<String, dynamic>> maps = await db.query('news');
+
+    // Convert the List<Map<String, dynamic> into a List<FeedItem>.
+    return List.generate(maps.length, (i) {
+      return FeedItem(
+        pageUrl: maps[i]['pageUrl'],
+        tags: maps[i]['tags'] != null ? maps[i]['tags'].split(',') : null,
+        content: maps[i]['content'],
+        title: maps[i]['title'],
+        date: maps[i]['date'],
+        imageUrl: maps[i]['imageUrl'],
+      );
+    });
+  }
+
+  Future<void> deleteNewsCache() async {
+    Database db = await getDatabase();
+    await db.rawDelete('DELETE currentPage FROM settings');
+    await db.rawDelete('DELETE currentNews FROM settings');
+    await db.rawDelete('DELETE FROM news');
   }
 }

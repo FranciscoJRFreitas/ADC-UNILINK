@@ -244,7 +244,7 @@ Future<int> login(
   http.Response response;
   debugPrint(username + " " + password);
   if (username == '' && password == '') {
-    showErrorSnackbar("Escreve alguma merda.", true, true);
+    showErrorSnackbar("Fill in your credentials.", true, true);
     return -1;
   } else {
     try {
