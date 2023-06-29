@@ -56,26 +56,27 @@ class _ChatPageState extends State<ChatPage> {
 
       // Fetch group details from groupsRef
       DatabaseEvent groupSnapshot = await groupsRef.child(groupId).once();
-      Map<dynamic, dynamic> groupData =
-          await groupSnapshot.snapshot.value as Map<dynamic, dynamic>;
+      Map<dynamic, dynamic>? groupData =
+          await groupSnapshot.snapshot.value as Map<dynamic, dynamic>?;
 
-      // Fetch members details from membersRef
       DatabaseEvent memberSnapshot = await membersRef.child(groupId).once();
-      Map<dynamic, dynamic> memberData =
-          await memberSnapshot.snapshot.value as Map<dynamic, dynamic>;
+      Map<dynamic, dynamic>? memberData =
+          await memberSnapshot.snapshot.value as Map<dynamic, dynamic>?;
 
-      String displayName = groupData['DisplayName'];
-      String description = groupData['description'];
-      int numberOfMembers = memberData.length; // get the number of members
-      Group group = Group(
-        id: groupId,
-        DisplayName: displayName,
-        description: description,
-        numberOfMembers: numberOfMembers, // this is your new field
-      );
-      groups.add(group);
+      if (groupData != null && memberData != null) {
+        String displayName = groupData['DisplayName'];
+        String description = groupData['description'];
+        int numberOfMembers = memberData.length;
+        Group group = Group(
+          id: groupId,
+          DisplayName: displayName,
+          description: description,
+          numberOfMembers: numberOfMembers,
+        );
+        groups.add(group);
 
-      streamController.add(groups); // Add groups to the stream
+        streamController.add(groups);
+      }
     });
 
     // Listen for child removal using onChildRemoved
