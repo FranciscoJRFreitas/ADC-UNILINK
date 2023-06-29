@@ -79,17 +79,20 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
         await cacheFactory.get('news', '') as List<FeedItem>;
 
     if (itemsInCache.isNotEmpty && currentPageInCache > _page) {
-      setState(() {
-        _page = currentPageInCache;
-        _feedItems = itemsInCache;
-        _filterNews();
-      });
+      if (mounted) {
+        setState(() {
+          _page = currentPageInCache;
+          _feedItems = itemsInCache;
+          _filterNews();
+        });
+      }
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       List<dom.Element> newsItems = await getNewsItems(_page);
@@ -105,32 +108,38 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       for (int i = start; i < newsItems.length; i++) {
         FeedItem? feedItem = await fetchNews(newsItems, i);
         if (feedItem != null) {
-          setState(() {
-            if (!_feedItems.any((item) => item.title == feedItem.title)) {
-              _feedItems.add(feedItem);
-              _filterNews();
-            }
-          });
+          if (mounted) {
+            setState(() {
+              if (!_feedItems.any((item) => item.title == feedItem.title)) {
+                _feedItems.add(feedItem);
+                _filterNews();
+              }
+            });
+          }
           cacheFactory.setNews(feedItem);
-          cacheFactory.set('currentNews', i);
+          cacheFactory.set('currentNews', i.toString());
         }
       }
 
       currentNewsInCache =
           int.parse(await cacheFactory.get('settings', 'currentNews'));
 
-      setState(() {
-        if (currentNewsInCache == 12) {
-          _page++;
-          cacheFactory.set('currentPage', _page);
-          cacheFactory.set('currentNews', 0);
-        }
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (currentNewsInCache == 12) {
+            _page++;
+            cacheFactory.set('currentPage', _page.toString());
+            cacheFactory.set('currentNews', "0");
+          }
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

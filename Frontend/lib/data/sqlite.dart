@@ -36,7 +36,9 @@ class SqliteService {
           'checkIntro': null,
           'checkLogin': null,
           'theme': null,
-          'index': "News"
+          'index': "News",
+          'currentPage': "0",
+          'currentNews': "0",
         });
       },
       version: 1,
@@ -51,198 +53,240 @@ class SqliteService {
   Future<void> insertUser(User user, String token, String password) async {
     // Get a reference to the database.
     Database db = await getDatabase();
-
-    await db.insert(
-      'users',
-      user.toMap(token, password),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.transaction((txn) async {
+      await txn.insert(
+        'users',
+        user.toMap(token, password),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   Future<void> updateCheckIntro(String value) async {
     Database db = await getDatabase();
-    await db.rawUpdate('UPDATE settings SET checkIntro = $value');
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET checkIntro = $value');
+    });
   }
 
   Future<void> updateCheckLogin(String value) async {
     Database db = await getDatabase();
-    await db.rawUpdate('UPDATE settings SET checkLogin = $value');
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET checkLogin = $value');
+    });
   }
 
   Future<void> updateTheme(String value) async {
     Database db = await getDatabase();
-    await db.rawUpdate("UPDATE settings SET theme = '$value'");
+    await db.transaction((txn) async {
+      await txn.rawUpdate("UPDATE settings SET theme = '$value'");
+    });
   }
 
   Future<void> updateIndex(String value) async {
     Database db = await getDatabase();
-    await db.rawUpdate('UPDATE settings SET `index` = \'$value\'');
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET `index` = \'$value\'');
+    });
   }
 
   Future<void> updateCurrentPage(String value) async {
     Database db = await getDatabase();
-    await db.rawUpdate('UPDATE settings SET currentPage = \'$value\'');
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET currentPage = \'$value\'');
+    });
   }
 
   Future<void> updateCurrentNews(String value) async {
     Database db = await getDatabase();
-    await db.rawUpdate('UPDATE settings SET currentNews = \'$value\'');
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET currentNews = \'$value\'');
+    });
   }
 
   Future<String?> getCheckIntro() async {
     Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
 
-    final List<Map<String, dynamic>> maps = await db.query('settings');
-
-    if (maps.isNotEmpty && maps[0].containsKey('checkIntro')) {
-      return maps[0]['checkIntro'];
-    } else {
-      return null;
-    }
+      if (maps.isNotEmpty && maps[0].containsKey('checkIntro')) {
+        return maps[0]['checkIntro'];
+      } else {
+        return null;
+      }
+    });
   }
 
   Future<String?> getCheckLogin() async {
     Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
 
-    final List<Map<String, dynamic>> maps = await db.query('settings');
-
-    if (maps.isNotEmpty && maps[0].containsKey('checkLogin')) {
-      return maps[0]['checkLogin'];
-    } else {
-      return null;
-    }
+      if (maps.isNotEmpty && maps[0].containsKey('checkLogin')) {
+        return maps[0]['checkLogin'];
+      } else {
+        return null;
+      }
+    });
   }
 
   Future<String?> getTheme() async {
     Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
 
-    final List<Map<String, dynamic>> maps = await db.query('settings');
+      if (maps.isNotEmpty && maps[0].containsKey('theme')) {
+        return maps[0]['theme'];
+      } else {
+        return null;
+      }
+    });
+  }
 
-    if (maps.isNotEmpty && maps[0].containsKey('theme')) {
-      return maps[0]['theme'];
-    } else {
-      return null;
-    }
+  Future<String?> getCurrentPage() async {
+    Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
+
+      if (maps.isNotEmpty && maps[0].containsKey('currentPage')) {
+        return maps[0]['currentPage'];
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<String?> getCurrentNews() async {
+    Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
+
+      if (maps.isNotEmpty && maps[0].containsKey('currentNews')) {
+        return maps[0]['currentNews'];
+      } else {
+        return null;
+      }
+    });
   }
 
   Future<User> getUser() async {
-    // Get a reference to the database.
     final db = await getDatabase();
-
-    // Query the table for all The Users.
-    final List<Map<String, dynamic>> maps = await db.query('users');
-
-    // Convert the List<Map<String, dynamic> into a List<User>.
-    return User(
-      displayName: maps[0]['displayName'],
-      email: maps[0]['email'],
-      username: maps[0]['username'],
-      role: maps[0]['role'],
-      educationLevel: maps[0]['educationalLevel'],
-      birthDate: maps[0]['birthDate'],
-      profileVisibility: maps[0]['profileVisibility'],
-      state: maps[0]['state'],
-      mobilePhone: maps[0]['mobilePhone'],
-      occupation: maps[0]['occupation'],
-      creationTime: maps[0]['creationTime'],
-    );
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('users');
+      return User(
+        displayName: maps[0]['displayName'],
+        email: maps[0]['email'],
+        username: maps[0]['username'],
+        role: maps[0]['role'],
+        educationLevel: maps[0]['educationalLevel'],
+        birthDate: maps[0]['birthDate'],
+        profileVisibility: maps[0]['profileVisibility'],
+        state: maps[0]['state'],
+        mobilePhone: maps[0]['mobilePhone'],
+        occupation: maps[0]['occupation'],
+        creationTime: maps[0]['creationTime'],
+      );
+    });
   }
 
   Future<String> getValue(String table, String value) async {
     Database db = await getDatabase();
-
-    final List<Map<String, dynamic>> maps = await db.query(table);
-
-    return maps[0][value];
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query(table);
+      return maps[0][value];
+    });
   }
 
   Future<String> getToken() async {
     Database db = await getDatabase();
-
-    final List<Map<String, dynamic>> maps = await db.query('users');
-
-    return maps[0]['token'];
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('users');
+      return maps[0]['token'];
+    });
   }
 
   Future<String> getPassword() async {
     Database db = await getDatabase();
-
-    final List<Map<String, dynamic>> maps = await db.query('users');
-
-    return maps[0]['password'];
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('users');
+      return maps[0]['password'];
+    });
   }
 
   Future<void> updateUser(User user, String token, String password) async {
-    // Get a reference to the database.
     final db = await getDatabase();
 
-    // Update the given user.
-    await db.update(
-      'users',
-      user.toMap(token, password),
-      // Ensure that the user has a matching id.
-      where: 'username = ?',
-      // Pass the user's id as a whereArg to prevent SQL injection.
-      whereArgs: [user.username],
-    );
+    await db.transaction((txn) async {
+      await txn.update(
+        'users',
+        user.toMap(token, password),
+        where: 'username = ?',
+        whereArgs: [user.username],
+      );
+    });
   }
 
   Future<void> deleteUser(String username) async {
     // Get a reference to the database.
     final db = await getDatabase();
 
-    // Remove the User from the database.
-    await db.delete(
-      'users',
-      // Use a `where` clause to delete a specific user.
-      where: 'username = ?',
-      // Pass the user's id as a whereArg to prevent SQL injection.
-      whereArgs: [username],
-    );
+    await db.transaction((txn) async {
+      await txn.delete(
+        'users',
+        where: 'username = ?',
+        whereArgs: [username],
+      );
+    });
   }
 
   Future<void> deleteUsersCache() async {
     // Get a reference to the database
     Database db = await getDatabase();
-
-    await db.rawDelete('DELETE FROM users');
+    await db.transaction((txn) async {
+      await txn.rawDelete('DELETE FROM users');
+    });
   }
 
   Future<void> insertNews(FeedItem feedItem) async {
     // Get a reference to the database.
     Database db = await getDatabase();
 
-    await db.insert(
-      'news',
-      feedItem.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.transaction((txn) async {
+      await txn.insert(
+        'news',
+        feedItem.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   Future<List<FeedItem>> getNews() async {
-    // Get a reference to the database.
     final db = await getDatabase();
 
-    // Query the table for all The News.
-    final List<Map<String, dynamic>> maps = await db.query('news');
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('news');
 
-    // Convert the List<Map<String, dynamic> into a List<FeedItem>.
-    return List.generate(maps.length, (i) {
-      return FeedItem(
-        pageUrl: maps[i]['pageUrl'],
-        tags: maps[i]['tags'] != null ? maps[i]['tags'].split(',') : null,
-        content: maps[i]['content'],
-        title: maps[i]['title'],
-        date: maps[i]['date'],
-        imageUrl: maps[i]['imageUrl'],
-      );
+      return List.generate(maps.length, (i) {
+        return FeedItem(
+          pageUrl: maps[i]['pageUrl'],
+          tags: maps[i]['tags'] != null
+              ? Set<String>.from(maps[i]['tags'].split(','))
+              : null,
+          content: maps[i]['content'],
+          title: maps[i]['title'],
+          date: maps[i]['date'],
+          imageUrl: maps[i]['imageUrl'],
+        );
+      });
     });
   }
 
   Future<void> deleteNewsCache() async {
     Database db = await getDatabase();
-    await db.rawDelete('DELETE currentPage FROM settings');
-    await db.rawDelete('DELETE currentNews FROM settings');
-    await db.rawDelete('DELETE FROM news');
+    await db.transaction((txn) async {
+      await txn.rawDelete('DELETE currentPage FROM settings');
+      await txn.rawDelete('DELETE currentNews FROM settings');
+      await txn.rawDelete('DELETE FROM news');
+    });
   }
 }

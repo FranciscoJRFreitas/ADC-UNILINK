@@ -44,6 +44,10 @@ class CacheFactoryImpl implements CacheFactory {
       return await SqliteService().getCheckIntro();
     else if (value == 'checkLogin')
       return await SqliteService().getCheckLogin();
+    else if (value == 'currentPage')
+      return await SqliteService().getCurrentPage();
+    else if (value == 'currentNews')
+      return await SqliteService().getCurrentNews();
     else if (value == 'password')
       return await SqliteService().getPassword();
     else if (value == 'theme')
@@ -52,6 +56,8 @@ class CacheFactoryImpl implements CacheFactory {
       return await SqliteService().getToken();
     else if (value == 'user')
       return await SqliteService().getUser();
+    else if (table == 'news')
+      return await SqliteService().getNews();
     else
       return await SqliteService().getValue(table, value);
   }

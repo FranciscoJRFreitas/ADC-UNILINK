@@ -57,12 +57,12 @@ class _ChatPageState extends State<ChatPage> {
       // Fetch group details from groupsRef
       DatabaseEvent groupSnapshot = await groupsRef.child(groupId).once();
       Map<dynamic, dynamic> groupData =
-          groupSnapshot.snapshot.value as Map<dynamic, dynamic>;
+          await groupSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
       // Fetch members details from membersRef
       DatabaseEvent memberSnapshot = await membersRef.child(groupId).once();
       Map<dynamic, dynamic> memberData =
-          memberSnapshot.snapshot.value as Map<dynamic, dynamic>;
+          await memberSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
       String displayName = groupData['DisplayName'];
       String description = groupData['description'];
