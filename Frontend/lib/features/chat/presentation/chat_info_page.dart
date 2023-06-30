@@ -627,22 +627,20 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                 );
               },
-              child: Container(
-                width: 57.0, // Set your desired width
-                height: 57.0, // and height
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: MemoryImage(snapshot.data!),
+              child: ClipOval(
+                child: FittedBox(
+                  child: Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.fill,
                   ),
+                  fit: BoxFit.cover,
                 ),
               ),
             );
           } else {
             return const Icon(
               Icons.account_circle,
-              size: 55,
+              size: 47,
             );
           }
         });

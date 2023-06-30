@@ -261,7 +261,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
             return Icon(
               Icons.account_circle,
               color: Theme.of(context).secondaryHeaderColor,
-              size: 55,
+              size: 47,
             );
           }
         });

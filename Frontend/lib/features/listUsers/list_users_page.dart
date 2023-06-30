@@ -191,9 +191,10 @@ class _ListUsersPageState extends State<ListUsersPage> {
               ),
             );
           } else {
-            return const Icon(
+            return Icon(
               Icons.account_circle,
-              size: 55,
+              color: Theme.of(context).secondaryHeaderColor,
+              size: 47,
             );
           }
         });

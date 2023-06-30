@@ -92,7 +92,7 @@ class _HomePageState extends State<HomePage> {
               ),
             );
           } else {
-            return const Icon(
+            return Icon(
               Icons.account_circle,
               size: 80,
             );
