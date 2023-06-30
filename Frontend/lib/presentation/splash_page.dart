@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:unilink2023/presentation/not_logged_in_page.dart';
 import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -25,10 +26,11 @@ class _SplashPageState extends State<SplashPage> {
         var loginB = await cacheFactory.get('settings', 'checkLogin');
         var introB = await cacheFactory.get('settings', 'checkIntro');
 
-        /*bool loginB = false;
-        loginB = await cacheFactory.get('settings', 'checkLogin') == 'true';
-        bool introB = false;
-        introB = await cacheFactory.get('settings', 'checkIntro') == 'true';*/
+        String page = await cacheFactory.get("settings", "index");
+        int index = 0;
+        if (page == "News") index = 0;
+        if (page == "Contacts") index = 1;
+        if (page == "Map") index = 3;
 
         if (introB == 'true' || introB == '1') {
           if (loginB == 'true' || loginB == '1') {
@@ -46,7 +48,7 @@ class _SplashPageState extends State<SplashPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => WelcomePage(),
+                    builder: (context) => NotLoggedInScreen(index: index),
                   ),
                 );
               }
@@ -57,7 +59,7 @@ class _SplashPageState extends State<SplashPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => WelcomePage(),
+                builder: (context) => NotLoggedInScreen(index: index),
               ),
             );
           }

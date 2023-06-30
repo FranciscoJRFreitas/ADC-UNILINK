@@ -33,7 +33,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     height: 10,
                   ),
                   Text(
-                    "Bem-vindo à nova plataforma UniLink!",
+                    "Bem-vindo à nova plataforma UniHub!",
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
