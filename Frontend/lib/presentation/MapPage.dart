@@ -605,7 +605,7 @@ class _MyMapState extends State<MyMap> {
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
       ),
     );
-    //nucleos
+    //nucleos que cringe
     // Set the state to update the map with the new markers
     setState(() {}); // Draw route between markers
   }
