@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
             doNothingSnackbar);
       setState(() {});
     });
-    FocusScope.of(context).requestFocus(_emailFocusNode);
+
   }
 
   @override
@@ -72,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    //FocusScope.of(context).requestFocus(_emailFocusNode);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

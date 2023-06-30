@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/presentation/contacts_page.dart';
+import 'package:unilink2023/presentation/not_logged_in_page.dart';
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
@@ -558,9 +559,15 @@ class _MainScreenState extends State<MainScreen> {
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
 
+      String page = await cacheFactory.get("settings", "index");
+      int index = 0;
+      if (page == "News") index = 0;
+      if (page == "Contacts") index = 1;
+      if (page == "Map") index = 3;
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => WelcomePage()),
+        MaterialPageRoute(builder: (context) => NotLoggedInScreen(index: index)),
       );
       showErrorSnackbar('${response.body}', false);
     } else {
