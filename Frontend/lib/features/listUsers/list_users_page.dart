@@ -4,12 +4,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/profile_page.dart';
-import '../data/cache_factory_provider.dart';
-import '../domain/Token.dart';
-import '../domain/User.dart';
+import '../../data/cache_factory_provider.dart';
+import '../../domain/Token.dart';
+import '../../domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../constants.dart';
+import '../../constants.dart';
 
 class ListUsersPage extends StatefulWidget {
   final User user;

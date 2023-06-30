@@ -4,17 +4,18 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:unilink2023/presentation/chat_msg_page.dart';
-import '../domain/Group.dart';
-import '../domain/Token.dart';
-import '../domain/User.dart';
-import '../widgets/my_text_field.dart';
-import '../widgets/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../data/cache_factory_provider.dart';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:unilink2023/data/cache_factory_provider.dart';
+import 'package:unilink2023/domain/Group.dart';
+import 'package:unilink2023/domain/Token.dart';
+import 'package:unilink2023/domain/User.dart';
+import 'package:unilink2023/features/chat/presentation/chat_msg_page.dart';
+import 'package:unilink2023/widgets/my_text_field.dart';
+import 'package:unilink2023/widgets/widgets.dart';
 
 class ChatPage extends StatefulWidget {
   final User user;

@@ -3,20 +3,28 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/contacts_page.dart';
+import 'package:unilink2023/features/chat/presentation/chat_page.dart';
+import 'package:unilink2023/features/contacts/contacts_page.dart';
+import 'package:unilink2023/features/listUsers/list_users_page.dart';
+import 'package:unilink2023/features/map/newMapPage.dart';
+import 'package:unilink2023/features/news/news_page.dart';
+import 'package:unilink2023/features/searchUser/search_users_page.dart';
+import 'package:unilink2023/features/settings/settings_page.dart';
+import 'package:unilink2023/features/userData/home_page.dart';
+import 'package:unilink2023/features/userManagement/change_password_page.dart';
+import 'package:unilink2023/features/userManagement/remove_account_page.dart';
 import 'package:unilink2023/presentation/not_logged_in_page.dart';
-import '../constants.dart';
-import '../data/cache_factory_provider.dart';
-import '../domain/UserNotifier.dart';
-import '../domain/Token.dart';
-import '../domain/User.dart';
-import 'newMapPage.dart';
-import 'screen.dart';
+import '../../constants.dart';
+import '../../data/cache_factory_provider.dart';
+import '../../domain/UserNotifier.dart';
+import '../../domain/Token.dart';
+import '../../domain/User.dart';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../presentation/schedule_page.dart';
+import '../../features/calendar/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
   final int? index;

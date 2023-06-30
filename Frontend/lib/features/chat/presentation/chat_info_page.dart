@@ -8,10 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
+import 'package:unilink2023/features/navigation/main_screen_page.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
-import '../data/cache_factory_provider.dart';
-import '../domain/Token.dart';
 
 import '../../../data/cache_factory_provider.dart';
 import '../../../domain/Token.dart';
