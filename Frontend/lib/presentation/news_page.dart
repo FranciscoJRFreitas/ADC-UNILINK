@@ -25,6 +25,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   int _newsPerPage = 12;
   bool web = false;
   int newsCounter = 0;
+  bool _hasNoMoreNews = false;
 
   @override
   void initState() {
@@ -39,6 +40,10 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     super.dispose();
   }
 
+  bool isFetched() {
+    return _hasNoMoreNews;
+  }
+
   void _scrollListener() {
     if (_scrollController.position.pixels >=
             (kIsWeb
@@ -46,6 +51,10 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                 : _scrollController.position.maxScrollExtent - 200) &&
         !isFetched()) {
       _fetchNews();
+    } else if (isFetched()) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -93,6 +102,16 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
     try {
       List<dom.Element> newsItems = await getNewsItems(_page);
+
+      if ((_page != 0 &&
+              itemsInCache[0].title ==
+                  newsItems[1]
+                      .querySelector('.views-field-title .field-content a')!
+                      .text) ||
+          newsItems.length != _newsPerPage + 1) {
+        _hasNoMoreNews = true;
+        return;
+      }
 
       int start = currentNewsInCache != 0 ? currentNewsInCache : 0;
 
@@ -265,6 +284,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                           ? Center(child: CircularProgressIndicator())
                           : SizedBox.shrink();
                     }
+
                     final item = _filteredFeedItems[index];
                     return MouseRegion(
                       cursor: SystemMouseCursors.click,
