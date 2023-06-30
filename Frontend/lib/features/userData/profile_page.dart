@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 
 import '../../constants.dart';
@@ -219,13 +220,22 @@ class ProfilePage extends StatelessWidget {
             ),
             InfoItem(
               title: "Account Creation Date",
-              value: user.creationTime ?? '',
+              value: formatDateInMillis(),
               icon: Icons.app_registration_rounded,
             ),
           ],
         ),
       ),
     );
+  }
+
+  String formatDateInMillis() {
+    if (user.creationTime == "" || user.creationTime == null) return "";
+    else {
+      var date = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(user.creationTime!).millisecondsSinceEpoch);
+      var formatter = DateFormat('d/M/y');
+      return formatter.format(date);
+    }
   }
 }
 
