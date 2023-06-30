@@ -5,16 +5,21 @@ import '../widgets/my_text_button.dart';
 
 class EditStartingPage extends StatefulWidget {
   final VoidCallback? onDialogClosed;
-
-  const EditStartingPage({Key? key, this.onDialogClosed}) : super(key: key);
+  final bool loggedIn;
+  const EditStartingPage({Key? key, this.onDialogClosed, required this.loggedIn}) : super(key: key);
 
   @override
-  _EditStartingPageState createState() => _EditStartingPageState();
+  _EditStartingPageState createState() => _EditStartingPageState(loggedIn);
 }
 
 class _EditStartingPageState extends State<EditStartingPage> {
   String _startingPage = "News";
   IconData icon = Icons.pages;
+  bool _loggedIn = false;
+
+  _EditStartingPageState(loggedIn){
+    _loggedIn = loggedIn;
+  }
 
   @override
   void initState() {
@@ -25,6 +30,8 @@ class _EditStartingPageState extends State<EditStartingPage> {
   Future<void> getSettings() async {
     _startingPage = await cacheFactory.get('settings', 'index');
     setState(() {});
+    if (!_loggedIn && (_startingPage != 'News' && _startingPage != 'Contacts' && _startingPage != 'Map'))
+      _startingPage = "News";
     updateIcon();
   }
 
@@ -76,14 +83,7 @@ class _EditStartingPageState extends State<EditStartingPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: LineComboBox(
                         selectedValue: _startingPage,
-                        items: [
-                          'News',
-                          'Profile',
-                          'Schedule',
-                          'Chat',
-                          'Contacts',
-                          'Map',
-                        ],
+                        items: itemList(),
                         onChanged: (dynamic newValue) {
                           setState(() {
                             _startingPage = newValue;
@@ -137,5 +137,21 @@ class _EditStartingPageState extends State<EditStartingPage> {
         ],
       ),
     );
+  }
+
+  List<String> itemList(){
+    if (_loggedIn) return [
+      'News',
+      'Profile',
+      'Schedule',
+      'Chat',
+      'Contacts',
+      'Map',
+    ];
+    else return [
+      'News',
+      'Contacts',
+      'Map',
+    ];
   }
 }

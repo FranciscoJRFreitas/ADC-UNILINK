@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
         RemoveAccountPage(),
         ChatPage(user: _currentUser),
         ContactsPage(),
-        SettingsPage(),
+        SettingsPage(loggedIn: true),
         SchedulePage(), //estudante
         MapPage(username: _currentUser.username),
         Placeholder(), //professor

@@ -48,9 +48,9 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   List<Widget> _widgetOptions() => [
     NewsFeedPage(),
     ContactsPage(),
-    SettingsPage(),
+    SettingsPage(loggedIn: false,),
     MapPage(username: ""),
-    WelcomePage(), //professor
+    WelcomePage(),
   ];
 
   @override
