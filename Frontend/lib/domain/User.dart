@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum UserRole {
@@ -50,7 +48,7 @@ class User {
         state: '',
         mobilePhone: '',
         occupation: '',
-        creationTime: (json['user_creation_time'] as Timestamp).toDate().toString(),
+        creationTime: ''
       );
     } else {
       return User(
@@ -64,7 +62,7 @@ class User {
         role: json['user_role']['string'],
         state: json['user_state']['string'],
         username: json['user_username']['string'],
-        creationTime: (json['user_creation_time'] as Timestamp).toDate().toString()
+        creationTime: json['user_creation_time']['string']
       );
     }
   }

@@ -1,5 +1,5 @@
 import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/splash_page.dart';
+import 'package:unilink2023/features/intro/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
@@ -26,6 +26,10 @@ void main() async {
     cacheFactory.set('theme', 'Dark');
   if (await cacheFactory.get("settings", "index") == null)
     cacheFactory.set('index', 'News');
+  if (await cacheFactory.get("settings", "currentPage") == null)
+    cacheFactory.set('currentPage', "0");
+  if (await cacheFactory.get("settings", "currentNews") == null)
+    cacheFactory.set('currentNews', "0");
 
   cacheFactory.printDb();
   dynamic themeSetting = await cacheFactory.get('settings', 'theme');

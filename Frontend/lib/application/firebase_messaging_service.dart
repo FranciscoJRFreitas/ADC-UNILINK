@@ -1,13 +1,8 @@
 import '../domain/Notification.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseMessagingService {
   final NotificationService _notificationService;
-  final _databaseRef = FirebaseDatabase.instance.ref();
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   FirebaseMessagingService(this._notificationService) {
     FirebaseMessaging.instance

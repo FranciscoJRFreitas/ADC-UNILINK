@@ -48,7 +48,7 @@ class MyPasswordField extends StatelessWidget {
             ),
           ),
           contentPadding: EdgeInsets.all(20),
-          hintText: hintText == null ? 'Password' : hintText,
+          hintText: hintText.isEmpty ? 'Password' : hintText,
           hintStyle: Theme.of(context).textTheme.bodyMedium,
         ),
       ),

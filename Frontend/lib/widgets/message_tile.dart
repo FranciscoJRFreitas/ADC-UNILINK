@@ -1,13 +1,15 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MessageTile extends StatefulWidget {
   final String groupId;
   final String id;
   final String message;
   final String sender;
-  final String time;
+  final String senderDisplay;
+  final int time;
   final bool isAdmin;
   final bool sentByMe;
   final bool isSystemMessage;
@@ -18,6 +20,7 @@ class MessageTile extends StatefulWidget {
     required this.groupId,
     required this.message,
     required this.sender,
+    required this.senderDisplay,
     required this.time,
     required this.isAdmin,
     required this.sentByMe,
@@ -38,26 +41,33 @@ class _MessageTileState extends State<MessageTile> {
     if (widget.sentByMe) {
       menuItems = [
         PopupMenuItem(
-          child: Text('Edit'),
+          child: Text('Edit', style: Theme.of(context).textTheme.bodyLarge),
           value: 'edit',
         ),
         PopupMenuItem(
-          child: Text('Delete'),
+          child: Text('Delete', style: Theme.of(context).textTheme.bodyLarge),
           value: 'delete',
         ),
         PopupMenuItem(
-          child: Text('Details'),
+          child: Text('Details', style: Theme.of(context).textTheme.bodyLarge),
           value: 'details',
         ),
       ];
     } else if (widget.isAdmin) {
       menuItems = [
         PopupMenuItem(
-          child: Text('Delete'),
+          child: Text('Delete', style: Theme.of(context).textTheme.bodyLarge),
           value: 'delete',
         ),
         PopupMenuItem(
-          child: Text('Details'),
+          child: Text('Details', style: Theme.of(context).textTheme.bodyLarge),
+          value: 'details',
+        ),
+      ];
+    } else if (widget.isAdmin) {
+      menuItems = [
+        PopupMenuItem(
+          child: Text('Details', style: Theme.of(context).textTheme.bodyLarge),
           value: 'details',
         ),
       ];
@@ -71,6 +81,7 @@ class _MessageTileState extends State<MessageTile> {
     }
 
     showMenu(
+      color: Theme.of(context).hoverColor,
       context: context,
       position: RelativeRect.fromRect(
         Rect.fromCenter(
@@ -103,21 +114,27 @@ class _MessageTileState extends State<MessageTile> {
 
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Edit Message'),
+          title: Text('Edit Message', style: Theme.of(context).textTheme.titleMedium),
           content: TextField(
+            style: Theme.of(context).textTheme.bodyLarge,
             onChanged: (value) {
               editedText = value; // Update the edited text
             },
             controller:
-                TextEditingController(text: editedText), // Set initial value
+                TextEditingController(text: editedText),
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+              enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
+              errorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red, width: 2.0)),
+              focusedErrorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red, width: 2.0)),
+            ),// Set initial value
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
             TextButton(
               onPressed: () {
                 final DatabaseReference messageRef = FirebaseDatabase.instance
@@ -129,6 +146,12 @@ class _MessageTileState extends State<MessageTile> {
                 Navigator.pop(context); // Close the dialog
               },
               child: Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
             ),
           ],
         );
@@ -142,15 +165,9 @@ class _MessageTileState extends State<MessageTile> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete this message?'),
+          title: Text('Confirm Delete', style: Theme.of(context).textTheme.titleMedium),
+          content: Text('Are you sure you want to delete this message?', style: Theme.of(context).textTheme.bodyLarge),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
             TextButton(
               onPressed: () {
                 final DatabaseReference messageRef = FirebaseDatabase.instance
@@ -162,6 +179,12 @@ class _MessageTileState extends State<MessageTile> {
                 Navigator.pop(context); // Close the dialog
               },
               child: Text('Delete'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
             ),
           ],
         );
@@ -175,14 +198,22 @@ class _MessageTileState extends State<MessageTile> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Details'),
-          content: Text("Username : ${widget.sender}"),
+          title: Text('Details', style: Theme.of(context).textTheme.titleMedium),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Username: ${widget.sender}", style: Theme.of(context).textTheme.bodyLarge),
+              SizedBox(height: 12), // Add some spacing between lines
+              Text( formatDateInMillis(widget.time) + ", " + formatTimeInMillis(widget.time), style: Theme.of(context).textTheme.bodyLarge),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Close the dialog
               },
-              child: Text('Ok'),
+              child: Text('OK'),
             ),
           ],
         );
@@ -266,7 +297,7 @@ class _MessageTileState extends State<MessageTile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.sender,
+                          widget.senderDisplay,
                           textAlign: TextAlign.start,
                           style: const TextStyle(
                               fontSize: 13,
@@ -288,7 +319,7 @@ class _MessageTileState extends State<MessageTile> {
                             Padding(
                               padding: const EdgeInsets.only(left: 10),
                               child: Text(
-                                widget.time,
+                                formatTimeInMillis(widget.time),
                                 style: TextStyle(
                                     fontSize: 10, color: Colors.white),
                               ),
@@ -303,4 +334,17 @@ class _MessageTileState extends State<MessageTile> {
       ],
     );
   }
+
+  String formatDateInMillis(int? timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis!);
+    var formatter = DateFormat('d/M/y');
+    return formatter.format(date);
+  }
+
+  String formatTimeInMillis(int timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis);
+    var formatter = DateFormat('HH:mm');
+    return formatter.format(date);
+  }
+
 }

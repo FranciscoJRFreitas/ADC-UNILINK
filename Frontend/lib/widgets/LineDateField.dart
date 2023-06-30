@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// ignore: must_be_immutable
 class LineDateField extends StatefulWidget {
   LineDateField({
     Key? key,
@@ -50,15 +51,17 @@ class _LineDateFieldState extends State<LineDateField> {
       decoration: InputDecoration(
         prefixIcon: Icon(
           widget.icon,
-          color: widget.wasPicked ? Theme.of(context).secondaryHeaderColor : Colors.grey,
+          color: widget.wasPicked
+              ? Theme.of(context).secondaryHeaderColor
+              : Colors.grey,
         ),
         labelText: widget.lableText,
         hintText: widget.title,
         hintStyle: Theme.of(context).textTheme.bodyMedium,
         labelStyle: Theme.of(context).textTheme.bodyMedium,
         contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-        focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey)),
+        focusedBorder:
+            UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
         enabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
         errorBorder: UnderlineInputBorder(

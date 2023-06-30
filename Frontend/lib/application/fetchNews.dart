@@ -7,25 +7,16 @@ import 'package:html/parser.dart' as parser;
 import 'package:unilink2023/domain/ExtractJSONfile.dart';
 import '../domain/FeedItem.dart';
 
-var _firstTitleElement = null;
-bool _hasNoMoreNews = false;
-bool checked = true;
-
-bool isFetched(){
-  return _hasNoMoreNews;
-}
-
 Future<List<dom.Element>> getNewsItems(page) async {
   final response =
       await http.get(Uri.parse('https://www.fct.unl.pt/noticias?page=$page'));
   var document = parser.parse(response.body);
-  return document.getElementsByClassName('views-row');
+  var viewsRow = document.getElementsByClassName('views-row');
+
+  return viewsRow;
 }
 
 Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
-
-  _firstTitleElement = null;
-  if (_hasNoMoreNews) return null;
 
   List<String> defaultTags = await extractFromFile("tags");
 
@@ -48,19 +39,6 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
 
   if (titleElement == null) return null;
 
-  String txt =
-      _firstTitleElement == null ? "placeholder" : _firstTitleElement.text;
-
-  if (titleElement.text == txt) {
-    _hasNoMoreNews = true;
-    return null;
-  }
-
-
-  if (checked) {
-    _firstTitleElement = titleElement;
-    checked = false;
-  }
   var summaryElement = newsItem
       .querySelector('.views-field-field-resumo-value .field-content p');
   var dateElement =
@@ -72,7 +50,6 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
       'https://www.fct.unl.pt' + (titleElement.attributes['href'] ?? '')));
 
   if (responseText.statusCode == 200) {
-
     var document = parser.parse(responseText.body);
     var textNews = document.getElementsByClassName('noticia-corpo');
 
@@ -108,13 +85,13 @@ Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
 
     var feedItem = FeedItem(
       pageUrl:
-          'https://www.fct.unl.pt' + (titleElement?.attributes['href'] ?? ''),
+          'https://www.fct.unl.pt' + (titleElement.attributes['href'] ?? ''),
       content: summaryElement?.text,
       imageUrl: imageElement?.attributes['src'],
       likesCount: 0,
       commentsCount: 0,
       retweetsCount: 0,
-      title: titleElement?.text,
+      title: titleElement.text,
       date: dateElement?.text,
       tags: tags,
     );
