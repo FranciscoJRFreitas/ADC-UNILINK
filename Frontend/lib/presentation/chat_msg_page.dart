@@ -121,6 +121,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
       }
     });
+    _scrollToBottom();
   }
 
   void _configureMessaging() async {

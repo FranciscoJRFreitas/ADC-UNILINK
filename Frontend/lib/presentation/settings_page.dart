@@ -76,6 +76,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       case 'Contacts':
                         iconData = Icons.call;
                         break;
+                      case 'Map':
+                        iconData = Icons.map;
+                        break;
                       default:
                         iconData = Icons.pages;
                     }
