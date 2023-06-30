@@ -418,7 +418,7 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 125),
+            SizedBox(height: 75),
             Divider(
               // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
               thickness: 1, // Adjusts the divider's thickness.

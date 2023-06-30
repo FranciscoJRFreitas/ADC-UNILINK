@@ -108,8 +108,11 @@ class _MyMapState extends State<MyMap> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text("Map"),
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        title: Text(
+          "Map",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: StreamBuilder(
         stream: _locationRef.onValue,

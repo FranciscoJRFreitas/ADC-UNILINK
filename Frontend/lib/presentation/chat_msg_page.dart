@@ -14,6 +14,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
+import '../domain/Group.dart';
 import '../domain/User.dart';
 import '../widgets/message_tile.dart';
 import '../domain/Message.dart';
@@ -438,7 +439,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text(widget.groupId),
+        title: Text(
+          widget.groupId,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(

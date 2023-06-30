@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_msg_page.dart';
 import '../domain/Group.dart';
 import '../domain/Token.dart';
@@ -91,6 +94,13 @@ class _ChatPageState extends State<ChatPage> {
     return streamController.stream;
   }
 
+  Future<Uint8List?> downloadGroupPictureData(String groupId) async {
+    return FirebaseStorage.instance
+        .ref('GroupPictures/' + groupId)
+        .getData()
+        .onError((error, stackTrace) => null);
+  }
+
   // Function to display the snackbar
   void _showErrorSnackbar(String message, bool Error) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +152,10 @@ class _ChatPageState extends State<ChatPage> {
         automaticallyImplyLeading: false,
         centerTitle: true,
         elevation: 0,
-        title: Text("Grupos"),
+        title: Text(
+          "Groups",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
         backgroundColor: Color.fromARGB(0, 0, 0, 0),
       ),
       body: Stack(
@@ -162,6 +175,7 @@ class _ChatPageState extends State<ChatPage> {
                       onTap: () {
                         setState(() {
                           selectedGroup = group;
+                          downloadGroupPictureData(group.id);
                         });
                       },
                       child: Card(
@@ -177,6 +191,9 @@ class _ChatPageState extends State<ChatPage> {
                           padding:
                               EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                           child: ListTile(
+                            leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(200),
+                                child: groupPicture(context, group.id)),
                             title: Text(
                               '${group.DisplayName}',
                               style: TextStyle(fontWeight: FontWeight.bold),
@@ -189,7 +206,13 @@ class _ChatPageState extends State<ChatPage> {
                                   children: [
                                     Icon(Icons.person, size: 20),
                                     SizedBox(width: 5),
-                                    Text('Description: ${group.description}'),
+                                    Expanded(
+                                      child: Text(
+                                        'Description: ${group.description}',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: 8),
@@ -197,11 +220,15 @@ class _ChatPageState extends State<ChatPage> {
                                   children: [
                                     Icon(Icons.people, size: 20),
                                     SizedBox(width: 5),
-                                    Text('${group.numberOfMembers} members'),
+                                    Expanded(
+                                      child: Text(
+                                        '${group.numberOfMembers} members',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                // ... Add other information rows with icons here
-                                // Make sure to add some spacing (SizedBox) between rows for better readability
                               ],
                             ),
                           ),
@@ -275,6 +302,9 @@ class _ChatPageState extends State<ChatPage> {
                           padding:
                               EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                           child: ListTile(
+                            leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(200),
+                                child: groupPicture(context, group.id)),
                             title: Text(
                               '${group.DisplayName}',
                               style: TextStyle(fontWeight: FontWeight.bold),
@@ -287,7 +317,13 @@ class _ChatPageState extends State<ChatPage> {
                                   children: [
                                     Icon(Icons.person, size: 20),
                                     SizedBox(width: 5),
-                                    Text('Description: ${group.description}'),
+                                    Expanded(
+                                      child: Text(
+                                        'Description: ${group.description}',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: 8),
@@ -295,11 +331,15 @@ class _ChatPageState extends State<ChatPage> {
                                   children: [
                                     Icon(Icons.people, size: 20),
                                     SizedBox(width: 5),
-                                    Text('${group.numberOfMembers} members'),
+                                    Expanded(
+                                      child: Text(
+                                        '${group.numberOfMembers} members',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                // ... Add other information rows with icons here
-                                // Make sure to add some spacing (SizedBox) between rows for better readability
                               ],
                             ),
                           ),
@@ -399,6 +439,80 @@ class _ChatPageState extends State<ChatPage> {
               ],
             );
           }));
+        });
+  }
+
+  Widget groupPicture(BuildContext context, String groupId) {
+    Stream<Uint8List?> groupPicStream = FirebaseStorage.instance
+        .ref('GroupPictures/' + groupId)
+        .getData()
+        .asStream()
+        .handleError((error, stackTrace) => null);
+
+    return StreamBuilder<Uint8List?>(
+        stream: groupPicStream,
+        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    return Dialog(
+                      child: Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          PhotoView(
+                            imageProvider: MemoryImage(snapshot.data!),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 15.0,
+                                      spreadRadius: 2.0,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Container(
+                width: 50.0, // Set your desired width
+                height: 50.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
+                  ),
+                ),
+              ),
+            );
+          } else {
+            return const Icon(
+              Icons.group,
+              size: 80,
+            );
+          }
         });
   }
 
