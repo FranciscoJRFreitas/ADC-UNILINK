@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -438,8 +436,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text(widget.groupId),
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        title: Text(
+          widget.groupId,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
             onPressed: () {
@@ -459,20 +460,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       ),
       body: Column(
         children: <Widget>[
-          IconButton(
-            onPressed: () {
-              combinedButtonKey.currentState?.collapseOverlay();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ChatInfoPage(
-                    groupId: widget.groupId,
-                    username: widget.user.username,
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.info),
-          ),
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {

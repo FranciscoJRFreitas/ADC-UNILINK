@@ -1,3 +1,4 @@
+import 'package:unilink2023/domain/FeedItem.dart';
 import 'package:unilink2023/domain/User.dart';
 
 import 'cache_factory.dart';
@@ -34,6 +35,10 @@ class CacheFactoryImpl extends CacheFactory{
   
   @override
   void removeNewsCache() {
+  }
+  
+  @override
+  void setNews(FeedItem feedItem) {
   }
 
 }

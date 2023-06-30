@@ -3,8 +3,6 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:math';
 
 class MyMap extends StatefulWidget {
@@ -111,8 +109,11 @@ class _MyMapState extends State<MyMap> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text("Map"),
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
+        title: Text(
+          "Map",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: StreamBuilder(
         stream: _locationRef.onValue,

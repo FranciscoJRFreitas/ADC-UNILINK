@@ -38,7 +38,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text(
+          "Change Password",
+          style: Theme.of(context).textTheme.bodyLarge,
+          selectionColor: Colors.white,
+        ),
+        centerTitle: true,
         elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);

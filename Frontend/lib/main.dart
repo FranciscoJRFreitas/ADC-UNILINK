@@ -26,6 +26,10 @@ void main() async {
     cacheFactory.set('theme', 'Dark');
   if (await cacheFactory.get("settings", "index") == null)
     cacheFactory.set('index', 'News');
+  if (await cacheFactory.get("settings", "currentPage") == null)
+    cacheFactory.set('currentPage', "0");
+  if (await cacheFactory.get("settings", "currentNews") == null)
+    cacheFactory.set('currentNews', "0");
 
   cacheFactory.printDb();
   dynamic themeSetting = await cacheFactory.get('settings', 'theme');

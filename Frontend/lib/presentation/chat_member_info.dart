@@ -15,13 +15,13 @@ import '../domain/Token.dart';
 
 import 'package:http/http.dart' as http;
 
-class chatMemberInfo extends StatefulWidget {
+class ChatMemberInfo extends StatefulWidget {
   final String sessionUsername;
   final String groupId;
   final bool isAdmin;
   final MembersData member;
 
-  const chatMemberInfo({
+  const ChatMemberInfo({
     required this.isAdmin,
     required this.sessionUsername,
     required this.groupId,
@@ -29,10 +29,10 @@ class chatMemberInfo extends StatefulWidget {
   });
 
   @override
-  _chatMemberInfoPageState createState() => _chatMemberInfoPageState();
+  _ChatMemberInfoPageState createState() => _ChatMemberInfoPageState();
 }
 
-class _chatMemberInfoPageState extends State<chatMemberInfo> {
+class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
   late Future<Uint8List?> memberPic;
   late String username = widget.member.username;
   late String displayName = widget.member.dispName;
@@ -151,167 +151,179 @@ class _chatMemberInfoPageState extends State<chatMemberInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 16),
-          Row(
-            children: [
-              profilePicture(context),
-              SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  displayName,
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Divider(
-            thickness: 1,
-            color: Style.lightBlue,
-          ),
-          SizedBox(height: 10),
-          SizedBox(height: 20),
-          Row(
-            children: [
-              Text(
-                'Personal Information',
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          InfoItem(
-            title: 'Username',
-            value: username,
-            icon: Icons.alternate_email,
-          ),
-          SizedBox(height: 20),
-          if (widget.isAdmin) ...[
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        elevation: 0,
+        title: Text(
+          "Member Management",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
             Row(
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor:
-                              Theme.of(context).scaffoldBackgroundColor,
-                          title: Text('Confirmation'),
-                          content: Text(
-                              'Are you sure you want to kick ${username}?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                kickGroup(
+                profilePicture(context),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Divider(
+              thickness: 1,
+              color: Style.lightBlue,
+            ),
+            SizedBox(height: 10),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Text(
+                  'Personal Information',
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            InfoItem(
+              title: 'Username',
+              value: username,
+              icon: Icons.alternate_email,
+            ),
+            SizedBox(height: 20),
+            if (widget.isAdmin) ...[
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            title: Text('Confirmation'),
+                            content: Text(
+                                'Are you sure you want to promote $username?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  final DatabaseReference membersRef =
+                                      FirebaseDatabase.instance
+                                          .ref()
+                                          .child('members')
+                                          .child(widget.groupId);
+                                  membersRef.child(username).set(true);
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Yes'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('No'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Text('Promote'),
+                  ),
+                  SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            title: Text('Confirmation'),
+                            content: Text(
+                                'Are you sure you want to demote $username?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  final DatabaseReference membersRef =
+                                      FirebaseDatabase.instance
+                                          .ref()
+                                          .child('members')
+                                          .child(widget.groupId);
+                                  membersRef.child(username).set(false);
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Yes'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('No'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Text('Demote'),
+                  ),
+                  SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            title: Text('Confirmation'),
+                            content: Text(
+                                'Are you sure you want to kick $username?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  kickGroup(
                                     context,
                                     widget.sessionUsername,
                                     widget.groupId,
                                     username,
-                                    _showErrorSnackbar);
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Yes'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: Text('No'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Kick'),
-                ),
-                SizedBox(width: 1),
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor:
-                              Theme.of(context).scaffoldBackgroundColor,
-                          title: Text('Confirmation'),
-                          content: Text(
-                              'Are you sure you want to demote ${username}?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                final DatabaseReference membersRef =
-                                    FirebaseDatabase.instance
-                                        .ref()
-                                        .child('members')
-                                        .child(widget.groupId);
-                                membersRef.child(username).set(false);
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: Text('Yes'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: Text('No'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Demote'),
-                ),
-                SizedBox(width: 1),
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor:
-                              Theme.of(context).scaffoldBackgroundColor,
-                          title: Text('Confirmation'),
-                          content: Text(
-                              'Are you sure you want to promote ${username}?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                final DatabaseReference membersRef =
-                                    FirebaseDatabase.instance
-                                        .ref()
-                                        .child('members')
-                                        .child(widget.groupId);
-                                membersRef.child(username).set(true);
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: Text('Yes'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: Text('No'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Promote'),
-                ),
-              ],
-            ),
+                                    _showErrorSnackbar,
+                                  );
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Yes'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('No'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Text('Kick'),
+                  ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

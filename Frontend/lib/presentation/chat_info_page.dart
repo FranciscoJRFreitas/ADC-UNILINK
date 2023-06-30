@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,15 +10,13 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_member_info.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
-
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
-import '../widgets/LineTextField.dart';
-import '../widgets/my_text_field.dart';
 
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
   final String username;
+
   ChatInfoPage({required this.groupId, required this.username});
 
   @override
@@ -32,8 +31,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   late DatabaseReference chatsRef;
   late String desc = "";
   late bool isAdmin = false;
-  late bool memberInfo = false;
   late MembersData? memberData;
+
   @override
   void initState() {
     super.initState();
@@ -159,8 +158,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -245,154 +244,162 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _showXButton(),
-    );
+    return kIsWeb
+        ? Scaffold(
+            body: _showXButton(),
+          )
+        : Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              elevation: 0,
+              title: Text(
+                "Group Information",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              backgroundColor: Theme.of(context).primaryColor,
+              actions: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.exit_to_app_rounded),
+                  tooltip: 'Leave Group',
+                  onPressed: () {
+                    leavePopUpDialog(context);
+                  },
+                ),
+              ],
+            ),
+            body: _showXButton());
   }
 
   Widget _showXButton() {
-    return memberInfo == false
-        ? SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    profilePicture(context),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        widget.groupId,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 16),
+          Row(
+            children: [
+              profilePicture(context),
+              SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  widget.groupId,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Divider(
+            thickness: 1,
+            color: Style.lightBlue,
+          ),
+          SizedBox(height: 10),
+          Text(
+            desc,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          SizedBox(height: 5),
+          Divider(
+            thickness: 1,
+            color: Style.lightBlue,
+          ),
+          SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '${members.length} Participants',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (isAdmin)
+                Padding(
+                  padding: EdgeInsets.only(left: 15.0),
+                  child: TextButton.icon(
+                    icon: Icon(Icons.add, color: Colors.white, size: 20),
+                    label: Text('Add more',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(color: Colors.white)),
+                    onPressed: () {
+                      popUpDialog(context);
+                    },
+                    style: TextButton.styleFrom(
+                      minimumSize: Size(50, 50),
+                      /*side: BorderSide(color: Colors.blue, width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),*/
                     ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Divider(
-                  // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                  thickness: 1, // Adjusts the divider's thickness.
-                  color: Style.lightBlue,
-                ),
-                SizedBox(height: 10),
-                Text(
-                  desc,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                SizedBox(height: 5),
-                Divider(
-                  // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                  thickness: 1, // Adjusts the divider's thickness.
-                  color: Style.lightBlue,
-                ),
-                SizedBox(height: 20),
-                Row(children: [
-                  Text(
-                    '${members.length} Participants',
-                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  Container(
-                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                      child: SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                  onTap: () {
-                                    leavePopUpDialog(context);
-                                  },
-                                  child: Icon(
-                                    Icons.group_remove,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ))))),
-                  if (isAdmin)
-                    Container(
-                        padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                    onTap: () {
-                                      popUpDialog(context);
-                                    },
-                                    child: Icon(
-                                      Icons.group_add,
-                                      color: Colors.white,
-                                      size: 20,
-                                    )))))
-                ]),
-                SizedBox(height: 20),
-                //...more info items...
-                Container(
-                    padding: EdgeInsets.only(top: 10, bottom: 80),
-                    child: SizedBox(
-                        height: 1000,
-                        child: ListView.builder(
-                            itemCount: members.length,
-                            itemBuilder: (context, index) {
-                              MembersData member = members[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  if (widget.username != member.username) {
-                                    setState(() {
-                                      memberData = member;
-                                      memberInfo = true;
-                                    });
-                                  }
-                                },
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  elevation: 5,
-                                  margin: EdgeInsets.symmetric(vertical: 8),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 10, horizontal: 8),
-                                    child: ListTile(
-                                      leading:
-                                          picture(context, member.username),
-                                      title: Text(
-                                        '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(height: 8),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.person, size: 20),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                  'Username: ${member.username}'),
-                                            ],
-                                          ),
-                                          // ... Add other information rows with icons here
-                                          // Make sure to add some spacing (SizedBox) between rows for better readability
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Container(
+            padding: EdgeInsets.only(top: 10, bottom: 80),
+            child: SizedBox(
+              height: 1000,
+              child: ListView.builder(
+                  itemCount: members.length,
+                  itemBuilder: (context, index) {
+                    MembersData member = members[index];
+                    return Material(
+                      color: Colors.transparent,
+                      child: GestureDetector(
+                        onTap: () {
+                          if (widget.username != member.username) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ChatMemberInfo(
+                                  isAdmin: isAdmin,
+                                  sessionUsername: widget.username,
+                                  groupId: widget.groupId,
+                                  member: member,
                                 ),
-                              );
-                            })))
-              ],
+                              ),
+                            );
+                          }
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 8),
+                            child: ListTile(
+                              leading: picture(context, member.username),
+                              title: Text(
+                                '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.alternate_email, size: 20),
+                                      SizedBox(width: 5),
+                                      Text('Username: ${member.username}'),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
             ),
           )
-        : chatMemberInfo(
-            isAdmin: isAdmin,
-            sessionUsername: widget.username,
-            groupId: widget.groupId,
-            member: memberData!,
-          );
+        ],
+      ),
+    );
   }
 
   popUpDialog(BuildContext context) {
@@ -415,16 +422,21 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     style: Theme.of(context).textTheme.bodyLarge,
                     controller: userNameController,
                     decoration: InputDecoration(
+                      hintText: "Enter a valid username",
+                      hintStyle: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey),
                       contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
                       focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
                       enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(92, 161, 161, 161))),
                       errorBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2.0)),
+                          borderSide:
+                              BorderSide(color: Colors.red, width: 2.0)),
                       focusedErrorBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2.0)),
-                    ),// Set initial value
+                          borderSide:
+                              BorderSide(color: Colors.red, width: 2.0)),
+                    ), // Set initial value
                   ),
                 ],
               ),
@@ -473,10 +485,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Are you sure you want to leave this group?",
-                  style: Theme.of(context).textTheme.bodyLarge
-              ),
+              Text("Are you sure you want to leave this group?",
+                  style: Theme.of(context).textTheme.bodyLarge),
             ],
           ),
           actions: [
@@ -495,7 +505,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).primaryColor,
               ),
-              child: const Text("LEAVE"),
+              child: const Text("CONFIRM"),
             ),
             ElevatedButton(
               onPressed: () {
@@ -542,8 +552,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -636,6 +646,7 @@ class MembersData {
   final String username;
   final String dispName;
   bool isAdmin;
+
   MembersData(
       {required this.username, required this.dispName, required this.isAdmin});
 }

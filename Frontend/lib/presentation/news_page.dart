@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/widgets/news_box.dart';
 import '../domain/FeedItem.dart';
 import '../application/fetchNews.dart';
@@ -16,15 +17,15 @@ class NewsFeedPage extends StatefulWidget {
 
 class _NewsFeedPageState extends State<NewsFeedPage> {
   final ScrollController _scrollController = ScrollController();
-  final List<FeedItem> _feedItems = [];
+  List<FeedItem> _feedItems = [];
   List<String> _activeTags = [];
   List<FeedItem> _filteredFeedItems = [];
   int _page = 0;
-  bool _hasMore = true;
   bool _isLoading = false;
-  bool _fetchedAllFromServer = false;
   int _newsPerPage = 12;
   bool web = false;
+  int newsCounter = 0;
+  bool _hasNoMoreNews = false;
 
   @override
   void initState() {
@@ -39,6 +40,10 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     super.dispose();
   }
 
+  bool isFetched() {
+    return _hasNoMoreNews;
+  }
+
   void _scrollListener() {
     if (_scrollController.position.pixels >=
             (kIsWeb
@@ -46,6 +51,10 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                 : _scrollController.position.maxScrollExtent - 200) &&
         !isFetched()) {
       _fetchNews();
+    } else if (isFetched()) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -63,55 +72,87 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
         _activeTags.add(tag);
       }
       _filterNews();
-      if (_filteredFeedItems.isEmpty && !_fetchedAllFromServer) _hasMore = true;
     });
   }
 
   Future<void> _fetchNews() async {
-    List<dom.Element> newsItems = await getNewsItems(_page);
-    int sizeBeforeFetch = _filteredFeedItems.length;
+    print(isFetched());
+    if (isFetched()) return;
+    int currentPageInCache =
+        int.parse(await cacheFactory.get('settings', 'currentPage'));
+    int currentNewsInCache =
+        int.parse(await cacheFactory.get('settings', 'currentNews'));
+    List<FeedItem> itemsInCache =
+        await cacheFactory.get('news', '') as List<FeedItem>;
 
-    for (int i = 0; i < _newsPerPage + 1; i++) {
-      if (_isLoading || !_hasMore) {
+    if (itemsInCache.isNotEmpty && currentPageInCache > _page) {
+      if (mounted) {
+        setState(() {
+          _page = currentPageInCache;
+          _feedItems = itemsInCache;
+          _filterNews();
+        });
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      List<dom.Element> newsItems = await getNewsItems(_page);
+
+      if ((_page != 0 &&
+              itemsInCache[0].title ==
+                  newsItems[1]
+                      .querySelector('.views-field-title .field-content a')!
+                      .text) ||
+          newsItems.length != _newsPerPage + 1) {
+        _hasNoMoreNews = true;
         return;
       }
 
-      try {
-        if (mounted)
-          setState(() {
-            _isLoading = true;
-          });
+      int start = currentNewsInCache != 0 ? currentNewsInCache : 0;
 
+      for (int i = start; i < _newsPerPage + 1; i++) {
         FeedItem? feedItem = await fetchNews(newsItems, i);
-
-        if (feedItem == null) {
-          continue;
+        if (feedItem != null) {
+          if (mounted) {
+            setState(() {
+              if (!_filteredFeedItems
+                  .any((item) => item.title == feedItem.title)) {
+                _feedItems.add(feedItem);
+                _filterNews();
+                cacheFactory.setNews(feedItem);
+                cacheFactory.set('currentNews', i.toString());
+              }
+            });
+          }
         }
+      }
 
-        if (mounted)
-          setState(() {
-            if (!_feedItems.contains(feedItem)) _feedItems.add(feedItem);
-            _filterNews();
-          });
-      } catch (e) {
-        // Handle exception here if needed
-      } finally {
-        if (mounted)
-          setState(() {
-            _isLoading = false;
-          });
+      currentNewsInCache =
+          int.parse(await cacheFactory.get('settings', 'currentNews'));
+
+      if (mounted) {
+        setState(() {
+          if (currentNewsInCache == 12 && !isFetched()) {
+            _page++;
+            cacheFactory.set('currentPage', _page.toString());
+            cacheFactory.set('currentNews', "0");
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
-    if (mounted)
-      setState(() {
-        _page++;
-      });
-
-    int sizeAfterFetch = _filteredFeedItems.length;
-
-    if ((sizeBeforeFetch == sizeAfterFetch && !isFetched()) ||
-        _activeTags.isNotEmpty) _fetchNews();
-    if (mounted) setState(() {});
+    if (_activeTags.isNotEmpty && !isFetched()) _fetchNews();
   }
 
   @override
@@ -134,7 +175,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
               Expanded(
                 child: ListView.separated(
                   controller: _scrollController,
-                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+                  itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
                   separatorBuilder: (BuildContext context, int index) {
                     return const Divider();
                   },
@@ -185,7 +226,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           Expanded(
             child: ListView.separated(
               controller: _scrollController,
-              itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+              itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
               separatorBuilder: (BuildContext context, int index) {
                 return const Divider();
               },
@@ -236,13 +277,14 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                     mainAxisSpacing: 4.0,
                     childAspectRatio: crossAxisCount > 1 ? 0.6 : 1.2,
                   ),
-                  itemCount: _filteredFeedItems.length + (_hasMore ? 1 : 0),
+                  itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
                   itemBuilder: (BuildContext context, int index) {
                     if (index >= _filteredFeedItems.length) {
                       return _isLoading
                           ? Center(child: CircularProgressIndicator())
                           : SizedBox.shrink();
                     }
+
                     final item = _filteredFeedItems[index];
                     return MouseRegion(
                       cursor: SystemMouseCursors.click,
