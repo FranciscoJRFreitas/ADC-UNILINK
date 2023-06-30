@@ -16,7 +16,6 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final loc.Location location = loc.Location();
   StreamSubscription<DatabaseEvent>? _locationSubscription;
-  //final TextEditingController _textEditingController = TextEditingController();
   late DatabaseReference _locationRef;
   List<DataSnapshot> _locationSnapshots = [];
 
@@ -72,10 +71,7 @@ class _MapPageState extends State<MapPage> {
                     ],
                   ),
                   trailing: IconButton(
-                    icon: Icon(
-                      Icons.directions,
-                      color: Colors.white,
-                    ),
+                    icon: Icon(Icons.directions),
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => MyMap(username ?? ''),

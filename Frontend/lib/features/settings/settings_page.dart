@@ -1,4 +1,7 @@
+import 'package:android_intent/android_intent.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/features/settings/edit_starting_page.dart';
@@ -73,6 +76,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       case 'Contacts':
                         iconData = Icons.call;
                         break;
+                      case 'Map':
+                        iconData = Icons.map;
+                        break;
                       default:
                         iconData = Icons.pages;
                     }
@@ -109,6 +115,15 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
+      if (!kIsWeb)
+        Option(
+            icon: Icon(Icons.notifications,
+                color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+            title: 'Notifications',
+            subtitle: 'Don\'t miss out on any updates!',
+            onTap: () {
+              openNotificationSettings();
+            }),
       Option(
           icon: Icon(Icons.password,
               color: Theme.of(context).secondaryHeaderColor, size: 40.0),
@@ -229,6 +244,15 @@ class _SettingsPageState extends State<SettingsPage> {
         },
       ),
     );
+  }
+
+  void openNotificationSettings() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final AndroidIntent intent = AndroidIntent(
+      action: 'android.settings.APPLICATION_DETAILS_SETTINGS',
+      data: 'package:${packageInfo.packageName}',
+    );
+    await intent.launch();
   }
 }
 

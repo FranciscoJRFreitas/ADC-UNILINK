@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:unilink2023/features/screen.dart';
+import 'package:unilink2023/presentation/not_logged_in_page.dart';
+import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
-import '../../data/cache_factory_provider.dart';
+import '../data/cache_factory_provider.dart';
 import 'package:android_intent/android_intent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -29,7 +30,7 @@ void navigateToWelcomePage(BuildContext context) {
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
-      builder: (context) => WelcomePage(),
+      builder: (context) => NotLoggedInScreen(),
     ),
   );
 }

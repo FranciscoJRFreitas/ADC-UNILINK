@@ -33,6 +33,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _emailFocusNode.requestFocus();
+    });
+
     void doNothingSnackbar(String message, bool isError, bool show) {}
 
     (() async {
@@ -244,7 +249,7 @@ Future<int> login(
   http.Response response;
   debugPrint(username + " " + password);
   if (username == '' && password == '') {
-    showErrorSnackbar("Escreve alguma merda.", true, true);
+    showErrorSnackbar("Fill in your credentials.", true, true);
     return -1;
   } else {
     try {
@@ -345,6 +350,7 @@ Future<int> login(
       if (page == "Schedule") index = 9;
       if (page == "Chat") index = 6;
       if (page == "Contacts") index = 7;
+      if (page == "Map") index = 10;
 
       Navigator.push(
         context,

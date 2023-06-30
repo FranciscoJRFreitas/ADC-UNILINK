@@ -8,10 +8,9 @@
 
     <application
         android:name="androidx.multidex.MultiDexApplication"
-        android:label="google_maps_in_flutter"
+        android:label="UniLink"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- TODO: Add your Google Maps API key here -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g" />

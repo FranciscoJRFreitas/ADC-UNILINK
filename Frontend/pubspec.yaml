@@ -60,8 +60,6 @@ dependencies:
   json_annotation: ^4.1.0
   table_calendar: ^3.0.0
   google_maps_flutter: any
-
-
   path_provider: ^2.0.15
   camera: ^0.10.5+2
   location: ^4.4.0

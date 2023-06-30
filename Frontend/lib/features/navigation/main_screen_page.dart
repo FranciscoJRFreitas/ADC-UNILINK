@@ -1,22 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/features/contacts/contacts_page.dart';
-import '../../constants.dart';
-import '../../data/cache_factory_provider.dart';
-import '../../domain/UserNotifier.dart';
-import '../../domain/Token.dart';
-import '../../domain/User.dart';
-import '../map/newMapPage.dart';
-import '../screen.dart';
+import 'package:unilink2023/presentation/contacts_page.dart';
+import 'package:unilink2023/presentation/not_logged_in_page.dart';
+import '../constants.dart';
+import '../data/cache_factory_provider.dart';
+import '../domain/UserNotifier.dart';
+import '../domain/Token.dart';
+import '../domain/User.dart';
+import 'newMapPage.dart';
+import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../calendar/schedule_page.dart';
+import '../presentation/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
   final int? index;
@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
     "News",
     "Search",
     "List",
-    "User Profile",
+    "Profile",
     "Change Password",
     "Remove Account",
     "Chat",
@@ -418,7 +418,7 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 125),
+            SizedBox(height: 75),
             Divider(
               // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
               thickness: 1, // Adjusts the divider's thickness.
@@ -547,21 +547,27 @@ class _MainScreenState extends State<MainScreen> {
 
         // Unsubscribe from all the groups
         if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
-          Map<dynamic, dynamic> userGroups =
+          /*Map<dynamic, dynamic> userGroups =
               userGroupsSnapshot.value as Map<dynamic, dynamic>;
           for (String groupId in userGroups.keys) {
             if (!kIsWeb) //PROVISIONAL
               await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
-          }
+          }*/
         }
       }
 
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
 
+      String page = await cacheFactory.get("settings", "index");
+      int index = 0;
+      if (page == "News") index = 0;
+      if (page == "Contacts") index = 1;
+      if (page == "Map") index = 3;
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => WelcomePage()),
+        MaterialPageRoute(builder: (context) => NotLoggedInScreen(index: index)),
       );
       showErrorSnackbar('${response.body}', false);
     } else {

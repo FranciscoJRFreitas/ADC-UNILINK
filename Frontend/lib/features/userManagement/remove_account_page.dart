@@ -41,6 +41,12 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     this.pageContext = context;
     return Scaffold(
       appBar: AppBar(
+        title: Text(
+          "Remove Account",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
