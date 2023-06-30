@@ -319,21 +319,28 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   const SizedBox(
                     width: 12,
                   ),
-                  Expanded(
-                    child: TextFormField(
-                      controller: messageController,
-                      focusNode: messageFocusNode,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: "Send a message...",
-                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
-                        border: InputBorder.none,
-                      ),
-                      onFieldSubmitted: (String value) {
-                        sendMessage(value);
-                      },
+                  Flexible(
+                      child: TextFormField(
+                    controller: messageController,
+                    focusNode: messageFocusNode,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: Colors.white70),
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      filled: true,
+                      hintText: "Send a message...",
+                      fillColor: Color.fromARGB(255, 79, 78, 78),
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          borderSide: BorderSide.none),
                     ),
-                  ),
+                    onFieldSubmitted: (String value) {
+                      sendMessage(value);
+                    },
+                  )),
                   const SizedBox(
                     width: 12,
                   ),
@@ -613,15 +620,24 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   const SizedBox(
                     width: 12,
                   ),
-                  Expanded(
+                  Flexible(
                     child: TextFormField(
                       controller: messageController,
                       focusNode: messageFocusNode,
-                      style: const TextStyle(color: Colors.white),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(color: Colors.white70),
+                      maxLines: null,
                       decoration: const InputDecoration(
+                        filled: true,
                         hintText: "Send a message...",
-                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
-                        border: InputBorder.none,
+                        fillColor: Colors.grey,
+                        hintStyle:
+                            TextStyle(color: Colors.white54, fontSize: 14),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                            borderSide: BorderSide.none),
                       ),
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
