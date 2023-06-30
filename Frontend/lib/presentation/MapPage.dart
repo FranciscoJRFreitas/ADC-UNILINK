@@ -157,10 +157,11 @@ class _MyMapState extends State<MyMap> {
               GoogleMap(
                 zoomGesturesEnabled: true,
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(latitude, longitude),
-                  zoom: 14.0,
+                  target: LatLng(38.660999, -9.205094),
+                  zoom: 17.0,
                 ),
-                markers: markers,
+                markers:
+                    selectedDropdownItem == "Item 1" ? markers : restmarkers,
                 polylines: Set<Polyline>.of(polylines.values),
                 mapType: MapType.normal,
                 onMapCreated: (controller) {
@@ -190,7 +191,7 @@ class _MyMapState extends State<MyMap> {
     if (latitude != null && longitude != null) {
       await _controller.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(latitude, longitude), zoom: 14.47),
+          CameraPosition(target: LatLng(38.660999, -9.205094), zoom: 17),
         ),
       );
     }
@@ -417,7 +418,194 @@ class _MyMapState extends State<MyMap> {
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
       ),
     );
+    markers.add(
+      Marker(
+        markerId: MarkerId('CAN'),
+        position: LatLng(38.661557, -9.204855),
+        infoWindow: InfoWindow(
+          title: 'Cantina',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      ),
+    );
+    markers.add(
+      Marker(
+        markerId: MarkerId('UNI1'),
+        position: LatLng(38.660133, -9.204044),
+        infoWindow: InfoWindow(
+          title: 'UNINOVA 1',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      ),
+    );
+    markers.add(
+      Marker(
+        markerId: MarkerId('UNI2'),
+        position: LatLng(38.659816, -9.203687),
+        infoWindow: InfoWindow(
+          title: 'UNINOVA 2',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      ),
+    );
+    markers.add(
+      Marker(
+        markerId: MarkerId('CEA'),
+        position: LatLng(38.662223, -9.206000),
+        infoWindow: InfoWindow(
+          title: 'CEA - Centro de Excelência do Ambiente',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      ),
+    );
+    markers.add(
+      Marker(
+        markerId: MarkerId('BIB'),
+        position: LatLng(38.662659, -9.205397),
+        infoWindow: InfoWindow(
+          title: 'Biblioteca',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      ),
+    );
+    markers.add(
+      Marker(
+        markerId: MarkerId('CRE'),
+        position: LatLng(38.662020, -9.204214),
+        infoWindow: InfoWindow(
+          title: 'Creche',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      ),
+    );
     //restauracao
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('AL'),
+        position: LatLng(38.661956, -9.207895),
+        infoWindow: InfoWindow(
+          title: 'Alquimia',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('AL'),
+        position: LatLng(38.661956, -9.207895),
+        infoWindow: InfoWindow(
+          title: 'Alquimia',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('TTF'),
+        position: LatLng(38.661610, -9.206827),
+        infoWindow: InfoWindow(
+          title: 'Tanto Faz Bar Academico',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('CDP'),
+        position: LatLng(38.661738, -9.205498),
+        infoWindow: InfoWindow(
+          title: 'Casa Do Pessoal',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    /*restmarkers.add(
+      Marker(
+        markerId: MarkerId('MIN'),
+        position: LatLng(38.661364, -9.205387),
+        infoWindow: InfoWindow(
+          title: 'MiniNova',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );*/
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('BC'),
+        position: LatLng(38.662623, -9.205166),
+        infoWindow: InfoWindow(
+          title: 'Bar C@mpus',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('MS'),
+        position: LatLng(38.660143, -9.205479),
+        infoWindow: InfoWindow(
+          title: 'My Spot',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('BT'),
+        position: LatLng(38.661311, -9.204934),
+        infoWindow: InfoWindow(
+          title: 'Bar "Tia"',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    restmarkers.add(
+      Marker(
+        markerId: MarkerId('CANR'),
+        position: LatLng(38.661541, -9.204948),
+        infoWindow: InfoWindow(
+          title: 'Cantina',
+          snippet: '',
+        ),
+        // Optional: Set a custom icon for the marker
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+      ),
+    );
+    //nucleos que cringe
     // Set the state to update the map with the new markers
     setState(() {}); // Draw route between markers
   }
