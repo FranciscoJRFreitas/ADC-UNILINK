@@ -548,14 +548,6 @@ class _ChatPageState extends State<ChatPage> {
               ),
               actions: [
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).primaryColor),
-                  child: const Text("CANCEL"),
-                ),
-                ElevatedButton(
                   onPressed: () async {
                     {
                       createGroup(context, groupNameController.text,
@@ -568,7 +560,15 @@ class _ChatPageState extends State<ChatPage> {
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
                   child: const Text("CREATE"),
-                )
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
               ],
             );
           }));

@@ -15,44 +15,6 @@ class UserProfilePage extends StatelessWidget {
 
   UserProfilePage({required this.user, required this.targetUser, required this.isNotUser});
 
-/*  @override
-  Widget build(BuildContext context) {
-    //String? currentUser = await cacheFactory.getValue('users', 'username');
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 8, 52, 88),
-        title: Text(
-            '${user.displayName}${user.username == targetUser.username ? ' (You)' : ''}'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildProfileCard('Página a ser alterada para "profile page"', '', context),
-              _buildProfileCard('Username', user.username, context),
-              _buildProfileCard('Email', user.email, context),
-              if (isNotUser)
-                _buildProfileCard('Role', user.role ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('State', user.state ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('Profile Visibility',
-                    user.profileVisibility ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard('Mobile', user.mobilePhone ?? 'N/A', context),
-              if (isNotUser)
-                _buildProfileCard(
-                    'Occupation', user.occupation ?? 'N/A', context),
-            ],
-          ),
-        ),
-      ),
-    );*/
-  
-
   Future<Uint8List?> downloadData() async {
     return FirebaseStorage.instance
         .ref('ProfilePictures/' + user.username)
@@ -149,29 +111,36 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    print(user.username);
-    print(targetUser.username);
-
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 16),
-            Row(
-              children: [
-                profilePicture(context),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    user.displayName,
-                    style: Theme.of(context).textTheme.titleLarge,
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('User Profile', style: Theme.of(context).textTheme.bodyLarge),
+          centerTitle: true,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  profilePicture(context),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      user.displayName,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
+                ],
+              ),
+    SizedBox(height: 20),
             Divider(
               // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
               thickness: 1, // Adjusts the divider's thickness.
