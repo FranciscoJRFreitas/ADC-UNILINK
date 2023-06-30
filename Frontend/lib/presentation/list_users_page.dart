@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:unilink2023/presentation/userprofile_page.dart';
+import 'package:unilink2023/presentation/profile_page.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/Token.dart';
 import '../domain/User.dart';
@@ -105,9 +105,8 @@ class _ListUsersPageState extends State<ListUsersPage> {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                        builder: (context) => UserProfilePage(
+                        builder: (context) => ProfilePage(
                               user: user,
-                              targetUser: widget.user,
                               isNotUser: isNotUser,
                             )),
                   );
