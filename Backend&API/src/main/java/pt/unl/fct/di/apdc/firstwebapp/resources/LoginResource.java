@@ -39,8 +39,6 @@ public class LoginResource {
 
         Key ctrskey = createUserStatsKey(data.username);
         Key logKey = createLogKey(data.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", data.username))
-                .setKind("User Token").newKey(data.username);
 
         Transaction txn = datastore.newTransaction();
         try {
@@ -67,6 +65,9 @@ public class LoginResource {
                 LOG.warning("Failed login attempt for username/email: " + data.username);
                 return Response.status(Status.NOT_FOUND).entity("Invalid login credentials. Please try again.").build();
             }
+            String username = user.getString("user_username");
+            Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", username))
+                    .setKind("User Token").newKey(username);
 
             Entity stats = getOrCreateUserStats(txn, ctrskey);
             Entity log = createLogEntity(request, headers, logKey);

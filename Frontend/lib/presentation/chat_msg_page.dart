@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
@@ -41,7 +40,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   FilePickerResult? picked;
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
-  late int messageCap = 20; //still experiment
+  late int messageCap = 10;
   late bool isLoading = false;
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
@@ -49,6 +48,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   final GlobalKey<CombinedButtonState> combinedButtonKey =
       GlobalKey<CombinedButtonState>();
   late bool info = false;
+  late bool isScrollLocked = false;
 
   //late CameraDescription camera;
 
@@ -76,6 +76,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             messages.indexWhere((m) => m.id == message.id) == -1) {
           // Check if message was removed or already in the list
           messages.add(message);
+          _scrollToBottom();
         }
       });
     });
@@ -86,7 +87,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         int index =
             messages.indexWhere((message) => message.id == updatedMessage.id);
         if (index != -1) {
-          // Update the existing message
           messages[index] = updatedMessage;
         }
       });
@@ -121,6 +121,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
       }
     });
+    _scrollToBottom();
   }
 
   void _configureMessaging() async {
@@ -145,18 +146,19 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
-      );
-    }
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
-    // Clean up the listener
     messageCap = 10;
     messagesRef.onChildAdded.drain();
 
@@ -164,10 +166,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messageFocusNode.dispose();
     super.dispose();
   }
-
-  // Widget _body() {
-  //   return null;
-  // }
 
   Widget _bodyForWeb() {
     return info == false
@@ -438,7 +436,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text(widget.groupId),
+        title: Text(
+          widget.groupId,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
@@ -784,6 +785,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
         // Add the older messages at the beginning of the messages list
         setState(() {
+          isScrollLocked = true;
           messages.insertAll(0, olderMessages);
         });
       }
@@ -795,11 +797,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       return Container(); // Return an empty container if there are no messages
     }
 
-    if (isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    } else {
-      isLoading = false;
-    }
     int? lastTimestamp = 0;
 
     return ListView.builder(
@@ -851,6 +848,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 id: message.id,
                 isAdmin: isAdmin,
               ));
+
+        if (!isScrollLocked) _scrollToBottom();
 
         return Column(
           children: widgets,
@@ -947,13 +946,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         print('Failed to send message: $error');
       });
 
-      Future.delayed(Duration(milliseconds: 300), () {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-        setState(() {});
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
       });
     }
   }

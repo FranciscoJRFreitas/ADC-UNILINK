@@ -1,3 +1,5 @@
+import 'package:unilink2023/domain/FeedItem.dart';
+
 import '../domain/User.dart';
 import 'stub_cache_factory.dart'
     if (dart.library.html) 'web_implementation.dart'
@@ -33,6 +35,10 @@ import 'stub_cache_factory.dart'
 
         void initDB() {
             impl.initDB();
+        }
+
+        void setNews(FeedItem feedItem) {
+          impl.setNews(feedItem);
         }
 
         void removeNewsCache(){

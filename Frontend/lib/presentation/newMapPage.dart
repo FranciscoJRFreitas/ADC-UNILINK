@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart' as loc;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:unilink2023/domain/location.dart';
 import 'MapPage.dart';
 
 class MapPage extends StatefulWidget {
@@ -19,7 +16,6 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final loc.Location location = loc.Location();
   StreamSubscription<DatabaseEvent>? _locationSubscription;
-  final TextEditingController _textEditingController = TextEditingController();
   late DatabaseReference _locationRef;
   List<DataSnapshot> _locationSnapshots = [];
 

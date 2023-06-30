@@ -418,7 +418,7 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 125),
+            SizedBox(height: 75),
             Divider(
               // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
               thickness: 1, // Adjusts the divider's thickness.
@@ -550,8 +550,8 @@ class _MainScreenState extends State<MainScreen> {
           Map<dynamic, dynamic> userGroups =
               userGroupsSnapshot.value as Map<dynamic, dynamic>;
           for (String groupId in userGroups.keys) {
-            if (!kIsWeb) //PROVISIONAL
-              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+            //if (!kIsWeb) //PROVISIONAL
+              //await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
           }
         }
       }

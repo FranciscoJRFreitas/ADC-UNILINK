@@ -1,3 +1,4 @@
+import '../domain/FeedItem.dart';
 import '../domain/User.dart';
 
 abstract class CacheFactory {
@@ -9,4 +10,5 @@ abstract class CacheFactory {
   void setUser(User user, String token, String password);
   void removeNewsCache();
   void printDb();
+  void setNews(FeedItem feedItem);
 }
