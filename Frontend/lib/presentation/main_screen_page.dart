@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
     "News",
     "Search",
     "List",
-    "User Profile",
+    "Profile",
     "Change Password",
     "Remove Account",
     "Chat",
