@@ -47,7 +47,6 @@ class UserProfilePage extends StatelessWidget {
   }
 
   Widget _buildProfileCard(String title, String value, context) {
-    print(value);
     return Card(
       child: ListTile(
         title: Text(title),
