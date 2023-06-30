@@ -550,19 +550,14 @@ class _MainScreenState extends State<MainScreen> {
           Map<dynamic, dynamic> userGroups =
               userGroupsSnapshot.value as Map<dynamic, dynamic>;
           for (String groupId in userGroups.keys) {
-            if (!kIsWeb) //PROVISIONAL
-              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+            //if (!kIsWeb) //PROVISIONAL
+              //await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
           }
         }
       }
 
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
-      cacheFactory.removeNewsCache();
-      if (await cacheFactory.get("settings", "currentPage") == null)
-        cacheFactory.set('currentPage', 0);
-      if (await cacheFactory.get("settings", "currentNews") == null)
-        cacheFactory.set('currentNews', 0);
 
       Navigator.push(
         context,

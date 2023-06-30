@@ -257,6 +257,15 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               backgroundColor: Theme.of(context).primaryColor,
+              actions: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.exit_to_app_rounded),
+                  tooltip: 'Leave Group',
+                  onPressed: () {
+                    leavePopUpDialog(context);
+                  },
+                ),
+              ],
             ),
             body: _showXButton());
   }
@@ -296,52 +305,37 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             color: Style.lightBlue,
           ),
           SizedBox(height: 20),
-          Row(children: [
-            Text(
-              '${members.length} Participants',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Container(
-                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                child: SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                            onTap: () {
-                              leavePopUpDialog(context);
-                            },
-                            child: Icon(
-                              Icons.exit_to_app_rounded,
-                              color: Colors.white,
-                              size: 20,
-                            ))))),
-            if (isAdmin)
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                child: Material(
-                  color: Colors.transparent,
-                  child: SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () {
-                          popUpDialog(context);
-                        },
-                        child: Icon(
-                          Icons.group_add,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '${members.length} Participants',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (isAdmin)
+                Padding(
+                  padding: EdgeInsets.only(left: 15.0),
+                  child: TextButton.icon(
+                    icon: Icon(Icons.add, color: Colors.white, size: 20),
+                    label: Text('Add more',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(color: Colors.white)),
+                    onPressed: () {
+                      popUpDialog(context);
+                    },
+                    style: TextButton.styleFrom(
+                      minimumSize: Size(50, 50),
+                      /*side: BorderSide(color: Colors.blue, width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),*/
                     ),
                   ),
                 ),
-              ),
-          ]),
+            ],
+          ),
           SizedBox(height: 20),
           Container(
             padding: EdgeInsets.only(top: 10, bottom: 80),
@@ -428,6 +422,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     style: Theme.of(context).textTheme.bodyLarge,
                     controller: userNameController,
                     decoration: InputDecoration(
+                      hintText: "Enter a valid username",
+                      hintStyle: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey),
                       contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
                       focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
@@ -509,7 +505,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).primaryColor,
               ),
-              child: const Text("LEAVE"),
+              child: const Text("CONFIRM"),
             ),
             ElevatedButton(
               onPressed: () {

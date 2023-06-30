@@ -214,25 +214,23 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                                 Theme.of(context).scaffoldBackgroundColor,
                             title: Text('Confirmation'),
                             content: Text(
-                                'Are you sure you want to kick ${username}?'),
+                                'Are you sure you want to promote $username?'),
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  kickGroup(
-                                      context,
-                                      widget.sessionUsername,
-                                      widget.groupId,
-                                      username,
-                                      _showErrorSnackbar);
-                                  Navigator.of(context).pop();
+                                  final DatabaseReference membersRef =
+                                      FirebaseDatabase.instance
+                                          .ref()
+                                          .child('members')
+                                          .child(widget.groupId);
+                                  membersRef.child(username).set(true);
                                   Navigator.of(context).pop();
                                 },
                                 child: Text('Yes'),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('No'),
                               ),
@@ -241,9 +239,9 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                         },
                       );
                     },
-                    child: Text('Kick'),
+                    child: Text('Promote'),
                   ),
-                  SizedBox(width: 1),
+                  SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () {
                       showDialog(
@@ -254,7 +252,7 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                                 Theme.of(context).scaffoldBackgroundColor,
                             title: Text('Confirmation'),
                             content: Text(
-                                'Are you sure you want to demote ${username}?'),
+                                'Are you sure you want to demote $username?'),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -264,15 +262,13 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                                           .child('members')
                                           .child(widget.groupId);
                                   membersRef.child(username).set(false);
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('Yes'),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('No'),
                               ),
@@ -283,7 +279,7 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                     },
                     child: Text('Demote'),
                   ),
-                  SizedBox(width: 1),
+                  SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () {
                       showDialog(
@@ -294,25 +290,25 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                                 Theme.of(context).scaffoldBackgroundColor,
                             title: Text('Confirmation'),
                             content: Text(
-                                'Are you sure you want to promote ${username}?'),
+                                'Are you sure you want to kick $username?'),
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  final DatabaseReference membersRef =
-                                      FirebaseDatabase.instance
-                                          .ref()
-                                          .child('members')
-                                          .child(widget.groupId);
-                                  membersRef.child(username).set(true);
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  kickGroup(
+                                    context,
+                                    widget.sessionUsername,
+                                    widget.groupId,
+                                    username,
+                                    _showErrorSnackbar,
+                                  );
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('Yes'),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('No'),
                               ),
@@ -321,7 +317,7 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
                         },
                       );
                     },
-                    child: Text('Promote'),
+                    child: Text('Kick'),
                   ),
                 ],
               ),

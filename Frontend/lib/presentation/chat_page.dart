@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_msg_page.dart';
 import '../domain/Group.dart';
@@ -31,6 +31,9 @@ class _ChatPageState extends State<ChatPage> {
   late Stream<List<Group>> groupsStream;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   Group? selectedGroup;
+  final TextEditingController searchController = TextEditingController();
+  List<Group> allGroups = [];
+  List<Group> filteredGroups = [];
 
   @override
   void initState() {
@@ -77,6 +80,10 @@ class _ChatPageState extends State<ChatPage> {
           numberOfMembers: numberOfMembers,
         );
         groups.add(group);
+        setState(() {
+          allGroups.add(group);
+          filteredGroups.add(group);
+        });
 
         streamController.add(groups);
       }
@@ -113,6 +120,82 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+
+  void filterGroups(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredGroups = allGroups; // Reset to all groups if query is empty
+      } else {
+        filteredGroups = allGroups.where((group) {
+          final displayName = group.DisplayName.toLowerCase();
+          final description = group.description.toLowerCase();
+          final searchLower = query.toLowerCase();
+
+          return query.isNotEmpty &&
+              (isMatch(displayName, searchLower) ||
+                  isMatch(description, searchLower) ||
+                  displayName.contains(searchLower) ||
+                  description.contains(searchLower));
+        }).toList();
+      }
+    });
+  }
+
+  /*Levenshtein algorithm*/
+  bool isMatch(String text, String query) {
+    if (text == query) {
+      return true; // Exact match
+    }
+
+    if ((text.length - query.length).abs() > 2) {
+      return false; // Length difference exceeds tolerance
+    }
+
+    for (int i = 0; i < text.length; i++) {
+      int differences = levenshteinDistance(text.substring(i), query);
+      if (differences <= 2) {
+        return true; // Match found within tolerance
+      }
+    }
+
+    return false; // No match found
+  }
+
+  int levenshteinDistance(String text, String query) {
+    if (text.isEmpty) {
+      return query.length;
+    }
+    if (query.isEmpty) {
+      return text.length;
+    }
+
+    List<int> previousRow = List<int>.filled(query.length + 1, 0);
+    List<int> currentRow = List<int>.filled(query.length + 1, 0);
+
+    for (int i = 0; i <= query.length; i++) {
+      previousRow[i] = i;
+    }
+
+    for (int i = 0; i < text.length; i++) {
+      currentRow[0] = i + 1;
+
+      for (int j = 0; j < query.length; j++) {
+        int insertions = previousRow[j + 1] + 1;
+        int deletions = currentRow[j] + 1;
+        int substitutions = previousRow[j] + (text[i] != query[j] ? 1 : 0);
+
+        currentRow[j + 1] = min(insertions, min(deletions, substitutions));
+      }
+
+      List<int> tempRow = previousRow;
+      previousRow = currentRow;
+      currentRow = tempRow;
+    }
+
+    return previousRow[query.length];
+  }
+
+  /*Levenshtein algorithm*/
 
   @override
   Widget build(BuildContext context) {
@@ -160,105 +243,134 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Stack(
         children: <Widget>[
-          StreamBuilder<List<Group>>(
-            stream: groupsStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (snapshot.hasData) {
-                List<Group> groups = snapshot.data!;
-                return ListView(
-                  padding: EdgeInsets.only(top: 10, bottom: 80),
-                  children: groups.map((group) {
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedGroup = group;
-                          downloadGroupPictureData(group.id);
-                        });
-                      },
-                      child: Card(
-                        color: selectedGroup == group
-                            ? Theme.of(context).primaryColorDark
-                            : null,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 5,
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                          child: ListTile(
-                            leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(200),
-                                child: groupPicture(context, group.id)),
-                            title: Text(
-                              '${group.DisplayName}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.person, size: 20),
-                                    SizedBox(width: 5),
-                                    Expanded(
-                                      child: Text(
-                                        'Description: ${group.description}',
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.people, size: 20),
-                                    SizedBox(width: 5),
-                                    Expanded(
-                                      child: Text(
-                                        '${group.numberOfMembers} members',
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              } else {
-                return noGroupWidget();
-              }
-            },
-          ),
-          Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    popUpDialog(context);
+          Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: searchController,
+                  onChanged: (query) {
+                    filterGroups(query);
                   },
-                  elevation: 6,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 30,
+                  decoration: InputDecoration(
+                    labelText: 'Search',
+                    labelStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Theme.of(context).secondaryHeaderColor),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).secondaryHeaderColor,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
                   ),
                 ),
-              )),
+              ),
+              Expanded(
+                child: StreamBuilder<List<Group>>(
+                  stream: groupsStream,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<Group>> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData) {
+                      List<Group> groups = filteredGroups;
+                      return ListView(
+                        padding: EdgeInsets.only(top: 10, bottom: 80),
+                        children: groups.map((group) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedGroup = group;
+                                downloadGroupPictureData(group.id);
+                              });
+                            },
+                            child: Card(
+                              color: selectedGroup == group
+                                  ? Theme.of(context).primaryColorDark
+                                  : null,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 5,
+                              margin: EdgeInsets.symmetric(vertical: 8),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 8),
+                                child: ListTile(
+                                  leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(200),
+                                      child: groupPicture(context, group.id)),
+                                  title: Text(
+                                    '${group.DisplayName}',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.person, size: 20),
+                                          SizedBox(width: 5),
+                                          Expanded(
+                                            child: Text(
+                                              'Description: ${group.description}',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.people, size: 20),
+                                          SizedBox(width: 5),
+                                          Expanded(
+                                            child: Text(
+                                              '${group.numberOfMembers} members',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    } else {
+                      return noGroupWidget();
+                    }
+                  },
+                ),
+              ),
+              Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        popUpDialog(context);
+                      },
+                      elevation: 6,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  )),
+            ],
+          ),
         ],
       ),
     );
@@ -266,105 +378,126 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        elevation: 0,
+        title: Text(
+          "Groups",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+      ),
+      body: Column(
         children: <Widget>[
-          StreamBuilder<List<Group>>(
-            stream: groupsStream, // Replace with your stream of groups
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (snapshot.hasData) {
-                List<Group> groups = snapshot.data!;
-
-                return ListView(
-                  padding: EdgeInsets.only(top: 10, bottom: 80),
-                  children: groups.map((group) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => GroupMessagesPage(
-                              key: ValueKey(group.id),
-                              groupId: group.id,
-                              user: widget.user,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 5,
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                          child: ListTile(
-                            leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(200),
-                                child: groupPicture(context, group.id)),
-                            title: Text(
-                              '${group.DisplayName}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.person, size: 20),
-                                    SizedBox(width: 5),
-                                    Expanded(
-                                      child: Text(
-                                        'Description: ${group.description}',
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.people, size: 20),
-                                    SizedBox(width: 5),
-                                    Expanded(
-                                      child: Text(
-                                        '${group.numberOfMembers} members',
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              } else {
-                return noGroupWidget();
-              }
-            },
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: IconButton(
-                onPressed: () {
-                  // nextScreen(context, const Placeholder()); //searchPageChat
-                  // Replace the above line with your desired logic
-                },
-                icon: const Icon(Icons.search),
-                color: Colors.white,
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              onChanged: (query) {
+                filterGroups(query);
+              },
+              decoration: InputDecoration(
+                labelText: 'Search',
+                labelStyle: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: Theme.of(context).secondaryHeaderColor),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
               ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<List<Group>>(
+              stream: groupsStream, // Replace with your stream of groups
+              builder:
+                  (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (snapshot.hasData) {
+                  List<Group> groups = snapshot.data!;
+
+                  return ListView(
+                    padding: EdgeInsets.only(top: 10, bottom: 80),
+                    children: groups.map((group) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => GroupMessagesPage(
+                                key: ValueKey(group.id),
+                                groupId: group.id,
+                                user: widget.user,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 8),
+                            child: ListTile(
+                              leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(200),
+                                  child: groupPicture(context, group.id)),
+                              title: Text(
+                                '${group.DisplayName}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.person, size: 20),
+                                      SizedBox(width: 5),
+                                      Expanded(
+                                        child: Text(
+                                          'Description: ${group.description}',
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.people, size: 20),
+                                      SizedBox(width: 5),
+                                      Expanded(
+                                        child: Text(
+                                          '${group.numberOfMembers} members',
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                } else {
+                  return noGroupWidget();
+                }
+              },
             ),
           ),
         ],
