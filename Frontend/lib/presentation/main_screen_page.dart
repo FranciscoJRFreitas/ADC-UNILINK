@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -547,12 +546,12 @@ class _MainScreenState extends State<MainScreen> {
 
         // Unsubscribe from all the groups
         if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
-          Map<dynamic, dynamic> userGroups =
+          /*Map<dynamic, dynamic> userGroups =
               userGroupsSnapshot.value as Map<dynamic, dynamic>;
           for (String groupId in userGroups.keys) {
-            //if (!kIsWeb) //PROVISIONAL
-              //await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
-          }
+            if (!kIsWeb) //PROVISIONAL
+              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+          }*/
         }
       }
 
