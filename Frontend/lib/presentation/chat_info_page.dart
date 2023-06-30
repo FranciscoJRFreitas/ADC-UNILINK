@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/chat_member_info.dart';
+import 'package:unilink2023/presentation/screen.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
 import '../data/cache_factory_provider.dart';
@@ -316,7 +317,11 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 Padding(
                   padding: EdgeInsets.only(left: 15.0),
                   child: TextButton.icon(
-                    icon: Icon(Icons.add, color: Colors.white, size: 20),
+                    icon: Icon(
+                      Icons.add_box_rounded,
+                      color: Theme.of(context).secondaryHeaderColor,
+                      size: 20,
+                    ),
                     label: Text('Add more',
                         style: Theme.of(context)
                             .textTheme
@@ -327,10 +332,28 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     },
                     style: TextButton.styleFrom(
                       minimumSize: Size(50, 50),
-                      /*side: BorderSide(color: Colors.blue, width: 2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),*/
+                    ),
+                  ),
+                ),
+              if (kIsWeb)
+                Padding(
+                  padding: EdgeInsets.only(left: 15.0),
+                  child: TextButton.icon(
+                    icon: Icon(
+                      Icons.exit_to_app_rounded,
+                      color: Theme.of(context).secondaryHeaderColor,
+                      size: 20,
+                    ),
+                    label: Text('Leave group',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(color: Colors.white)),
+                    onPressed: () {
+                      leavePopUpDialog(context);
+                    },
+                    style: TextButton.styleFrom(
+                      minimumSize: Size(50, 50),
                     ),
                   ),
                 ),
@@ -423,7 +446,10 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     controller: userNameController,
                     decoration: InputDecoration(
                       hintText: "Enter a valid username",
-                      hintStyle: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey),
+                      hintStyle: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .copyWith(color: Colors.grey),
                       contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
                       focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
@@ -495,12 +521,23 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 leaveGroup(context, widget.groupId, widget.username,
                     _showErrorSnackbar);
 
-                if (!kIsWeb)
+                if (!kIsWeb) {
                   await FirebaseMessaging.instance
                       .unsubscribeFromTopic(widget.groupId);
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                } else {
+                  Future.delayed(Duration(milliseconds: 100), () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => MainScreen(index: 6),
+                      ),
+                    );
+                  });
+                }
               },
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).primaryColor,
