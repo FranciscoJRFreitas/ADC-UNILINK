@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../presentation/chat_page.dart';
-import '../presentation/home_page.dart';
+import '../features/chat/presentation/chat_page.dart';
+import '../features/userData/home_page.dart';
 import 'User.dart';
 
 class Routes {
@@ -9,8 +9,18 @@ class Routes {
       <String, WidgetBuilder>{
     '/home': (_) => HomePage(),
     '/chat': (_) => ChatPage(
-          user: User(displayName: '', username: '', email: '', role: '', educationLevel: '', birthDate: '', profileVisibility: '', state: '', mobilePhone: '',
-              occupation: '', creationTime: ''),
+          user: User(
+              displayName: '',
+              username: '',
+              email: '',
+              role: '',
+              educationLevel: '',
+              birthDate: '',
+              profileVisibility: '',
+              state: '',
+              mobilePhone: '',
+              occupation: '',
+              creationTime: ''),
         ),
   };
 

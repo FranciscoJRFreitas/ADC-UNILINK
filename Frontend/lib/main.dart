@@ -1,5 +1,5 @@
 import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/splash_page.dart';
+import 'package:unilink2023/features/intro/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
