@@ -143,7 +143,17 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: Container(
+                width: 80.0, // Set your desired width
+                height: 80.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
+                  ),
+                ),
+              ),
             );
           } else {
             return const Icon(

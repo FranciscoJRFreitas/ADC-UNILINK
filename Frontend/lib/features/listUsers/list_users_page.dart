@@ -178,12 +178,22 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: Container(
+                width: 57.0, // Set your desired width
+                height: 57.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
+                  ),
+                ),
+              ),
             );
           } else {
             return const Icon(
               Icons.account_circle,
-              size: 50,
+              size: 55,
             );
           }
         });
