@@ -33,6 +33,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _emailFocusNode.requestFocus();
+    });
+
     void doNothingSnackbar(String message, bool isError, bool show) {}
 
     (() async {
@@ -44,7 +49,6 @@ class _LoginPageState extends State<LoginPage> {
             doNothingSnackbar);
       setState(() {});
     });
-    FocusScope.of(context).requestFocus(_emailFocusNode);
   }
 
   @override
