@@ -44,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
             doNothingSnackbar);
       setState(() {});
     });
+    FocusScope.of(context).requestFocus(_emailFocusNode);
   }
 
   @override
