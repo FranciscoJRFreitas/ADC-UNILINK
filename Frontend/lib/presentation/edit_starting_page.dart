@@ -34,6 +34,7 @@ class _EditStartingPageState extends State<EditStartingPage> {
     if (_startingPage == "Schedule") icon = Icons.schedule;
     if (_startingPage == "Chat") icon = Icons.chat;
     if (_startingPage == "Contacts") icon = Icons.call;
+    if (_startingPage == "Map") icon = Icons.map;
   }
 
   @override
@@ -80,7 +81,8 @@ class _EditStartingPageState extends State<EditStartingPage> {
                           'Profile',
                           'Schedule',
                           'Chat',
-                          'Contacts'
+                          'Contacts',
+                          'Map',
                         ],
                         onChanged: (dynamic newValue) {
                           setState(() {

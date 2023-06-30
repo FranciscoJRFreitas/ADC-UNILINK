@@ -345,6 +345,7 @@ Future<int> login(
       if (page == "Schedule") index = 9;
       if (page == "Chat") index = 6;
       if (page == "Contacts") index = 7;
+      if (page == "Map") index = 10;
 
       Navigator.push(
         context,
