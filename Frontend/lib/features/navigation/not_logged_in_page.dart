@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../constants.dart';
-import '../features/contacts/contacts_page.dart';
-import '../features/intro/welcome_page.dart';
-import '../features/map/newMapPage.dart';
-import '../features/news/news_page.dart';
-import '../features/settings/settings_page.dart';
+import '../../constants.dart';
+import '../contacts/contacts_page.dart';
+import '../intro/welcome_page.dart';
+import '../map/newMapPage.dart';
+import '../news/news_page.dart';
+import '../settings/settings_page.dart';
 
 
 

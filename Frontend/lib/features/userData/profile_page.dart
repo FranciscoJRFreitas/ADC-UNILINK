@@ -5,8 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
-import '../constants.dart';
-import '../domain/User.dart';
+import '../../constants.dart';
+import '../../domain/User.dart';
 
 class ProfilePage extends StatelessWidget {
   final User user;

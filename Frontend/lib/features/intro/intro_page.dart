@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:unilink2023/data/cache_factory_provider.dart';
-import 'package:unilink2023/presentation/not_logged_in_page.dart';
+import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';

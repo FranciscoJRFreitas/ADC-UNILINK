@@ -13,7 +13,7 @@ import 'package:unilink2023/features/settings/settings_page.dart';
 import 'package:unilink2023/features/userData/home_page.dart';
 import 'package:unilink2023/features/userManagement/change_password_page.dart';
 import 'package:unilink2023/features/userManagement/remove_account_page.dart';
-import 'package:unilink2023/presentation/not_logged_in_page.dart';
+import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/UserNotifier.dart';
