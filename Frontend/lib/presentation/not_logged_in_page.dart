@@ -1,21 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/contacts_page.dart';
+
 import '../constants.dart';
-import '../data/cache_factory_provider.dart';
-import '../domain/UserNotifier.dart';
-import '../domain/Token.dart';
-import '../domain/User.dart';
-import 'newMapPage.dart';
-import 'screen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:photo_view/photo_view.dart';
-import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../presentation/schedule_page.dart';
+import '../features/contacts/contacts_page.dart';
+import '../features/intro/welcome_page.dart';
+import '../features/map/newMapPage.dart';
+import '../features/news/news_page.dart';
+import '../features/settings/settings_page.dart';
+
+
 
 class NotLoggedInScreen extends StatefulWidget {
   final int? index;

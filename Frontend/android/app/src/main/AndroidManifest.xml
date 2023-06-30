@@ -8,13 +8,11 @@
 
     <application
         android:name="androidx.multidex.MultiDexApplication"
-        android:label="UniLink"
+        android:label="unilink2023"
         android:icon="@mipmap/ic_launcher">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true"
