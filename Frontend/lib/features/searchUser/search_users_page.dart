@@ -151,7 +151,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                       padding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                       child: ListTile(
-                        leading: picture(context, user.username),
+                        leading: profilePicture(context, user.username),
                         title: Text(
                           '${user.displayName}${user.username == uUsername ? ' (You)' : ''}', //TODO Mudar para token em vez de widget
                           //TODO Faz sentido user ver se a si próprio no search?
@@ -255,5 +255,28 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
             );
           }
         });
+  }
+
+  Widget profilePicture(BuildContext context, String username) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 80,
+            height: 80,
+            child: CircleAvatar(
+              backgroundColor: Colors.white70,
+              radius: 20,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(200),
+                  child: picture(context, username)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

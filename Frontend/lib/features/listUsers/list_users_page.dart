@@ -73,34 +73,6 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   "There are no users to be displayed for your role...");
             //SU can always see his own info
             else
-              /*return Card(
-                color: Colors.white60,
-                child: ListTile(
-                  title: Text(
-                      '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Username: ${user.username}'),
-                      Text('Email: ${user.email}'),
-                      if (isNotUser) Text('Role: ${user.role}'),
-                      if (isNotUser) Text('State: ${user.state}'),
-                      if (isNotUser)
-                        Text('Profile Visibility: ${user.profileVisibility}'),
-                      if (isNotUser) Text('Landline: ${user.landlinePhone}'),
-                      if (isNotUser) Text('Mobile: ${user.mobilePhone}'),
-                      if (isNotUser) Text('Occupation: ${user.occupation}'),
-                      if (isNotUser) Text('Workplace: ${user.workplace}'),
-                      if (isNotUser) Text('Address: ${user.address}'),
-                      if (isNotUser)
-                        Text('Additional Address: ${user.additionalAddress}'),
-                      if (isNotUser) Text('Locality: ${user.locality}'),
-                      if (isNotUser) Text('Postal Code: ${user.postalCode}'),
-                      if (isNotUser) Text('NIF: ${user.nif}'),
-                    ],
-                  ),
-                ),
-              );*/
               return GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
@@ -119,7 +91,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: ListTile(
-                      leading: picture(context, user.username),
+                      leading: profilePicture(context, user.username),
                       title: Text(
                         '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -215,5 +187,28 @@ class _ListUsersPageState extends State<ListUsersPage> {
             );
           }
         });
+  }
+
+  Widget profilePicture(BuildContext context, String username) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 80,
+            height: 80,
+            child: CircleAvatar(
+              backgroundColor: Colors.white70,
+              radius: 20,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(200),
+                  child: picture(context, username)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

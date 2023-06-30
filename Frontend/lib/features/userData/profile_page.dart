@@ -77,7 +77,7 @@ class ProfilePage extends StatelessWidget {
             return Icon(
               Icons.account_circle,
               color: Theme.of(context).secondaryHeaderColor,
-              size: 50,
+              size: 80,
             );
           }
         });
