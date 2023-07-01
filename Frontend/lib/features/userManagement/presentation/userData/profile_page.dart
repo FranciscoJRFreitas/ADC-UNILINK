@@ -1,13 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:unilink2023/constants.dart';
+import 'package:unilink2023/features/userManagement/domain/User.dart';
 
-import '../constants.dart';
-import '../features/userManagement/domain/User.dart';
+
 
 class ProfilePage extends StatelessWidget {
   final User user;
