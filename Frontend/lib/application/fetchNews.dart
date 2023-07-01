@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
+import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/domain/ExtractJSONfile.dart';
 import '../domain/FeedItem.dart';
 
@@ -11,13 +12,16 @@ Future<List<dom.Element>> getNewsItems(page) async {
   final response =
       await http.get(Uri.parse('https://www.fct.unl.pt/noticias?page=$page'));
   var document = parser.parse(response.body);
-  var viewsRow = document.getElementsByClassName('views-row');
+  
+  var viewNoticiasDiv = document.querySelector('.view.view-noticias.view-id-noticias');
+  
+  var viewsRow = viewNoticiasDiv!.getElementsByClassName('views-row');
 
   return viewsRow;
 }
 
-Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
 
+Future<FeedItem?> fetchNews(List<dom.Element> newsItems, int i) async {
   List<String> defaultTags = await extractFromFile("tags");
 
   Map<String, String> defaultTagsMapping = Map.fromIterable(defaultTags,
@@ -118,14 +122,11 @@ Future<Map<String, List<String>>> extractSynonyms(String filename) async {
 Future<Set<String>> extractKeywords(String content) async {
   var client = http.Client();
   try {
-    var uri = Uri.parse(
-        'https://tm-websuiteapps.ipt.pt/yake/api/v2.0/extract_keywords');
-    var request = http.MultipartRequest('POST', uri)
-      ..fields['content'] = content
-      ..fields['max_ngram_size'] = '1'
-      ..fields['number_of_keywords'] = '10'
-      ..fields['preTag'] = '<b style="color:white; background-color: #37517e;">'
-      ..fields['posTag'] = '</b>';
+    var uri = Uri.parse(kExtractKeywordsUrl);
+
+    var request = http.Request('POST', uri)
+      ..headers['Content-Type'] = 'application/json'
+      ..body = jsonEncode({'text': content});
 
     var streamedResponse = await client.send(request);
     var response = await http.Response.fromStream(streamedResponse);
@@ -133,9 +134,7 @@ Future<Set<String>> extractKeywords(String content) async {
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       List<dynamic> keywordData = data['keywords'];
-      List<String> keywords =
-          keywordData.map((keyword) => keyword['ngram'].toString()).toList();
-      return keywords.toSet();
+      return keywordData.map<String>((keyword) => keyword.toString()).toSet();
     } else {
       throw Exception('Failed to extract keywords...');
     }
