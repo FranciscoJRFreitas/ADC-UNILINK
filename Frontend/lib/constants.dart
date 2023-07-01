@@ -34,6 +34,7 @@ const kBodyText2 = TextStyle(
   color: Colors.white,
 );
 
+const kExtractKeywordsUrl = 'https://yakeaux.oa.r.appspot.com/extract';
 const kBaseUrl = "https://unilink23.oa.r.appspot.com/";
 //const kBaseUrl = "http://localhost:8080/";
 

@@ -75,8 +75,19 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     });
   }
 
+  void checkIfHasMoreNews(var itemsInCache, var newsItems) {
+    if (_page != 0 &&
+        (itemsInCache[0].title ==
+                newsItems[1]
+                    .querySelector('.views-field-title .field-content a')!
+                    .text ||
+            newsItems.length != _newsPerPage)) {
+      print(newsItems.length != _newsPerPage);
+      _hasNoMoreNews = true;
+    }
+  }
+
   Future<void> _fetchNews() async {
-    print(isFetched());
     if (isFetched()) return;
     int currentPageInCache =
         int.parse(await cacheFactory.get('settings', 'currentPage'));
@@ -88,6 +99,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     if (itemsInCache.isNotEmpty && currentPageInCache > _page) {
       if (mounted) {
         setState(() {
+          print(itemsInCache);
           _page = currentPageInCache;
           _feedItems = itemsInCache;
           _filterNews();
@@ -102,20 +114,11 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
     try {
       List<dom.Element> newsItems = await getNewsItems(_page);
-
-      if ((_page != 0 &&
-              itemsInCache[0].title ==
-                  newsItems[1]
-                      .querySelector('.views-field-title .field-content a')!
-                      .text) ||
-          newsItems.length != _newsPerPage + 1) {
-        _hasNoMoreNews = true;
-        return;
-      }
+      print(newsItems.length);
 
       int start = currentNewsInCache != 0 ? currentNewsInCache : 0;
 
-      for (int i = start; i < _newsPerPage + 1; i++) {
+      for (int i = start; i < _newsPerPage; i++) {
         FeedItem? feedItem = await fetchNews(newsItems, i);
         if (feedItem != null) {
           if (mounted) {
@@ -135,9 +138,12 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       currentNewsInCache =
           int.parse(await cacheFactory.get('settings', 'currentNews'));
 
+      print(currentPageInCache);
+      print(currentNewsInCache);
+
       if (mounted) {
         setState(() {
-          if (currentNewsInCache == 12 && !isFetched()) {
+          if (currentNewsInCache == _newsPerPage - 1 && !isFetched()) {
             _page++;
             cacheFactory.set('currentPage', _page.toString());
             cacheFactory.set('currentNews', "0");
@@ -145,6 +151,9 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           _isLoading = false;
         });
       }
+
+      checkIfHasMoreNews(itemsInCache, newsItems);
+      if(isFetched()) return;
     } catch (e) {
       if (mounted) {
         setState(() {

@@ -76,7 +76,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             messages.indexWhere((m) => m.id == message.id) == -1) {
           // Check if message was removed or already in the list
           messages.add(message);
-          _scrollToBottom();
         }
       });
     });
