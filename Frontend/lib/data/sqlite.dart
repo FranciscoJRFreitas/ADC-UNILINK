@@ -1,8 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-import '../domain/FeedItem.dart';
-import '../domain/User.dart';
+import '../features/news/domain/FeedItem.dart';
+import '../features/userManagement/domain/User.dart';
 
 class SqliteService {
   static final SqliteService _singleton = SqliteService._internal();

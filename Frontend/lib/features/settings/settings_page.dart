@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/features/settings/edit_starting_page.dart';
 import '../../data/cache_factory_provider.dart';
-import '../userManagement/change_password_page.dart';
-import '../userManagement/remove_account_page.dart';
+import '../userManagement/presentation/userAuth/change_password_page.dart';
+import '../userManagement/presentation/userAuth/remove_account_page.dart';
 
 class SettingsPage extends StatefulWidget {
   @override

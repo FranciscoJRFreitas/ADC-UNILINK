@@ -1,5 +1,5 @@
-import '../domain/FeedItem.dart';
-import '../domain/User.dart';
+import '../features/news/domain/FeedItem.dart';
+import '../features/userManagement/domain/User.dart';
 
 abstract class CacheFactory {
   void set(String property, dynamic value);

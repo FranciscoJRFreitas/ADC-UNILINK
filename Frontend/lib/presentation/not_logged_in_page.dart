@@ -3,19 +3,24 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/presentation/contacts_page.dart';
+import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
+import 'package:unilink2023/features/intro/welcome_page.dart';
+import 'package:unilink2023/features/map/newMapPage.dart';
+import 'package:unilink2023/features/news/presentation/news_page.dart';
+import 'package:unilink2023/features/screen.dart';
+import 'package:unilink2023/features/settings/settings_page.dart';
+
 import '../constants.dart';
 import '../data/cache_factory_provider.dart';
 import '../domain/UserNotifier.dart';
 import '../domain/Token.dart';
-import '../domain/User.dart';
-import 'newMapPage.dart';
+import '../features/userManagement/domain/User.dart';
+
 import 'screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../presentation/schedule_page.dart';
 
 class NotLoggedInScreen extends StatefulWidget {
   final int? index;
@@ -28,13 +33,7 @@ class NotLoggedInScreen extends StatefulWidget {
 
 class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   int _selectedIndex = 0;
-  List<String> _title = [
-    "News",
-    "Contacts",
-    "Settings",
-    "Map",
-    "Login"
-  ];
+  List<String> _title = ["News", "Contacts", "Settings", "Map", "Login"];
 
   _NotLoggedInScreenState(int? index) {
     if (index != null) _selectedIndex = index;
@@ -46,16 +45,15 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   }
 
   List<Widget> _widgetOptions() => [
-    NewsFeedPage(),
-    ContactsPage(),
-    SettingsPage(),
-    MapPage(username: ""),
-    WelcomePage(), //professor
-  ];
+        NewsFeedPage(),
+        ContactsPage(),
+        SettingsPage(),
+        MapPage(username: ""),
+        WelcomePage(), //professor
+      ];
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor, //roleColor,
@@ -65,6 +63,23 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
           selectionColor: Colors.white,
         ),
         centerTitle: true,
+        actions: [
+          Tooltip(
+            message: 'Login',
+            child: IconButton(
+              icon: Icon(Icons.login),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginPage(),
+                  ),
+                );
+              },
+            ),
+          )
+        ],
       ),
       drawer: Drawer(
         backgroundColor: Theme.of(context).primaryColor,
@@ -149,5 +164,4 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
       return Text('Selected index out of range! ${options}');
     }
   }
-
 }

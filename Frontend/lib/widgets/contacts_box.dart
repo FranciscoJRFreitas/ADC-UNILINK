@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../domain/Contact.dart';
+import '../features/contacts/domain/Contact.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 

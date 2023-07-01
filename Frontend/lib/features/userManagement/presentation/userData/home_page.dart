@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
-import 'package:unilink2023/features/userData/edit_profile_page.dart';
+import 'package:unilink2023/features/userManagement/presentation/userData/edit_profile_page.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
-import '../../constants.dart';
-import '../../domain/UserNotifier.dart';
+import '../../../../constants.dart';
+import '../../../../domain/UserNotifier.dart';
 import '../../domain/User.dart';
 
 class HomePage extends StatefulWidget {

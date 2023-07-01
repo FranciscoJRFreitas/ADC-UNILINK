@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
 import '../constants.dart';
-import '../domain/User.dart';
+import '../features/userManagement/domain/User.dart';
 
 class ProfilePage extends StatelessWidget {
   final User user;

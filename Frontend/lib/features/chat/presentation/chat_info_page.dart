@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
+import 'package:unilink2023/widgets/my_text_field.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 
@@ -27,6 +28,10 @@ class ChatInfoPage extends StatefulWidget {
 
 class _ChatInfoPageState extends State<ChatInfoPage> {
   final TextEditingController userNameController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController startController = TextEditingController();
+  final TextEditingController endController = TextEditingController();
   late Future<Uint8List?> groupPic;
   late List<MembersData> members = [];
   late DatabaseReference membersRef;
@@ -306,7 +311,34 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             thickness: 1,
             color: Style.lightBlue,
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 5),
+          Padding(
+            padding: EdgeInsets.only(left: 15.0),
+            child: TextButton.icon(
+              icon: Icon(
+                Icons.event,
+                color: Theme.of(context).secondaryHeaderColor,
+                size: 20,
+              ),
+              label: Text('Add event',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Colors.white)),
+              onPressed: () {
+                eventPopUpDialog(context);
+              },
+              style: TextButton.styleFrom(
+                minimumSize: Size(50, 50),
+              ),
+            ),
+          ),
+          SizedBox(height: 5),
+          Divider(
+            thickness: 1,
+            color: Style.lightBlue,
+          ),
+          SizedBox(height: 5),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -336,6 +368,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                   ),
                 ),
+
               if (kIsWeb)
                 Padding(
                   padding: EdgeInsets.only(left: 15.0),
@@ -560,6 +593,76 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
     );
   }
 
+  eventPopUpDialog(BuildContext context) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: const Text(
+                "Add an event",
+                textAlign: TextAlign.left,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  MyTextField(
+                    small: false,
+                    hintText: 'Title',
+                    inputType: TextInputType.text,
+                    controller: titleController,
+                  ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'Description',
+                    inputType: TextInputType.text,
+                    controller: descriptionController,
+                  ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'Start',
+                    inputType: TextInputType.text,
+                    controller: startController,
+                  ),
+                  MyTextField(
+                    small: false,
+                    hintText: 'End',
+                    inputType: TextInputType.text,
+                    controller: endController,
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () async {
+                    {
+                      createEvent(context, titleController.text,
+                          descriptionController.text, startController.text,
+                          endController.text, _showErrorSnackbar);
+                      Navigator.of(context).pop();
+
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CREATE"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
+              ],
+            );
+          }));
+        });
+  }
+
   Future<Uint8List?> downloadData(String username) async {
     return FirebaseStorage.instance
         .ref('ProfilePictures/' + username)
@@ -654,6 +757,41 @@ Future<void> inviteGroup(
     showErrorSnackbar('Error sending the invite!', true);
   }
 }
+Future<void> createEvent(
+    BuildContext context,
+    String title,
+    String  description,
+    String start,
+    String end,
+    void Function(String, bool) showErrorSnackbar,
+    ) async {
+  final url = "https://unilink23.oa.r.appspot.com/rest/events/add";
+  final tokenID = await cacheFactory.get('users', 'token');
+  final storedUsername = await cacheFactory.get('users', 'username');
+  Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${json.encode(token.toJson())}'
+    },
+    body: jsonEncode({
+      'title': title,
+      'description': description,
+      'startTime': start,
+      'endTime': end,
+      'creator': storedUsername,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    showErrorSnackbar('Created an event successfully!', false);
+  } else {
+    showErrorSnackbar('Failed to create a group: ${response.body}', true);
+  }
+}
+
 
 Future<void> leaveGroup(
   BuildContext context,
@@ -688,3 +826,32 @@ class MembersData {
   MembersData(
       {required this.username, required this.dispName, required this.isAdmin});
 }
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return _tabBar;
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
+  }
+}
+
+const _tabs = [
+  Tab(icon: Icon(Icons.home_rounded), text: "Home"),
+  Tab(icon: Icon(Icons.shopping_bag_rounded), text: "Cart"),
+  Tab(icon: Icon(Icons.person), text: "Profile"),
+];

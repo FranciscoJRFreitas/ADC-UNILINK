@@ -6,7 +6,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/presentation/profile_page.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/Token.dart';
-import '../../domain/User.dart';
+import '../userManagement/domain/User.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../constants.dart';

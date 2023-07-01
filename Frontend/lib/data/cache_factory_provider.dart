@@ -1,6 +1,6 @@
-import 'package:unilink2023/domain/FeedItem.dart';
+import 'package:unilink2023/features/news/domain/FeedItem.dart';
 
-import '../domain/User.dart';
+import '../features/userManagement/domain/User.dart';
 import 'stub_cache_factory.dart'
     if (dart.library.html) 'web_implementation.dart'
     if (dart.library.io) 'android_implementation.dart';

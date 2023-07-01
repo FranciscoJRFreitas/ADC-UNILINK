@@ -1,5 +1,5 @@
-import 'package:unilink2023/domain/FeedItem.dart';
-import 'package:unilink2023/domain/User.dart';
+import 'package:unilink2023/features/news/domain/FeedItem.dart';
+import 'package:unilink2023/features/userManagement/domain/User.dart';
 
 import 'cache_factory.dart';
 
