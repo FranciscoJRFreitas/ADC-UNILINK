@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
-import 'package:unilink2023/features/map/newMapPage.dart';
+import 'package:unilink2023/features/map/MapPage.dart';
 import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 import 'package:unilink2023/features/news/presentation/news_page.dart';
 import 'package:unilink2023/features/searchUser/search_users_page.dart';
@@ -85,7 +85,7 @@ class _MainScreenState extends State<MainScreen> {
         ContactsPage(),
         SettingsPage(loggedIn: true),
         SchedulePage(), //estudante
-        MapPage(username: _currentUser.username),
+        MyMap(userId: _currentUser.username),
         Placeholder(), //professor
         Placeholder(), //diretor
       ];
@@ -585,7 +585,8 @@ class _MainScreenState extends State<MainScreen> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => NotLoggedInScreen(index: index)),
+        MaterialPageRoute(
+            builder: (context) => NotLoggedInScreen(index: index)),
       );
       showErrorSnackbar('${response.body}', false);
     } else {

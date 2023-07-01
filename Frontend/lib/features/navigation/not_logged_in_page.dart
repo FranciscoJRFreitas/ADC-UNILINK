@@ -1,12 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:unilink2023/constants.dart';
 
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
+import 'package:unilink2023/features/map/MapPage.dart';
 import 'package:unilink2023/features/map/newMapPage.dart';
 import 'package:unilink2023/features/screen.dart';
-
-
 
 class NotLoggedInScreen extends StatefulWidget {
   final int? index;
@@ -19,13 +17,7 @@ class NotLoggedInScreen extends StatefulWidget {
 
 class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   int _selectedIndex = 0;
-  List<String> _title = [
-    "News",
-    "Contacts",
-    "Settings",
-    "Map",
-    "Login"
-  ];
+  List<String> _title = ["News", "Contacts", "Settings", "Map", "Login"];
 
   _NotLoggedInScreenState(int? index) {
     if (index != null) _selectedIndex = index;
@@ -37,16 +29,17 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   }
 
   List<Widget> _widgetOptions() => [
-    NewsFeedPage(),
-    ContactsPage(),
-    SettingsPage(loggedIn: false,),
-    MapPage(username: ""),
-    WelcomePage(),
-  ];
+        NewsFeedPage(),
+        ContactsPage(),
+        SettingsPage(
+          loggedIn: false,
+        ),
+        MyMap(userId: ""),
+        WelcomePage(),
+      ];
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor, //roleColor,

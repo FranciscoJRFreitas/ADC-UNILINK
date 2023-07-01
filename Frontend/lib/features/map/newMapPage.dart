@@ -74,7 +74,7 @@ class _MapPageState extends State<MapPage> {
                     icon: Icon(Icons.directions),
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => MyMap(username ?? ''),
+                        builder: (context) => MyMap(userId: username ?? ''),
                       ));
                     },
                   ),

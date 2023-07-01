@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -5,10 +7,12 @@ import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:math';
 
+import 'package:permission_handler/permission_handler.dart';
+
 class MyMap extends StatefulWidget {
   final String userId;
 
-  MyMap(this.userId);
+  MyMap({required this.userId});
 
   @override
   _MyMapState createState() => _MyMapState();
@@ -17,9 +21,14 @@ class MyMap extends StatefulWidget {
 class _MyMapState extends State<MyMap> {
   final loc.Location location = loc.Location();
   late GoogleMapController _controller;
-  late DatabaseReference _locationRef;
-  bool _added = false;
+  late DatabaseReference _locationRef =
+      FirebaseDatabase.instance.ref().child('location');
   GoogleMapController? mapController; //contrller for Google map
+  StreamSubscription<DatabaseEvent>? _locationSubscription;
+  List<DataSnapshot> _locationSnapshots = [];
+  var latitude;
+  var longitude;
+
   PolylinePoints polylinePoints = PolylinePoints();
 
   String googleAPiKey = "AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g";
@@ -30,38 +39,30 @@ class _MyMapState extends State<MyMap> {
 
   double distance = 0.0;
 
-  List<LatLng> polylineCoordinates = []; // Set to store the route polyline
   List<String> dropdownItems = ['Edificio', 'Restauraçao', 'Item 3'];
   String selectedDropdownItem = 'Edificio';
 
   @override
   void initState() {
     super.initState();
-    _locationRef = FirebaseDatabase.instance.ref().child('location');
-    _listenLocation();
+    if (widget.userId == "") {
+      _requestPermission();
+      _getLocation();
+      _listenerLocation();
+      _listenLocation();
+    }
     _loadMarkers();
-    getDirections(); //fetch direction polylines from Google API
   }
 
-  double calculateDistance(lat1, lon1, lat2, lon2) {
-    var p = 0.017453292519943295;
-    var a = 0.5 -
-        cos((lat2 - lat1) * p) / 2 +
-        cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a));
-  }
-
-  getDirections() async {
+  getDirections(double lat, double long) async {
     List<LatLng> polylineCoordinates = [];
-    List<Marker> markerList = markers.toList();
+    //List<Marker> markerList = markers.toList();
 
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       googleAPiKey,
-      PointLatLng(
-          markerList[0].position.latitude, markerList[0].position.longitude),
-      PointLatLng(
-          markerList[1].position.latitude, markerList[1].position.longitude),
-      travelMode: TravelMode.driving,
+      PointLatLng(latitude, longitude),
+      PointLatLng(lat, long),
+      travelMode: TravelMode.walking,
     );
 
     if (result.points.isNotEmpty) {
@@ -71,21 +72,6 @@ class _MyMapState extends State<MyMap> {
     } else {
       print(result.errorMessage);
     }
-
-    //polulineCoordinates is the List of longitute and latidtude.
-    double totalDistance = 0;
-    for (var i = 0; i < polylineCoordinates.length - 1; i++) {
-      totalDistance += calculateDistance(
-          polylineCoordinates[i].latitude,
-          polylineCoordinates[i].longitude,
-          polylineCoordinates[i + 1].latitude,
-          polylineCoordinates[i + 1].longitude);
-    }
-    print(totalDistance);
-
-    setState(() {
-      distance = totalDistance;
-    });
 
     //add to the list of poly line coordinates
     addPolyLine(polylineCoordinates);
@@ -106,49 +92,41 @@ class _MyMapState extends State<MyMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: Text(
-          "Map",
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
       body: StreamBuilder(
         stream: _locationRef.onValue,
         builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-          if (_added) {
-            myMap(snapshot);
-          }
           if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: CircularProgressIndicator());
           }
+          if (widget.userId != "") {
+            final data =
+                snapshot.data?.snapshot.value as Map<dynamic, dynamic>?;
 
-          final data = snapshot.data?.snapshot.value as Map<dynamic, dynamic>?;
+            latitude = data?[widget.userId]?['latitude'];
+            longitude = data?[widget.userId]?['longitude'];
 
-          final latitude = data?[widget.userId]?['latitude'];
-          final longitude = data?[widget.userId]?['longitude'];
-
-          if (latitude == null || longitude == null) {
-            return Center(child: Text('Location not found'));
+            if (latitude == null || longitude == null) {
+              return Center(child: Text('Location not found'));
+            }
           }
-
           // Build the dropdown widget
-          Widget dropdownWidget = DropdownButton<String>(
-            value: selectedDropdownItem,
-            dropdownColor: Colors.transparent,
-            items: dropdownItems.map((String item) {
-              return DropdownMenuItem<String>(
-                value: item,
-                child: Text(item),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedDropdownItem = newValue!;
-              });
-            },
+          Widget dropdownWidget = Container(
+            alignment: Alignment.bottomCenter,
+            child: DropdownButton<String>(
+              value: selectedDropdownItem,
+              dropdownColor: Colors.transparent,
+              items: dropdownItems.map((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedDropdownItem = newValue!;
+                });
+              },
+            ),
           );
 
           // This is where we'll add the dropdown
@@ -185,19 +163,29 @@ class _MyMapState extends State<MyMap> {
     );
   }
 
-  Future<void> myMap(AsyncSnapshot<DatabaseEvent> snapshot) async {
-    final data = snapshot.data?.snapshot.value as Map<dynamic, dynamic>?;
-
-    final latitude = data?[widget.userId]?['latitude'];
-    final longitude = data?[widget.userId]?['longitude'];
-
-    if (latitude != null && longitude != null) {
-      await _controller.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(38.660999, -9.205094), zoom: 17),
-        ),
-      );
+  _getLocation() async {
+    try {
+      final loc.LocationData _locationResult = await location.getLocation();
+      final DatabaseReference locationRef =
+          FirebaseDatabase.instance.ref("location").child(widget.userId);
+      locationRef.child("latitude").set(_locationResult.latitude);
+      locationRef.child("longitude").set(_locationResult.longitude);
+    } catch (e) {
+      print(e);
     }
+  }
+
+  void _listenerLocation() {
+    _locationSubscription ??= _locationRef.onChildAdded.listen(
+      (DatabaseEvent event) {
+        if (event.snapshot.value != null) {
+          setState(() {
+            // Assuming _locationSnapshots is a List<DatabaseReference>
+            _locationSnapshots.add(event.snapshot);
+          });
+        }
+      },
+    );
   }
 
   void _listenLocation() {
@@ -211,6 +199,17 @@ class _MyMapState extends State<MyMap> {
     );
   }
 
+  Future<void> _requestPermission() async {
+    var status = await Permission.location.request();
+    if (status.isGranted) {
+      print('Permission granted');
+    } else if (status.isDenied) {
+      _requestPermission();
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
+
   void _loadMarkers() {
     // Departements
     markers.add(
@@ -220,8 +219,10 @@ class _MyMapState extends State<MyMap> {
         infoWindow: InfoWindow(
           title: 'Edifício 1',
           snippet: 'example',
+          onTap: () {
+            getDirections(38.661275, -9.205565);
+          },
         ),
-        // Optional: Set a custom icon for the marker
         icon:
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
       ),
