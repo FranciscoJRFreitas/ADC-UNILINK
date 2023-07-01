@@ -192,7 +192,17 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: Container(
+                width: 100.0, // Set your desired width
+                height: 100.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
+                  ),
+                ),
+              ),
             );
           } else {
             return const Icon(
@@ -428,7 +438,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             padding: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 8),
                             child: ListTile(
-                              leading: picture(context, member.username),
+                              leading: profilePicture2(context, member.username),
                               title: Text(
                                 '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -720,17 +730,50 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: ClipOval(
+                child: FittedBox(
+                  child: Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.fill,
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
             );
           } else {
             return const Icon(
               Icons.account_circle,
-              size: 50,
+              size: 47,
             );
           }
         });
   }
+
+  Widget profilePicture2(BuildContext context, String username) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 80,
+            height: 80,
+            child: CircleAvatar(
+              backgroundColor: Colors.white70,
+              radius: 20,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(200),
+                  child: picture(context, username)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
+
 
 Future<void> inviteGroup(
   BuildContext context,

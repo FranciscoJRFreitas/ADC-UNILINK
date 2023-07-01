@@ -33,7 +33,13 @@ class NotLoggedInScreen extends StatefulWidget {
 
 class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   int _selectedIndex = 0;
-  List<String> _title = ["News", "Contacts", "Settings", "Map", "Login"];
+  List<String> _title = [
+    "News",
+    "Contacts",
+    "Settings",
+    "Map",
+    "Login"
+  ];
 
   _NotLoggedInScreenState(int? index) {
     if (index != null) _selectedIndex = index;
@@ -45,15 +51,16 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   }
 
   List<Widget> _widgetOptions() => [
-        NewsFeedPage(),
-        ContactsPage(),
-        SettingsPage(),
-        MapPage(username: ""),
-        WelcomePage(), //professor
-      ];
+    NewsFeedPage(),
+    ContactsPage(),
+    SettingsPage(loggedIn: false,),
+    MapPage(username: ""),
+    WelcomePage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor, //roleColor,

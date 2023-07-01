@@ -51,7 +51,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ],
               ),
               SizedBox(
-                height: 300,
+                height: 200,
               ),
               Container(
                 height: 50,

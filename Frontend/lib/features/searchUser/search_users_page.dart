@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:unilink2023/presentation/profile_page.dart';
+import 'package:unilink2023/features/userData/profile_page.dart';
 
 import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
@@ -151,7 +151,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                       padding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                       child: ListTile(
-                        leading: picture(context, user.username),
+                        leading: profilePicture(context, user.username),
                         title: Text(
                           '${user.displayName}${user.username == uUsername ? ' (You)' : ''}', //TODO Mudar para token em vez de widget
                           //TODO Faz sentido user ver se a si próprio no search?
@@ -245,15 +245,48 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: Container(
+                width: 57.0, // Set your desired width
+                height: 57.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
+                  ),
+                ),
+              ),
             );
           } else {
             return Icon(
               Icons.account_circle,
               color: Theme.of(context).secondaryHeaderColor,
-              size: 50,
+              size: 47,
             );
           }
         });
+  }
+
+  Widget profilePicture(BuildContext context, String username) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: 80,
+            height: 80,
+            child: CircleAvatar(
+              backgroundColor: Colors.white70,
+              radius: 20,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(200),
+                  child: picture(context, username)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

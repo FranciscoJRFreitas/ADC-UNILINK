@@ -10,12 +10,21 @@ import '../userManagement/presentation/userAuth/change_password_page.dart';
 import '../userManagement/presentation/userAuth/remove_account_page.dart';
 
 class SettingsPage extends StatefulWidget {
+  final bool loggedIn;
+
+  SettingsPage({required this.loggedIn});
+
   @override
-  _SettingsPageState createState() => _SettingsPageState();
+  _SettingsPageState createState() => _SettingsPageState(loggedIn);
 }
 
 class _SettingsPageState extends State<SettingsPage> {
   String? _currentTheme;
+  bool _loggedIn = false;
+
+  _SettingsPageState(loggedIn){
+    _loggedIn = loggedIn;
+  }
 
   @override
   void initState() {
@@ -30,6 +39,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loggedIn) return layoutLoggedIn(context);
+    else return layoutNotLoggedIn(context);
+  }
+
+  Widget layoutLoggedIn(BuildContext context){
+
     final options = [
       Option(
           icon: Icon(
@@ -51,7 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
             mainAxisAlignment:
-                MainAxisAlignment.spaceBetween, // Distribute space evenly
+            MainAxisAlignment.spaceBetween, // Distribute space evenly
             children: [
               FutureBuilder(
                 future: cacheFactory.get('settings', 'index'),
@@ -109,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
               return EditStartingPage(
                 onDialogClosed: () {
                   setState(() {});
-                },
+                }, loggedIn: true,
               );
             },
           );
@@ -170,13 +185,13 @@ class _SettingsPageState extends State<SettingsPage> {
             child: InkWell(
               onTap: options[index - 1].toggleButton == true
                   ? () {
-                      setState(() {
-                        Provider.of<ThemeNotifier>(context, listen: false)
-                            .toggleTheme();
-                        _currentTheme =
-                            _currentTheme == "Dark" ? "Light" : "Dark";
-                      });
-                    }
+                setState(() {
+                  Provider.of<ThemeNotifier>(context, listen: false)
+                      .toggleTheme();
+                  _currentTheme =
+                  _currentTheme == "Dark" ? "Light" : "Dark";
+                });
+              }
                   : options[index - 1].onTap,
               child: Container(
                 margin: EdgeInsets.all(10.0),
@@ -220,14 +235,200 @@ class _SettingsPageState extends State<SettingsPage> {
                             onChanged: (value) {
                               setState(() {
                                 Provider.of<ThemeNotifier>(context,
-                                        listen: false)
+                                    listen: false)
                                     .toggleTheme();
                                 _currentTheme =
-                                    _currentTheme == "Dark" ? "Light" : "Dark";
+                                _currentTheme == "Dark" ? "Light" : "Dark";
                               });
                             },
                             activeTrackColor:
-                                Theme.of(context).primaryColor.withOpacity(0.5),
+                            Theme.of(context).primaryColor.withOpacity(0.5),
+                            activeColor: Theme.of(context).primaryColor,
+                          )
+                        else
+                          SizedBox.shrink(),
+                        if (options[index - 1].rightWidget != null)
+                          options[index - 1].rightWidget!,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+  }
+
+  Widget layoutNotLoggedIn(BuildContext context){
+
+    final options = [
+      Option(
+          icon: Icon(
+              _currentTheme == "Dark" ? Icons.nights_stay : Icons.wb_sunny,
+              color: Theme.of(context).secondaryHeaderColor,
+              size: 40.0),
+          title: 'Theme',
+          subtitle: 'Change between dark and light themes.',
+          toggleButton: true,
+          onTap: () {
+            getSettings();
+          }),
+      Option(
+        icon: Icon(Icons.waving_hand,
+            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+        title: 'Starting Page',
+        subtitle: 'Select your preferable starting page.',
+        rightWidget: Padding(
+          padding: EdgeInsets.only(right: 20.0),
+          child: Row(
+            mainAxisAlignment:
+            MainAxisAlignment.spaceBetween, // Distribute space evenly
+            children: [
+              FutureBuilder(
+                future: cacheFactory.get('settings', 'index'),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else {
+                    IconData iconData;
+                    switch (snapshot.data) {
+                      case 'News':
+                        iconData = Icons.newspaper;
+                        break;
+                      case 'Contacts':
+                        iconData = Icons.call;
+                        break;
+                      case 'Map':
+                        iconData = Icons.map;
+                        break;
+                      default:
+                        iconData = Icons.newspaper;
+                    }
+                    return Row(
+                      children: [
+                        Icon(iconData,
+                            color: Theme.of(context).secondaryHeaderColor),
+                        SizedBox(
+                            width: 5.0), // Add space between the icon and text
+                        Text(
+                          (snapshot.data == 'News' || snapshot.data == 'Contacts' || snapshot.data == 'Map') ? snapshot.data : 'News',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+              SizedBox(), // Add an empty SizedBox to ensure proper alignment
+            ],
+          ),
+        ),
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return EditStartingPage(
+                onDialogClosed: () {
+                  setState(() {});
+                }, loggedIn: false,
+              );
+            },
+          );
+        },
+      ),
+      if (!kIsWeb)
+        Option(
+            icon: Icon(Icons.notifications,
+                color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+            title: 'Notifications',
+            subtitle: 'Don\'t miss out on any updates!',
+            onTap: () {
+              openNotificationSettings();
+            }),
+      Option(
+          icon: Icon(Icons.privacy_tip,
+              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+          title: 'About',
+          subtitle: 'Verify our terms and conditions and privacy policy.',
+          onTap: () {}),
+    ];
+
+    return Scaffold(
+      body: ListView.builder(
+        itemCount: options.length + 2,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
+            return SizedBox(height: 15.0);
+          } else if (index == options.length + 1) {
+            return SizedBox(height: 100.0);
+          }
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: options[index - 1].toggleButton == true
+                  ? () {
+                setState(() {
+                  Provider.of<ThemeNotifier>(context, listen: false)
+                      .toggleTheme();
+                  _currentTheme =
+                  _currentTheme == "Dark" ? "Light" : "Dark";
+                });
+              }
+                  : options[index - 1].onTap,
+              child: Container(
+                margin: EdgeInsets.all(10.0),
+                width: double.infinity,
+                height: 85.0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.black26),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        options[index - 1].icon,
+                        SizedBox(width: 10.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                options[index - 1].title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              Text(
+                                options[index - 1].subtitle.toString(),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (options[index - 1].toggleButton == true)
+                          Switch(
+                            value: _currentTheme != "Dark",
+                            onChanged: (value) {
+                              setState(() {
+                                Provider.of<ThemeNotifier>(context,
+                                    listen: false)
+                                    .toggleTheme();
+                                _currentTheme =
+                                _currentTheme == "Dark" ? "Light" : "Dark";
+                              });
+                            },
+                            activeTrackColor:
+                            Theme.of(context).primaryColor.withOpacity(0.5),
                             activeColor: Theme.of(context).primaryColor,
                           )
                         else
