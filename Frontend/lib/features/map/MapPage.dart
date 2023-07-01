@@ -31,8 +31,8 @@ class _MyMapState extends State<MyMap> {
   double distance = 0.0;
 
   List<LatLng> polylineCoordinates = []; // Set to store the route polyline
-  List<String> dropdownItems = ['Item 1', 'Item 2', 'Item 3'];
-  String selectedDropdownItem = 'Item 1';
+  List<String> dropdownItems = ['Edificio', 'Restauraçao', 'Item 3'];
+  String selectedDropdownItem = 'Edificio';
 
   @override
   void initState() {
@@ -160,8 +160,11 @@ class _MyMapState extends State<MyMap> {
                   target: LatLng(38.660999, -9.205094),
                   zoom: 17.0,
                 ),
-                markers:
-                    selectedDropdownItem == "Item 1" ? markers : restmarkers,
+                markers: selectedDropdownItem == "Edificio"
+                    ? markers
+                    : selectedDropdownItem == "Restauraçao"
+                        ? restmarkers
+                        : Set(),
                 polylines: Set<Polyline>.of(polylines.values),
                 mapType: MapType.normal,
                 onMapCreated: (controller) {
