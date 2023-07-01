@@ -6,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:math';
-
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MyMap extends StatefulWidget {
@@ -42,9 +42,14 @@ class _MyMapState extends State<MyMap> {
   List<String> dropdownItems = ['Edificio', 'Restauraçao', 'Item 3'];
   String selectedDropdownItem = 'Edificio';
 
+  String _mapStyle = '';
+
   @override
   void initState() {
     super.initState();
+    rootBundle.loadString('assets/json/map_style.json').then((string) {
+      _mapStyle = string;
+    });
     if (widget.userId == "") {
       _requestPermission();
       _getLocation();
@@ -133,6 +138,9 @@ class _MyMapState extends State<MyMap> {
           return Stack(
             children: <Widget>[
               GoogleMap(
+                onMapCreated: (GoogleMapController controller) {
+                  controller.setMapStyle(_mapStyle);
+                },
                 zoomGesturesEnabled: true,
                 initialCameraPosition: CameraPosition(
                   target: LatLng(38.660999, -9.205094),
@@ -145,11 +153,11 @@ class _MyMapState extends State<MyMap> {
                         : Set(),
                 polylines: Set<Polyline>.of(polylines.values),
                 mapType: MapType.normal,
-                onMapCreated: (controller) {
+                /*onMapCreated: (controller) {
                   setState(() {
                     mapController = controller;
                   });
-                },
+                },*/
               ),
               Positioned(
                 top: 10.0,
