@@ -1,4 +1,5 @@
 pt\unl\fct\di\apdc\firstwebapp\servlets\MediaResourceServlet.class
+pt\unl\fct\di\apdc\firstwebapp\resources\EventResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\SearchUsersData.class
 pt\unl\fct\di\apdc\firstwebapp\util\UserProfileVisibility.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ListUsersResource.class
@@ -9,6 +10,7 @@ pt\unl\fct\di\apdc\firstwebapp\util\ChangePasswordData.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\ModifyAttributesData.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource$1.class
+pt\unl\fct\di\apdc\firstwebapp\util\EventData.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ListUsersResource$1.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChatResources$1.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChatResources.class

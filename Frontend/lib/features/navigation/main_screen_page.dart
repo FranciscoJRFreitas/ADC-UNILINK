@@ -4,27 +4,27 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
-import 'package:unilink2023/features/contacts/contacts_page.dart';
+import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
 import 'package:unilink2023/features/map/newMapPage.dart';
-import 'package:unilink2023/features/news/news_page.dart';
+import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
+import 'package:unilink2023/features/news/presentation/news_page.dart';
 import 'package:unilink2023/features/searchUser/search_users_page.dart';
 import 'package:unilink2023/features/settings/settings_page.dart';
-import 'package:unilink2023/features/userData/home_page.dart';
-import 'package:unilink2023/features/userManagement/change_password_page.dart';
-import 'package:unilink2023/features/userManagement/remove_account_page.dart';
-import 'package:unilink2023/presentation/not_logged_in_page.dart';
+import 'package:unilink2023/features/userManagement/presentation/userData/home_page.dart';
+import 'package:unilink2023/features/userManagement/presentation/userAuth/change_password_page.dart';
+import 'package:unilink2023/features/userManagement/presentation/userAuth/remove_account_page.dart';
 import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/UserNotifier.dart';
 import '../../domain/Token.dart';
-import '../../domain/User.dart';
+import '../userManagement/domain/User.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../../features/calendar/schedule_page.dart';
+import '../calendar/presentation/schedule_page.dart';
 
 class MainScreen extends StatefulWidget {
   final int? index;
@@ -83,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
         RemoveAccountPage(),
         ChatPage(user: _currentUser),
         ContactsPage(),
-        SettingsPage(),
+        SettingsPage(loggedIn: true),
         SchedulePage(), //estudante
         MapPage(username: _currentUser.username),
         Placeholder(), //professor
@@ -143,7 +143,17 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
+              child: Container(
+                width: 80.0, // Set your desired width
+                height: 80.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
+                  ),
+                ),
+              ),
             );
           } else {
             return const Icon(

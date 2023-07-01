@@ -2,9 +2,8 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:unilink2023/domain/Event.dart';
+import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
-
 
 
 class SchedulePage extends StatefulWidget {

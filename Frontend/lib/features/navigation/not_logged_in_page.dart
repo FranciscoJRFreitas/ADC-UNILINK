@@ -1,12 +1,10 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
-import '../constants.dart';
-import '../features/contacts/contacts_page.dart';
-import '../features/intro/welcome_page.dart';
-import '../features/map/newMapPage.dart';
-import '../features/news/news_page.dart';
-import '../features/settings/settings_page.dart';
+import 'package:flutter/material.dart';
+import 'package:unilink2023/constants.dart';
+
+import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
+import 'package:unilink2023/features/map/newMapPage.dart';
+import 'package:unilink2023/features/screen.dart';
 
 
 
@@ -41,9 +39,9 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   List<Widget> _widgetOptions() => [
     NewsFeedPage(),
     ContactsPage(),
-    SettingsPage(),
+    SettingsPage(loggedIn: false,),
     MapPage(username: ""),
-    WelcomePage(), //professor
+    WelcomePage(),
   ];
 
   @override
@@ -58,6 +56,23 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
           selectionColor: Colors.white,
         ),
         centerTitle: true,
+        actions: [
+          Tooltip(
+            message: 'Login',
+            child: IconButton(
+              icon: Icon(Icons.login),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginPage(),
+                  ),
+                );
+              },
+            ),
+          )
+        ],
       ),
       drawer: Drawer(
         backgroundColor: Theme.of(context).primaryColor,
@@ -142,5 +157,4 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
       return Text('Selected index out of range! ${options}');
     }
   }
-
 }

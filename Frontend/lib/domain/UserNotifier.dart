@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../data/cache_factory_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'User.dart';
+import '../features/userManagement/domain/User.dart';
 
 class UserNotifier with ChangeNotifier {
   Future<Uint8List?>? profilePic;

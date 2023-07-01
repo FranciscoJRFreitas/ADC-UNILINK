@@ -1,12 +1,12 @@
 import 'dart:convert';
-import '../screen.dart';
+import '../../../screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import '../../widgets/my_age_field.dart';
-import '../../widgets/widget.dart';
-import '../../constants.dart';
+import '../../../../widgets/my_age_field.dart';
+import '../../../../widgets/widget.dart';
+import '../../../../constants.dart';
 
 class RegisterPage extends StatefulWidget {
   @override

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../features/chat/presentation/chat_page.dart';
-import '../features/userData/home_page.dart';
-import 'User.dart';
+import '../features/userManagement/presentation/userData/home_page.dart';
+import '../features/userManagement/domain/User.dart';
 
 class Routes {
   static Map<String, Widget Function(BuildContext)> list =

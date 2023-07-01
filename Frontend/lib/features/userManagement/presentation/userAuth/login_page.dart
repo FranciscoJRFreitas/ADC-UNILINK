@@ -6,12 +6,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../constants.dart';
-import '../../data/cache_factory_provider.dart';
-import '../../domain/UserNotifier.dart';
-import '../screen.dart';
+import '../../../../constants.dart';
+import '../../../../data/cache_factory_provider.dart';
+import '../../../../domain/UserNotifier.dart';
+import '../../../screen.dart';
 import '../../domain/User.dart';
-import '../../widgets/widget.dart';
+import '../../../../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;

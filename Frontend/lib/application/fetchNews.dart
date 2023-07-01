@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/domain/ExtractJSONfile.dart';
-import '../domain/FeedItem.dart';
+import '../features/news/domain/FeedItem.dart';
 
 Future<List<dom.Element>> getNewsItems(page) async {
   final response =

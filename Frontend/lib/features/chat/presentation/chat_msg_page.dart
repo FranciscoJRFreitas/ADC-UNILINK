@@ -13,7 +13,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
-import '../../../domain/User.dart';
+import '../../userManagement/domain/User.dart';
 import '../../../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';

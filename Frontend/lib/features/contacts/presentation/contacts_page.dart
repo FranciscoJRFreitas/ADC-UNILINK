@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:unilink2023/domain/Contact.dart';
+import 'package:unilink2023/features/contacts/domain/Contact.dart';
 import 'package:unilink2023/widgets/contacts_box.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:alphabet_list_view/alphabet_list_view.dart';

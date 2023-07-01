@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:html';
-import 'package:unilink2023/domain/User.dart';
+import 'package:unilink2023/features/userManagement/domain/User.dart';
 
-import '../domain/FeedItem.dart';
+import '../features/news/domain/FeedItem.dart';
 import 'cache_factory.dart';
 
 class CacheFactoryImpl implements CacheFactory {
