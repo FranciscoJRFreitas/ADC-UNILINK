@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:provider/provider.dart';
+import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/data/cache_factory_provider.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/features/intro/intro_page.dart';
 import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 import 'package:unilink2023/features/userManagement/presentation/userAuth/login_page.dart';
@@ -9,10 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/constants.dart';
 
 class SplashPage extends StatefulWidget {
-  final bool isDarkTheme;
-
-  SplashPage({required this.isDarkTheme});
-
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
@@ -90,10 +89,10 @@ class _SplashPageState extends State<SplashPage> {
             return Center(
               child: Image.asset(
                 kIsWeb
-                    ? widget.isDarkTheme
+                    ? Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme
                         ? 'assets/animation/NOVAanimation-web_dark.gif'
                         : 'assets/animation/NOVAanimation-web.gif'
-                    : widget.isDarkTheme
+                    : Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme
                         ? 'assets/animation/NOVAanimation-mobile_dark.gif'
                         : 'assets/animation/NOVAanimation-mobile.gif',
                 width: constraints.maxWidth,
