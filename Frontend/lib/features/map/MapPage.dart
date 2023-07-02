@@ -69,6 +69,11 @@ class _MyMapState extends State<MyMap> {
     _loadMarkersFromJson();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void initializeAsync() async {
     bool isDarkTheme = await cacheFactory.get('settings', 'theme') == 'Dark';
     rootBundle
@@ -255,16 +260,20 @@ class _MyMapState extends State<MyMap> {
     if (permissionGranted == loc.PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != loc.PermissionStatus.granted) {
-        // Location permission not granted, handle accordingly
-        return;
+        if (mounted) {
+          // Location permission not granted, handle accordingly
+          return;
+        }
       }
     }
 
     // Start listening for location updates
     location.onLocationChanged.listen((loc.LocationData _locationResult) {
-      setState(() {
-        currentLocation = _locationResult;
-      });
+      if (mounted) {
+        setState(() {
+          currentLocation = _locationResult;
+        });
+      }
     });
   }
 
