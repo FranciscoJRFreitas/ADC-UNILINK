@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -33,20 +33,32 @@ class _MyMapState extends State<MyMap> {
 
   String googleAPiKey = "AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g";
 
-  Set<Marker> markers = Set(); //markers for google map
-  Set<Marker> restmarkers = Set();
+  Set<Polygon> campusPolygon = Set();
+  Set<Marker> edMarkers = Set();
+  Set<Marker> restMarkers = Set();
+  Set<Marker> parkMarkers = Set();
+  Set<Marker> portMarkers = Set();
+  Set<Marker> servMarkers = Set();
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
 
   double distance = 0.0;
 
-  List<String> dropdownItems = ['Edificio', 'Restauraçao', 'Item 3'];
-  String selectedDropdownItem = 'Edificio';
+  List<String> dropdownItems = [
+    'Campus',
+    'Buildings',
+    'Restauration',
+    'Parking',
+    'Gates',
+    'Services'
+  ];
+  String selectedDropdownItem = 'Campus';
 
   String _mapStyle = '';
 
   @override
   void initState() {
     super.initState();
+    _loadMarkersFromJson();
     rootBundle.loadString('assets/json/map_style.json').then((string) {
       _mapStyle = string;
     });
@@ -56,7 +68,6 @@ class _MyMapState extends State<MyMap> {
       _listenerLocation();
       _listenLocation();
     }
-    _loadMarkers();
   }
 
   getDirections(double lat, double long) async {
@@ -146,11 +157,18 @@ class _MyMapState extends State<MyMap> {
                   target: LatLng(38.660999, -9.205094),
                   zoom: 17.0,
                 ),
-                markers: selectedDropdownItem == "Edificio"
-                    ? markers
-                    : selectedDropdownItem == "Restauraçao"
-                        ? restmarkers
-                        : Set(),
+                polygons: selectedDropdownItem == "Campus" ? campusPolygon : {},
+                markers: selectedDropdownItem == "Buildings"
+                    ? edMarkers
+                    : selectedDropdownItem == "Restauration"
+                        ? restMarkers
+                        : selectedDropdownItem == "Parking"
+                            ? parkMarkers
+                            : selectedDropdownItem == "Gates"
+                                ? portMarkers
+                                : selectedDropdownItem == "Services"
+                                    ? servMarkers
+                                    : Set(),
                 polylines: Set<Polyline>.of(polylines.values),
                 mapType: MapType.normal,
                 /*onMapCreated: (controller) {
@@ -218,407 +236,128 @@ class _MyMapState extends State<MyMap> {
     }
   }
 
-  void _loadMarkers() {
-    // Departements
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED1'),
-        position: LatLng(38.661275, -9.205565),
-        infoWindow: InfoWindow(
-          title: 'Edifício 1',
-          snippet: 'example',
-          onTap: () {
-            getDirections(38.661275, -9.205565);
-          },
-        ),
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
+  void _loadMarkersFromJson() async {
+    String campusJson =
+        await rootBundle.loadString('assets/json/map/Campus_de_Caparica.json');
+    String buildingsJson =
+        await rootBundle.loadString('assets/json/map/Edificios.json');
+    String eatingSpacesJson =
+        await rootBundle.loadString('assets/json/map/Espacos_de_refeicao.json');
+    String parkingLotsJson = await rootBundle
+        .loadString('assets/json/map/Parques_de_estacionamento.json');
+    String gatesJson =
+        await rootBundle.loadString('assets/json/map/Portarias.json');
+    String servicesJson =
+        await rootBundle.loadString('assets/json/map/Servicos.json');
+
+    List<dynamic> campusData = jsonDecode(campusJson)['features'];
+    List<dynamic> buildingsData = jsonDecode(buildingsJson)['features'];
+    List<dynamic> eatingSpacesData = jsonDecode(eatingSpacesJson)['features'];
+    List<dynamic> parkingLotsData = jsonDecode(parkingLotsJson)['features'];
+    List<dynamic> gatesData = jsonDecode(gatesJson)['features'];
+    List<dynamic> servicesData = jsonDecode(servicesJson)['features'];
+
+
+    List<LatLng> polygonPoints = [];
+    for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
+      double latitude = coordinates[1];
+      double longitude = coordinates[0];
+      polygonPoints.add(LatLng(latitude, longitude));
+    }
+
+    Polygon polygon = Polygon(
+      polygonId: PolygonId('campus_polygon'),
+      points: polygonPoints,
+      strokeColor: Colors.blue,
+      fillColor: Colors.blue.withOpacity(0.2),
+      strokeWidth: 2,
     );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED2'),
-        position: LatLng(38.661158, -9.203591),
-        infoWindow: InfoWindow(
-          title: 'Edifício 2',
-          snippet: 'example',
+
+    campusPolygon.add(polygon);
+
+    for (var feature in buildingsData) {
+      String name = feature['properties']['Name'];
+      List<dynamic> coordinates = feature['geometry']['coordinates'];
+      LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+      edMarkers.add(
+        Marker(
+          markerId: MarkerId(name),
+          position: latLng,
+          //icon: BitmapDescriptor.fromAssetImage(configuration, assetName),
+          //onTap: getDirections(),
+          infoWindow: InfoWindow(
+            title: name,
+            snippet: feature['properties']['description'] ?? '',
+          ),
         ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED3'),
-        position: LatLng(38.663218, -9.207174),
-        infoWindow: InfoWindow(
-          title: 'Edifício 3',
-          snippet: 'example',
+      );
+    }
+
+    for (var feature in eatingSpacesData) {
+      String name = feature['properties']['Name'];
+      List<dynamic> coordinates = feature['geometry']['coordinates'];
+      LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+      restMarkers.add(
+        Marker(
+          markerId: MarkerId(name),
+          position: latLng,
+          infoWindow: InfoWindow(
+            title: name,
+          ),
         ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED4'),
-        position: LatLng(38.662920, -9.207217),
-        infoWindow: InfoWindow(
-          title: 'Edifício 4',
-          snippet: 'example',
+      );
+    }
+
+    for (var feature in parkingLotsData) {
+      String name = feature['properties']['Name'];
+      List<dynamic> coordinates = feature['geometry']['coordinates'];
+      LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+      parkMarkers.add(
+        Marker(
+          markerId: MarkerId(name),
+          position: latLng,
+          infoWindow: InfoWindow(
+            title: name,
+          ),
         ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED5'),
-        position: LatLng(38.663352, -9.206885),
-        infoWindow: InfoWindow(
-          title: 'Edifício 5',
-          snippet: 'Auditório Caixa Geral de Depósitos',
+      );
+    }
+
+    for (var feature in gatesData) {
+      String name = feature['properties']['Name'];
+      List<dynamic> coordinates = feature['geometry']['coordinates'];
+      LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+      portMarkers.add(
+        Marker(
+          markerId: MarkerId(name),
+          position: latLng,
+          infoWindow: InfoWindow(
+            title: name,
+          ),
         ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED7'),
-        position: LatLng(38.660504, -9.205801),
-        infoWindow: InfoWindow(
-          title: 'Edifício 7',
-          snippet: 'example',
+      );
+    }
+
+    for (var feature in servicesData) {
+      String name = feature['properties']['Name'];
+      List<dynamic> coordinates = feature['geometry']['coordinates'];
+      LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+      servMarkers.add(
+        Marker(
+          markerId: MarkerId(name),
+          position: latLng,
+          infoWindow: InfoWindow(
+            title: name,
+          ),
         ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED8'),
-        position: LatLng(38.660095, -9.206643),
-        infoWindow: InfoWindow(
-          title: 'Edifício 8',
-          snippet: 'example',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED9'),
-        position: LatLng(38.660192, -9.207139),
-        infoWindow: InfoWindow(
-          title: 'Edifício 9',
-          snippet: 'example',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED10'),
-        position: LatLng(38.660422, -9.204882),
-        infoWindow: InfoWindow(
-          title: 'Edifício 10',
-          snippet: 'example',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED6'),
-        position: LatLng(38.662476, -9.201807),
-        infoWindow: InfoWindow(
-          title: 'Edifício 6',
-          snippet: 'Madan Parque',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('ED11'),
-        position: LatLng(38.662951, -9.206532),
-        infoWindow: InfoWindow(
-          title: 'Edifício 11',
-          snippet: 'Laboratório de e-Learning',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('EDD'),
-        position: LatLng(38.662263, -9.207646),
-        infoWindow: InfoWindow(
-          title: 'Edifício Departamental',
-          snippet: 'example',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('CEN'),
-        position: LatLng(38.659442, -9.203411),
-        infoWindow: InfoWindow(
-          title: 'CENIMAT',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('H1'),
-        position: LatLng(38.661682, -9.206876),
-        infoWindow: InfoWindow(
-          title: 'Hangar 1',
-          snippet: 'Associação de Estudantes & Bar "Tanto Faz"',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('H2'),
-        position: LatLng(38.661914, -9.206715),
-        infoWindow: InfoWindow(
-          title: 'Hangar 2',
-          snippet: 'Secção de Economato',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('H3'),
-        position: LatLng(38.662086, -9.206559),
-        infoWindow: InfoWindow(
-          title: 'Hangar 3',
-          snippet: 'Vicarte - Centro do Vidro e Cerâmica para as Artes',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('CAN'),
-        position: LatLng(38.661557, -9.204855),
-        infoWindow: InfoWindow(
-          title: 'Cantina',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('UNI1'),
-        position: LatLng(38.660133, -9.204044),
-        infoWindow: InfoWindow(
-          title: 'UNINOVA 1',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('UNI2'),
-        position: LatLng(38.659816, -9.203687),
-        infoWindow: InfoWindow(
-          title: 'UNINOVA 2',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('CEA'),
-        position: LatLng(38.662223, -9.206000),
-        infoWindow: InfoWindow(
-          title: 'CEA - Centro de Excelência do Ambiente',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('BIB'),
-        position: LatLng(38.662659, -9.205397),
-        infoWindow: InfoWindow(
-          title: 'Biblioteca',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('CRE'),
-        position: LatLng(38.662020, -9.204214),
-        infoWindow: InfoWindow(
-          title: 'Creche',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      ),
-    );
-    //restauracao
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('AL'),
-        position: LatLng(38.661956, -9.207895),
-        infoWindow: InfoWindow(
-          title: 'Alquimia',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('AL'),
-        position: LatLng(38.661956, -9.207895),
-        infoWindow: InfoWindow(
-          title: 'Alquimia',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('TTF'),
-        position: LatLng(38.661610, -9.206827),
-        infoWindow: InfoWindow(
-          title: 'Tanto Faz Bar Academico',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('CDP'),
-        position: LatLng(38.661738, -9.205498),
-        infoWindow: InfoWindow(
-          title: 'Casa Do Pessoal',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    /*restmarkers.add(
-      Marker(
-        markerId: MarkerId('MIN'),
-        position: LatLng(38.661364, -9.205387),
-        infoWindow: InfoWindow(
-          title: 'MiniNova',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );*/
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('BC'),
-        position: LatLng(38.662623, -9.205166),
-        infoWindow: InfoWindow(
-          title: 'Bar C@mpus',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('MS'),
-        position: LatLng(38.660143, -9.205479),
-        infoWindow: InfoWindow(
-          title: 'My Spot',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('BT'),
-        position: LatLng(38.661311, -9.204934),
-        infoWindow: InfoWindow(
-          title: 'Bar "Tia"',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    restmarkers.add(
-      Marker(
-        markerId: MarkerId('CANR'),
-        position: LatLng(38.661541, -9.204948),
-        infoWindow: InfoWindow(
-          title: 'Cantina',
-          snippet: '',
-        ),
-        // Optional: Set a custom icon for the marker
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      ),
-    );
-    //nucleos que cringe
-    // Set the state to update the map with the new markers
-    setState(() {}); // Draw route between markers
+      );
+    }
+
+    setState(() {});
   }
 }

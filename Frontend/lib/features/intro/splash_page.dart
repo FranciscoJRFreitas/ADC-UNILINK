@@ -10,8 +10,6 @@ import 'package:lottie/lottie.dart';
 
 import 'package:flutter/src/foundation/constants.dart';
 
-
-
 class SplashPage extends StatefulWidget {
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -23,7 +21,7 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     Timer(
-      const Duration(seconds: kIsWeb ? 0 : 0),
+      const Duration(seconds: kIsWeb ? 4 : 4),
       //TODO Changed for testing reasons
       () async {
         var loginB = await cacheFactory.get('settings', 'checkLogin');
@@ -83,12 +81,19 @@ class _SplashPageState extends State<SplashPage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
-            child: Lottie.asset(
-          'animation/NovaAnimation.mp4.lottie.json',
-          repeat: true,
-          reverse: false,
-        )),
+        body: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return Center(
+              child: Image.asset(
+                'animation/NovaAnimation.gif',
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                fit: BoxFit.cover,
+                repeat: ImageRepeat.repeat,
+              ),
+            );
+          },
+        ),
       ),
     );
   }

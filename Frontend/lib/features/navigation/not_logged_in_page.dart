@@ -3,7 +3,6 @@ import 'package:unilink2023/constants.dart';
 
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/map/MapPage.dart';
-import 'package:unilink2023/features/map/newMapPage.dart';
 import 'package:unilink2023/features/screen.dart';
 
 class NotLoggedInScreen extends StatefulWidget {
