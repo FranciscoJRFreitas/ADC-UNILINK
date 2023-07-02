@@ -82,7 +82,6 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                     .querySelector('.views-field-title .field-content a')!
                     .text ||
             newsItems.length != _newsPerPage)) {
-      print(newsItems.length != _newsPerPage);
       _hasNoMoreNews = true;
     }
   }
@@ -99,7 +98,6 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     if (itemsInCache.isNotEmpty && currentPageInCache > _page) {
       if (mounted) {
         setState(() {
-          print(itemsInCache);
           _page = currentPageInCache;
           _feedItems = itemsInCache;
           _filterNews();
@@ -114,7 +112,6 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
     try {
       List<dom.Element> newsItems = await getNewsItems(_page);
-      print(newsItems.length);
 
       int start = currentNewsInCache != 0 ? currentNewsInCache : 0;
 
@@ -138,9 +135,6 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       currentNewsInCache =
           int.parse(await cacheFactory.get('settings', 'currentNews'));
 
-      print(currentPageInCache);
-      print(currentNewsInCache);
-
       if (mounted) {
         setState(() {
           if (currentNewsInCache == _newsPerPage - 1 && !isFetched()) {
@@ -153,7 +147,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       }
 
       checkIfHasMoreNews(itemsInCache, newsItems);
-      if(isFetched()) return;
+      if (isFetched()) return;
     } catch (e) {
       if (mounted) {
         setState(() {

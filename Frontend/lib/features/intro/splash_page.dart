@@ -4,24 +4,27 @@ import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/features/intro/intro_page.dart';
 import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 import 'package:unilink2023/features/userManagement/presentation/userAuth/login_page.dart';
-import 'package:unilink2023/presentation/screen.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 import 'package:flutter/src/foundation/constants.dart';
 
 class SplashPage extends StatefulWidget {
+  final bool isDarkTheme;
+
+  SplashPage({required this.isDarkTheme});
+
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
 
 class _SplashPageState extends State<SplashPage> {
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     Timer(
-      const Duration(seconds: kIsWeb ? 4 : 4),
+      const Duration(milliseconds: kIsWeb ? 3500 : 2500),
       //TODO Changed for testing reasons
       () async {
         var loginB = await cacheFactory.get('settings', 'checkLogin');
@@ -75,6 +78,7 @@ class _SplashPageState extends State<SplashPage> {
       },
     );
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +89,13 @@ class _SplashPageState extends State<SplashPage> {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Center(
               child: Image.asset(
-                'animation/NovaAnimation.gif',
+                kIsWeb
+                    ? widget.isDarkTheme
+                        ? 'assets/animation/NOVAanimation-web_dark.gif'
+                        : 'assets/animation/NOVAanimation-web.gif'
+                    : widget.isDarkTheme
+                        ? 'assets/animation/NOVAanimation-mobile_dark.gif'
+                        : 'assets/animation/NOVAanimation-mobile.gif',
                 width: constraints.maxWidth,
                 height: constraints.maxHeight,
                 fit: BoxFit.cover,

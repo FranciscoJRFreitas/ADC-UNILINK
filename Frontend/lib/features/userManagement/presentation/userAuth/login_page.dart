@@ -337,7 +337,6 @@ Future<int> login(
       cacheFactory.setUser(user, token[0], password);
 
       cacheFactory.set('checkLogin', 'true');
-      cacheFactory.printDb();
 
       await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
       await Provider.of<UserNotifier>(context, listen: false).downloadData();

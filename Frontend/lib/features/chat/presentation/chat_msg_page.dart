@@ -893,7 +893,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         String? extension = pickedFile!.mimeType?.split("/")[1];
         extension == null
             ? extension = pickedFile!.path.split("/").last.split(".")[1]
-            : print("Extension was ook");
+            : print("Extension was ok");
         final Reference storageReference = FirebaseStorage.instance.ref().child(
             'GroupAttachements/${widget.groupId}/$generatedId.$extension');
 

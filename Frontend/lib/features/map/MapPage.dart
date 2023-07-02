@@ -6,7 +6,6 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -25,9 +24,10 @@ class _MyMapState extends State<MyMap> {
   late DatabaseReference _locationRef =
       FirebaseDatabase.instance.ref().child('location');
   GoogleMapController? mapController; //contrller for Google map
+  StreamSubscription<DatabaseEvent>? _locationSubscription;
+  List<DataSnapshot> _locationSnapshots = [];
   var latitude;
   var longitude;
-  var isDirections = false;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -58,7 +58,7 @@ class _MyMapState extends State<MyMap> {
   @override
   void initState() {
     super.initState();
-    _loadMarkersFromJson();
+    WidgetsBinding.instance.addPostFrameCallback((_) => initializeAsync());
     rootBundle.loadString('assets/json/map_style.json').then((string) {
       _mapStyle = string;
     });
@@ -67,7 +67,18 @@ class _MyMapState extends State<MyMap> {
 
     _loadMarkersFromJson();
   }
-
+  void initializeAsync() async {
+    bool isDarkTheme = await cacheFactory.get('settings', 'theme') == 'Dark';
+    rootBundle
+        .loadString(isDarkTheme
+        ? 'assets/json/map_style_dark.json'
+        : 'assets/json/map_style_.json')
+        .then((string) {
+      setState(() {
+        _mapStyle = string;
+      });
+    });
+  }
   getDirections(double? lat, double? long) async {
     print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
     if (lat != null && long != null && isDirections) {
@@ -250,6 +261,7 @@ class _MyMapState extends State<MyMap> {
     List<dynamic> gatesData = jsonDecode(gatesJson)['features'];
     List<dynamic> servicesData = jsonDecode(servicesJson)['features'];
 
+
     List<LatLng> polygonPoints = [];
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
       double latitude = coordinates[1];
@@ -276,6 +288,8 @@ class _MyMapState extends State<MyMap> {
         Marker(
           markerId: MarkerId(name),
           position: latLng,
+          //icon: BitmapDescriptor.fromAssetImage(configuration, assetName),
+          //onTap: getDirections(),
           infoWindow: InfoWindow(
             title: name,
             snippet: feature['properties']['description'] ?? '',
