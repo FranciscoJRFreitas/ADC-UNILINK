@@ -87,7 +87,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'UniLink',
       theme: themeNotifier.currentTheme,
-      home: SplashPage(isDarkTheme: themeNotifier.currentTheme == kDarkTheme),
+      home: SplashPage(),
     );
   }
 }

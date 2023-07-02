@@ -7,8 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:unilink2023/data/cache_factory_provider.dart';
+import '../../data/cache_factory_provider.dart';
+import '../../widgets/ToggleButton.dart';
 
 class MyMap extends StatefulWidget {
   final String userId;
@@ -21,14 +21,14 @@ class MyMap extends StatefulWidget {
 
 class _MyMapState extends State<MyMap> {
   final loc.Location location = loc.Location();
-  late GoogleMapController _controller;
+  late loc.LocationData currentLocation;
   late DatabaseReference _locationRef =
       FirebaseDatabase.instance.ref().child('location');
   GoogleMapController? mapController; //contrller for Google map
-  StreamSubscription<DatabaseEvent>? _locationSubscription;
-  List<DataSnapshot> _locationSnapshots = [];
   var latitude;
   var longitude;
+  var isDirections = false;
+  bool isSattelite = true;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -60,13 +60,18 @@ class _MyMapState extends State<MyMap> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => initializeAsync());
-    if (widget.userId == "") {
-      _requestPermission();
-      _getLocation();
-      _listenerLocation();
-      _listenLocation();
-    }
+    rootBundle.loadString('assets/json/map_style.json').then((string) {
+      _mapStyle = string;
+    });
+
+    _getLocation();
+
     _loadMarkersFromJson();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void initializeAsync() async {
@@ -82,30 +87,43 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
-  getDirections(double lat, double long) async {
-    List<LatLng> polylineCoordinates = [];
-    //List<Marker> markerList = markers.toList();
+  getDirections(double? lat, double? long) async {
+    print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
+    if (lat != null && long != null && isDirections) {
+      List<LatLng> polylineCoordinates = [];
 
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      googleAPiKey,
-      PointLatLng(latitude, longitude),
-      PointLatLng(lat, long),
-      travelMode: TravelMode.walking,
-    );
+      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        googleAPiKey,
+        PointLatLng(
+          currentLocation.latitude ?? 0.0,
+          currentLocation.longitude ?? 0.0,
+        ),
+        PointLatLng(lat, long),
+        travelMode: TravelMode.walking,
+      );
 
-    if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      if (result.points.isNotEmpty) {
+        result.points.forEach((PointLatLng point) {
+          polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+        });
+      } else {
+        print(result.errorMessage);
+      }
+
+      if (isDirections) {
+        addPolyLine(lat, long, polylineCoordinates);
+      } else
+        setState(() {
+          polylines = {}; // Clear polylines to stop showing directions
+        });
+    } else
+      setState(() {
+        polylines = {}; // Clear polylines to stop showing directions
       });
-    } else {
-      print(result.errorMessage);
-    }
-
-    //add to the list of poly line coordinates
-    addPolyLine(polylineCoordinates);
   }
 
-  addPolyLine(List<LatLng> polylineCoordinates) {
+  addPolyLine(
+      double destLat, double destLong, List<LatLng> polylineCoordinates) {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
@@ -115,6 +133,8 @@ class _MyMapState extends State<MyMap> {
     );
     polylines[id] = polyline;
     setState(() {});
+    getDirections(
+        destLat, destLong); // Call getDirections when polyline is added
   }
 
   @override
@@ -123,23 +143,8 @@ class _MyMapState extends State<MyMap> {
       body: StreamBuilder(
         stream: _locationRef.onValue,
         builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-          if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (widget.userId != "") {
-            final data =
-                snapshot.data?.snapshot.value as Map<dynamic, dynamic>?;
-
-            latitude = data?[widget.userId]?['latitude'];
-            longitude = data?[widget.userId]?['longitude'];
-
-            if (latitude == null || longitude == null) {
-              return Center(child: Text('Location not found'));
-            }
-          }
-          // Build the dropdown widget
           Widget dropdownWidget = Container(
-            alignment: Alignment.bottomCenter,
+            alignment: Alignment.topRight,
             child: DropdownButton<String>(
               value: selectedDropdownItem,
               dropdownColor: Colors.transparent,
@@ -168,7 +173,6 @@ class _MyMapState extends State<MyMap> {
                 initialCameraPosition: CameraPosition(
                   target: LatLng(38.660999, -9.205094),
                   zoom: 17.0,
-                  tilt: 60.0,
                 ),
                 polygons: selectedDropdownItem == "Campus" ? campusPolygon : {},
                 markers: selectedDropdownItem == "Buildings"
@@ -183,18 +187,53 @@ class _MyMapState extends State<MyMap> {
                                     ? servMarkers
                                     : Set(),
                 polylines: Set<Polyline>.of(polylines.values),
-                mapType: MapType.normal,
-                /*onMapCreated: (controller) {
-                  setState(() {
-                    mapController = controller;
-                  });
-                },*/
+                mapType: isSattelite ? MapType.satellite : MapType.normal,
               ),
               Positioned(
                 top: 10.0,
                 left: 10.0,
                 child: dropdownWidget,
               ),
+              Positioned(
+                top: 10.0,
+                right: 10.0,
+                child: Switch(
+                  value: isSattelite,
+                  onChanged: (value) {
+                    setState(() {
+                      isSattelite = value;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: Duration(milliseconds: 750),
+                        content: Text(
+                          isSattelite
+                              ? "Switched to Satellite mode"
+                              : "Switched to Normal mode",
+                        ),
+                      ),
+                    );
+                  },
+                  activeTrackColor:
+                      Theme.of(context).primaryColor.withOpacity(0.5),
+                  activeColor: Theme.of(context).primaryColor,
+                ),
+              ),
+              if (isDirections)
+                Positioned(
+                  bottom: 20.0,
+                  right: 20.0,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isDirections = false;
+                        polylines =
+                            {}; // Clear polylines to stop showing directions
+                      });
+                    },
+                    child: Text('Stop giving directions'),
+                  ),
+                ),
             ],
           );
         },
@@ -203,50 +242,39 @@ class _MyMapState extends State<MyMap> {
   }
 
   _getLocation() async {
-    try {
-      final loc.LocationData _locationResult = await location.getLocation();
-      final DatabaseReference locationRef =
-          FirebaseDatabase.instance.ref("location").child(widget.userId);
-      locationRef.child("latitude").set(_locationResult.latitude);
-      locationRef.child("longitude").set(_locationResult.longitude);
-    } catch (e) {
-      print(e);
-    }
-  }
+    bool serviceEnabled;
+    loc.PermissionStatus permissionGranted;
 
-  void _listenerLocation() {
-    _locationSubscription ??= _locationRef.onChildAdded.listen(
-      (DatabaseEvent event) {
-        if (event.snapshot.value != null) {
-          setState(() {
-            // Assuming _locationSnapshots is a List<DatabaseReference>
-            _locationSnapshots.add(event.snapshot);
-          });
+    // Check if location services are enabled
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        // Location services are disabled, handle accordingly
+        return;
+      }
+    }
+
+    // Check if location permission is granted
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == loc.PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != loc.PermissionStatus.granted) {
+        if (mounted) {
+          // Location permission not granted, handle accordingly
+          return;
         }
-      },
-    );
-  }
-
-  void _listenLocation() {
-    _locationRef.onChildAdded.listen(
-      (event) {
-        print('Location Event: $event');
-      },
-      onError: (error) {
-        print('Location Error: $error');
-      },
-    );
-  }
-
-  Future<void> _requestPermission() async {
-    var status = await Permission.location.request();
-    if (status.isGranted) {
-      print('Permission granted');
-    } else if (status.isDenied) {
-      _requestPermission();
-    } else if (status.isPermanentlyDenied) {
-      openAppSettings();
+      }
     }
+
+    // Start listening for location updates
+    location.onLocationChanged.listen((loc.LocationData _locationResult) {
+      if (mounted) {
+        setState(() {
+          currentLocation = _locationResult;
+        });
+      }
+    });
   }
 
   void _loadMarkersFromJson() async {
@@ -301,6 +329,16 @@ class _MyMapState extends State<MyMap> {
           infoWindow: InfoWindow(
             title: name,
             snippet: feature['properties']['description'] ?? '',
+            onTap: () async {
+              if (isDirections) {
+                setState(() {
+                  isDirections = false;
+                });
+                await Future.delayed(Duration(seconds: 1));
+              }
+              isDirections = true;
+              getDirections(latLng.latitude, latLng.longitude);
+            },
           ),
         ),
       );
@@ -317,6 +355,16 @@ class _MyMapState extends State<MyMap> {
           position: latLng,
           infoWindow: InfoWindow(
             title: name,
+            onTap: () async {
+              if (isDirections) {
+                setState(() {
+                  isDirections = false;
+                });
+                await Future.delayed(Duration(seconds: 1));
+              }
+              isDirections = true;
+              getDirections(latLng.latitude, latLng.longitude);
+            },
           ),
         ),
       );
@@ -333,6 +381,16 @@ class _MyMapState extends State<MyMap> {
           position: latLng,
           infoWindow: InfoWindow(
             title: name,
+            onTap: () async {
+              if (isDirections) {
+                setState(() {
+                  isDirections = false;
+                });
+                await Future.delayed(Duration(seconds: 1));
+              }
+              isDirections = true;
+              getDirections(latLng.latitude, latLng.longitude);
+            },
           ),
         ),
       );
@@ -349,6 +407,16 @@ class _MyMapState extends State<MyMap> {
           position: latLng,
           infoWindow: InfoWindow(
             title: name,
+            onTap: () async {
+              if (isDirections) {
+                setState(() {
+                  isDirections = false;
+                });
+                await Future.delayed(Duration(seconds: 1));
+              }
+              isDirections = true;
+              getDirections(latLng.latitude, latLng.longitude);
+            },
           ),
         ),
       );
@@ -365,6 +433,16 @@ class _MyMapState extends State<MyMap> {
           position: latLng,
           infoWindow: InfoWindow(
             title: name,
+            onTap: () async {
+              if (isDirections) {
+                setState(() {
+                  isDirections = false;
+                });
+                await Future.delayed(Duration(seconds: 1));
+              }
+              isDirections = true;
+              getDirections(latLng.latitude, latLng.longitude);
+            },
           ),
         ),
       );
