@@ -8,6 +8,7 @@ import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:unilink2023/data/cache_factory_provider.dart';
 
 class MyMap extends StatefulWidget {
   final String userId;
@@ -58,16 +59,27 @@ class _MyMapState extends State<MyMap> {
   @override
   void initState() {
     super.initState();
-    _loadMarkersFromJson();
-    rootBundle.loadString('assets/json/map_style.json').then((string) {
-      _mapStyle = string;
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => initializeAsync());
     if (widget.userId == "") {
       _requestPermission();
       _getLocation();
       _listenerLocation();
       _listenLocation();
     }
+    _loadMarkersFromJson();
+  }
+
+  void initializeAsync() async {
+    bool isDarkTheme = await cacheFactory.get('settings', 'theme') == 'Dark';
+    rootBundle
+        .loadString(isDarkTheme
+            ? 'assets/json/map_style_dark.json'
+            : 'assets/json/map_style_.json')
+        .then((string) {
+      setState(() {
+        _mapStyle = string;
+      });
+    });
   }
 
   getDirections(double lat, double long) async {
@@ -256,7 +268,6 @@ class _MyMapState extends State<MyMap> {
     List<dynamic> parkingLotsData = jsonDecode(parkingLotsJson)['features'];
     List<dynamic> gatesData = jsonDecode(gatesJson)['features'];
     List<dynamic> servicesData = jsonDecode(servicesJson)['features'];
-
 
     List<LatLng> polygonPoints = [];
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {

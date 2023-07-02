@@ -19,7 +19,7 @@ import '../../data/cache_factory_provider.dart';
 import '../../domain/UserNotifier.dart';
 import '../../domain/Token.dart';
 import '../userManagement/domain/User.dart';
-
+import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
@@ -35,8 +35,10 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState(index);
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
+  late AnimationController _controller;
   int _selectedIndex = 0;
+  int _bottomNavigationIndex = 0;
   List<String> _title = [
     "News",
     "Search",
@@ -52,6 +54,7 @@ class _MainScreenState extends State<MainScreen> {
     "Teacher",
     "Director",
   ];
+  late List<double> scales = List.filled(_widgetOptions().length, 1);
   late User _currentUser;
 
   DocumentReference picsRef =
@@ -64,12 +67,22 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   List<Widget> _widgetOptions() => [
-        NewsFeedPage(), //futuramente as news
-        SearchUsersPage(user: _currentUser),
-        ListUsersPage(user: _currentUser),
+        NewsFeedPage(), //0
+        SearchUsersPage(user: _currentUser), //1
+        ListUsersPage(user: _currentUser), //2
         /*ModifyAttributesPage(
           user: _currentUser,
           onUserUpdate: (updatedUser) {
@@ -78,16 +91,16 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
         ),*/
-        HomePage(),
-        ChangePasswordPage(),
-        RemoveAccountPage(),
-        ChatPage(user: _currentUser),
-        ContactsPage(),
-        SettingsPage(loggedIn: true),
-        SchedulePage(), //estudante
-        MyMap(userId: _currentUser.username),
-        Placeholder(), //professor
-        Placeholder(), //diretor
+        HomePage(), //3
+        ChangePasswordPage(), //4
+        RemoveAccountPage(), //5
+        ChatPage(user: _currentUser), //6
+        ContactsPage(), //7
+        SettingsPage(loggedIn: true), //8
+        SchedulePage(), //estudante //9
+        MyMap(userId: _currentUser.username), //10
+        Placeholder(), //professor //11
+        Placeholder(), //diretor //12
       ];
 
   Widget picture(BuildContext context) {
@@ -485,6 +498,105 @@ class _MainScreenState extends State<MainScreen> {
       ),
       //body: _widgetOptions()[_selectedIndex],
       body: getSelectedWidget(),
+      bottomNavigationBar: !kIsWeb
+          ? BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              unselectedItemColor: Theme.of(context).secondaryHeaderColor,
+              selectedItemColor: Theme.of(context).primaryColor,
+              currentIndex: _bottomNavigationIndex,
+              onTap: (index) {
+                setState(() {
+                  _bottomNavigationIndex = index;
+                  _selectedIndex = index == 2
+                      ? 10
+                      : index == 3
+                          ? 6
+                          : index == 4
+                              ? 8
+                              : index;
+                  scales[_selectedIndex] = 1;
+                  _controller.reverse();
+                  scales[_selectedIndex] = 0;
+                });
+                Future.delayed(const Duration(milliseconds: 250), () {
+                  setState(() {
+                    scales[index] = 1;
+                    _controller.forward();
+                  });
+                });
+              },
+              items: [
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.newspaper, 0, AxisDirection.up),
+                  label: 'News',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.search, 1, AxisDirection.right),
+                  label: 'Search',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.map, 10, AxisDirection.right),
+                  label: 'Map',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.chat, 6, AxisDirection.down),
+                  label: 'Chat',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.settings, 8, AxisDirection.left),
+                  label: 'Settings',
+                ),
+              ],
+            )
+          : null,
+    );
+  }
+
+  Widget _buildIcon(IconData icon, int index, AxisDirection direction) {
+    return _selectedIndex == index ? _applyAnimation(icon, index) : Icon(icon);
+  }
+
+  Widget _applyAnimation(IconData icon, int index) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_controller]),
+      builder: (context, child) {
+        if (index == 0) {
+          // For news icon
+          return Transform.translate(
+            offset: Offset(0, -5 * math.sin(_controller.value * math.pi * 2)),
+            child: child,
+          );
+        } else if (index == 1) {
+          // For search icon
+          return Transform.scale(
+            scale: 1.0 + (0.33 * _controller.value),
+            child: child,
+          );
+        } else if (index == 10) {
+          // For maps icon
+          return Transform.translate(
+            offset: Offset(-5 * math.sin(_controller.value * math.pi * 2), 0),
+            child: child,
+          );
+        } else if (index == 6) {
+          // For chat icon
+          return Transform.scale(
+            scale: 1.0 +
+                (_controller.status == AnimationStatus.forward ? 0.2 : -0.2) *
+                    _controller.value,
+            child: child,
+          );
+        } else if (index == 8) {
+          // If the icon is for settings
+          return Transform.rotate(
+            angle: _controller.value * 1.5 * math.pi, // For 270 degree rotation
+            child: child,
+          );
+        }
+        return child!;
+      },
+      child: Icon(icon),
     );
   }
 

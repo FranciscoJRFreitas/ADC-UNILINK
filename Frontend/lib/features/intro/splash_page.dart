@@ -21,7 +21,7 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     Timer(
-      const Duration(seconds: kIsWeb ? 4 : 4),
+      const Duration(milliseconds: kIsWeb ? 3500 : 3500),
       //TODO Changed for testing reasons
       () async {
         var loginB = await cacheFactory.get('settings', 'checkLogin');
@@ -84,8 +84,8 @@ class _SplashPageState extends State<SplashPage> {
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Center(
-              child: Image.asset(
-                'animation/NovaAnimation.gif',
+              child: Image.asset(kIsWeb ? 
+                'assets/animation/NOVAanimation-web.gif' : 'assets/animation/NOVAanimation-mobile.gif',
                 width: constraints.maxWidth,
                 height: constraints.maxHeight,
                 fit: BoxFit.cover,
