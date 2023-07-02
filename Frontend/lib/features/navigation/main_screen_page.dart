@@ -61,7 +61,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
   _MainScreenState(int? index) {
-    if (index != null) _selectedIndex = index;
+    if (index != null) {
+      _selectedIndex = index;
+      _bottomNavigationIndex = index == 10
+                      ? 2
+                      : index == 6
+                          ? 3
+                          : index == 8
+                              ? 4
+                              : 0;
+    }
   }
 
   @override

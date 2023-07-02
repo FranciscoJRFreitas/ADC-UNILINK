@@ -21,7 +21,6 @@ void main() async {
   disablerFactory.disable();
 
   cacheFactory.initDB();
-  cacheFactory.printDb();
   if (await cacheFactory.get("settings", "theme") == null)
     cacheFactory.set('theme', 'Dark');
   if (await cacheFactory.get("settings", "index") == null)
@@ -31,7 +30,6 @@ void main() async {
   if (await cacheFactory.get("settings", "currentNews") == null)
     cacheFactory.set('currentNews', "0");
 
-  cacheFactory.printDb();
   dynamic themeSetting = await cacheFactory.get('settings', 'theme');
 
   runApp(
@@ -89,7 +87,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'UniLink',
       theme: themeNotifier.currentTheme,
-      home: SplashPage(),
+      home: SplashPage(isDarkTheme: themeNotifier.currentTheme == kDarkTheme),
     );
   }
 }
