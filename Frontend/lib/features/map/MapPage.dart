@@ -8,6 +8,7 @@ import 'package:location/location.dart' as loc;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
 import '../../data/cache_factory_provider.dart';
+import '../../widgets/ToggleButton.dart';
 
 class MyMap extends StatefulWidget {
   final String userId;
@@ -27,6 +28,7 @@ class _MyMapState extends State<MyMap> {
   var latitude;
   var longitude;
   var isDirections = false;
+  bool isSattelite = true;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -155,37 +157,73 @@ class _MyMapState extends State<MyMap> {
             ),
           );
 
-          // This is where we'll add the dropdown
           return Stack(
             children: <Widget>[
-              GoogleMap(
-                onMapCreated: (GoogleMapController controller) {
-                  controller.setMapStyle(_mapStyle);
-                },
-                zoomGesturesEnabled: true,
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(38.660999, -9.205094),
-                  zoom: 17.0,
+              MouseRegion(
+                cursor: SystemMouseCursors.basic,
+                child: AbsorbPointer(
+                  absorbing: true,
+                  child: GoogleMap(
+                    onMapCreated: (GoogleMapController controller) {
+                      controller.setMapStyle(_mapStyle);
+                    },
+                    zoomGesturesEnabled: true,
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(38.660999, -9.205094),
+                      zoom: 17.0,
+                    ),
+                    polygons:
+                        selectedDropdownItem == "Campus" ? campusPolygon : {},
+                    markers: selectedDropdownItem == "Buildings"
+                        ? edMarkers
+                        : selectedDropdownItem == "Restauration"
+                            ? restMarkers
+                            : selectedDropdownItem == "Parking"
+                                ? parkMarkers
+                                : selectedDropdownItem == "Gates"
+                                    ? portMarkers
+                                    : selectedDropdownItem == "Services"
+                                        ? servMarkers
+                                        : Set(),
+                    polylines: Set<Polyline>.of(polylines.values),
+                    mapType: isSattelite ? MapType.satellite : MapType.normal,
+                  ),
                 ),
-                polygons: selectedDropdownItem == "Campus" ? campusPolygon : {},
-                markers: selectedDropdownItem == "Buildings"
-                    ? edMarkers
-                    : selectedDropdownItem == "Restauration"
-                        ? restMarkers
-                        : selectedDropdownItem == "Parking"
-                            ? parkMarkers
-                            : selectedDropdownItem == "Gates"
-                                ? portMarkers
-                                : selectedDropdownItem == "Services"
-                                    ? servMarkers
-                                    : Set(),
-                polylines: Set<Polyline>.of(polylines.values),
-                mapType: MapType.satellite,
               ),
               Positioned(
                 top: 10.0,
                 left: 10.0,
                 child: dropdownWidget,
+              ),
+              Positioned(
+                top: 10.0,
+                right: 10.0,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    child: Switch(
+                      value: isSattelite,
+                      onChanged: (value) {
+                        setState(() {
+                          isSattelite = value;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            duration: Duration(milliseconds: 750),
+                            content: Text(
+                              isSattelite
+                                  ? "Switched to Satellite mode"
+                                  : "Switched to Normal mode",
+                            ),
+                          ),
+                        );
+                      },
+                      activeTrackColor:
+                          Theme.of(context).primaryColor.withOpacity(0.5),
+                      activeColor: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
               ),
               if (isDirections)
                 Positioned(
