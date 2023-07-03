@@ -5,16 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
 import '../../data/cache_factory_provider.dart';
-import '../../widgets/ToggleButton.dart';
+import 'dart:math';
 
 class MyMap extends StatefulWidget {
-  final String userId;
-
-  MyMap({required this.userId});
-
   @override
   _MyMapState createState() => _MyMapState();
 }
@@ -22,13 +17,13 @@ class MyMap extends StatefulWidget {
 class _MyMapState extends State<MyMap> {
   final loc.Location location = loc.Location();
   late loc.LocationData currentLocation;
-  late DatabaseReference _locationRef =
-      FirebaseDatabase.instance.ref().child('location');
   GoogleMapController? mapController; //contrller for Google map
   var latitude;
   var longitude;
   var isDirections = false;
   bool isSattelite = true;
+  bool isFirst = true;
+  var center = LatLng(38.660999, -9.205094);
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -52,7 +47,6 @@ class _MyMapState extends State<MyMap> {
     'Gates',
     'Services'
   ];
-  String selectedDropdownItem = 'Campus';
 
   String _mapStyle = '';
 
@@ -89,6 +83,7 @@ class _MyMapState extends State<MyMap> {
 
   getDirections(double? lat, double? long) async {
     print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
+    print(distance);
     if (lat != null && long != null && isDirections) {
       List<LatLng> polylineCoordinates = [];
 
@@ -99,7 +94,7 @@ class _MyMapState extends State<MyMap> {
           currentLocation.longitude ?? 0.0,
         ),
         PointLatLng(lat, long),
-        travelMode: TravelMode.walking,
+        travelMode: distance >= 0.75 ? TravelMode.driving : TravelMode.walking,
       );
 
       if (result.points.isNotEmpty) {
@@ -122,8 +117,19 @@ class _MyMapState extends State<MyMap> {
       });
   }
 
+  double calculateDistance(double? lat, double? long) {
+    var p = 0.017453292519943295;
+    var a = 0.5 -
+        cos((center.latitude - lat!) * p) / 2 +
+        cos(lat * p) *
+            cos(center.latitude * p) *
+            (1 - cos((center.longitude - long!) * p)) /
+            2;
+    return 12742 * asin(sqrt(a));
+  }
+
   addPolyLine(
-      double destLat, double destLong, List<LatLng> polylineCoordinates) {
+      double destLat, double destLong, List<LatLng> polylineCoordinates) async {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
@@ -133,67 +139,104 @@ class _MyMapState extends State<MyMap> {
     );
     polylines[id] = polyline;
     setState(() {});
+    await Future.delayed(Duration(seconds: 2));
     getDirections(
         destLat, destLong); // Call getDirections when polyline is added
+  }
+
+  List<String> selectedDropdownItems = [];
+
+  Set<Marker> markers = Set();
+
+  void updateMarkers() {
+    print(selectedDropdownItems);
+    // Update the markers set based on the selectedDropdownItems
+    markers.clear();
+
+    if (selectedDropdownItems.contains("Buildings")) {
+      markers.addAll(edMarkers);
+    }
+    if (selectedDropdownItems.contains('Restauration')) {
+      markers.addAll(restMarkers);
+    }
+    if (selectedDropdownItems.contains('Parking')) {
+      markers.addAll(parkMarkers);
+    }
+    if (selectedDropdownItems.contains('Gates')) {
+      markers.addAll(portMarkers);
+    }
+    if (selectedDropdownItems.contains('Services')) {
+      markers.addAll(servMarkers);
+    }
+    print(markers);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
-        stream: _locationRef.onValue,
-        builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-          Widget dropdownWidget = Container(
-            alignment: Alignment.topRight,
-            child: DropdownButton<String>(
-              value: selectedDropdownItem,
-              dropdownColor: Colors.transparent,
-              items: dropdownItems.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedDropdownItem = newValue!;
-                });
-              },
-            ),
-          );
-
-          // This is where we'll add the dropdown
+      body: Builder(
+        builder: (BuildContext context) {
           return Stack(
-            children: <Widget>[
+            children: [
               GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
                   controller.setMapStyle(_mapStyle);
                 },
                 zoomGesturesEnabled: true,
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(38.660999, -9.205094),
+                  target: center,
                   zoom: 17.0,
-                  tilt: 20,
                 ),
-                polygons: selectedDropdownItem == "Campus" ? campusPolygon : {},
-                markers: selectedDropdownItem == "Buildings"
-                    ? edMarkers
-                    : selectedDropdownItem == "Restauration"
-                        ? restMarkers
-                        : selectedDropdownItem == "Parking"
-                            ? parkMarkers
-                            : selectedDropdownItem == "Gates"
-                                ? portMarkers
-                                : selectedDropdownItem == "Services"
-                                    ? servMarkers
-                                    : Set(),
+                polygons: selectedDropdownItems.contains("Campus")
+                    ? campusPolygon
+                    : {},
+                markers: markers,
                 polylines: Set<Polyline>.of(polylines.values),
                 mapType: isSattelite ? MapType.satellite : MapType.normal,
               ),
               Positioned(
                 top: 10.0,
                 left: 10.0,
-                child: dropdownWidget,
+                child: Container(
+                  alignment: Alignment.topRight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return StatefulBuilder(
+                            builder: (BuildContext context, setState) {
+                              return AlertDialog(
+                                title: Text('Select Options'),
+                                backgroundColor:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                content: MultiSelectDropdownDialog(
+                                  dropdownItems: dropdownItems,
+                                  selectedItems: selectedDropdownItems,
+                                  onChanged: (List<String> newSelectedItems) {
+                                    setState(() {
+                                      selectedDropdownItems = newSelectedItems;
+                                    });
+                                    updateMarkers();
+                                  },
+                                ),
+                                actions: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('Done'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                    child: Text('Open Dropdown'),
+                  ),
+                ),
               ),
               Positioned(
                 top: 10.0,
@@ -209,8 +252,8 @@ class _MyMapState extends State<MyMap> {
                         duration: Duration(milliseconds: 750),
                         content: Text(
                           isSattelite
-                              ? "Switched to Satellite mode"
-                              : "Switched to Normal mode",
+                              ? 'Switched to Satellite mode'
+                              : 'Switched to Normal mode',
                         ),
                       ),
                     );
@@ -220,10 +263,11 @@ class _MyMapState extends State<MyMap> {
                   activeColor: Theme.of(context).primaryColor,
                 ),
               ),
-              if (isDirections)
-                Positioned(
-                  bottom: 20.0,
-                  right: 20.0,
+              Positioned(
+                bottom: 20.0,
+                right: 20.0,
+                child: Visibility(
+                  visible: isDirections,
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -235,6 +279,7 @@ class _MyMapState extends State<MyMap> {
                     child: Text('Stop giving directions'),
                   ),
                 ),
+              ),
             ],
           );
         },
@@ -273,6 +318,11 @@ class _MyMapState extends State<MyMap> {
       if (mounted) {
         setState(() {
           currentLocation = _locationResult;
+          if (isFirst) {
+            isFirst = false;
+            distance = calculateDistance(
+                currentLocation.latitude, currentLocation.longitude);
+          }
         });
       }
     });
@@ -450,5 +500,61 @@ class _MyMapState extends State<MyMap> {
     }
 
     setState(() {});
+  }
+}
+
+class MultiSelectDropdownDialog extends StatefulWidget {
+  final List<String> dropdownItems;
+  final List<String> selectedItems;
+  final ValueChanged<List<String>> onChanged;
+
+  MultiSelectDropdownDialog({
+    required this.dropdownItems,
+    required this.selectedItems,
+    required this.onChanged,
+  });
+
+  @override
+  _MultiSelectDropdownDialogState createState() =>
+      _MultiSelectDropdownDialogState();
+}
+
+class _MultiSelectDropdownDialogState extends State<MultiSelectDropdownDialog> {
+  List<String> selectedItems = [];
+
+  @override
+  void initState() {
+    selectedItems.addAll(widget.selectedItems);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: widget.dropdownItems.map((String item) {
+          return CheckboxListTile(
+            title: Text(item),
+            value: selectedItems.contains(item),
+            onChanged: (bool? value) {
+              setState(() {
+                if (value == true) {
+                  selectedItems.add(item);
+                  print(item);
+                } else {
+                  selectedItems.remove(item);
+                }
+              });
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    widget.onChanged(selectedItems);
+    super.dispose();
   }
 }

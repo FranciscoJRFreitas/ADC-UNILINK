@@ -33,7 +33,7 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
         SettingsPage(
           loggedIn: false,
         ),
-        MyMap(userId: ""),
+        MyMap(),
         WelcomePage(),
       ];
 
