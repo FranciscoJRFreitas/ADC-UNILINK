@@ -22,6 +22,7 @@ class _MyMapState extends State<MyMap> {
   var longitude;
   var isDirections = false;
   bool isSattelite = true;
+  bool isFirst = true;
   var center = LatLng(38.660999, -9.205094);
 
   PolylinePoints polylinePoints = PolylinePoints();
@@ -82,6 +83,7 @@ class _MyMapState extends State<MyMap> {
 
   getDirections(double? lat, double? long) async {
     print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
+    print(distance);
     if (lat != null && long != null && isDirections) {
       List<LatLng> polylineCoordinates = [];
 
@@ -316,8 +318,11 @@ class _MyMapState extends State<MyMap> {
       if (mounted) {
         setState(() {
           currentLocation = _locationResult;
-          distance = calculateDistance(
-              currentLocation.latitude, currentLocation.longitude);
+          if (isFirst) {
+            isFirst = false;
+            distance = calculateDistance(
+                currentLocation.latitude, currentLocation.longitude);
+          }
         });
       }
     });
