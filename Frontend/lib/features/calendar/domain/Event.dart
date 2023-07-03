@@ -23,7 +23,7 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
       creator: json['creator'] ?? '',
-      type: json['type'] ?? '',
+      type: json['type'],
       title: json['title'],
       description: json['description'],
       startTime: DateTime.parse(json['startTime']),
@@ -34,8 +34,8 @@ class Event {
   factory Event.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
-      creator: data['creator'] ?? '',
-      type: data['type'],
+      creator: data['creator'],
+      type: _parseEventType(data['type']),
       title: data['title'],
       description: data['description'],
       startTime: DateTime.parse(data['startTime']),
@@ -58,6 +58,7 @@ class Event {
   static EventType _parseEventType(String? eventTypeString) {
     if (eventTypeString != null) {
       eventTypeString = eventTypeString.toLowerCase();
+      print(eventTypeString);
 
       switch (eventTypeString) {
         case 'academic':

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
@@ -38,6 +39,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
   late Future<Uint8List?> groupPic;
   late List<MembersData> members = [];
   late List<Event> events = [];
@@ -386,7 +388,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             Container(
               padding: EdgeInsets.only(top: 10, bottom: 80),
               child: SizedBox(
-                height: 100,
+                height: 150,
                 child: ListView.builder(
                     itemCount: events.length,
                     itemBuilder: (context, index) {
@@ -395,6 +397,14 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                         color: Colors.transparent,
                         child: GestureDetector(
                           onTap: () {
+                            print(event.creator);
+                            print(event.description);
+                            print(event.title);
+                            print(event.startTime);
+                            print(event.endTime);
+                            print(event.type);
+                            print(event.location);
+
                             // if (widget.username != member.username) {
                             //   Navigator.of(context).push(
                             //     MaterialPageRoute(
@@ -417,10 +427,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                               padding: EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 8),
                               child: ListTile(
-                                // leading:
-                                //     profilePicture2(context, member.username),
                                 title: Text(
-                                  'Evento',
+                                  event.title +
+                                      " (${_getEventTypeString(event.type)} Event)",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 subtitle: Column(
@@ -429,27 +438,40 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                     SizedBox(height: 8),
                                     Row(
                                       children: [
-                                        Icon(Icons.alternate_email, size: 20),
+                                        Icon(Icons.description, size: 20),
                                         SizedBox(width: 5),
-                                        Text('Start'),
+                                        Text(event.description),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8),
+                                    if (event.location != null) ...[
+                                      Row(
+                                        children: [
+                                          Icon(Icons.place, size: 20),
+                                          SizedBox(width: 5),
+                                          Text('Location: ' + event.location!),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                    ],
+                                    Row(
+                                      children: [
+                                        Icon(Icons.schedule, size: 20),
+                                        SizedBox(width: 5),
+                                        Text(
+                                            "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
                                       ],
                                     ),
                                     SizedBox(height: 8),
                                     Row(
                                       children: [
-                                        Icon(Icons.alternate_email, size: 20),
+                                        Icon(Icons.schedule, size: 20),
                                         SizedBox(width: 5),
-                                        Text('End'),
+                                        Text(
+                                            "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
                                       ],
                                     ),
                                     SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.alternate_email, size: 20),
-                                        SizedBox(width: 5),
-                                        Text('Location'),
-                                      ],
-                                    ),
                                   ],
                                 ),
                               ),
@@ -759,6 +781,13 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     controller: descriptionController,
                     title: "",
                   ),
+                  LineTextField(
+                    //Text for now (add Dropdown for Buildings)
+                    icon: Icons.place,
+                    lableText: "Event Location",
+                    controller: locationController,
+                    title: "",
+                  ),
                   SizedBox(
                     height: 10,
                   ),
@@ -793,7 +822,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                           startController.text,
                           endController.text,
                           widget.groupId,
-                          "", //add Location controller
+                          locationController.text, //add Location controller
                           _showErrorSnackbar);
                       Navigator.of(context).pop();
                     }
@@ -845,7 +874,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     {
                       removeEvent(
                           context,
-                          "",//Need a way to get eventId
+                          "", //Need a way to get eventId
                           widget.groupId,
                           _showErrorSnackbar);
                       Navigator.of(context).pop();
@@ -1095,10 +1124,8 @@ Future<void> leaveGroup(
   String userId,
   void Function(String, bool) showErrorSnackbar,
 ) async {
-  final url = kBaseUrl + "rest/chat/leave?groupId=" +
-      groupId +
-      "&userId=" +
-      userId;
+  final url =
+      kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
   final tokenID = await cacheFactory.get('users', 'token');
   Token token = new Token(tokenID: tokenID, username: userId);
 
