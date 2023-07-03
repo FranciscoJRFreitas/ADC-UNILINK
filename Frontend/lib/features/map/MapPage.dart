@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter/services.dart';
 import '../../data/cache_factory_provider.dart';
+import 'dart:math';
 
 class MyMap extends StatefulWidget {
   @override
@@ -21,6 +22,7 @@ class _MyMapState extends State<MyMap> {
   var longitude;
   var isDirections = false;
   bool isSattelite = true;
+  var center = LatLng(38.660999, -9.205094);
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -90,7 +92,7 @@ class _MyMapState extends State<MyMap> {
           currentLocation.longitude ?? 0.0,
         ),
         PointLatLng(lat, long),
-        travelMode: TravelMode.walking,
+        travelMode: distance >= 0.75 ? TravelMode.driving : TravelMode.walking,
       );
 
       if (result.points.isNotEmpty) {
@@ -113,8 +115,19 @@ class _MyMapState extends State<MyMap> {
       });
   }
 
+  double calculateDistance(double? lat, double? long) {
+    var p = 0.017453292519943295;
+    var a = 0.5 -
+        cos((center.latitude - lat!) * p) / 2 +
+        cos(lat * p) *
+            cos(center.latitude * p) *
+            (1 - cos((center.longitude - long!) * p)) /
+            2;
+    return 12742 * asin(sqrt(a));
+  }
+
   addPolyLine(
-      double destLat, double destLong, List<LatLng> polylineCoordinates) {
+      double destLat, double destLong, List<LatLng> polylineCoordinates) async {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
@@ -124,6 +137,7 @@ class _MyMapState extends State<MyMap> {
     );
     polylines[id] = polyline;
     setState(() {});
+    await Future.delayed(Duration(seconds: 2));
     getDirections(
         destLat, destLong); // Call getDirections when polyline is added
   }
@@ -168,7 +182,7 @@ class _MyMapState extends State<MyMap> {
                 },
                 zoomGesturesEnabled: true,
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(38.660999, -9.205094),
+                  target: center,
                   zoom: 17.0,
                 ),
                 polygons: selectedDropdownItems.contains("Campus")
@@ -302,6 +316,8 @@ class _MyMapState extends State<MyMap> {
       if (mounted) {
         setState(() {
           currentLocation = _locationResult;
+          distance = calculateDistance(
+              currentLocation.latitude, currentLocation.longitude);
         });
       }
     });
