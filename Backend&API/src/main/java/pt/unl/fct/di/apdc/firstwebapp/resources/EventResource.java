@@ -1,6 +1,8 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.*;
 
@@ -37,43 +39,38 @@ public class EventResource {
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        String eventID = UUID.randomUUID().toString();
-
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
-        Key eventKey = datastore.newKeyFactory().setKind("Event").newKey(eventID);
+
         Transaction txn = datastore.newTransaction();
         try {
-            Entity event = txn.get(eventKey);
             Entity originalToken = txn.get(tokenKey);
-
-            if (event != null) {
-                txn.rollback();
-                return Response.status(Response.Status.CONFLICT).entity("Event id already exists.").build();
-            }
 
             if (originalToken == null) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
 
-            event = Entity.newBuilder(eventKey)
-                    .set("event_creator", data.creator)
-                    .set("event_title", data.title)
-                    .set("event_description", data.description)
-                    .set("event_start_time", data.startTime)
-                    .set("event_end_time", data.endTime)
-                    .build();
+//            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+//                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+//            }
+            DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
+            DatabaseReference newEventRef = eventsRef.child(data.groupID).push(); // Generate a unique ID for the new chat
+
+            // Set the data for the new chat
+            newEventRef.child("creator").setValueAsync(data.creator);
+            newEventRef.child("description").setValueAsync(data.description);
+            newEventRef.child("title").setValueAsync(data.title);
+            newEventRef.child("startTime").setValueAsync(data.startTime);
+            newEventRef.child("endTime").setValueAsync(data.endTime);
 
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("event_title", data.title);
+            responseData.put("event_groupID", data.groupID);
             responseData.put("event_creator", data.creator);
             responseData.put("event_description", data.description);
             responseData.put("event_start_time", data.startTime);
             responseData.put("event_end_time", data.endTime);
-
-            txn.add(event);
-            txn.commit();
 
             return Response.ok(g.toJson(responseData)).build();
 
@@ -89,7 +86,7 @@ public class EventResource {
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response removeEvent(@QueryParam("eventID") String eventID, @Context HttpHeaders headers) {
+    public Response removeEvent(@QueryParam("eventID") String eventID,@QueryParam("groupID") String groupID, @Context HttpHeaders headers) {
 
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
@@ -97,7 +94,6 @@ public class EventResource {
 
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
-        Key eventKey = datastore.newKeyFactory().setKind("Event").newKey(eventID);
         Transaction txn = datastore.newTransaction();
         try {
             Entity originalToken = txn.get(tokenKey);
@@ -106,15 +102,14 @@ public class EventResource {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
             }
-            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-            }
+//            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+//                txn.rollback();
+//                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+//            }
+            DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events").child(groupID);
+            eventsRef.child(eventID).removeValueAsync();
 
-            txn.delete(eventKey);
-            txn.commit();
-
-            return Response.ok().build();
+            return Response.ok("{}").build();
 
         } catch (Exception e) {
             txn.rollback();

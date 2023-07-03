@@ -171,6 +171,7 @@ class _MyMapState extends State<MyMap> {
                 initialCameraPosition: CameraPosition(
                   target: LatLng(38.660999, -9.205094),
                   zoom: 17.0,
+                  tilt: 20,
                 ),
                 polygons: selectedDropdownItems.contains("Campus")
                     ? campusPolygon
