@@ -64,12 +64,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
-                      ? 2
-                      : index == 6
-                          ? 3
-                          : index == 8
-                              ? 4
-                              : 0;
+          ? 2
+          : index == 6
+              ? 3
+              : index == 8
+                  ? 4
+                  : 0;
     }
   }
 
@@ -107,7 +107,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(), //estudante //9
-        MyMap(userId: _currentUser.username), //10
+        MyMap(), //10
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
       ];
