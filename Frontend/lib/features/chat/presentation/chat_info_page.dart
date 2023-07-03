@@ -343,6 +343,27 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               ),
             ),
           ),
+          Padding(
+            padding: EdgeInsets.only(left: 15.0),
+            child: TextButton.icon(
+              icon: Icon(
+                Icons.event_busy,
+                color: Theme.of(context).secondaryHeaderColor,
+                size: 20,
+              ),
+              label: Text('Remove event',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Colors.white)),
+              onPressed: () {
+                eventPopUpDialog(context);
+              },
+              style: TextButton.styleFrom(
+                minimumSize: Size(50, 50),
+              ),
+            ),
+          ),
           SizedBox(height: 5),
           Divider(
             thickness: 1,
@@ -650,7 +671,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     {
                       createEvent(context, titleController.text,
                           descriptionController.text, startController.text,
-                          endController.text, _showErrorSnackbar);
+                          endController.text, widget.groupId, _showErrorSnackbar);
                       Navigator.of(context).pop();
 
                     }
@@ -803,9 +824,10 @@ Future<void> inviteGroup(
 Future<void> createEvent(
     BuildContext context,
     String title,
-    String  description,
+    String description,
     String start,
     String end,
+    String groupID,
     void Function(String, bool) showErrorSnackbar,
     ) async {
   final url = "https://unilink23.oa.r.appspot.com/rest/events/add";
@@ -825,6 +847,7 @@ Future<void> createEvent(
       'startTime': start,
       'endTime': end,
       'creator': storedUsername,
+      'groupID': groupID,
     }),
   );
 
