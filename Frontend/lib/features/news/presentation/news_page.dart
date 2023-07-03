@@ -235,33 +235,33 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
               },
               itemBuilder: (BuildContext context, int index) {
                 if (index >= _filteredFeedItems.length) {
-                  return _isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : SizedBox.shrink();
-                }
+                    return _isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : SizedBox.shrink();
+                  }
                 final item = _filteredFeedItems[index];
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 400),
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () => _launchURL(item.pageUrl ?? ''),
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 400),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () => _launchURL(item.pageUrl ?? ''),
                         // When a tag is clicked, call _toggleTag.
-                        child: CustomCard(
-                          imageUrl: item.imageUrl,
-                          tags: item.tags,
-                          content: item.content,
-                          title: item.title,
-                          date: item.date,
+                          child: CustomCard(
+                            imageUrl: item.imageUrl,
+                            tags: item.tags,
+                            content: item.content,
+                            title: item.title,
+                            date: item.date,
                           index: index,
-                          onTagClick: _toggleTag,
-                          isSingleCrossAxisCount: isSingleCrossAxisCount,
+                            onTagClick: _toggleTag,
+                            isSingleCrossAxisCount: isSingleCrossAxisCount,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
+                  );
               },
             ),
           ),
@@ -278,7 +278,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                     crossAxisCount: crossAxisCount > 0 ? crossAxisCount : 1,
                     crossAxisSpacing: 4.0,
                     mainAxisSpacing: 4.0,
-                    childAspectRatio: crossAxisCount > 1 ? 0.6 : 1.2,
+                    childAspectRatio: 0.75,
                   ),
                   itemCount: _filteredFeedItems.length + (!isFetched() ? 1 : 0),
                   itemBuilder: (BuildContext context, int index) {
@@ -316,14 +316,50 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   Widget _buildColumn() {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 6.0, // gap between adjacent tags
+      runSpacing: 6.0, // gap between lines of tags
       children: _activeTags
-          .map((tag) => Chip(
-                label: Text(tag),
-                deleteIcon: Icon(Icons.close),
-                onDeleted: () => _toggleTag(tag),
-              ))
+          .map(
+            (tag) => MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => _toggleTag(tag),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black54),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize
+                          .min, // Set this to make the row only as wide as the children need
+                      children: [
+                        Text(
+                          "#" + tag,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                            width: 8.0), // Space between the text and the icon
+                        GestureDetector(
+                          onTap: () => _toggleTag(tag),
+                          child: Icon(
+                            Icons.close,
+                            size: 16.0, // You can adjust the size as needed
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
           .toList(),
     );
   }

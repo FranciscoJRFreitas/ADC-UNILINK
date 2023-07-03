@@ -118,20 +118,39 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
                       ),
                     SizedBox(height: 10.0),
                     Wrap(
-                      spacing: 6.0, // gap between tags
-                      runSpacing: 6.0, // gap between lines
+                      spacing: 6.0, // gap between adjacent tags
+                      runSpacing: 6.0, // gap between lines of tags
                       children: widget.tags != null && widget.tags!.isNotEmpty
                           ? widget.tags!
-                              .map((tag) => GestureDetector(
-                                    onTap: () => widget.onTagClick?.call(tag),
-                                    child: Chip(label: Text(tag!)),
-                                  ))
+                              .map(
+                                (tag) => GestureDetector(
+                                  onTap: () => widget.onTagClick?.call(tag),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black54),
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    child: Text(
+                                      "#" + tag!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                              fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              )
                               .toList()
                           : <Widget>[],
                     ),
                     SizedBox(height: 8.0),
                     Text(
                       widget.content ?? 'N/A',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 4,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium!
