@@ -364,27 +364,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(left: 15.0),
-              child: TextButton.icon(
-                icon: Icon(
-                  Icons.event_busy,
-                  color: Theme.of(context).secondaryHeaderColor,
-                  size: 20,
-                ),
-                label: Text('Remove event',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: Colors.white)),
-                onPressed: () {
-                  _removeEventPopUpDialog(context);
-                },
-                style: TextButton.styleFrom(
-                  minimumSize: Size(50, 50),
-                ),
-              ),
-            ),
             Container(
               padding: EdgeInsets.only(top: 10, bottom: 80),
               child: SizedBox(
@@ -397,14 +376,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                         color: Colors.transparent,
                         child: GestureDetector(
                           onTap: () {
-                            print(event.creator);
-                            print(event.description);
-                            print(event.title);
-                            print(event.startTime);
-                            print(event.endTime);
-                            print(event.type);
-                            print(event.location);
-
                             // if (widget.username != member.username) {
                             //   Navigator.of(context).push(
                             //     MaterialPageRoute(
@@ -418,64 +389,82 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             //   );
                             // }
                           },
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            elevation: 5,
-                            margin: EdgeInsets.symmetric(vertical: 8),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 8),
-                              child: ListTile(
-                                title: Text(
-                                  event.title +
-                                      " (${_getEventTypeString(event.type)} Event)",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.description, size: 20),
-                                        SizedBox(width: 5),
-                                        Text(event.description),
-                                      ],
+                          child: Stack(
+                            children: <Widget>[
+                              Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 8),
+                                  child: ListTile(
+                                    title: Text(
+                                      event.title +
+                                          " (${_getEventTypeString(event.type)} Event)",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    SizedBox(height: 8),
-                                    if (event.location != null) ...[
-                                      Row(
-                                        children: [
-                                          Icon(Icons.place, size: 20),
-                                          SizedBox(width: 5),
-                                          Text('Location: ' + event.location!),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.description, size: 20),
+                                            SizedBox(width: 5),
+                                            Text(event.description),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        if (event.location != null) ...[
+                                          Row(
+                                            children: [
+                                              Icon(Icons.place, size: 20),
+                                              SizedBox(width: 5),
+                                              Text('Location: ' +
+                                                  event.location!),
+                                            ],
+                                          ),
+                                          SizedBox(height: 8),
                                         ],
-                                      ),
-                                      SizedBox(height: 8),
-                                    ],
-                                    Row(
-                                      children: [
-                                        Icon(Icons.schedule, size: 20),
-                                        SizedBox(width: 5),
-                                        Text(
-                                            "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.schedule, size: 20),
+                                            SizedBox(width: 5),
+                                            Text(
+                                                "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.schedule, size: 20),
+                                            SizedBox(width: 5),
+                                            Text(
+                                                "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
                                       ],
                                     ),
-                                    SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.schedule, size: 20),
-                                        SizedBox(width: 5),
-                                        Text(
-                                            "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
-                                      ],
-                                    ),
-                                    SizedBox(height: 8),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
+                              Positioned(
+                                top: 0,
+                                bottom: 0,
+                                right: 20,
+                                child: IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    _removeEventPopUpDialog(context);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -860,12 +849,10 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  LineTextField(
-                    icon: Icons.title,
-                    lableText: 'Event Title',
-                    controller: titleController,
-                    title: "",
-                  ),
+                  Text(
+                    "Are you sure you want remove this event? This action is irreversible.",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  )
                 ],
               ),
               actions: [
@@ -882,7 +869,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
-                  child: const Text("REMOVE"),
+                  child: const Text("CONFIRM"),
                 ),
                 ElevatedButton(
                   onPressed: () {
