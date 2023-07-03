@@ -346,7 +346,7 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
     String userId,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/chat/leave?groupId=" +
+    final url = kBaseUrl + "rest/chat/leave?groupId=" +
         groupId +
         "&userId=" +
         userId;
