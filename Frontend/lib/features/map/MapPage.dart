@@ -6,9 +6,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../data/cache_factory_provider.dart';
-import '../../domain/MarkersNotifier.dart';
 
 class MyMap extends StatefulWidget {
   @override
@@ -60,7 +58,6 @@ class _MyMapState extends State<MyMap> {
     _getLocation();
 
     _loadMarkersFromJson();
-    _updateMarkers();
   }
 
   @override
@@ -135,7 +132,9 @@ class _MyMapState extends State<MyMap> {
 
   Set<Marker> markers = Set();
 
-  void _updateMarkers() async {
+  void updateMarkers() {
+    print(selectedDropdownItems);
+    // Update the markers set based on the selectedDropdownItems
     markers.clear();
 
     if (selectedDropdownItems.contains("Buildings")) {
@@ -153,7 +152,7 @@ class _MyMapState extends State<MyMap> {
     if (selectedDropdownItems.contains('Services')) {
       markers.addAll(servMarkers);
     }
-    Provider.of<MarkersNotifier>(context, listen: false).updateMarkers(markers);
+    print(markers);
   }
 
   @override
@@ -171,12 +170,11 @@ class _MyMapState extends State<MyMap> {
                 initialCameraPosition: CameraPosition(
                   target: LatLng(38.660999, -9.205094),
                   zoom: 17.0,
-                  tilt: 20,
                 ),
                 polygons: selectedDropdownItems.contains("Campus")
                     ? campusPolygon
                     : {},
-                markers: Provider.of<MarkersNotifier>(context).markers,
+                markers: markers,
                 polylines: Set<Polyline>.of(polylines.values),
                 mapType: isSattelite ? MapType.satellite : MapType.normal,
               ),
@@ -203,12 +201,12 @@ class _MyMapState extends State<MyMap> {
                                     setState(() {
                                       selectedDropdownItems = newSelectedItems;
                                     });
+                                    updateMarkers();
                                   },
                                 ),
                                 actions: [
                                   ElevatedButton(
-                                    onPressed: () async {
-                                      _updateMarkers();
+                                    onPressed: () {
                                       Navigator.of(context).pop();
                                     },
                                     child: Text('Done'),
@@ -247,6 +245,23 @@ class _MyMapState extends State<MyMap> {
                   activeTrackColor:
                       Theme.of(context).primaryColor.withOpacity(0.5),
                   activeColor: Theme.of(context).primaryColor,
+                ),
+              ),
+              Positioned(
+                bottom: 20.0,
+                right: 20.0,
+                child: Visibility(
+                  visible: isDirections,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isDirections = false;
+                        polylines =
+                            {}; // Clear polylines to stop showing directions
+                      });
+                    },
+                    child: Text('Stop giving directions'),
+                  ),
                 ),
               ),
             ],
