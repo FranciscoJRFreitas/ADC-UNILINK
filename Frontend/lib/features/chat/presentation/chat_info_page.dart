@@ -367,7 +367,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             Container(
               padding: EdgeInsets.only(top: 10, bottom: 80),
               child: SizedBox(
-                height: 150,
+                height: 250,
                 child: ListView.builder(
                     itemCount: events.length,
                     itemBuilder: (context, index) {
@@ -453,6 +453,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                   ),
                                 ),
                               ),
+                              if(isAdmin)
                               Positioned(
                                 top: 0,
                                 bottom: 0,
