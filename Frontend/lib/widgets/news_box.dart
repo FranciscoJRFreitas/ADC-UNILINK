@@ -56,12 +56,12 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Color cardColor = widget.index % 2 == 0
+    /*Color cardColor = widget.index % 2 == 0
         ? Theme.of(context).primaryColor
         : Theme.of(context)
             .primaryColor
             .withGreen(Theme.of(context).primaryColor.green - 40)
-            .withRed(Theme.of(context).primaryColor.red - 10);
+            .withRed(Theme.of(context).primaryColor.red - 10);*/
     return LayoutBuilder(builder: (context, constraints) {
       // Calculate available height and width
       final double availableHeight = constraints.maxHeight;
@@ -84,7 +84,7 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(15),
           ),
           elevation: 5,
-          color: cardColor,
+          color: Theme.of(context).primaryColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -100,7 +100,6 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
               ),
               Container(
                 padding: const EdgeInsets.all(8.0),
-                color: cardColor,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

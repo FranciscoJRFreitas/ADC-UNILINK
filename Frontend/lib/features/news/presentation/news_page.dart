@@ -7,6 +7,9 @@ import '../../../application/fetchNews.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:provider/provider.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
+import 'package:unilink2023/constants.dart';
 
 class NewsFeedPage extends StatefulWidget {
   const NewsFeedPage({Key? key}) : super(key: key);
@@ -221,7 +224,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
     final maxItemWidth = 400.0;
     final crossAxisCount = (width / maxItemWidth).floor();
     final isSingleCrossAxisCount = crossAxisCount == 1;
-
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
     return Column(
       children: [
         _buildColumn(),
@@ -235,33 +238,33 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
               },
               itemBuilder: (BuildContext context, int index) {
                 if (index >= _filteredFeedItems.length) {
-                    return _isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : SizedBox.shrink();
-                  }
+                  return _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : SizedBox.shrink();
+                }
                 final item = _filteredFeedItems[index];
-                  return Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 400),
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () => _launchURL(item.pageUrl ?? ''),
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 400),
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => _launchURL(item.pageUrl ?? ''),
                         // When a tag is clicked, call _toggleTag.
-                          child: CustomCard(
-                            imageUrl: item.imageUrl,
-                            tags: item.tags,
-                            content: item.content,
-                            title: item.title,
-                            date: item.date,
+                        child: CustomCard(
+                          imageUrl: item.imageUrl,
+                          tags: item.tags,
+                          content: item.content,
+                          title: item.title,
+                          date: item.date,
                           index: index,
-                            onTagClick: _toggleTag,
-                            isSingleCrossAxisCount: isSingleCrossAxisCount,
-                          ),
+                          onTagClick: _toggleTag,
+                          isSingleCrossAxisCount: isSingleCrossAxisCount,
                         ),
                       ),
                     ),
-                  );
+                  ),
+                );
               },
             ),
           ),

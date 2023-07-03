@@ -5,7 +5,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
 
-
 class SchedulePage extends StatefulWidget {
   @override
   _SchedulePageState createState() => _SchedulePageState();
@@ -63,7 +62,9 @@ class _SchedulePageState extends State<SchedulePage> {
               return Column(
                 children: daySchedule['classes'].map<Widget>((classData) {
                   return ListTile(
-                    title: Text(classData['name']),
+                    title: Text(
+                      classData['name'],
+                    ),
                     subtitle: Text(
                         '${classData['startTime']} - ${classData['endTime']}'),
                   );

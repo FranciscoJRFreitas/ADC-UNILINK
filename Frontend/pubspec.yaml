@@ -21,6 +21,7 @@ version: 1.0.0+1
 environment:
   sdk: ">=2.19.4 <3.0.0"
 
+
 dependencies:
   flutter:
     sdk: flutter
@@ -71,7 +72,7 @@ flutter_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon/ICON_UNILINK-03.png"
-
+ 
   #adaptive_icon_background: '#6FAF4C'
 
    
