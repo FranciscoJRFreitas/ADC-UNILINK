@@ -351,10 +351,12 @@ Future<int> login(
       if (page == "Contacts") index = 7;
       if (page == "Map") index = 10;
 
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => MainScreen(index: index)),
+        (Route<dynamic> route) => false,
       );
+
       showErrorSnackbar("Login Successful!", false, true);
     } else {
       // Handle unexpected error

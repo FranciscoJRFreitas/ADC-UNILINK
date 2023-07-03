@@ -9,6 +9,7 @@ import 'dart:convert';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/domain/Token.dart';
@@ -690,7 +691,7 @@ class _ChatPageState extends State<ChatPage> {
     String description,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = "https://unilink23.oa.r.appspot.com/rest/chat/create";
+    final url = kBaseUrl + "rest/chat/create";
     final tokenID = await cacheFactory.get('users', 'token');
     final storedUsername = await cacheFactory.get('users', 'username');
     Token token = new Token(tokenID: tokenID, username: storedUsername);

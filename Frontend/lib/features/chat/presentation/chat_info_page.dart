@@ -6,15 +6,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
+import 'package:unilink2023/widgets/LineComboBox.dart';
+import 'package:unilink2023/widgets/LineDateField.dart';
+import 'package:unilink2023/widgets/LineTextField.dart';
+import 'package:unilink2023/widgets/my_date_event_field.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../data/cache_factory_provider.dart';
 import '../../../domain/Token.dart';
+import '../../../widgets/LineDateTimeField.dart';
 
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
@@ -32,13 +39,17 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
   late Future<Uint8List?> groupPic;
   late List<MembersData> members = [];
+  late List<Event> events = [];
   late DatabaseReference membersRef;
   late DatabaseReference chatsRef;
   late String desc = "";
   late bool isAdmin = false;
   late MembersData? memberData;
+  List<EventType> eventTypes = EventType.values;
+  String _selectedEventType = 'Academic';
 
   @override
   void initState() {
@@ -101,6 +112,18 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
       setState(() {
         desc = chatsData["description"];
+      });
+    });
+
+    DatabaseReference eventsRef =
+        FirebaseDatabase.instance.ref().child('events').child(widget.groupId);
+    eventsRef.onChildAdded.listen((event) {
+      setState(() {
+        String? id = event.snapshot.key; // Here is how you get the key
+        Event currentEvent = id != null
+            ? Event.fromSnapshotId(id, event.snapshot)
+            : Event.fromSnapshot(event.snapshot);
+        events.add(currentEvent);
       });
     });
   }
@@ -322,53 +345,142 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             color: Style.lightBlue,
           ),
           SizedBox(height: 5),
-          Padding(
-            padding: EdgeInsets.only(left: 15.0),
-            child: TextButton.icon(
-              icon: Icon(
-                Icons.event,
-                color: Theme.of(context).secondaryHeaderColor,
-                size: 20,
-              ),
-              label: Text('Add event',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: Colors.white)),
-              onPressed: () {
-                eventPopUpDialog(context);
-              },
-              style: TextButton.styleFrom(
-                minimumSize: Size(50, 50),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 15.0),
-            child: TextButton.icon(
-              icon: Icon(
-                Icons.event_busy,
-                color: Theme.of(context).secondaryHeaderColor,
-                size: 20,
-              ),
-              label: Text('Remove event',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: Colors.white)),
-              onPressed: () {
-                eventPopUpDialog(context);
-              },
-              style: TextButton.styleFrom(
-                minimumSize: Size(50, 50),
+          if (isAdmin) ...[
+            Padding(
+              padding: EdgeInsets.only(left: 15.0),
+              child: TextButton.icon(
+                icon: Icon(
+                  Icons.event,
+                  color: Theme.of(context).secondaryHeaderColor,
+                  size: 20,
+                ),
+                label: Text('Add event',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: Colors.white)),
+                onPressed: () {
+                  _createEventPopUpDialog(context);
+                },
+                style: TextButton.styleFrom(
+                  minimumSize: Size(50, 50),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 5),
-          Divider(
-            thickness: 1,
-            color: Style.lightBlue,
-          ),
+            Container(
+              padding: EdgeInsets.only(top: 10, bottom: 80),
+              child: SizedBox(
+                height: 250,
+                child: ListView.builder(
+                    itemCount: events.length,
+                    itemBuilder: (context, index) {
+                      Event event = events[index];
+                      return Material(
+                        color: Colors.transparent,
+                        child: GestureDetector(
+                          onTap: () {
+                            // if (widget.username != member.username) {
+                            //   Navigator.of(context).push(
+                            //     MaterialPageRoute(
+                            //       builder: (context) => ChatMemberInfo(
+                            //         isAdmin: isAdmin,
+                            //         sessionUsername: widget.username,
+                            //         groupId: widget.groupId,
+                            //         member: member,
+                            //       ),
+                            //     ),
+                            //   );
+                            // }
+                          },
+                          child: Stack(
+                            children: <Widget>[
+                              Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 8),
+                                  child: ListTile(
+                                    title: Text(
+                                      event.title +
+                                          " (${_getEventTypeString(event.type)} Event)",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.description, size: 20),
+                                            SizedBox(width: 5),
+                                            Text(event.description),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        if (event.location != null) ...[
+                                          Row(
+                                            children: [
+                                              Icon(Icons.place, size: 20),
+                                              SizedBox(width: 5),
+                                              Text('Location: ' +
+                                                  event.location!),
+                                            ],
+                                          ),
+                                          SizedBox(height: 8),
+                                        ],
+                                        Row(
+                                          children: [
+                                            Icon(Icons.schedule, size: 20),
+                                            SizedBox(width: 5),
+                                            Text(
+                                                "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.schedule, size: 20),
+                                            SizedBox(width: 5),
+                                            Text(
+                                                "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (isAdmin)
+                                Positioned(
+                                  top: 0,
+                                  bottom: 0,
+                                  right: 20,
+                                  child: IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      _removeEventPopUpDialog(context, event.id!);
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+            SizedBox(height: 5),
+            Divider(
+              thickness: 1,
+              color: Style.lightBlue,
+            ),
+          ],
           SizedBox(height: 5),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -399,7 +511,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                   ),
                 ),
-
               if (kIsWeb)
                 Padding(
                   padding: EdgeInsets.only(left: 15.0),
@@ -459,7 +570,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             padding: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 8),
                             child: ListTile(
-                              leading: profilePicture2(context, member.username),
+                              leading:
+                                  profilePicture2(context, member.username),
                               title: Text(
                                 '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -624,7 +736,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
     );
   }
 
-  eventPopUpDialog(BuildContext context) {
+  _createEventPopUpDialog(BuildContext context) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -639,29 +751,55 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MyTextField(
-                    small: false,
-                    hintText: 'Title',
-                    inputType: TextInputType.text,
+                  LineComboBox(
+                    selectedValue: _selectedEventType,
+                    items:
+                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                    icon: Icons.type_specimen,
+                    onChanged: (dynamic newValue) {
+                      setState(() {
+                        _selectedEventType = newValue;
+                      });
+                    },
+                  ),
+                  LineTextField(
+                    icon: Icons.title,
+                    lableText: 'Event Title',
                     controller: titleController,
+                    title: "",
                   ),
-                  MyTextField(
-                    small: false,
-                    hintText: 'Description',
-                    inputType: TextInputType.text,
+                  LineTextField(
+                    icon: Icons.description,
+                    lableText: "Event Description",
                     controller: descriptionController,
+                    title: "",
                   ),
-                  MyTextField(
-                    small: false,
-                    hintText: 'Start',
-                    inputType: TextInputType.text,
+                  LineTextField(
+                    //Text for now (add Dropdown for Buildings)
+                    icon: Icons.place,
+                    lableText: "Event Location",
+                    controller: locationController,
+                    title: "",
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  LineDateTimeField(
+                    icon: Icons.schedule,
                     controller: startController,
+                    hintText: "Event Start Time",
+                    firstDate: DateTime.now().subtract(Duration(days: 30)),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
-                  MyTextField(
-                    small: false,
-                    hintText: 'End',
-                    inputType: TextInputType.text,
+                  SizedBox(
+                    height: 20,
+                  ),
+                  LineDateTimeField(
+                    icon: Icons.schedule,
                     controller: endController,
+                    hintText: "Event End Time",
+                    firstDate: DateTime.now().subtract(Duration(days: 30)),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
                 ],
               ),
@@ -669,11 +807,17 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 ElevatedButton(
                   onPressed: () async {
                     {
-                      createEvent(context, titleController.text,
-                          descriptionController.text, startController.text,
-                          endController.text, widget.groupId, _showErrorSnackbar);
+                      createEvent(
+                          context,
+                          _selectedEventType,
+                          titleController.text,
+                          descriptionController.text,
+                          startController.text,
+                          endController.text,
+                          widget.groupId,
+                          locationController.text, //add Location controller
+                          _showErrorSnackbar);
                       Navigator.of(context).pop();
-
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -692,6 +836,86 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             );
           }));
         });
+  }
+
+  _removeEventPopUpDialog(BuildContext context, String eventId) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: const Text(
+                "Remove an event",
+                textAlign: TextAlign.left,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Are you sure you want remove this event? This action is irreversible.",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  )
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () async {
+                    {
+                      removeEvent(
+                          context,
+                          eventId, //Need a way to get eventId
+                          widget.groupId,
+                          _showErrorSnackbar);
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CONFIRM"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
+              ],
+            );
+          }));
+        });
+  }
+
+  static String _getEventTypeString(EventType eventType) {
+    switch (eventType) {
+      case EventType.academic:
+        return 'Academic';
+      case EventType.entertainment:
+        return 'Entertainment';
+      case EventType.faire:
+        return 'Faire';
+      case EventType.athletics:
+        return 'Athletics';
+      case EventType.competition:
+        return 'Competition';
+      case EventType.party:
+        return 'Party';
+      case EventType.ceremony:
+        return 'Ceremony';
+      case EventType.conference:
+        return 'Conference';
+      case EventType.lecture:
+        return 'Lecture';
+      case EventType.meeting:
+        return 'Meeting';
+      case EventType.workshop:
+        return 'Workshop';
+      case EventType.exhibit:
+        return 'Exhibit';
+    }
   }
 
   Future<Uint8List?> downloadData(String username) async {
@@ -792,9 +1016,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
       ),
     );
   }
-
 }
-
 
 Future<void> inviteGroup(
   BuildContext context,
@@ -802,10 +1024,8 @@ Future<void> inviteGroup(
   String userId,
   void Function(String, bool) showErrorSnackbar,
 ) async {
-  final url = "https://unilink23.oa.r.appspot.com/rest/chat/invite?groupId=" +
-      groupId +
-      "&userId=" +
-      userId;
+  final url =
+      kBaseUrl + "rest/chat/invite?groupId=" + groupId + "&userId=" + userId;
   final tokenID = await cacheFactory.get('users', 'token');
   final storedUsername = await cacheFactory.get('users', 'username');
   Token token = new Token(tokenID: tokenID, username: storedUsername);
@@ -821,16 +1041,19 @@ Future<void> inviteGroup(
     showErrorSnackbar('Error sending the invite!', true);
   }
 }
+
 Future<void> createEvent(
-    BuildContext context,
-    String title,
-    String description,
-    String start,
-    String end,
-    String groupID,
-    void Function(String, bool) showErrorSnackbar,
-    ) async {
-  final url = "https://unilink23.oa.r.appspot.com/rest/events/add";
+  BuildContext context,
+  String type,
+  String title,
+  String description,
+  String start,
+  String end,
+  String groupID,
+  String location,
+  void Function(String, bool) showErrorSnackbar,
+) async {
+  final url = kBaseUrl + "rest/events/add";
   final tokenID = await cacheFactory.get('users', 'token');
   final storedUsername = await cacheFactory.get('users', 'username');
   Token token = new Token(tokenID: tokenID, username: storedUsername);
@@ -843,21 +1066,48 @@ Future<void> createEvent(
     },
     body: jsonEncode({
       'title': title,
+      'type': type,
       'description': description,
       'startTime': start,
       'endTime': end,
       'creator': storedUsername,
       'groupID': groupID,
+      'location': location
     }),
   );
 
   if (response.statusCode == 200) {
     showErrorSnackbar('Created an event successfully!', false);
   } else {
-    showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    showErrorSnackbar('Failed to create an event: ${response.body}', true);
   }
 }
 
+Future<void> removeEvent(
+  BuildContext context,
+  String eventId,
+  String groupId,
+  void Function(String, bool) showErrorSnackbar,
+) async {
+  final url = kBaseUrl + "rest/events/delete?eventId=$eventId&groupId=$groupId";
+  final tokenID = await cacheFactory.get('users', 'token');
+  final storedUsername = await cacheFactory.get('users', 'username');
+  Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+  final response = await http.delete(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${json.encode(token.toJson())}'
+    },
+  );
+
+  if (response.statusCode == 200) {
+    showErrorSnackbar('Removed successfully!', false);
+  } else {
+    showErrorSnackbar('Failed to remove the event: ${response.body}', true);
+  }
+}
 
 Future<void> leaveGroup(
   BuildContext context,
@@ -865,10 +1115,8 @@ Future<void> leaveGroup(
   String userId,
   void Function(String, bool) showErrorSnackbar,
 ) async {
-  final url = "https://unilink23.oa.r.appspot.com/rest/chat/leave?groupId=" +
-      groupId +
-      "&userId=" +
-      userId;
+  final url =
+      kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
   final tokenID = await cacheFactory.get('users', 'token');
   Token token = new Token(tokenID: tokenID, username: userId);
 

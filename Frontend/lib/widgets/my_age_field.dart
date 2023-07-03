@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // ignore: must_be_immutable
-class regAge extends StatefulWidget {
-  regAge({
+class RegAge extends StatefulWidget {
+  RegAge({
     Key? key,
     required this.textColor,
     required this.controller,
@@ -14,10 +14,10 @@ class regAge extends StatefulWidget {
   bool wasPicked = false;
 
   @override
-  State<regAge> createState() => _regAgeState();
+  State<RegAge> createState() => _RegAgeState();
 }
 
-class _regAgeState extends State<regAge> {
+class _RegAgeState extends State<RegAge> {
   @override
   Widget build(BuildContext context) {
     return TextField(

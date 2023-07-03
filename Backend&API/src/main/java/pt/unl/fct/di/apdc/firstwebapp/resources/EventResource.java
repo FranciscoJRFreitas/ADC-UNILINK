@@ -59,18 +59,23 @@ public class EventResource {
 
             // Set the data for the new chat
             newEventRef.child("creator").setValueAsync(data.creator);
-            newEventRef.child("description").setValueAsync(data.description);
+            newEventRef.child("type").setValueAsync(data.type);
             newEventRef.child("title").setValueAsync(data.title);
+            newEventRef.child("description").setValueAsync(data.description);
             newEventRef.child("startTime").setValueAsync(data.startTime);
             newEventRef.child("endTime").setValueAsync(data.endTime);
+            newEventRef.child("location").setValueAsync(data.location);
 
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("event_title", data.title);
+            responseData.put("event_type", data.type);
             responseData.put("event_groupID", data.groupID);
             responseData.put("event_creator", data.creator);
             responseData.put("event_description", data.description);
             responseData.put("event_start_time", data.startTime);
             responseData.put("event_end_time", data.endTime);
+            responseData.put("event_location", data.location);
+
 
             return Response.ok(g.toJson(responseData)).build();
 

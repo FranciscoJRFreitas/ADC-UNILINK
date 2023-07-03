@@ -20,7 +20,6 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     Timer(
       const Duration(milliseconds: kIsWeb ? 3500 : 2500),
@@ -48,7 +47,7 @@ class _SplashPageState extends State<SplashPage> {
               if (response != 200) {
                 cacheFactory.removeLoginCache();
 
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => NotLoggedInScreen(index: index),
@@ -59,7 +58,7 @@ class _SplashPageState extends State<SplashPage> {
               print("Error in users cache.");
             }
           } else {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => NotLoggedInScreen(index: index),
@@ -67,7 +66,7 @@ class _SplashPageState extends State<SplashPage> {
             );
           }
         } else {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => IntroPage(),

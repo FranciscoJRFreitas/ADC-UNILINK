@@ -108,7 +108,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(), //estudante //9
-        MyMap(userId: _currentUser.username), //10
+        MyMap(), //10
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
       ];
@@ -717,11 +717,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       if (page == "Contacts") index = 1;
       if (page == "Map") index = 3;
 
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => NotLoggedInScreen(index: index)),
+        (Route<dynamic> route) => false,
       );
+
       showErrorSnackbar('${response.body}', false);
     } else {
       showErrorSnackbar('${response.body}', true);

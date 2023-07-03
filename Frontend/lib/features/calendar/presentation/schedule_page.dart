@@ -36,8 +36,8 @@ class _SchedulePageState extends State<SchedulePage> {
       body: Column(
         children: [
           TableCalendar(
-            firstDay: DateTime.utc(2022, 6, 19), // assuming it's a Monday
-            lastDay: DateTime.utc(2024, 6, 23), // assuming it's a Friday
+            firstDay: DateTime.utc(2022, 6, 19),
+            lastDay: DateTime.utc(2024, 6, 23),
             focusedDay: focusedDay,
             calendarFormat: format,
             onFormatChanged: (CalendarFormat _format) {
@@ -139,7 +139,7 @@ class _SchedulePageState extends State<SchedulePage> {
                               }
                             },
                             child: Text(
-                              'Start Time: ${DateFormat('yyyy-MM-dd – kk:mm').format(startTime)}',
+                              'Start Time: ${DateFormat('yyyy-MM-dd HH:mm').format(startTime)}',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
@@ -172,7 +172,7 @@ class _SchedulePageState extends State<SchedulePage> {
                               }
                             },
                             child: Text(
-                              'End Time: ${DateFormat('yyyy-MM-dd – kk:mm').format(endTime)}',
+                              'End Time: ${DateFormat('yyyy-MM-dd HH:mm').format(endTime)}',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
@@ -203,10 +203,12 @@ class _SchedulePageState extends State<SchedulePage> {
                     onPressed: () {
                       Navigator.of(context).pop(
                         Event(
+                          type: EventType.academic,//add controller
                           title: titleController.text,
                           description: descriptionController.text,
                           startTime: startTime,
                           endTime: endTime,
+                          location: "",
                         ),
                       );
                     },

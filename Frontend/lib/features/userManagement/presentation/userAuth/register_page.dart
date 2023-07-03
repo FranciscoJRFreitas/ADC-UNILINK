@@ -247,7 +247,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           SizedBox(
                             height: 10,
                           ),
-                          regAge(
+                          RegAge(
                             textColor: Theme.of(context).secondaryHeaderColor,
                             controller: registration_dateController,
                           ),
