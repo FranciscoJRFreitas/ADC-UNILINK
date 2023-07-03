@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 
 class Event {
+  final String? id;
   final EventType type;
   final String title;
   final String description;
@@ -10,6 +11,7 @@ class Event {
   final String? location;
 
   Event({
+    this.id,
     this.creator,
     required this.type,
     required this.title,
@@ -31,6 +33,20 @@ class Event {
       location: json['location'] ?? '',
     );
   }
+  factory Event.fromSnapshotId(String id, DataSnapshot snapshot) {
+    final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+    return Event(
+      id: id,
+      creator: data['creator'],
+      type: _parseEventType(data['type']),
+      title: data['title'],
+      description: data['description'],
+      startTime: DateTime.parse(data['startTime']),
+      endTime: DateTime.parse(data['endTime']),
+      location: data['location'] ?? '',
+    );
+  }
+
   factory Event.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
@@ -43,6 +59,9 @@ class Event {
       location: data['location'] ?? '',
     );
   }
+
+
+
   Map<String, dynamic> toJson() {
     return {
       'creator': creator,

@@ -119,7 +119,10 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         FirebaseDatabase.instance.ref().child('events').child(widget.groupId);
     eventsRef.onChildAdded.listen((event) {
       setState(() {
-        Event currentEvent = Event.fromSnapshot(event.snapshot);
+        String? id = event.snapshot.key; // Here is how you get the key
+        Event currentEvent = id != null
+            ? Event.fromSnapshotId(id, event.snapshot)
+            : Event.fromSnapshot(event.snapshot);
         events.add(currentEvent);
       });
     });
@@ -453,18 +456,18 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                   ),
                                 ),
                               ),
-                              if(isAdmin)
-                              Positioned(
-                                top: 0,
-                                bottom: 0,
-                                right: 20,
-                                child: IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    _removeEventPopUpDialog(context);
-                                  },
+                              if (isAdmin)
+                                Positioned(
+                                  top: 0,
+                                  bottom: 0,
+                                  right: 20,
+                                  child: IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      _removeEventPopUpDialog(context, event.id!);
+                                    },
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -835,7 +838,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         });
   }
 
-  _removeEventPopUpDialog(BuildContext context) {
+  _removeEventPopUpDialog(BuildContext context, String eventId) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -862,7 +865,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     {
                       removeEvent(
                           context,
-                          "", //Need a way to get eventId
+                          eventId, //Need a way to get eventId
                           widget.groupId,
                           _showErrorSnackbar);
                       Navigator.of(context).pop();
@@ -1076,7 +1079,7 @@ Future<void> createEvent(
   if (response.statusCode == 200) {
     showErrorSnackbar('Created an event successfully!', false);
   } else {
-    showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    showErrorSnackbar('Failed to create an event: ${response.body}', true);
   }
 }
 
@@ -1091,7 +1094,7 @@ Future<void> removeEvent(
   final storedUsername = await cacheFactory.get('users', 'username');
   Token token = new Token(tokenID: tokenID, username: storedUsername);
 
-  final response = await http.post(
+  final response = await http.delete(
     Uri.parse(url),
     headers: {
       'Content-Type': 'application/json',
@@ -1100,9 +1103,9 @@ Future<void> removeEvent(
   );
 
   if (response.statusCode == 200) {
-    showErrorSnackbar('Created an event successfully!', false);
+    showErrorSnackbar('Removed successfully!', false);
   } else {
-    showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    showErrorSnackbar('Failed to remove the event: ${response.body}', true);
   }
 }
 
