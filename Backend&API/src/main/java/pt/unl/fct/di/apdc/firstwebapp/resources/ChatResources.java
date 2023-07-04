@@ -63,9 +63,6 @@ public class ChatResources {
         if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
-//        DatabaseReference groupForUser = FirebaseDatabase.getInstance().getReference("users");
-//        DatabaseReference userRef = groupForUser.child(group.adminID);
-//        DatabaseReference groupRef = userRef.child("Groups");
 
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat

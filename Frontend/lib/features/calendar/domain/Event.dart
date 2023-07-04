@@ -37,30 +37,28 @@ class Event {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
       id: id,
-      creator: data['creator'],
-      type: _parseEventType(data['type']),
-      title: data['title'],
-      description: data['description'],
+      creator: data['creator'] as String,
+      type: _parseEventType(data['type'] as String),
+      title: data['title'] as String,
+      description: data['description'] as String,
       startTime: DateTime.parse(data['startTime']),
       endTime: DateTime.parse(data['endTime']),
-      location: data['location'] ?? '',
+      location: data['location'] as String,
     );
   }
 
   factory Event.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
-      creator: data['creator'],
-      type: _parseEventType(data['type']),
-      title: data['title'],
-      description: data['description'],
+      creator: data['creator'] as String,
+      type: _parseEventType(data['type'] as String),
+      title: data['title'] as String,
+      description: data['description'] as String,
       startTime: DateTime.parse(data['startTime']),
       endTime: DateTime.parse(data['endTime']),
-      location: data['location'] ?? '',
+      location: data['location'] as String,
     );
   }
-
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -106,7 +104,7 @@ class Event {
           return EventType.exhibit;
       }
     }
-    
+
     return EventType.academic;
   }
 
