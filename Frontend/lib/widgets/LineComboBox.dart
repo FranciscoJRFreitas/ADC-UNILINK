@@ -48,12 +48,12 @@ class _LineComboBoxState extends State<LineComboBox> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(42.12431, 0, 0, 0),
+            padding: const EdgeInsets.fromLTRB(42.5, 0, 0, 0),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: widget.selectedValue,
                 iconEnabledColor: Theme.of(context).primaryColor,
-                dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                dropdownColor: Theme.of(context).canvasColor,
                 style: Theme.of(context).textTheme.bodyLarge,
                 onChanged: widget.onChanged,
                 isExpanded: true,

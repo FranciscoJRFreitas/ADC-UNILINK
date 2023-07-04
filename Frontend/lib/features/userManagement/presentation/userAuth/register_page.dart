@@ -144,19 +144,30 @@ class _RegisterPageState extends State<RegisterPage> {
                                 "Already have an account? ",
                                 style: kBodyText.copyWith(color: Colors.blue),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                      builder: (context) => LoginPage(),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  'Login',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                          builder: (context) => LoginPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text: 'Login',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall!
+                                            .copyWith(
+                                              color: Theme.of(context).secondaryHeaderColor,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                      ),
+                                    )),
                               ),
                             ],
                           ),
@@ -304,7 +315,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             );
                           },
                           bgColor: Theme.of(context).primaryColor,
-                          textColor: Colors.black87,
+                          textColor: Theme.of(context).secondaryHeaderColor,
                           height: 60,
                         ),
                       ],

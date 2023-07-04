@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../constants.dart';
+import '../../domain/ThemeNotifier.dart';
 import '../screen.dart';
 import '../../widgets/widget.dart';
 
@@ -25,7 +28,11 @@ class _WelcomePageState extends State<WelcomePage> {
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.2,
                       child: Image(
-                        image: AssetImage('assets/images/NOVA_Logo.png'),
+                        image: Provider.of<ThemeNotifier>(context)
+                                    .currentTheme! ==
+                                kDarkTheme
+                            ? AssetImage('assets/images/NOVA_Logo.png')
+                            : AssetImage('assets/images/NOVA_Logo_whiteBg.png'),
                       ),
                     ),
                   ),
@@ -71,7 +78,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               CupertinoPageRoute(
                                   builder: (context) => RegisterPage()));
                         },
-                        textColor: Colors.black87,
+                        textColor: Theme.of(context).secondaryHeaderColor,
                         height: 60,
                       ),
                     ),

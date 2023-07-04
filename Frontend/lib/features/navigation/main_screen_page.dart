@@ -227,6 +227,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       ),
       child: Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: kWhiteBackgroundColor,
+          ),
           backgroundColor: Theme.of(context).primaryColor, //roleColor,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
@@ -524,7 +527,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 type: BottomNavigationBarType.fixed,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 unselectedItemColor: Theme.of(context).secondaryHeaderColor,
-                selectedItemColor: Theme.of(context).primaryColor,
+                selectedItemColor: Theme.of(context).dividerColor,
                 currentIndex: _bottomNavigationIndex,
                 onTap: (index) {
                   setState(() {

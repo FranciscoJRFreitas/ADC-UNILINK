@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
+import 'package:unilink2023/widgets/LineDateTimeField.dart';
+import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -84,11 +86,14 @@ class _SchedulePageState extends State<SchedulePage> {
               TextEditingController titleController = TextEditingController();
               TextEditingController descriptionController =
                   TextEditingController();
+              TextEditingController startDateController =
+                  TextEditingController();
+              TextEditingController endDateController = TextEditingController();
               DateTime startTime = DateTime.now();
               DateTime endTime = DateTime.now().add(Duration(hours: 1));
 
               return AlertDialog(
-                backgroundColor: Theme.of(context).primaryColor,
+                backgroundColor: Theme.of(context).canvasColor,
                 title: Text('New Event',
                     style: Theme.of(context).textTheme.titleMedium),
                 content: StatefulBuilder(
@@ -97,85 +102,38 @@ class _SchedulePageState extends State<SchedulePage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          MyTextField(
+                          LineTextField(
+                            icon: Icons.title,
                             controller: titleController,
-                            small: true,
-                            hintText: 'Title Event',
-                            inputType: TextInputType.text,
+                            lableText: 'Title',
                           ),
-                          MyTextField(
+                          SizedBox(height: 5,),
+                          LineTextField(
+                            icon: Icons.description,
                             controller: descriptionController,
-                            small: true,
-                            hintText: 'Description',
-                            inputType: TextInputType.text,
+                            lableText: 'Description',
                           ),
-                          TextButton(
-                            onPressed: () async {
-                              final selectedDate = await showDatePicker(
-                                context: context,
-                                initialDate: startTime,
-                                firstDate: DateTime.now()
-                                    .subtract(Duration(days: 365)),
-                                lastDate:
-                                    DateTime.now().add(Duration(days: 365)),
-                              );
-                              if (selectedDate != null) {
-                                final selectedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime:
-                                      TimeOfDay.fromDateTime(startTime),
-                                );
-                                if (selectedTime != null) {
-                                  setState(() {
-                                    startTime = DateTime(
-                                      selectedDate.year,
-                                      selectedDate.month,
-                                      selectedDate.day,
-                                      selectedTime.hour,
-                                      selectedTime.minute,
-                                    );
-                                  });
-                                }
-                              }
-                            },
-                            child: Text(
-                              'Start Time: ${DateFormat('yyyy-MM-dd HH:mm').format(startTime)}',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                          SizedBox(
+                            height: 8,
                           ),
-                          TextButton(
-                            onPressed: () async {
-                              final selectedDate = await showDatePicker(
-                                context: context,
-                                initialDate: endTime,
-                                firstDate: DateTime.now()
-                                    .subtract(Duration(days: 365)),
-                                lastDate:
-                                    DateTime.now().add(Duration(days: 365)),
-                              );
-                              if (selectedDate != null) {
-                                final selectedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.fromDateTime(endTime),
-                                );
-                                if (selectedTime != null) {
-                                  setState(() {
-                                    endTime = DateTime(
-                                      selectedDate.year,
-                                      selectedDate.month,
-                                      selectedDate.day,
-                                      selectedTime.hour,
-                                      selectedTime.minute,
-                                    );
-                                  });
-                                }
-                              }
-                            },
-                            child: Text(
-                              'End Time: ${DateFormat('yyyy-MM-dd HH:mm').format(endTime)}',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                          LineDateTimeField(
+                              icon: Icons.schedule,
+                              controller: startDateController,
+                              hintText: 'Start',
+                              firstDate:
+                                  DateTime.now().subtract(Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(Duration(days: 365))),
+                          SizedBox(
+                            height: 8,
                           ),
+                          LineDateTimeField(
+                              icon: Icons.schedule,
+                              controller: endDateController,
+                              hintText: 'Start',
+                              firstDate:
+                                  DateTime.now().subtract(Duration(days: 365)),
+                              lastDate: DateTime.now().add(Duration(days: 365)))
                         ],
                       ),
                     );
@@ -188,7 +146,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
-                          .copyWith(color: Colors.white),
+                          .copyWith(color: Theme.of(context).secondaryHeaderColor),
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -199,11 +157,11 @@ class _SchedulePageState extends State<SchedulePage> {
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall!
-                            .copyWith(color: Colors.white)),
+                            .copyWith(color: Theme.of(context).secondaryHeaderColor)),
                     onPressed: () {
                       Navigator.of(context).pop(
                         Event(
-                          type: EventType.academic,//add controller
+                          type: EventType.academic, //add controller
                           title: titleController.text,
                           description: descriptionController.text,
                           startTime: startTime,

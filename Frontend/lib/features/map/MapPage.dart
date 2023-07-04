@@ -149,7 +149,6 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> markers = Set();
 
   void updateMarkers() {
-    print(selectedDropdownItems);
     // Update the markers set based on the selectedDropdownItems
     markers.clear();
 
@@ -168,7 +167,6 @@ class _MyMapState extends State<MyMap> {
     if (selectedDropdownItems.contains('Services')) {
       markers.addAll(servMarkers);
     }
-    print(markers);
   }
 
   @override
@@ -200,8 +198,64 @@ class _MyMapState extends State<MyMap> {
                 child: Container(
                   alignment: Alignment.topRight,
                   child: ElevatedButton(
+                    onPressed: () => showOptionsDialog(context),
+                    child: Text('Open Dropdown'),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 10.0,
+                right: 10.0,
+                child: Switch(
+                  value: isSattelite,
+                  onChanged: (value) {
+                    setState(() {
+                      isSattelite = value;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: Duration(milliseconds: 750),
+                        content: Text(
+                          isSattelite
+                              ? 'Switched to Satellite mode'
+                              : 'Switched to Normal mode',
+                          style: DefaultTextStyle.of(context)
+                              .style
+                              .copyWith(color: Colors.white),
+                        ),
+                      ),
+                    );
+                  },
+                  activeTrackColor:
+                      Theme.of(context).primaryColor.withOpacity(0.5),
+                  activeColor: Theme.of(context).primaryColor,
+                ),
+              ),
+              Positioned(
+                bottom: 20.0,
+                right: 20.0,
+                child: Visibility(
+                  visible: isDirections,
+                  child: ElevatedButton(
                     onPressed: () {
-                      showDialog(
+                      setState(() {
+                        isDirections = false;
+                        polylines = {};
+                      });
+                    },
+                    child: Text('Stop giving directions'),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void showOptionsDialog(BuildContext context) {
+    showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return StatefulBuilder(
@@ -233,58 +287,6 @@ class _MyMapState extends State<MyMap> {
                           );
                         },
                       );
-                    },
-                    child: Text('Open Dropdown'),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 10.0,
-                right: 10.0,
-                child: Switch(
-                  value: isSattelite,
-                  onChanged: (value) {
-                    setState(() {
-                      isSattelite = value;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        duration: Duration(milliseconds: 750),
-                        content: Text(
-                          isSattelite
-                              ? 'Switched to Satellite mode'
-                              : 'Switched to Normal mode',
-                        ),
-                      ),
-                    );
-                  },
-                  activeTrackColor:
-                      Theme.of(context).primaryColor.withOpacity(0.5),
-                  activeColor: Theme.of(context).primaryColor,
-                ),
-              ),
-              Positioned(
-                bottom: 20.0,
-                right: 20.0,
-                child: Visibility(
-                  visible: isDirections,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        isDirections = false;
-                        polylines =
-                            {}; // Clear polylines to stop showing directions
-                      });
-                    },
-                    child: Text('Stop giving directions'),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 
   _getLocation() async {
@@ -540,7 +542,6 @@ class _MultiSelectDropdownDialogState extends State<MultiSelectDropdownDialog> {
               setState(() {
                 if (value == true) {
                   selectedItems.add(item);
-                  print(item);
                 } else {
                   selectedItems.remove(item);
                 }

@@ -70,8 +70,8 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
       final double availableHeight = constraints.maxHeight;
       final double cardHeight =
           availableHeight < MediaQuery.of(context).size.height
-              ? availableHeight / 5
-              : MediaQuery.of(context).size.height / 5;
+              ? availableHeight / 6
+              : MediaQuery.of(context).size.height / 6;
 
       double cardMaxHeight;
       if (widget.isSingleCrossAxisCount ?? false) {
