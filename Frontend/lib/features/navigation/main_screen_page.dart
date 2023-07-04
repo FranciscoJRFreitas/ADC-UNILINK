@@ -217,201 +217,193 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     Color roleColor = _currentUser.getRoleColor(_currentUser.role);
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [Colors.blue, Colors.green],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor, //roleColor,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        title: Text(
+          _title[_selectedIndex],
+          style: Theme.of(context).textTheme.bodyLarge,
+          selectionColor: Colors.white,
         ),
+        centerTitle: true,
+        actions: [
+          Tooltip(
+            message: 'Quick Logout',
+            child: IconButton(
+              icon: Icon(Icons.logout),
+              color: roleColor == Colors.yellow ? Colors.black : Colors.white,
+              onPressed: () async {
+                final token = await cacheFactory.get('users', 'token');
+                if (token != null) {
+                  await logout(
+                      context, _currentUser.username, _showErrorSnackbar);
+                } else {
+                  _showErrorSnackbar('Error logging out', true);
+                }
+              },
+            ),
+          )
+        ],
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor, //roleColor,
-          systemOverlayStyle: SystemUiOverlayStyle.light,
-          title: Text(
-            _title[_selectedIndex],
-            style: Theme.of(context).textTheme.bodyLarge,
-            selectionColor: Colors.white,
-          ),
-          centerTitle: true,
-          actions: [
-            Tooltip(
-              message: 'Quick Logout',
-              child: IconButton(
-                icon: Icon(Icons.logout),
-                color: roleColor == Colors.yellow ? Colors.black : Colors.white,
-                onPressed: () async {
-                  final token = await cacheFactory.get('users', 'token');
-                  if (token != null) {
-                    await logout(
-                        context, _currentUser.username, _showErrorSnackbar);
-                  } else {
-                    _showErrorSnackbar('Error logging out', true);
-                  }
-                },
-              ),
-            )
-          ],
-        ),
-        drawer: Drawer(
-          backgroundColor: Theme.of(context).primaryColor,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor //roleColor,
-                    ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Row(children: [
-                      profilePicture(context),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: Column(children: [
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            processDisplayName(_currentUser.displayName),
-                            style: _currentUser.displayName.length < 5
-                                ? Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(color: Colors.white)
-                                : _currentUser.displayName.length < 10
-                                    ? Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(color: Colors.white)
-                                    : Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(color: Colors.white),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            //trocar por numero de aluno
-                            'Role: ${_currentUser.role}',
-                            style: TextStyle(
-                              color: Colors.white60,
-                              //roleColor == Colors.yellow ? Colors.black: Colors.white,
-                              fontSize: 10,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ]),
-                      ),
-                    ]),
-                    SizedBox(
-                      height: 5,
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.person),
-                title: Text('Profile'),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 3;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
-                  ? ExpansionTile(
-                      leading: Icon(
-                        Icons.person_add_alt_1_outlined,
-                      ),
-                      title: Text('Student',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      children: [
-                          ListTile(
-                            leading: Icon(Icons.schedule),
-                            title: Text('Schedule'),
-                            onTap: () {
-                              setState(() {
-                                _selectedIndex = 9;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ])
-                  : Container(),
-              _currentUser.role == 'PROF' || _currentUser.role == 'SU'
-                  ? ListTile(
-                      leading: Icon(Icons.newspaper),
-                      title: Text('Professor'),
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 10;
-                        });
-                        Navigator.pop(context);
-                      },
-                    )
-                  : Container(),
-              _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
-                  ? ListTile(
-                      leading: Icon(Icons.newspaper),
-                      title: Text('Director'),
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 11;
-                        });
-                        Navigator.pop(context);
-                      },
-                    )
-                  : Container(),
-              ListTile(
-                leading: Icon(Icons.newspaper),
-                title: Text('News'),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 0;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ExpansionTile(
-                  leading: Icon(
-                    Icons.group,
+      drawer: Drawer(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor //roleColor,
                   ),
-                  title: Text('Community',
-                      style: Theme.of(context).textTheme.bodyLarge),
-                  children: [
-                    ListTile(
-                      title: Text('Search Users',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 1;
-                        });
-                        Navigator.pop(context);
-                      },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Row(children: [
+                    profilePicture(context),
+                    SizedBox(
+                      width: 10,
                     ),
-                    ListTile(
-                      title: Text('List Users',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 2;
-                        });
-                        Navigator.pop(context);
-                      },
-                    )
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                      child: Column(children: [
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          processDisplayName(_currentUser.displayName),
+                          style: _currentUser.displayName.length < 5
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(color: Colors.white)
+                              : _currentUser.displayName.length < 10
+                                  ? Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(color: Colors.white)
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          //trocar por numero de aluno
+                          'Role: ${_currentUser.role}',
+                          style: TextStyle(
+                            color: Colors.white60,
+                            //roleColor == Colors.yellow ? Colors.black: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ]),
+                    ),
                   ]),
+                  SizedBox(
+                    height: 5,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 3;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
+                ? ExpansionTile(
+                    leading: Icon(
+                      Icons.person_add_alt_1_outlined,
+                    ),
+                    title: Text('Student',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    children: [
+                        ListTile(
+                          leading: Icon(Icons.schedule),
+                          title: Text('Schedule'),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 9;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ])
+                : Container(),
+            _currentUser.role == 'PROF' || _currentUser.role == 'SU'
+                ? ListTile(
+                    leading: Icon(Icons.newspaper),
+                    title: Text('Professor'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 10;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : Container(),
+            _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
+                ? ListTile(
+                    leading: Icon(Icons.newspaper),
+                    title: Text('Director'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 11;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : Container(),
+            ListTile(
+              leading: Icon(Icons.newspaper),
+              title: Text('News'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 0;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ExpansionTile(
+                leading: Icon(
+                  Icons.group,
+                ),
+                title: Text('Community',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                children: [
+                  ListTile(
+                    title: Text('Search Users',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('List Users',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                ]),
 
-              /* ExpansionTile(
+            /* ExpansionTile(
                 leading: Icon(Icons.person),
                 title:
                     Text('Profile', style: Theme.of(context).textTheme.bodyLarge),
@@ -448,130 +440,127 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                 ],
               ),*/
-              ListTile(
-                leading: Icon(Icons.chat),
-                title:
-                    Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 6;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.map),
-                title:
-                    Text('Map', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 10;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 75),
-              Divider(
-                // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                thickness: 1, // Adjusts the divider's thickness.
-                color: kBackgroundColor, // Adjusts the divider's color.
-              ),
-              ListTile(
-                leading: Icon(Icons.call),
-                title: Text('Contacts',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 7;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 8;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
+            ListTile(
+              leading: Icon(Icons.chat),
+              title: Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 6;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.map),
+              title: Text('Map', style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 10;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 75),
+            Divider(
+              // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
+              thickness: 1, // Adjusts the divider's thickness.
+              color: kBackgroundColor, // Adjusts the divider's color.
+            ),
+            ListTile(
+              leading: Icon(Icons.call),
+              title: Text('Contacts',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 7;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 8;
+                });
+                Navigator.pop(context);
+              },
+            ),
 
-              ListTile(
-                leading: Icon(Icons.logout_sharp),
-                title: Text('Logout',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () async {
-                  final token = await cacheFactory.get('users', 'token');
-                  if (token != null) {
-                    await logout(
-                        context, _currentUser.username, _showErrorSnackbar);
-                  } else {
-                    _showErrorSnackbar('Error logging out', true);
-                  }
-                },
-              ),
-              // ... other Drawer items
-            ],
-          ),
+            ListTile(
+              leading: Icon(Icons.logout_sharp),
+              title:
+                  Text('Logout', style: Theme.of(context).textTheme.bodyLarge),
+              onTap: () async {
+                final token = await cacheFactory.get('users', 'token');
+                if (token != null) {
+                  await logout(
+                      context, _currentUser.username, _showErrorSnackbar);
+                } else {
+                  _showErrorSnackbar('Error logging out', true);
+                }
+              },
+            ),
+            // ... other Drawer items
+          ],
         ),
-        //body: _widgetOptions()[_selectedIndex],
-        body: getSelectedWidget(),
-        bottomNavigationBar: !kIsWeb
-            ? BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                unselectedItemColor: Theme.of(context).secondaryHeaderColor,
-                selectedItemColor: Theme.of(context).primaryColor,
-                currentIndex: _bottomNavigationIndex,
-                onTap: (index) {
-                  setState(() {
-                    _bottomNavigationIndex = index;
-                    _selectedIndex = index == 2
-                        ? 10
-                        : index == 3
-                            ? 6
-                            : index == 4
-                                ? 8
-                                : index;
-                    scales[_selectedIndex] = 1;
-                    _controller.reverse();
-                    scales[_selectedIndex] = 0;
-                  });
-                  Future.delayed(const Duration(milliseconds: 250), () {
-                    setState(() {
-                      scales[index] = 1;
-                      _controller.forward();
-                    });
-                  });
-                },
-                items: [
-                  BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.newspaper, 0, AxisDirection.up),
-                    label: 'News',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.search, 1, AxisDirection.right),
-                    label: 'Search',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.map, 10, AxisDirection.right),
-                    label: 'Map',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.chat, 6, AxisDirection.down),
-                    label: 'Chat',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.settings, 8, AxisDirection.left),
-                    label: 'Settings',
-                  ),
-                ],
-              )
-            : null,
       ),
+      //body: _widgetOptions()[_selectedIndex],
+      body: getSelectedWidget(),
+      bottomNavigationBar: !kIsWeb
+          ? BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              unselectedItemColor: Theme.of(context).secondaryHeaderColor,
+              selectedItemColor: Theme.of(context).primaryColor,
+              currentIndex: _bottomNavigationIndex,
+              onTap: (index) {
+                setState(() {
+                  _bottomNavigationIndex = index;
+                  _selectedIndex = index == 2
+                      ? 10
+                      : index == 3
+                          ? 6
+                          : index == 4
+                              ? 8
+                              : index;
+                  scales[_selectedIndex] = 1;
+                  _controller.reverse();
+                  scales[_selectedIndex] = 0;
+                });
+                Future.delayed(const Duration(milliseconds: 250), () {
+                  setState(() {
+                    scales[index] = 1;
+                    _controller.forward();
+                  });
+                });
+              },
+              items: [
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.newspaper, 0, AxisDirection.up),
+                  label: 'News',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.search, 1, AxisDirection.right),
+                  label: 'Search',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.map, 10, AxisDirection.right),
+                  label: 'Map',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.chat, 6, AxisDirection.down),
+                  label: 'Chat',
+                ),
+                BottomNavigationBarItem(
+                  icon: _buildIcon(Icons.settings, 8, AxisDirection.left),
+                  label: 'Settings',
+                ),
+              ],
+            )
+          : null,
     );
   }
 

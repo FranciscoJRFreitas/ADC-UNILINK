@@ -18,19 +18,18 @@ class _WelcomePageState extends State<WelcomePage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Column(
                 children: [
                   Center(
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      child: Image(
-                        image: AssetImage('assets/images/NOVA_Logo.png'),
-                      ),
+                      width: MediaQuery.of(context).size.width * 0.15,
+                      child: Image.asset('assets/icon/ICON_UNILINK-03.png'),
                     ),
                   ),
                   SizedBox(
-                    height: 10,
+                    height: 5,
                   ),
                   Text(
                     "Bem-vindo à nova plataforma UniHub!",
@@ -51,8 +50,44 @@ class _WelcomePageState extends State<WelcomePage> {
                 ],
               ),
               SizedBox(
-                height: 200,
+                height: 100,
               ),
+
+              MyTextButton(
+                  buttonName: 'Register',
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => RegisterPage()));
+                  },
+                  bgColor: Theme.of(context).primaryColor,
+                  textColor: Colors.white70,
+                  height: 45),
+              SizedBox(height: 20),
+              // Provide some space between buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already a user?',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(builder: (context) => LoginPage()),
+                      );
+                    },
+                    child: Text(
+                      'Log in',
+                      style: TextStyle(fontSize: 20, color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+              /*
               Container(
                 height: 50,
                 decoration: BoxDecoration(
@@ -92,7 +127,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ],
                 ),
-              ),
+              ),*/
             ],
           ),
         ),
