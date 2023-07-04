@@ -17,7 +17,7 @@ class MyMap extends StatefulWidget {
 class _MyMapState extends State<MyMap> {
   final loc.Location location = loc.Location();
   late loc.LocationData currentLocation;
-  GoogleMapController? mapController; //contrller for Google map
+  GoogleMapController? mapController;
   var latitude;
   var longitude;
   var isDirections = false;
@@ -35,7 +35,7 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> parkMarkers = Set();
   Set<Marker> portMarkers = Set();
   Set<Marker> servMarkers = Set();
-  Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
+  Map<PolylineId, Polyline> polylines = {};
 
   double distance = 0.0;
 
@@ -109,11 +109,11 @@ class _MyMapState extends State<MyMap> {
         addPolyLine(lat, long, polylineCoordinates);
       } else
         setState(() {
-          polylines = {}; // Clear polylines to stop showing directions
+          polylines = {};
         });
     } else
       setState(() {
-        polylines = {}; // Clear polylines to stop showing directions
+        polylines = {};
       });
   }
 
@@ -141,7 +141,7 @@ class _MyMapState extends State<MyMap> {
     setState(() {});
     await Future.delayed(Duration(seconds: 2));
     getDirections(
-        destLat, destLong); // Call getDirections when polyline is added
+        destLat, destLong);
   }
 
   List<String> selectedDropdownItems = [];
@@ -149,8 +149,6 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> markers = Set();
 
   void updateMarkers() {
-    print(selectedDropdownItems);
-    // Update the markers set based on the selectedDropdownItems
     markers.clear();
 
     if (selectedDropdownItems.contains("Buildings")) {
@@ -168,7 +166,6 @@ class _MyMapState extends State<MyMap> {
     if (selectedDropdownItems.contains('Services')) {
       markers.addAll(servMarkers);
     }
-    print(markers);
   }
 
   @override
@@ -200,40 +197,7 @@ class _MyMapState extends State<MyMap> {
                 child: Container(
                   alignment: Alignment.topRight,
                   child: ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return StatefulBuilder(
-                            builder: (BuildContext context, setState) {
-                              return AlertDialog(
-                                title: Text('Select Options'),
-                                backgroundColor:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                content: MultiSelectDropdownDialog(
-                                  dropdownItems: dropdownItems,
-                                  selectedItems: selectedDropdownItems,
-                                  onChanged: (List<String> newSelectedItems) {
-                                    setState(() {
-                                      selectedDropdownItems = newSelectedItems;
-                                    });
-                                    updateMarkers();
-                                  },
-                                ),
-                                actions: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text('Done'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                    onPressed: () => showOptionsDialog(context),
                     child: Text('Open Dropdown'),
                   ),
                 ),
@@ -254,6 +218,9 @@ class _MyMapState extends State<MyMap> {
                           isSattelite
                               ? 'Switched to Satellite mode'
                               : 'Switched to Normal mode',
+                          style: DefaultTextStyle.of(context)
+                              .style
+                              .copyWith(color: Colors.white),
                         ),
                       ),
                     );
@@ -272,8 +239,7 @@ class _MyMapState extends State<MyMap> {
                     onPressed: () {
                       setState(() {
                         isDirections = false;
-                        polylines =
-                            {}; // Clear polylines to stop showing directions
+                        polylines = {};
                       });
                     },
                     child: Text('Stop giving directions'),
@@ -284,6 +250,40 @@ class _MyMapState extends State<MyMap> {
           );
         },
       ),
+    );
+  }
+
+  void showOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) {
+            return AlertDialog(
+              title: Text('Select Options'),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              content: MultiSelectDropdownDialog(
+                dropdownItems: dropdownItems,
+                selectedItems: selectedDropdownItems,
+                onChanged: (List<String> newSelectedItems) {
+                  setState(() {
+                    selectedDropdownItems = newSelectedItems;
+                  });
+                  updateMarkers();
+                },
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Done'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -540,7 +540,6 @@ class _MultiSelectDropdownDialogState extends State<MultiSelectDropdownDialog> {
               setState(() {
                 if (value == true) {
                   selectedItems.add(item);
-                  print(item);
                 } else {
                   selectedItems.remove(item);
                 }

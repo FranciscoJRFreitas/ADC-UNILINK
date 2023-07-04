@@ -13,6 +13,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
+import '../../../constants.dart';
 import '../../userManagement/domain/User.dart';
 import '../../../widgets/message_tile.dart';
 import '../domain/Message.dart';
@@ -433,6 +434,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   Widget _layoutForMobile() {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: kWhiteBackgroundColor,
+        ),
         centerTitle: true,
         elevation: 0,
         title: Text(
@@ -453,7 +457,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 ),
               );
             },
-            icon: const Icon(Icons.info),
+            icon: Icon(
+              Icons.info,
+              color: Theme.of(context).secondaryHeaderColor,
+            ),
           ),
         ],
       ),
@@ -735,14 +742,18 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                info = true;
-              });
-            },
-            icon: const Icon(Icons.info),
-          ),
+          if (!info)
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  info = true;
+                });
+              },
+              icon: Icon(
+                Icons.info,
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
+            ),
         ],
       ),
       body: _bodyForWeb(),

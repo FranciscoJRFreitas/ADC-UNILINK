@@ -298,6 +298,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           )
         : Scaffold(
             appBar: AppBar(
+              iconTheme: IconThemeData(
+                color: kWhiteBackgroundColor,
+              ),
               centerTitle: true,
               elevation: 0,
               title: Text(
@@ -307,7 +310,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               backgroundColor: Theme.of(context).primaryColor,
               actions: <Widget>[
                 IconButton(
-                  icon: const Icon(Icons.exit_to_app_rounded),
+                  icon: Icon(Icons.exit_to_app_rounded),
                   tooltip: 'Leave Group',
                   onPressed: () {
                     leavePopUpDialog(context);
@@ -752,7 +755,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).canvasColor,
               title: const Text(
                 "Add an event",
                 textAlign: TextAlign.left,
@@ -984,13 +987,15 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                 );
               },
-              child: ClipOval(
-                child: FittedBox(
-                  child: Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.fill,
+              child: Container(
+                width: 50.0, // Set your desired width
+                height: 50.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
                   ),
-                  fit: BoxFit.cover,
                 ),
               ),
             );

@@ -296,19 +296,31 @@ class _RegisterPageState extends State<RegisterPage> {
                                 'Already a user?',
                                 style: TextStyle(fontSize: 15),
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                        builder: (context) => LoginPage()),
-                                  );
-                                },
-                                child: Text(
-                                  'Log in',
-                                  style: TextStyle(
-                                      fontSize: 15, color: Colors.blue),
-                                ),
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                          builder: (context) => LoginPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text: 'Login',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall!
+                                            .copyWith(
+                                              color: Theme.of(context)
+                                                  .secondaryHeaderColor,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                      ),
+                                    )),
                               ),
                             ],
                           ),

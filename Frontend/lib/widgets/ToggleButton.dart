@@ -51,8 +51,8 @@ class _ToggleButtonState extends State<ToggleButton> {
               widget.onToggle!(_isActive); // Call the callback
             }
           },
-          activeTrackColor: Theme.of(context).primaryColor.withOpacity(0.5),
-          activeColor: Theme.of(context).primaryColor,
+          activeTrackColor: Colors.blue.shade900,
+          activeColor: Colors.blue.shade400,
         ),
       ),
       subtitle: Text(

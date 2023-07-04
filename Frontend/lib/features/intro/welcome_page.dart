@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../constants.dart';
+import '../../domain/ThemeNotifier.dart';
 import '../screen.dart';
 import '../../widgets/widget.dart';
 
@@ -87,47 +90,6 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 ],
               ),
-              /*
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.grey[850],
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: MyTextButton(
-                        bgColor: Theme.of(context).primaryColor,
-                        buttonName: 'Register',
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) => RegisterPage()));
-                        },
-                        textColor: Colors.black87,
-                        height: 60,
-                      ),
-                    ),
-                    Expanded(
-                      child: MyTextButton(
-                        bgColor: Colors.transparent,
-                        buttonName: 'Login',
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => LoginPage(),
-                              ));
-                        },
-                        textColor: Colors.white,
-                        height: 60,
-                      ),
-                    ),
-                  ],
-                ),
-              ),*/
             ],
           ),
         ),

@@ -15,6 +15,7 @@ import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/domain/Token.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 import 'package:unilink2023/features/chat/presentation/chat_msg_page.dart';
+import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
 import 'package:unilink2023/widgets/widgets.dart';
 
@@ -527,23 +528,25 @@ class _ChatPageState extends State<ChatPage> {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: const Text(
+              title: Text(
                 "Create a group",
                 textAlign: TextAlign.left,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MyTextField(
-                    small: false,
-                    hintText: 'Group name',
-                    inputType: TextInputType.text,
+                  LineTextField(
+                    icon: Icons.title,
+                    lableText: 'Group name',
                     controller: groupNameController,
                   ),
-                  MyTextField(
-                    small: false,
-                    hintText: 'Group Description',
-                    inputType: TextInputType.text,
+                  SizedBox(
+                    height: 8,
+                  ),
+                  LineTextField(
+                    icon: Icons.description,
+                    lableText: 'Group Description',
                     controller: descriptionController,
                   ),
                 ],
@@ -555,8 +558,6 @@ class _ChatPageState extends State<ChatPage> {
                       createGroup(context, groupNameController.text,
                           descriptionController.text, _showErrorSnackbar);
                       Navigator.of(context).pop();
-                      showSnackbar(
-                          context, Colors.green, "Group created successfully.");
                     }
                   },
                   style: ElevatedButton.styleFrom(

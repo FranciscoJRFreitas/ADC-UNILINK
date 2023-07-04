@@ -172,19 +172,32 @@ class _LoginPageState extends State<LoginPage> {
                                   "Don't have an account? ",
                                   style: kBodyText.copyWith(color: Colors.blue),
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                        builder: (context) => RegisterPage(),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                          builder: (context) => RegisterPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text: 'Register',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall!
+                                            .copyWith(
+                                              color: Theme.of(context)
+                                                  .secondaryHeaderColor,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
                                       ),
-                                    );
-                                  },
-                                  child: Text('Register',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -211,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                                       });
                                     },
                               bgColor: Theme.of(context).primaryColor,
-                              textColor: Colors.black87,
+                              textColor: Theme.of(context).secondaryHeaderColor,
                               height: 60,
                             ),
                           ],

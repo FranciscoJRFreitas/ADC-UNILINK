@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
-import 'domain/MarkersNotifier.dart';
+import 'domain/MapNotifier.dart';
 import 'widgets/rightClickDisabler/disabler_provider.dart';
 import 'domain/Notification.dart';
 import 'domain/UserNotifier.dart';
@@ -53,7 +53,8 @@ void main() async {
           create: (context) => UserNotifier(),
         ),
         ChangeNotifierProvider(
-          create: (context) => MarkersNotifier(),
+          create: (context) => MapNotifier(),
+          child: MyApp(),
         ),
         Provider<NotificationService>(
           create: (context) => NotificationService(),
