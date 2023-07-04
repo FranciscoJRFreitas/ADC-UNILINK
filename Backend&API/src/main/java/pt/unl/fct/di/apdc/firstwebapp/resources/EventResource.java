@@ -42,31 +42,31 @@ public class EventResource {
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
 
-        Transaction txn = datastore.newTransaction();
-        try {
-            Entity originalToken = txn.get(tokenKey);
+        Entity originalToken = datastore.get(tokenKey);
 
-            if (originalToken == null) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-            }
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
 
-//            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-//                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-//            }
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
             DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-            DatabaseReference newEventRef = eventsRef.child(data.groupID).push(); // Generate a unique ID for the new chat
+        eventsRef.child(data.groupID).push(); // Generate a unique ID for the new chat
 
             // Set the data for the new chat
-            newEventRef.child("creator").setValueAsync(data.creator);
-            newEventRef.child("type").setValueAsync(data.type);
-            newEventRef.child("title").setValueAsync(data.title);
-            newEventRef.child("description").setValueAsync(data.description);
-            newEventRef.child("startTime").setValueAsync(data.startTime);
-            newEventRef.child("endTime").setValueAsync(data.endTime);
-            newEventRef.child("location").setValueAsync(data.location);
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("creator", data.creator);
+        eventData.put("type", data.type);
+        eventData.put("title", data.title);
+        eventData.put("description", data.description);
+        eventData.put("startTime", data.startTime);
+        eventData.put("endTime", data.endTime);
+        eventData.put("location", data.location);
+        eventsRef.child(data.groupID).push().setValueAsync(eventData); // Generate a unique ID for the new chat
 
-            Map<String, Object> responseData = new HashMap<>();
+        Map<String, Object> responseData = new HashMap<>();
             responseData.put("event_title", data.title);
             responseData.put("event_type", data.type);
             responseData.put("event_groupID", data.groupID);
@@ -79,12 +79,6 @@ public class EventResource {
 
             return Response.ok(g.toJson(responseData)).build();
 
-        } catch (Exception e) {
-            txn.rollback();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } finally {
-            if (txn.isActive()) txn.rollback();
-        }
     }
 
     @DELETE
