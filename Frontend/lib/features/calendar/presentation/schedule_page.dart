@@ -140,24 +140,10 @@ class _SchedulePageState extends State<SchedulePage> {
                   },
                 ),
                 actions: [
-                  TextButton(
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall!
-                          .copyWith(color: Theme.of(context).secondaryHeaderColor),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text('Save',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall!
-                            .copyWith(color: Theme.of(context).secondaryHeaderColor)),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Theme.of(context).primaryColor),
+                    child: Text('SAVE', ),
                     onPressed: () {
                       Navigator.of(context).pop(
                         Event(
@@ -169,6 +155,16 @@ class _SchedulePageState extends State<SchedulePage> {
                           location: "",
                         ),
                       );
+                    },
+                  ),
+                  ElevatedButton(
+                    child: Text(
+                      'CANCEL',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                        primary: Theme.of(context).primaryColor),
+                    onPressed: () {
+                      Navigator.of(context).pop();
                     },
                   ),
                 ],
@@ -186,7 +182,13 @@ class _SchedulePageState extends State<SchedulePage> {
             });
           }
         },
-        child: Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+        elevation: 6,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
     );
   }
