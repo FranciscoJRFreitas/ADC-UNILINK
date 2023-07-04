@@ -126,6 +126,14 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         events.add(currentEvent);
       });
     });
+
+    eventsRef.onChildRemoved.listen((event) {
+      String eventId = event.snapshot.key as String;
+
+      setState(() {
+        events.removeWhere((event) => event.id == eventId);
+      });
+    });
   }
 
   void _showErrorSnackbar(String message, bool Error) {
@@ -1090,7 +1098,7 @@ Future<void> removeEvent(
   String groupId,
   void Function(String, bool) showErrorSnackbar,
 ) async {
-  final url = kBaseUrl + "rest/events/delete?eventId=$eventId&groupId=$groupId";
+  final url = kBaseUrl + "rest/events/delete?eventID=$eventId&groupID=$groupId";
   final tokenID = await cacheFactory.get('users', 'token');
   final storedUsername = await cacheFactory.get('users', 'username');
   Token token = new Token(tokenID: tokenID, username: storedUsername);
