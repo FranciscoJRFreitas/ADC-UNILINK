@@ -169,35 +169,33 @@ class _LoginPageState extends State<LoginPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "Don't have an account? ",
-                                  style: kBodyText.copyWith(color: Colors.blue),
+                                  "Don't have an account?",
+                                  style: TextStyle(fontSize: 16),
                                 ),
                                 MouseRegion(
                                   cursor: SystemMouseCursors.click,
                                   child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                          builder: (context) => RegisterPage(),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) => LoginPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'Register',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(
+                                                color: Colors.blue.shade400,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
                                         ),
-                                      );
-                                    },
-                                    child: RichText(
-                                      text: TextSpan(
-                                        text: 'Register',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall!
-                                            .copyWith(
-                                              color: Theme.of(context)
-                                                  .secondaryHeaderColor,
-                                              decoration:
-                                                  TextDecoration.underline,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
+                                      )),
                                 ),
                               ],
                             ),

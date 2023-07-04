@@ -212,6 +212,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return _buildWebLayout(context);
+    } else {
+      return _buildWebLayout(context);
+    }
+  }
+
+  @override
+  Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
 
@@ -257,6 +266,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             )
           ],
         ),
+
         drawer: Drawer(
           backgroundColor: Theme.of(context).primaryColor,
           child: ListView(

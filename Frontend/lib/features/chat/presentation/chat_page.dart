@@ -16,8 +16,14 @@ import 'package:unilink2023/domain/Token.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 import 'package:unilink2023/features/chat/presentation/chat_msg_page.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
-import 'package:unilink2023/widgets/my_text_field.dart';
-import 'package:unilink2023/widgets/widgets.dart';
+
+import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
+import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
+
+import 'package:provider/provider.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
+import 'package:unilink2023/constants.dart';
 
 class ChatPage extends StatefulWidget {
   final User user;
@@ -217,7 +223,11 @@ class _ChatPageState extends State<ChatPage> {
             flex: 1,
             child: _buildLeftWidget(context),
           ),
-          if (selectedGroup != null)
+          if (selectedGroup != null) ...[
+            Container(
+              width: 1, // You can adjust the thickness of the divider
+              color: Colors.grey, // You can adjust the color of the divider
+            ),
             Expanded(
               flex: 2,
               child: GroupMessagesPage(
@@ -226,6 +236,7 @@ class _ChatPageState extends State<ChatPage> {
                 user: widget.user,
               ),
             ),
+          ],
         ],
       ),
     );
@@ -235,14 +246,16 @@ class _ChatPageState extends State<ChatPage> {
     // Your existing widget code, with modifications to onTap:
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        elevation: 0,
+        iconTheme: IconThemeData(
+          color: kWhiteBackgroundColor,
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, //roleColor,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Text(
           "Groups",
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+        centerTitle: true,
       ),
       body: Stack(
         children: <Widget>[
@@ -281,6 +294,105 @@ class _ChatPageState extends State<ChatPage> {
                       return ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
+                          return Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedGroup = group;
+                                    downloadGroupPictureData(group.id);
+                                  });
+                                },
+                                child: Container(
+                                  color: selectedGroup == group
+                                      ? Theme.of(context).primaryColorDark
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 8),
+                                    child: ListTile(
+                                      leading: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(200),
+                                          child:
+                                              groupPicture(context, group.id)),
+                                      title: Text(
+                                        '${group.DisplayName}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      trailing: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text(
+                                            'HH:MM', // Replace with the time of the last message
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.person, size: 20),
+                                              SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  'Description: ${group.description}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.people, size: 20),
+                                              SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  '${group.numberOfMembers} members',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
+                                          ),
+                                          Divider(
+                                            color: Provider.of<ThemeNotifier>(
+                                                            context)
+                                                        .currentTheme ==
+                                                    kDarkTheme
+                                                ? Colors.white60
+                                                : Theme.of(context)
+                                                    .primaryColor,
+                                            thickness: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+
+                      /*ListView(
+                        padding: EdgeInsets.only(top: 10, bottom: 80),
+                        children: groups.map((group) {
                           return GestureDetector(
                             onTap: () {
                               setState(() {
@@ -288,67 +400,87 @@ class _ChatPageState extends State<ChatPage> {
                                 downloadGroupPictureData(group.id);
                               });
                             },
-                            child: Card(
-                              color: selectedGroup == group
-                                  ? Theme.of(context).primaryColorDark
-                                  : null,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 5,
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 8),
-                                child: ListTile(
-                                  leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(200),
-                                      child: groupPicture(context, group.id)),
-                                  title: Text(
-                                    '${group.DisplayName}',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 8),
-                                      Row(
+                            child: Column(
+                              children: [
+                                Card(
+                                  color: selectedGroup == group
+                                      ? Theme.of(context).primaryColorDark
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                  elevation: 0,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 8),
+                                    child: ListTile(
+                                      leading: ClipRRect(
+                                          child:
+                                              groupPicture(context, group.id)),
+                                      title: Text(
+                                        '${group.DisplayName}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      trailing: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          Icon(Icons.person, size: 20),
-                                          SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              'Description: ${group.description}',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
+                                          Text(
+                                            'HH:MM', // Replace with the time of the last message
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.grey),
                                           ),
                                         ],
                                       ),
-                                      SizedBox(height: 8),
-                                      Row(
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Icon(Icons.people, size: 20),
-                                          SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              '${group.numberOfMembers} members',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.person, size: 20),
+                                              SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  'Description: ${group.description}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.people, size: 20),
+                                              SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  '${group.numberOfMembers} members',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
-                              ),
+                                Divider(
+                                  color: Theme.of(context).primaryColor,
+                                  thickness: 1,
+                                ),
+                              ],
                             ),
                           );
                         }).toList(),
-                      );
+                      );*/
                     } else {
                       return noGroupWidget();
                     }
@@ -718,5 +850,70 @@ class _ChatPageState extends State<ChatPage> {
     }
     groupNameController.clear();
     descriptionController.clear();
+  }
+
+  Future<void> logout(
+    BuildContext context,
+    String username,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url = kBaseUrl + "rest/logout/";
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final FirebaseAuth.User? _currentUser =
+          FirebaseAuth.FirebaseAuth.instance.currentUser;
+
+      if (_currentUser != null) {
+        DatabaseReference userRef =
+            FirebaseDatabase.instance.ref().child('chat').child(username);
+        DatabaseReference userGroupsRef = userRef.child('Groups');
+
+        // Retrieve user's group IDs from the database
+        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+        // Unsubscribe from all the groups
+        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+          /*Map<dynamic, dynamic> userGroups =
+              userGroupsSnapshot.value as Map<dynamic, dynamic>;
+          for (String groupId in userGroups.keys) {
+            if (!kIsWeb) //PROVISIONAL
+              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+          }*/
+        }
+      }
+
+      FirebaseAuth.FirebaseAuth.instance.signOut();
+      cacheFactory.removeLoginCache();
+
+      String page = await cacheFactory.get("settings", "index");
+      int index = 0;
+      if (page == "News") index = 0;
+      if (page == "Contacts") index = 1;
+      if (page == "Map") index = 3;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NotLoggedInScreen(index: index)),
+        (Route<dynamic> route) => false,
+      );
+
+      showErrorSnackbar('${response.body}', false);
+    } else {
+      showErrorSnackbar('${response.body}', true);
+    }
   }
 }

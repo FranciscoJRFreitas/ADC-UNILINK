@@ -282,19 +282,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
                                 bgColor: Theme.of(context).primaryColor,
                                 textColor: Colors.white70,
-                                height: 45,
+                                height: 40,
                               ),
                             ],
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 5,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 'Already a user?',
-                                style: TextStyle(fontSize: 15),
+                                style: TextStyle(fontSize: 16),
                               ),
                               MouseRegion(
                                 cursor: SystemMouseCursors.click,
@@ -312,10 +312,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                         text: 'Login',
                                         style: Theme.of(context)
                                             .textTheme
-                                            .bodySmall!
+                                            .bodyMedium!
                                             .copyWith(
-                                              color: Theme.of(context)
-                                                  .secondaryHeaderColor,
+                                              color: Colors.blue.shade400,
                                               decoration:
                                                   TextDecoration.underline,
                                             ),

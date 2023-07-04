@@ -74,19 +74,29 @@ class _WelcomePageState extends State<WelcomePage> {
                 children: [
                   Text(
                     'Already a user?',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 16),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(builder: (context) => LoginPage()),
-                      );
-                    },
-                    child: Text(
-                      'Log in',
-                      style: TextStyle(fontSize: 20, color: Colors.blue),
-                    ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => LoginPage(),
+                            ),
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'Login',
+                            style:
+                                Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                          ),
+                        )),
                   ),
                 ],
               ),
