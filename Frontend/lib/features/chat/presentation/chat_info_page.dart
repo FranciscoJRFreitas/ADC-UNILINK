@@ -987,13 +987,15 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                 );
               },
-              child: ClipOval(
-                child: FittedBox(
-                  child: Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.fill,
+              child: Container(
+                width: 50.0, // Set your desired width
+                height: 50.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
                   ),
-                  fit: BoxFit.cover,
                 ),
               ),
             );
