@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "190649102208",
+    "firebase_url": "https://unilink23-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "unilink23",
+    "storage_bucket": "unilink23.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190649102208:android:b6eb46114dca4189519b65",
+        "android_client_info": {
+          "package_name": "com.example.unilink2023"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "190649102208-9fjunus1dtenrjg5buflg2paqo93ksjg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCOPiBagBwkjvDbVVEmJOfh8BKqhl7680"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "190649102208-9fjunus1dtenrjg5buflg2paqo93ksjg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "190649102208-i6rtcli8lmvtim86a3s7s0s3hdev9n6r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.apdcAi60313"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

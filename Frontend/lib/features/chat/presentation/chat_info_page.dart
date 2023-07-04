@@ -776,20 +776,20 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   ),
                   LineTextField(
                     icon: Icons.title,
-                    lableText: 'Event Title',
+                    lableText: 'Title',
                     controller: titleController,
                     title: "",
                   ),
                   LineTextField(
                     icon: Icons.description,
-                    lableText: "Event Description",
+                    lableText: "Description",
                     controller: descriptionController,
                     title: "",
                   ),
                   LineTextField(
                     //Text for now (add Dropdown for Buildings)
                     icon: Icons.place,
-                    lableText: "Event Location",
+                    lableText: "Location",
                     controller: locationController,
                     title: "",
                   ),
@@ -799,7 +799,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: startController,
-                    hintText: "Event Start Time",
+                    hintText: "Start Time",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -809,7 +809,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: endController,
-                    hintText: "Event End Time",
+                    hintText: "End Time",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
