@@ -22,7 +22,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String? _currentTheme;
   bool _loggedIn = false;
 
-  _SettingsPageState(loggedIn){
+  _SettingsPageState(loggedIn) {
     _loggedIn = loggedIn;
   }
 
@@ -39,12 +39,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loggedIn) return layoutLoggedIn(context);
-    else return layoutNotLoggedIn(context);
+    if (_loggedIn)
+      return layoutLoggedIn(context);
+    else
+      return layoutNotLoggedIn(context);
   }
 
-  Widget layoutLoggedIn(BuildContext context){
-
+  Widget layoutLoggedIn(BuildContext context) {
     final options = [
       Option(
           icon: Icon(
@@ -59,14 +60,14 @@ class _SettingsPageState extends State<SettingsPage> {
           }),
       Option(
         icon: Icon(Icons.waving_hand,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+            color: Theme.of(context).secondaryHeaderColor, size: 30.0),
         title: 'Starting Page',
         subtitle: 'Select your preferable starting page.',
         rightWidget: Padding(
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
             mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Distribute space evenly
+                MainAxisAlignment.spaceBetween, // Distribute space evenly
             children: [
               FutureBuilder(
                 future: cacheFactory.get('settings', 'index'),
@@ -124,7 +125,8 @@ class _SettingsPageState extends State<SettingsPage> {
               return EditStartingPage(
                 onDialogClosed: () {
                   setState(() {});
-                }, loggedIn: true,
+                },
+                loggedIn: true,
               );
             },
           );
@@ -133,15 +135,14 @@ class _SettingsPageState extends State<SettingsPage> {
       if (!kIsWeb)
         Option(
             icon: Icon(Icons.notifications,
-                color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+                color: Theme.of(context).secondaryHeaderColor, size: 30.0),
             title: 'Notifications',
             subtitle: 'Don\'t miss out on any updates!',
             onTap: () {
               openNotificationSettings();
             }),
       Option(
-          icon: Icon(Icons.password,
-              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+          icon: Icon(Icons.password, size: 30.0),
           title: 'Change Password',
           subtitle: 'Change your password for a new one.',
           onTap: () {
@@ -154,7 +155,7 @@ class _SettingsPageState extends State<SettingsPage> {
           }),
       Option(
           icon: Icon(Icons.delete_forever,
-              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+              color: Theme.of(context).secondaryHeaderColor, size: 30.0),
           title: 'Remove Account',
           subtitle: 'Delete your current account.',
           onTap: () {
@@ -165,7 +166,7 @@ class _SettingsPageState extends State<SettingsPage> {
           }),
       Option(
           icon: Icon(Icons.privacy_tip,
-              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+              color: Theme.of(context).secondaryHeaderColor, size: 30.0),
           title: 'About',
           subtitle: 'Verify our terms and conditions and privacy policy.',
           onTap: () {}),
@@ -185,13 +186,13 @@ class _SettingsPageState extends State<SettingsPage> {
             child: InkWell(
               onTap: options[index - 1].toggleButton == true
                   ? () {
-                setState(() {
-                  Provider.of<ThemeNotifier>(context, listen: false)
-                      .toggleTheme();
-                  _currentTheme =
-                  _currentTheme == "Dark" ? "Light" : "Dark";
-                });
-              }
+                      setState(() {
+                        Provider.of<ThemeNotifier>(context, listen: false)
+                            .toggleTheme();
+                        _currentTheme =
+                            _currentTheme == "Dark" ? "Light" : "Dark";
+                      });
+                    }
                   : options[index - 1].onTap,
               child: Container(
                 margin: EdgeInsets.all(10.0),
@@ -235,14 +236,14 @@ class _SettingsPageState extends State<SettingsPage> {
                             onChanged: (value) {
                               setState(() {
                                 Provider.of<ThemeNotifier>(context,
-                                    listen: false)
+                                        listen: false)
                                     .toggleTheme();
                                 _currentTheme =
-                                _currentTheme == "Dark" ? "Light" : "Dark";
+                                    _currentTheme == "Dark" ? "Light" : "Dark";
                               });
                             },
                             activeTrackColor:
-                            Theme.of(context).primaryColor.withOpacity(0.5),
+                                Theme.of(context).primaryColor.withOpacity(0.5),
                             activeColor: Theme.of(context).primaryColor,
                           )
                         else
@@ -259,11 +260,9 @@ class _SettingsPageState extends State<SettingsPage> {
         },
       ),
     );
-
   }
 
-  Widget layoutNotLoggedIn(BuildContext context){
-
+  Widget layoutNotLoggedIn(BuildContext context) {
     final options = [
       Option(
           icon: Icon(
@@ -278,14 +277,14 @@ class _SettingsPageState extends State<SettingsPage> {
           }),
       Option(
         icon: Icon(Icons.waving_hand,
-            color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+            color: Theme.of(context).secondaryHeaderColor, size: 30.0),
         title: 'Starting Page',
         subtitle: 'Select your preferable starting page.',
         rightWidget: Padding(
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
             mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Distribute space evenly
+                MainAxisAlignment.spaceBetween, // Distribute space evenly
             children: [
               FutureBuilder(
                 future: cacheFactory.get('settings', 'index'),
@@ -314,7 +313,11 @@ class _SettingsPageState extends State<SettingsPage> {
                         SizedBox(
                             width: 5.0), // Add space between the icon and text
                         Text(
-                          (snapshot.data == 'News' || snapshot.data == 'Contacts' || snapshot.data == 'Map') ? snapshot.data : 'News',
+                          (snapshot.data == 'News' ||
+                                  snapshot.data == 'Contacts' ||
+                                  snapshot.data == 'Map')
+                              ? snapshot.data
+                              : 'News',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
@@ -334,7 +337,8 @@ class _SettingsPageState extends State<SettingsPage> {
               return EditStartingPage(
                 onDialogClosed: () {
                   setState(() {});
-                }, loggedIn: false,
+                },
+                loggedIn: false,
               );
             },
           );
@@ -343,7 +347,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (!kIsWeb)
         Option(
             icon: Icon(Icons.notifications,
-                color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+                color: Theme.of(context).secondaryHeaderColor, size: 30.0),
             title: 'Notifications',
             subtitle: 'Don\'t miss out on any updates!',
             onTap: () {
@@ -351,7 +355,7 @@ class _SettingsPageState extends State<SettingsPage> {
             }),
       Option(
           icon: Icon(Icons.privacy_tip,
-              color: Theme.of(context).secondaryHeaderColor, size: 40.0),
+              color: Theme.of(context).secondaryHeaderColor, size: 30.0),
           title: 'About',
           subtitle: 'Verify our terms and conditions and privacy policy.',
           onTap: () {}),
@@ -371,13 +375,13 @@ class _SettingsPageState extends State<SettingsPage> {
             child: InkWell(
               onTap: options[index - 1].toggleButton == true
                   ? () {
-                setState(() {
-                  Provider.of<ThemeNotifier>(context, listen: false)
-                      .toggleTheme();
-                  _currentTheme =
-                  _currentTheme == "Dark" ? "Light" : "Dark";
-                });
-              }
+                      setState(() {
+                        Provider.of<ThemeNotifier>(context, listen: false)
+                            .toggleTheme();
+                        _currentTheme =
+                            _currentTheme == "Dark" ? "Light" : "Dark";
+                      });
+                    }
                   : options[index - 1].onTap,
               child: Container(
                 margin: EdgeInsets.all(10.0),
@@ -421,14 +425,14 @@ class _SettingsPageState extends State<SettingsPage> {
                             onChanged: (value) {
                               setState(() {
                                 Provider.of<ThemeNotifier>(context,
-                                    listen: false)
+                                        listen: false)
                                     .toggleTheme();
                                 _currentTheme =
-                                _currentTheme == "Dark" ? "Light" : "Dark";
+                                    _currentTheme == "Dark" ? "Light" : "Dark";
                               });
                             },
                             activeTrackColor:
-                            Theme.of(context).primaryColor.withOpacity(0.5),
+                                Theme.of(context).primaryColor.withOpacity(0.5),
                             activeColor: Theme.of(context).primaryColor,
                           )
                         else

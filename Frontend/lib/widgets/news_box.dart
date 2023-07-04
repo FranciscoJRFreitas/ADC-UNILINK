@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
+import 'package:unilink2023/constants.dart';
 
 class CustomCard extends StatefulWidget {
   final String? imageUrl;
@@ -85,82 +88,128 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
           ),
           elevation: 5,
           color: Theme.of(context).primaryColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                child: // Check if imageWidth is not null
-                    Image.network(
-                  widget.imageUrl ?? 'N/A',
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  height: 200,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                          kDarkTheme
+                      ? Colors.blue.shade900
+                      : Colors.black54, // shadow color
+                  offset: Offset(5, 5), // Offset in x and y axes
+                  blurRadius: 10, // blur effect
+                  spreadRadius: 3, // spread effect
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title ?? 'N/A',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(fontSize: fontSize),
-                    ),
-                    if (widget.date != null)
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                  child: // Check if imageWidth is not null
+                      Image.network(
+                    widget.imageUrl ?? 'N/A',
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    height: 200,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        widget.date!.trimLeft(),
-                        style: Theme.of(context).textTheme.bodySmall,
+                        widget.title ?? 'N/A',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(fontSize: fontSize),
                       ),
-                    SizedBox(height: 10.0),
-                    Wrap(
-                      spacing: 6.0, // gap between adjacent tags
-                      runSpacing: 6.0, // gap between lines of tags
-                      children: widget.tags != null && widget.tags!.isNotEmpty
-                          ? widget.tags!
-                              .map(
-                                (tag) => GestureDetector(
-                                  onTap: () => widget.onTagClick?.call(tag),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 4.0),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black54),
-                                      borderRadius: BorderRadius.circular(16.0),
-                                    ),
-                                    child: Text(
-                                      "#" + tag!,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .copyWith(
-                                              fontWeight: FontWeight.bold),
+                      if (widget.date != null)
+                        Text(
+                          widget.date!.trimLeft(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      SizedBox(height: 10.0),
+                      Wrap(
+                        spacing: 6.0, // gap between adjacent tags
+                        runSpacing: 6.0, // gap between lines of tags
+                        children: widget.tags != null && widget.tags!.isNotEmpty
+                            ? widget.tags!
+                                .map(
+                                  (tag) => GestureDetector(
+                                    onTap: () => widget.onTagClick?.call(tag),
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8.0, vertical: 4.0),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Provider.of<ThemeNotifier>(context)
+                                                        .currentTheme ==
+                                                    kDarkTheme
+                                                ? Colors.blue.shade900
+                                                : Colors.blue.shade300,
+                                        border: Border.all(
+                                            color: Provider.of<ThemeNotifier>(
+                                                            context)
+                                                        .currentTheme ==
+                                                    kDarkTheme
+                                                ? Colors.blue.shade900
+                                                : Colors.blue.shade300),
+                                        borderRadius:
+                                            BorderRadius.circular(16.0),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Provider.of<ThemeNotifier>(
+                                                              context)
+                                                          .currentTheme ==
+                                                      kDarkTheme
+                                                  ? Colors.blue.shade900
+                                                      .withOpacity(0.5)
+                                                  : Colors.blue.shade300
+                                                      .withOpacity(0.8),
+                                              offset: Offset(0, 25),
+                                              blurRadius: 3,
+                                              spreadRadius:
+                                                  -10 // changes position of shadow
+                                              ),
+                                        ],
+                                      ),
+                                      child: Text(
+                                        "#" + tag!,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall!
+                                            .copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                              .toList()
-                          : <Widget>[],
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      widget.content ?? 'N/A',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 4,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(fontSize: fontSize - 3),
-                    ),
-                  ],
+                                )
+                                .toList()
+                            : <Widget>[],
+                      ),
+                      SizedBox(height: 20.0),
+                      Text(
+                        widget.content ?? 'N/A',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 4,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontSize: fontSize - 3),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          borderOnForeground: true,
         ),
       );
     });
