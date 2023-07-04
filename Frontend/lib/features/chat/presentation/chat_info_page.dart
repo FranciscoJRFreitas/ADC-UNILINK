@@ -5,14 +5,17 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
+import 'package:unilink2023/widgets/LineButton.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateField.dart';
+import 'package:unilink2023/widgets/LineText.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/my_date_event_field.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
@@ -49,7 +52,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   late bool isAdmin = false;
   late MembersData? memberData;
   List<EventType> eventTypes = EventType.values;
+  GoogleMapController? _controller;
   String _selectedEventType = 'Academic';
+  bool isLocationSelected = false;
 
   @override
   void initState() {
@@ -749,6 +754,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   }
 
   _createEventPopUpDialog(BuildContext context) {
+    LatLng? _selectedLocation = null;
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -776,22 +782,88 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   ),
                   LineTextField(
                     icon: Icons.title,
-                    lableText: 'Event Title',
+                    lableText: 'Title',
                     controller: titleController,
                     title: "",
                   ),
                   LineTextField(
                     icon: Icons.description,
-                    lableText: "Event Description",
+                    lableText: "Description",
                     controller: descriptionController,
                     title: "",
                   ),
-                  LineTextField(
-                    //Text for now (add Dropdown for Buildings)
+                  LineButton(
                     icon: Icons.place,
-                    lableText: "Event Location",
-                    controller: locationController,
-                    title: "",
+                    title: isLocationSelected
+                        ? "1 Location Selected"
+                        : "Select Location",
+                    onPressed: () {
+                      Set<Marker> _markers = {};
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return StatefulBuilder(builder: (context, setState) {
+                            return AlertDialog(
+                              content: Container(
+                                width: MediaQuery.of(context).size.width *
+                                    0.9, // 90% of screen width
+                                height: MediaQuery.of(context).size.height *
+                                    0.8, // 80% of screen height
+                                child: Stack(
+                                  children: <Widget>[
+                                    GoogleMap(
+                                      onMapCreated:
+                                          (GoogleMapController controller) {},
+                                      initialCameraPosition: CameraPosition(
+                                        target: LatLng(38.660999, -9.205094),
+                                        zoom: 17,
+                                      ),
+                                      onTap: (LatLng location) {
+                                        // User tapped at location on map
+                                        // Store this location and add marker
+                                        setState(() {
+                                          _selectedLocation = location;
+                                          _markers.clear();
+                                          _markers.add(Marker(
+                                            markerId: MarkerId(
+                                                _selectedLocation.toString()),
+                                            position: _selectedLocation!,
+                                          ));
+                                        });
+                                      },
+                                      markers: _markers,
+                                    ),
+                                    if (_selectedLocation != null)
+                                      Positioned(
+                                        bottom: 10,
+                                        right: 10,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            isLocationSelected = true;
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('Select Location'),
+                                        ),
+                                      ),
+                                    Positioned(
+                                      top: 10,
+                                      right: 10,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          _selectedLocation = null;
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Close'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                        },
+                      );
+                    },
                   ),
                   SizedBox(
                     height: 10,
@@ -799,7 +871,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: startController,
-                    hintText: "Event Start Time",
+                    hintText: "Start Time",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -809,7 +881,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: endController,
-                    hintText: "Event End Time",
+                    hintText: "End Time",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -827,7 +899,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                           startController.text,
                           endController.text,
                           widget.groupId,
-                          locationController.text, //add Location controller
+                          _selectedLocation!, //add Location controller
                           _showErrorSnackbar);
                       Navigator.of(context).pop();
                     }
@@ -1064,7 +1136,7 @@ Future<void> createEvent(
   String start,
   String end,
   String groupID,
-  String location,
+  LatLng? location,
   void Function(String, bool) showErrorSnackbar,
 ) async {
   final url = kBaseUrl + "rest/events/add";
@@ -1072,29 +1144,52 @@ Future<void> createEvent(
   final storedUsername = await cacheFactory.get('users', 'username');
   Token token = new Token(tokenID: tokenID, username: storedUsername);
 
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${json.encode(token.toJson())}'
-    },
-    body: jsonEncode({
-      'title': title,
-      'type': type,
-      'description': description,
-      'startTime': start,
-      'endTime': end,
-      'creator': storedUsername,
-      'groupID': groupID,
-      'location': location
-    }),
-  );
+  print(location);
+/*
+  var response;
+  if (location != null) {
+    response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+      body: jsonEncode({
+        'title': title,
+        'type': type,
+        'description': description,
+        'startTime': start,
+        'endTime': end,
+        'creator': storedUsername,
+        'groupID': groupID,
+        'location': location
+      }),
+    );
+  } else {
+    response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+      body: jsonEncode({
+        'title': title,
+        'type': type,
+        'description': description,
+        'startTime': start,
+        'endTime': end,
+        'creator': storedUsername,
+        'groupID': groupID,
+        'location': 0
+      }),
+    );
+  }
 
   if (response.statusCode == 200) {
     showErrorSnackbar('Created an event successfully!', false);
   } else {
     showErrorSnackbar('Failed to create an event: ${response.body}', true);
-  }
+  }*/
 }
 
 Future<void> removeEvent(

@@ -107,7 +107,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ChatPage(user: _currentUser), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
-        SchedulePage(), //estudante //9
+        SchedulePage(username: _currentUser.username,), //estudante //9
         MyMap(), //10
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
