@@ -826,7 +826,7 @@ class _ChatPageState extends State<ChatPage> {
       int index = 0;
       if (page == "News") index = 0;
       if (page == "Contacts") index = 1;
-      if (page == "Map") index = 3;
+      if (page == "Campus") index = 3;
 
       Navigator.pushAndRemoveUntil(
         context,

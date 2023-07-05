@@ -31,7 +31,7 @@ class _EditStartingPageState extends State<EditStartingPage> {
   Future<void> getSettings() async {
     _startingPage = await cacheFactory.get('settings', 'index');
     setState(() {});
-    if (!_loggedIn && (_startingPage != 'News' && _startingPage != 'Contacts' && _startingPage != 'Map'))
+    if (!_loggedIn && (_startingPage != 'News' && _startingPage != 'Contacts' && _startingPage != 'Campus'))
       _startingPage = "News";
     updateIcon();
   }
@@ -42,7 +42,7 @@ class _EditStartingPageState extends State<EditStartingPage> {
     if (_startingPage == "Schedule") icon = Icons.schedule;
     if (_startingPage == "Chat") icon = Icons.chat;
     if (_startingPage == "Contacts") icon = Icons.call;
-    if (_startingPage == "Map") icon = Icons.map;
+    if (_startingPage == "Campus") icon = Icons.map;
   }
 
   @override
@@ -147,12 +147,12 @@ class _EditStartingPageState extends State<EditStartingPage> {
       'Schedule',
       'Chat',
       'Contacts',
-      'Map',
+      'Campus',
     ];
     else return [
       'News',
       'Contacts',
-      'Map',
+      'Campus',
     ];
   }
 }

@@ -52,7 +52,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "Contacts",
     "Settings",
     "Student",
-    "Map",
+    "Campus",
     "Anomaly",
     "Teacher",
     "Director",
@@ -446,7 +446,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ListTile(
                 leading: Icon(Icons.map),
                 title:
-                    Text('Map', style: Theme.of(context).textTheme.bodyLarge),
+                    Text('Campus', style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
                     _selectedIndex = 10;
@@ -554,7 +554,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.map, 10, AxisDirection.right),
-                    label: 'Map',
+                    label: 'Campus',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.chat, 6, AxisDirection.down),
@@ -711,7 +711,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       int index = 0;
       if (page == "News") index = 0;
       if (page == "Contacts") index = 1;
-      if (page == "Map") index = 3;
+      if (page == "Campus") index = 3;
 
       Navigator.pushAndRemoveUntil(
         context,

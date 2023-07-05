@@ -35,7 +35,7 @@ class _SplashPageState extends State<SplashPage> {
         int index = 0;
         if (page == "News") index = 0;
         if (page == "Contacts") index = 1;
-        if (page == "Map") index = 3;
+        if (page == "Campus") index = 3;
 
         if (introB == 'true' || introB == '1') {
           if (loginB == 'true' || loginB == '1') {
