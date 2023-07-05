@@ -119,53 +119,52 @@ class _SchedulePageState extends State<SchedulePage> {
     setState(() {});
   }
 
-  void _getPersonalEvents() async{
+   void _getPersonalEvents() async {
 
-    DatabaseReference eventsRef =
-    FirebaseDatabase.instance.ref().child('schedule').child(widget.username);
+    DatabaseReference eventsRef = await FirebaseDatabase.instance
+        .ref()
+        .child('schedule')
+        .child(widget.username);
 
-    await eventsRef.once().then((userDataSnapshot) {
-      Map<dynamic, dynamic> newevents = userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+     eventsRef.onChildAdded.listen((event) async {
+       setState(() {
+      Map<dynamic, dynamic> currEvent = event.snapshot.value as Map<dynamic, dynamic>;
+      print("SNAPSHOT: " + event.snapshot.value.toString());
+      Event currentEvent = Event(
+        type: _parseEventType(currEvent["type"]),
+        title: currEvent["title"],
+        description: currEvent['description'],
+        location: currEvent['location'],
+        startTime: DateTime.parse(currEvent["startTime"]),
+        endTime: DateTime.parse(currEvent["endTime"]),
+      );
 
-      newevents.forEach((key, value) {
-        Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
-        Event currentEvent = Event(
-            type: _parseEventType(currEvent["type"]),
-            title: currEvent["title"],
-            description: currEvent['description'],
-            location: currEvent['location'],
-            startTime: DateTime.parse(currEvent["startTime"]),
-            endTime: DateTime.parse(currEvent["endTime"]));
+      // Update events array with the new event
+      DateTime startDate = DateTime(
+        currentEvent.startTime.year,
+        currentEvent.startTime.month,
+        currentEvent.startTime.day,
+      );
+      DateTime endDate = DateTime(
+        currentEvent.endTime.year,
+        currentEvent.endTime.month,
+        currentEvent.endTime.day,
+      );
 
-        print("Event: " + currentEvent.title);
+      for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+        DateTime currentDate = startDate.add(Duration(days: i));
+        String formattedCurrentDateTime = customFormat.format(currentDate);
 
-        DateTime startDate = DateTime(
-          currentEvent.startTime.year,
-          currentEvent.startTime.month,
-          currentEvent.startTime.day,
-        );
-        DateTime endDate = DateTime(
-          currentEvent.endTime.year,
-          currentEvent.endTime.month,
-          currentEvent.endTime.day,
-        );
+        DateTime parsedCurrentDateTime = customFormat.parse(formattedCurrentDateTime, true);
 
-        for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
-          DateTime currentDate = startDate.add(Duration(days: i));
-          String formattedCurrentDateTime = customFormat.format(currentDate);
-
-          DateTime parsedCurrentDateTime =
-          customFormat.parse(formattedCurrentDateTime, true);
-
-          if (events.containsKey(parsedCurrentDateTime)) {
-            events[parsedCurrentDateTime]!.add(currentEvent);
-          } else {
-            events[parsedCurrentDateTime] = [currentEvent];
-          }
+        if (events.containsKey(parsedCurrentDateTime)) {
+          events[parsedCurrentDateTime]!.add(currentEvent);
+        } else {
+          events[parsedCurrentDateTime] = [currentEvent];
         }
-      });
+      }
+     });
     });
-
   }
 
   EventType _parseEventType(String? eventTypeString) {
@@ -383,8 +382,6 @@ class _SchedulePageState extends State<SchedulePage> {
                   ElevatedButton(
                     onPressed: () async {
                       {
-                        print(startController.text);
-                        print(endController.text);
                         DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
                         _createPersonalEvent(Event(creator: widget.username, type: _parseEventType(_selectedEventType), title: titleController.text, description: descriptionController.text,
                             startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(startController.text), location: locationController.text));
@@ -429,8 +426,6 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   _createPersonalEvent(Event event) {
-
-    print(event.toJson());
 
     DatabaseReference eventsRef =
     FirebaseDatabase.instance.ref().child('schedule').child(widget.username).push();
