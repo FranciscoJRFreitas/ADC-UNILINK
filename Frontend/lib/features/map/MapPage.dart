@@ -24,6 +24,7 @@ class _MyMapState extends State<MyMap> {
   bool isSattelite = true;
   bool isFirst = true;
   var center = LatLng(38.660999, -9.205094);
+  var cameraposition;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -53,6 +54,7 @@ class _MyMapState extends State<MyMap> {
   @override
   void initState() {
     super.initState();
+    cameraposition = center;
     WidgetsBinding.instance.addPostFrameCallback((_) => initializeAsync());
     rootBundle.loadString('assets/json/map_style.json').then((string) {
       _mapStyle = string;
@@ -96,6 +98,8 @@ class _MyMapState extends State<MyMap> {
         PointLatLng(lat, long),
         travelMode: distance >= 0.75 ? TravelMode.driving : TravelMode.walking,
       );
+      cameraposition =
+          LatLng(currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
 
       if (result.points.isNotEmpty) {
         result.points.forEach((PointLatLng point) {
@@ -103,6 +107,9 @@ class _MyMapState extends State<MyMap> {
         });
       } else {
         print(result.errorMessage);
+      }
+      if (mapController != null) {
+        mapController!.moveCamera(CameraUpdate.newLatLng(cameraposition));
       }
 
       if (isDirections) {
@@ -177,10 +184,12 @@ class _MyMapState extends State<MyMap> {
               GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
                   controller.setMapStyle(_mapStyle);
+                  mapController =
+                      controller; // Store the GoogleMapController instance
                 },
                 zoomGesturesEnabled: true,
                 initialCameraPosition: CameraPosition(
-                  target: center,
+                  target: cameraposition,
                   zoom: 17.0,
                 ),
                 polygons: selectedDropdownItems.contains("Campus")
