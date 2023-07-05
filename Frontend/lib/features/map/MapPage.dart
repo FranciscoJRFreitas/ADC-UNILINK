@@ -60,7 +60,7 @@ class _MyMapState extends State<MyMap> {
 
     _getLocation();
 
-    _loadMarkersFromJson();
+    loadMarkersFromJson();
   }
 
   @override
@@ -339,7 +339,7 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
-  void _loadMarkersFromJson() async {
+  loadMarkersFromJson() async {
     String campusJson =
         await rootBundle.loadString('assets/json/map/Campus_de_Caparica.json');
     String buildingsJson =
