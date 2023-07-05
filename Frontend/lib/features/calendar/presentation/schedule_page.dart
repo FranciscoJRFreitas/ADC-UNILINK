@@ -41,6 +41,7 @@ class _SchedulePageState extends State<SchedulePage> {
     selectedDay = customFormat.parse(formattedSelectedDateTime, true);
     loadSchedule();
     getUserEvents();
+
   }
 
   void getUserEvents() async {
@@ -62,50 +63,109 @@ class _SchedulePageState extends State<SchedulePage> {
     });
 
     for (String groupId in groups) {
+
       DatabaseReference eventsRef =
           await FirebaseDatabase.instance.ref().child('events').child(groupId);
+
       await eventsRef.once().then((userDataSnapshot) {
-        Map<dynamic, dynamic> newevents =
-            userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
-        newevents.forEach((key, value) {
-          Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
-          Event currentEvent = Event(
-              type: _parseEventType(currEvent["type"]),
-              title: currEvent["title"],
-              description: currEvent['description'],
-              location: currEvent['location'],
-              groupId: groupId,
-              startTime: DateTime.parse(currEvent["startTime"]),
-              endTime: DateTime.parse(currEvent["endTime"]));
 
-          DateTime startDate = DateTime(
-            currentEvent.startTime.year,
-            currentEvent.startTime.month,
-            currentEvent.startTime.day,
-          );
-          DateTime endDate = DateTime(
-            currentEvent.endTime.year,
-            currentEvent.endTime.month,
-            currentEvent.endTime.day,
-          );
+        if(userDataSnapshot.snapshot.value != null) {
+          Map<dynamic, dynamic> newevents = userDataSnapshot.snapshot
+              .value as Map<dynamic, dynamic>;
 
-          for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
-            DateTime currentDate = startDate.add(Duration(days: i));
-            String formattedCurrentDateTime = customFormat.format(currentDate);
+          newevents.forEach((key, value) {
+            Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
+            Event currentEvent = Event(
+                type: _parseEventType(currEvent["type"]),
+                title: currEvent["title"],
+                description: currEvent['description'],
+                location: currEvent['location'],
+                groupId: groupId,
+                startTime: DateTime.parse(currEvent["startTime"]),
+                endTime: DateTime.parse(currEvent["endTime"]));
 
-            DateTime parsedCurrentDateTime =
-                customFormat.parse(formattedCurrentDateTime, true);
+            DateTime startDate = DateTime(
+              currentEvent.startTime.year,
+              currentEvent.startTime.month,
+              currentEvent.startTime.day,
+            );
+            DateTime endDate = DateTime(
+              currentEvent.endTime.year,
+              currentEvent.endTime.month,
+              currentEvent.endTime.day,
+            );
 
-            if (events.containsKey(parsedCurrentDateTime)) {
-              events[parsedCurrentDateTime]!.add(currentEvent);
-            } else {
-              events[parsedCurrentDateTime] = [currentEvent];
+            for (int i = 0; i <= endDate
+                .difference(startDate)
+                .inDays; i++) {
+              DateTime currentDate = startDate.add(Duration(days: i));
+              String formattedCurrentDateTime = customFormat.format(
+                  currentDate);
+
+              DateTime parsedCurrentDateTime =
+              customFormat.parse(formattedCurrentDateTime, true);
+
+              if (events.containsKey(parsedCurrentDateTime)) {
+                events[parsedCurrentDateTime]!.add(currentEvent);
+              } else {
+                events[parsedCurrentDateTime] = [currentEvent];
+              }
             }
-          }
-        });
-      });
+          });
+        }});
     }
+
+    _getPersonalEvents();
     setState(() {});
+  }
+
+  void _getPersonalEvents() async{
+
+    DatabaseReference eventsRef =
+    FirebaseDatabase.instance.ref().child('schedule').child(widget.username);
+
+    await eventsRef.once().then((userDataSnapshot) {
+      Map<dynamic, dynamic> newevents = userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+
+      newevents.forEach((key, value) {
+        Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
+        Event currentEvent = Event(
+            type: _parseEventType(currEvent["type"]),
+            title: currEvent["title"],
+            description: currEvent['description'],
+            location: currEvent['location'],
+            startTime: DateTime.parse(currEvent["startTime"]),
+            endTime: DateTime.parse(currEvent["endTime"]));
+
+        print("Event: " + currentEvent.title);
+
+        DateTime startDate = DateTime(
+          currentEvent.startTime.year,
+          currentEvent.startTime.month,
+          currentEvent.startTime.day,
+        );
+        DateTime endDate = DateTime(
+          currentEvent.endTime.year,
+          currentEvent.endTime.month,
+          currentEvent.endTime.day,
+        );
+
+        for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+          DateTime currentDate = startDate.add(Duration(days: i));
+          String formattedCurrentDateTime = customFormat.format(currentDate);
+
+          DateTime parsedCurrentDateTime =
+          customFormat.parse(formattedCurrentDateTime, true);
+
+          if (events.containsKey(parsedCurrentDateTime)) {
+            events[parsedCurrentDateTime]!.add(currentEvent);
+          } else {
+            events[parsedCurrentDateTime] = [currentEvent];
+          }
+        }
+      });
+    });
+
   }
 
   EventType _parseEventType(String? eventTypeString) {
@@ -153,6 +213,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Column(
         children: [
