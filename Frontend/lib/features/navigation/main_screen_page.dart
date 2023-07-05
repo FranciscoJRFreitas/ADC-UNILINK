@@ -107,7 +107,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ChatPage(user: _currentUser), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
-        SchedulePage(), //estudante //9
+        SchedulePage(username: _currentUser.username,), //estudante //9
         MyMap(), //10
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
@@ -212,6 +212,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return _buildWebLayout(context);
+    } else {
+      return _buildWebLayout(context);
+    }
+  }
+
+  @override
+  Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
 
@@ -257,6 +266,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             )
           ],
         ),
+
         drawer: Drawer(
           backgroundColor: Theme.of(context).primaryColor,
           child: ListView(
@@ -414,43 +424,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     )
                   ]),
 
-              /* ExpansionTile(
-                leading: Icon(Icons.person),
-                title:
-                    Text('Profile', style: Theme.of(context).textTheme.bodyLarge),
-                children: <Widget>[
-                 ListTile(
-                    title: Text('Modify Attributes',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 3;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Change Password',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 4;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Remove Account',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 5;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),*/
               ListTile(
                 leading: Icon(Icons.chat),
                 title:

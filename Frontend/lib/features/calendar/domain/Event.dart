@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class Event {
   final String? id;
+  final String? groupId;
   final EventType type;
   final String title;
   final String description;
@@ -13,6 +14,7 @@ class Event {
   Event({
     this.id,
     this.creator,
+    this.groupId,
     required this.type,
     required this.title,
     required this.description,
@@ -37,6 +39,20 @@ class Event {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
       id: id,
+      creator: data['creator'] as String,
+      type: _parseEventType(data['type'] as String),
+      title: data['title'] as String,
+      description: data['description'] as String,
+      startTime: DateTime.parse(data['startTime']),
+      endTime: DateTime.parse(data['endTime']),
+      location: data['location'] as String,
+    );
+  }
+
+  factory Event.fromSnapshotGroupId(String id, DataSnapshot snapshot) {
+    final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+    return Event(
+      groupId: id,
       creator: data['creator'] as String,
       type: _parseEventType(data['type'] as String),
       title: data['title'] as String,
@@ -107,6 +123,7 @@ class Event {
 
     return EventType.academic;
   }
+
 
   static String _getEventTypeString(EventType eventType) {
     switch (eventType) {

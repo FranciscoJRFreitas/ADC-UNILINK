@@ -435,7 +435,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: kWhiteBackgroundColor,
+          color: Theme.of(context).primaryColor,
         ),
         centerTitle: true,
         elevation: 0,
@@ -733,7 +733,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 },
               )
             : null,
-        backgroundColor: Theme.of(context).primaryColorDark,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
           widget.groupId,
           style: Theme.of(context).textTheme.bodyLarge,

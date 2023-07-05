@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/constants.dart';
+import 'dart:math';
 
 class CustomCard extends StatefulWidget {
   final String? imageUrl;
@@ -72,6 +73,8 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
           availableHeight < MediaQuery.of(context).size.height
               ? availableHeight / 5
               : MediaQuery.of(context).size.height / 5;
+      final double minFontSize = 18.0;
+      final double maxFontSize = 23.0;
 
       double cardMaxHeight;
       if (widget.isSingleCrossAxisCount ?? false) {
@@ -127,7 +130,7 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium!
-                            .copyWith(fontSize: fontSize),
+                            .copyWith(fontSize: max(min(fontSize, maxFontSize), minFontSize)),
                       ),
                       if (widget.date != null)
                         Text(
@@ -202,7 +205,7 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium!
-                            .copyWith(fontSize: fontSize - 3),
+                            .copyWith(fontSize: max(min(fontSize - 3, maxFontSize - 3), minFontSize - 3)),
                       ),
                     ],
                   ),

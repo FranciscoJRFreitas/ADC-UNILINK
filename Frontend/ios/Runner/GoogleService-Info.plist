@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>190649102208-i6rtcli8lmvtim86a3s7s0s3hdev9n6r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.190649102208-i6rtcli8lmvtim86a3s7s0s3hdev9n6r</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCadMr4N1zXR1KtX6Vu77HUK2fNMl-kSk8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>190649102208</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.apdcAi60313</string>
+	<key>PROJECT_ID</key>
+	<string>unilink23</string>
+	<key>STORAGE_BUCKET</key>
+	<string>unilink23.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:190649102208:ios:8eac3cad7956bcb5519b65</string>
+	<key>DATABASE_URL</key>
+	<string>https://unilink23-default-rtdb.europe-west1.firebasedatabase.app</string>
+</dict>
+</plist>

@@ -44,7 +44,7 @@ void main() async {
             theme: ThemeData(
               //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
               scaffoldBackgroundColor: kBackgroundColor,
-              primarySwatch: Colors.blue,
+              //primarySwatch: Colors.blue,
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
           ),
