@@ -55,7 +55,7 @@ class _MyTextComboBoxState extends State<MyTextComboBox> {
               value: widget.selectedValue,
               isExpanded: true,
               iconEnabledColor: Theme.of(context).primaryColor,
-              dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+              dropdownColor: Theme.of(context).canvasColor,
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium!

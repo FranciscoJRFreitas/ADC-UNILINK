@@ -165,43 +165,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         Column(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Don't have an account?",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          CupertinoPageRoute(
-                                            builder: (context) => LoginPage(),
-                                          ),
-                                        );
-                                      },
-                                      child: RichText(
-                                        text: TextSpan(
-                                          text: 'Register',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .copyWith(
-                                                color: Colors.blue.shade400,
-                                                decoration:
-                                                    TextDecoration.underline,
-                                              ),
-                                        ),
-                                      )),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
                             MyTextButton(
                               buttonName: _isLoading ? 'Loading...' : 'Login',
                               onTap: _isLoading
@@ -222,8 +185,46 @@ class _LoginPageState extends State<LoginPage> {
                                       });
                                     },
                               bgColor: Theme.of(context).primaryColor,
-                              textColor: Theme.of(context).secondaryHeaderColor,
-                              height: 60,
+                              textColor: Colors.white70,
+                              height: 50,
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account?  ",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) =>
+                                                RegisterPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'Register',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(
+                                                color: Colors.blue.shade400,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                        ),
+                                      )),
+                                ),
+                              ],
                             ),
                           ],
                         ),

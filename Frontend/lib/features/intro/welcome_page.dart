@@ -12,7 +12,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  //final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +34,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     height: 5,
                   ),
                   Text(
-                    "Bem-vindo à nova plataforma UniHub!",
+                    "Welcome to the new UniHub platform!",
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -45,7 +44,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: Text(
-                      "A tornar as faculdades mais acessiveis...",
+                      "Making universities more accessible...",
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
@@ -72,8 +71,9 @@ class _WelcomePageState extends State<WelcomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SizedBox(height: 10),
                   Text(
-                    'Already a user?',
+                    'Already a user?  ',
                     style: TextStyle(fontSize: 16),
                   ),
                   MouseRegion(
@@ -92,7 +92,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             text: 'Login',
                             style:
                                 Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                      color: Theme.of(context).primaryColor,
+                                      color: Colors.blue.shade400,
                                       decoration: TextDecoration.underline,
                                     ),
                           ),

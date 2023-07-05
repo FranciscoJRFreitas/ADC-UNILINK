@@ -16,7 +16,7 @@ class NotLoggedInScreen extends StatefulWidget {
 
 class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   int _selectedIndex = 0;
-  List<String> _title = ["News", "Contacts", "Settings", "Map", "Login"];
+  List<String> _title = ["News", "Contacts", "Settings", "Map", "Get Started"];
 
   _NotLoggedInScreenState(int? index) {
     if (index != null) _selectedIndex = index;
@@ -76,8 +76,8 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
           children: <Widget>[
             SizedBox(height: 75),
             ListTile(
-              leading: Icon(Icons.login),
-              title: Text('Login'),
+              leading: Icon(Icons.flight_takeoff),
+              title: Text('Get Started'),
               onTap: () {
                 setState(() {
                   _selectedIndex = 4;

@@ -25,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String _selectedEducationLevel = 'Education Level';
   final TextEditingController registration_dateController =
       TextEditingController();
-  String _selectedProfileVisibility = 'Profile Visibility';
+  String _selectedProfileVisibility = 'Profile Visibility (Public by default)';
   String sv = '';
   final TextEditingController landlinePhoneController = TextEditingController();
   final TextEditingController mobilePhoneController = TextEditingController();
@@ -119,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
               hasScrollBody: false,
               child: Padding(
                 padding:
-                    const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+                    const EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
                 child: Column(
                   children: [
                     Flexible(
@@ -230,9 +230,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               MyTextComboBox(
                                 selectedValue: _selectedProfileVisibility,
-                                hintText: 'Profile Visibility',
+                                hintText:
+                                    'Profile Visibility (Public by default)',
                                 items: [
-                                  'Profile Visibility',
+                                  'Profile Visibility (Public by default)',
                                   'Public',
                                   'Private'
                                 ],
@@ -271,9 +272,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                                     ? 'MD'
                                                     : 'PE',
                                     registration_dateController.text,
-                                    sv = _selectedProfileVisibility == 'Public'
-                                        ? 'PUBLIC'
-                                        : 'PRIVATE',
+                                    sv = _selectedProfileVisibility == 'Private'
+                                        ? 'PRIVATE'
+                                        : 'PUBLIC',
                                     //Default Private
                                     mobilePhoneController.text,
                                     occupationController.text,
@@ -282,18 +283,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
                                 bgColor: Theme.of(context).primaryColor,
                                 textColor: Colors.white70,
-                                height: 40,
+                                height: 50,
                               ),
                             ],
                           ),
                           SizedBox(
-                            height: 5,
+                            height: 10,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Already a user?',
+                                'Already a user?  ',
                                 style: TextStyle(fontSize: 16),
                               ),
                               MouseRegion(
@@ -322,6 +323,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                     )),
                               ),
                             ],
+                          ),
+                          SizedBox(
+                            height: 10,
                           ),
                         ],
                       ),
