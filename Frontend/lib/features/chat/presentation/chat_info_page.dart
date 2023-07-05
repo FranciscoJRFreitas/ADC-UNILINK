@@ -1458,31 +1458,23 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                       markers: _markers,
                     ),
                     if (preLocation != null)
-                      Positioned(
-                        bottom: 10,
-                        right: 10,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              selectedLocation = preLocation;
-                            });
-                            Navigator.of(context).pop(selectedLocation);
-                            Navigator.of(context).pop(selectedLocation);
-                          },
-                          child: Text('Select Location'),
-                        ),
-                      ),
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: ElevatedButton(
+                      ElevatedButton(
                         onPressed: () {
-                          selectedLocation = null;
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pop();
+                          setState(() {
+                            selectedLocation = preLocation;
+                          });
+                          Navigator.of(context).pop(selectedLocation);
+                          Navigator.of(context).pop(selectedLocation);
                         },
-                        child: Text('Close'),
+                        child: Text('Select Location'),
                       ),
+                    ElevatedButton(
+                      onPressed: () {
+                        selectedLocation = null;
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Close'),
                     ),
                   ],
                 ),
