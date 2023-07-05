@@ -32,6 +32,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   DateTime focusedDay = DateTime.now();
   Map<DateTime, List<Event>> events = {};
+  String _selectedEventType = 'Academic';
 
   @override
   void initState() {
@@ -242,7 +243,7 @@ class _SchedulePageState extends State<SchedulePage> {
           final newEvent = await showDialog<Event>(
             context: context,
             builder: (BuildContext context) {
-              String _selectedEventType = 'Academic';
+
               final TextEditingController titleController =
                   TextEditingController();
               final TextEditingController descriptionController =
@@ -321,7 +322,11 @@ class _SchedulePageState extends State<SchedulePage> {
                   ElevatedButton(
                     onPressed: () async {
                       {
-                        _createPersonalEvent();
+                        print(startController.text);
+                        print(endController.text);
+                        DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+                        _createPersonalEvent(Event(creator: widget.username, type: _parseEventType(_selectedEventType), title: titleController.text, description: descriptionController.text,
+                            startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(startController.text), location: locationController.text));
                         Navigator.of(context).pop();
                       }
                     },
@@ -343,8 +348,7 @@ class _SchedulePageState extends State<SchedulePage> {
           );
 
           if (newEvent != null) {
-            // Save the new event using your chosen method
-            // Then update the state to refresh the calendar
+            
             setState(() {
               // This is where you'd actually add the new event to your event list
               // For now I'll just print it
@@ -363,9 +367,24 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  _createPersonalEvent() {
+  _createPersonalEvent(Event event) {
 
-  }
+    print(event.toJson());
+
+    DatabaseReference eventsRef =
+    FirebaseDatabase.instance.ref().child('schedule').child(widget.username).push();
+
+    // Generate a new ID for the event
+    String? eventId = eventsRef.key;
+
+    // Add the event to the database
+    eventsRef.set(event.toJson()).then((_) {
+        print('Event added successfully with ID: $eventId');
+      }).catchError((error) {
+        print('Failed to add event: $error');
+      });
+    }
+
 
   String getDayOfWeek(DateTime date) {
     switch (date.weekday) {
