@@ -25,6 +25,7 @@ class _MyMapState extends State<MyMap> {
   bool isFirst = true;
   var center = LatLng(38.660999, -9.205094);
   var cameraposition;
+  var isLocked = false;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -86,6 +87,9 @@ class _MyMapState extends State<MyMap> {
   getDirections(double? lat, double? long) async {
     print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
     print(distance);
+    if (mapController != null && isLocked) {
+      mapController!.moveCamera(CameraUpdate.newLatLng(cameraposition));
+    }
     if (lat != null && long != null && isDirections) {
       List<LatLng> polylineCoordinates = [];
 
@@ -107,9 +111,6 @@ class _MyMapState extends State<MyMap> {
         });
       } else {
         print(result.errorMessage);
-      }
-      if (mapController != null) {
-        mapController!.moveCamera(CameraUpdate.newLatLng(cameraposition));
       }
 
       if (isDirections) {
@@ -251,6 +252,27 @@ class _MyMapState extends State<MyMap> {
                       });
                     },
                     child: Text('Stop giving directions'),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom:
+                    60.0, // Adjust the offset to position the buttons as desired
+                right: 20.0,
+                child: Visibility(
+                  visible: isDirections,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (!isLocked) {
+                          isLocked = true;
+                        } else {
+                          isLocked = false;
+                        }
+                        polylines = {};
+                      });
+                    },
+                    child: Text(isLocked ? "Unlock Camera" : "Lock Camera"),
                   ),
                 ),
               ),
