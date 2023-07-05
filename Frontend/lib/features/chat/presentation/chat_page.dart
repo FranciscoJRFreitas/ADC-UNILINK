@@ -256,7 +256,7 @@ class _ChatPageState extends State<ChatPage> {
               color: Colors.grey, // You can adjust the color of the divider
             ),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: GroupMessagesPage(
                 key: ValueKey(selectedGroup.id),
                 groupId: selectedGroup.id,
@@ -321,7 +321,8 @@ class _ChatPageState extends State<ChatPage> {
                       return ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
-                          Message? firstMessage = firstMessageOfGroups[group.id];
+                          Message? firstMessage =
+                              firstMessageOfGroups[group.id];
                           return Column(
                             children: [
                               GestureDetector(
@@ -367,37 +368,6 @@ class _ChatPageState extends State<ChatPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          //SizedBox(height: 8),
-                                          /*Row(
-                                            children: [
-                                              Icon(Icons.person, size: 20),
-                                              SizedBox(width: 5),
-                                              Expanded(
-                                                child: Text(
-                                                  'Description: ${group.description}',
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                            ],
-                                          ),*/
-                                          //SizedBox(height: 8),
-                                          /*Row(
-                                            children: [
-                                              Icon(Icons.people, size: 20),
-                                              SizedBox(width: 5),
-                                              Expanded(
-                                                child: Text(
-                                                  '${group.numberOfMembers} members',
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                              SizedBox(height: 8),
-                                            ],
-                                          ),*/
                                           SizedBox(height: 8),
                                           Row(
                                             children: [
@@ -435,98 +405,6 @@ class _ChatPageState extends State<ChatPage> {
                           );
                         }).toList(),
                       );
-
-                      /*ListView(
-                        padding: EdgeInsets.only(top: 10, bottom: 80),
-                        children: groups.map((group) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGroup = group;
-                                downloadGroupPictureData(group.id);
-                              });
-                            },
-                            child: Column(
-                              children: [
-                                Card(
-                                  color: selectedGroup == group
-                                      ? Theme.of(context).primaryColorDark
-                                      : Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                  elevation: 0,
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 10, horizontal: 8),
-                                    child: ListTile(
-                                      leading: ClipRRect(
-                                          child:
-                                              groupPicture(context, group.id)),
-                                      title: Text(
-                                        '${group.DisplayName}',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      trailing: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text(
-                                            'HH:MM', // Replace with the time of the last message
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.grey),
-                                          ),
-                                        ],
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(height: 8),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.person, size: 20),
-                                              SizedBox(width: 5),
-                                              Expanded(
-                                                child: Text(
-                                                  'Description: ${group.description}',
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 8),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.people, size: 20),
-                                              SizedBox(width: 5),
-                                              Expanded(
-                                                child: Text(
-                                                  '${group.numberOfMembers} members',
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                              SizedBox(height: 8),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Divider(
-                                  color: Theme.of(context).primaryColor,
-                                  thickness: 1,
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      );*/
                     } else {
                       return noGroupWidget();
                     }
@@ -948,7 +826,7 @@ class _ChatPageState extends State<ChatPage> {
       int index = 0;
       if (page == "News") index = 0;
       if (page == "Contacts") index = 1;
-      if (page == "Map") index = 3;
+      if (page == "Campus") index = 3;
 
       Navigator.pushAndRemoveUntil(
         context,

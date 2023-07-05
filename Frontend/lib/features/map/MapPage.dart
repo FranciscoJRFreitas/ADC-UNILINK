@@ -62,7 +62,7 @@ class _MyMapState extends State<MyMap> {
 
     _getLocation();
 
-    _loadMarkersFromJson();
+    loadMarkersFromJson();
   }
 
   @override
@@ -206,7 +206,7 @@ class _MyMapState extends State<MyMap> {
                   alignment: Alignment.topRight,
                   child: ElevatedButton(
                     onPressed: () => showOptionsDialog(context),
-                    child: Text('Open Dropdown'),
+                    child: Text('Map Options'),
                   ),
                 ),
               ),
@@ -348,7 +348,7 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
-  void _loadMarkersFromJson() async {
+  loadMarkersFromJson() async {
     String campusJson =
         await rootBundle.loadString('assets/json/map/Campus_de_Caparica.json');
     String buildingsJson =
