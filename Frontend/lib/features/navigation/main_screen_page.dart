@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:unilink2023/features/anomaly/anomalypage.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
@@ -52,6 +53,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "Settings",
     "Student",
     "Map",
+    "Anomaly",
     "Teacher",
     "Director",
   ];
@@ -111,6 +113,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           username: _currentUser.username,
         ), //estudante //9
         MyMap(), //10
+        ReportAnomalyPage(),
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
       ];
@@ -412,7 +415,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 2;
-                          
                         });
                         Navigator.pop(context);
                       },
@@ -449,6 +451,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   setState(() {
                     _selectedIndex = 10;
                     _bottomNavigationIndex = 2;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.analytics),
+                title: Text('Anomaly',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 11;
                   });
                   Navigator.pop(context);
                 },

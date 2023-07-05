@@ -24,12 +24,14 @@ pt\unl\fct\di\apdc\firstwebapp\util\UserRole.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChangePasswordResource.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RegisterResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\InviteToken.class
+pt\unl\fct\di\apdc\firstwebapp\resources\AnomalyResources.class
 pt\unl\fct\di\apdc\firstwebapp\util\VerifyAction.class
 pt\unl\fct\di\apdc\firstwebapp\servlets\FirebaseInit.class
 pt\unl\fct\di\apdc\firstwebapp\resources\LoginResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\RolesLoader.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ModifyAttributesResource.class
 pt\unl\fct\di\apdc\firstwebapp\filters\AdditionalResponseHeadersFilter.class
+pt\unl\fct\di\apdc\firstwebapp\util\AnomalyData.class
 pt\unl\fct\di\apdc\firstwebapp\util\AuthToken.class
 pt\unl\fct\di\apdc\firstwebapp\util\LoginData.class
 pt\unl\fct\di\apdc\firstwebapp\util\RegisterData.class

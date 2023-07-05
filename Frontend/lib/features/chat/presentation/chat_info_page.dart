@@ -310,7 +310,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               elevation: 0,
               title: Text(
                 "Group Information",
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
+                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Theme.of(context).textTheme.bodyLarge!.color),
               ),
               backgroundColor: Theme.of(context).primaryColor,
               actions: <Widget>[
@@ -809,52 +810,47 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                     0.9, // 90% of screen width
                                 height: MediaQuery.of(context).size.height *
                                     0.8, // 80% of screen height
-                                child: Stack(
+                                child: Column(
                                   children: <Widget>[
-                                    GoogleMap(
-                                      onMapCreated:
-                                          (GoogleMapController controller) {},
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(38.660999, -9.205094),
-                                        zoom: 17,
-                                      ),
-                                      onTap: (LatLng location) {
-                                        // User tapped at location on map
-                                        // Store this location and add marker
-                                        setState(() {
-                                          _selectedLocation = location;
-                                          _markers.clear();
-                                          _markers.add(Marker(
-                                            markerId: MarkerId(
-                                                _selectedLocation.toString()),
-                                            position: _selectedLocation!,
-                                          ));
-                                        });
-                                      },
-                                      markers: _markers,
-                                    ),
-                                    if (_selectedLocation != null)
-                                      Positioned(
-                                        bottom: 10,
-                                        right: 10,
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            isLocationSelected = true;
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Text('Select Location'),
+                                    Expanded(
+                                      child: GoogleMap(
+                                        onMapCreated:
+                                            (GoogleMapController controller) {},
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(38.660999, -9.205094),
+                                          zoom: 17,
                                         ),
+                                        onTap: (LatLng location) {
+                                          // User tapped at location on map
+                                          // Store this location and add marker
+                                          setState(() {
+                                            _selectedLocation = location;
+                                            _markers.clear();
+                                            _markers.add(Marker(
+                                              markerId: MarkerId(
+                                                  _selectedLocation.toString()),
+                                              position: _selectedLocation!,
+                                            ));
+                                          });
+                                        },
+                                        markers: _markers,
                                       ),
-                                    Positioned(
-                                      top: 10,
-                                      right: 10,
-                                      child: ElevatedButton(
+                                    ),
+                                    if (_selectedLocation != null) ...[
+                                      ElevatedButton(
                                         onPressed: () {
-                                          _selectedLocation = null;
+                                          isLocationSelected = true;
                                           Navigator.of(context).pop();
                                         },
-                                        child: Text('Close'),
+                                        child: Text('Select Location'),
                                       ),
+                                    ],
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _selectedLocation = null;
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Close'),
                                     ),
                                   ],
                                 ),
