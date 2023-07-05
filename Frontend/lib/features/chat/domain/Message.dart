@@ -45,4 +45,28 @@ class Message {
             isSystemMessage: data['isSystemMessage'] as bool,
           );
   }
+
+  factory Message.fromMap(var key, Map<dynamic, dynamic> data) {
+    bool files = data["containsFile"] as bool;
+    return files
+        ? Message(
+            id: key,
+            extension: data['extension'] as String,
+            text: data['message'] as String,
+            name: data['name'] as String,
+            displayName: data['displayName'] as String,
+            timestamp: data['timestamp'] as int,
+            containsFile: data['containsFile'] as bool,
+            isSystemMessage: data['isSystemMessage'] as bool,
+          )
+        : Message(
+            id: key,
+            text: data['message'] as String,
+            name: data['name'] as String,
+            displayName: data['displayName'] as String,
+            timestamp: data['timestamp'] as int,
+            containsFile: data['containsFile'] as bool,
+            isSystemMessage: data['isSystemMessage'] as bool,
+          );
+  }
 }

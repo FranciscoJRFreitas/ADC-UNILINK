@@ -107,7 +107,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ChatPage(user: _currentUser), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
-        SchedulePage(username: _currentUser.username,), //estudante //9
+        SchedulePage(
+          username: _currentUser.username,
+        ), //estudante //9
         MyMap(), //10
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
@@ -237,21 +239,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       child: Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(
-            color: kWhiteBackgroundColor,
+            color: Theme.of(context).textTheme.bodyLarge!.color,
           ),
           backgroundColor: Theme.of(context).primaryColor, //roleColor,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
             _title[_selectedIndex],
             style: Theme.of(context).textTheme.bodyLarge,
-            selectionColor: Colors.white,
+            selectionColor: Colors.black,
           ),
           centerTitle: true,
           actions: [
             Tooltip(
               message: 'Quick Logout',
               child: IconButton(
-                icon: Icon(Icons.logout),
+                icon: Icon(Icons.logout,
+                    color: Theme.of(context).textTheme.bodyLarge!.color),
                 color: roleColor == Colors.yellow ? Colors.black : Colors.white,
                 onPressed: () async {
                   final token = await cacheFactory.get('users', 'token');
@@ -385,16 +388,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       },
                     )
                   : Container(),
-              ListTile(
-                leading: Icon(Icons.newspaper),
-                title: Text('News'),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 0;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
               ExpansionTile(
                   leading: Icon(
                     Icons.group,
@@ -408,6 +401,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 1;
+                          _bottomNavigationIndex = 1;
                         });
                         Navigator.pop(context);
                       },
@@ -418,12 +412,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 2;
+                          
                         });
                         Navigator.pop(context);
                       },
                     )
                   ]),
-
+              ListTile(
+                leading: Icon(Icons.newspaper),
+                title: Text('News'),
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 0;
+                    _bottomNavigationIndex = 0;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
               ListTile(
                 leading: Icon(Icons.chat),
                 title:
@@ -431,6 +436,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 6;
+                    _bottomNavigationIndex = 3;
                   });
                   Navigator.pop(context);
                 },
@@ -442,6 +448,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 10;
+                    _bottomNavigationIndex = 2;
                   });
                   Navigator.pop(context);
                 },
@@ -470,11 +477,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 8;
+                    _bottomNavigationIndex = 4;
                   });
                   Navigator.pop(context);
                 },
               ),
-
               ListTile(
                 leading: Icon(Icons.logout_sharp),
                 title: Text('Logout',

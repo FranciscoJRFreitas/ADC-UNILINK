@@ -304,13 +304,13 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         : Scaffold(
             appBar: AppBar(
               iconTheme: IconThemeData(
-                color: kWhiteBackgroundColor,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
               ),
               centerTitle: true,
               elevation: 0,
               title: Text(
                 "Group Information",
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
               ),
               backgroundColor: Theme.of(context).primaryColor,
               actions: <Widget>[
@@ -716,8 +716,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     _showErrorSnackbar);
 
                 if (!kIsWeb) {
-                  await FirebaseMessaging.instance
-                      .unsubscribeFromTopic(widget.groupId);
+                  /*await FirebaseMessaging.instance
+                      .unsubscribeFromTopic(widget.groupId);*/
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();

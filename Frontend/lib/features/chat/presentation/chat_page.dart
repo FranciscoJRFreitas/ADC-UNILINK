@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -23,7 +24,7 @@ import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
-import 'package:unilink2023/constants.dart';
+import '../domain/Message.dart';
 
 class ChatPage extends StatefulWidget {
   final User user;
@@ -43,12 +44,24 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController searchController = TextEditingController();
   List<Group> allGroups = [];
   List<Group> filteredGroups = [];
+  Map<String, Message> firstMessageOfGroups = {};
 
   @override
   void initState() {
     super.initState();
-
     groupsStream = listenForGroups();
+  }
+
+  String formatDateInMillis(int? timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis!);
+    var formatter = DateFormat('d/M/y');
+    return formatter.format(date);
+  }
+
+  String formatTimeInMillis(int timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis);
+    var formatter = DateFormat('HH:mm');
+    return formatter.format(date);
   }
 
   Stream<List<Group>> listenForGroups() {
@@ -61,6 +74,8 @@ class _ChatPageState extends State<ChatPage> {
         FirebaseDatabase.instance.ref().child('groups');
     DatabaseReference membersRef =
         FirebaseDatabase.instance.ref().child('members');
+    DatabaseReference messagesRef =
+        FirebaseDatabase.instance.ref().child('messages');
 
     StreamController<List<Group>> streamController = StreamController();
     List<Group> groups = [];
@@ -68,6 +83,17 @@ class _ChatPageState extends State<ChatPage> {
     // Listen for initial data and subsequent child additions
     chatRef.onChildAdded.listen((event) async {
       String groupId = event.snapshot.key as String;
+
+      messagesRef
+          .child(groupId)
+          .orderByKey()
+          .limitToLast(1)
+          .onChildAdded
+          .listen((event) async {
+        setState(() {
+          firstMessageOfGroups[groupId] = Message.fromSnapshot(event.snapshot);
+        });
+      });
 
       // Fetch group details from groupsRef
       DatabaseEvent groupSnapshot = await groupsRef.child(groupId).once();
@@ -89,6 +115,7 @@ class _ChatPageState extends State<ChatPage> {
           numberOfMembers: numberOfMembers,
         );
         groups.add(group);
+
         setState(() {
           allGroups.add(group);
           filteredGroups.add(group);
@@ -294,6 +321,7 @@ class _ChatPageState extends State<ChatPage> {
                       return ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
+                          Message? firstMessage = firstMessageOfGroups[group.id];
                           return Column(
                             children: [
                               GestureDetector(
@@ -327,7 +355,8 @@ class _ChatPageState extends State<ChatPage> {
                                             MainAxisAlignment.spaceEvenly,
                                         children: [
                                           Text(
-                                            'HH:MM', // Replace with the time of the last message
+                                            formatTimeInMillis(
+                                                firstMessage!.timestamp),
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.grey),
@@ -338,8 +367,8 @@ class _ChatPageState extends State<ChatPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          SizedBox(height: 8),
-                                          Row(
+                                          //SizedBox(height: 8),
+                                          /*Row(
                                             children: [
                                               Icon(Icons.person, size: 20),
                                               SizedBox(width: 5),
@@ -352,15 +381,32 @@ class _ChatPageState extends State<ChatPage> {
                                                 ),
                                               ),
                                             ],
-                                          ),
-                                          SizedBox(height: 8),
-                                          Row(
+                                          ),*/
+                                          //SizedBox(height: 8),
+                                          /*Row(
                                             children: [
                                               Icon(Icons.people, size: 20),
                                               SizedBox(width: 5),
                                               Expanded(
                                                 child: Text(
                                                   '${group.numberOfMembers} members',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
+                                          ),*/
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              //Maybe have icon?
+                                              //Icon(Icons.message, size: 20),
+                                              //SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  '${firstMessage.displayName}: ${firstMessage.text}',
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   maxLines: 1,
@@ -844,7 +890,7 @@ class _ChatPageState extends State<ChatPage> {
 
     if (response.statusCode == 200) {
       showErrorSnackbar('Created a group successfully!', false);
-      if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
+      //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }

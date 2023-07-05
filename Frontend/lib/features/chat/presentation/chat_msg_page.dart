@@ -50,6 +50,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       GlobalKey<CombinedButtonState>();
   late bool info = false;
   late bool isScrollLocked = false;
+  late StreamSubscription<DatabaseEvent> _subscription;
 
   //late CameraDescription camera;
 
@@ -66,19 +67,20 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
 
-    messagesRef
+    _subscription = messagesRef
         .orderByKey()
         .limitToLast(messageCap)
         .onChildAdded
         .listen((event) {
-      setState(() {
-        Message message = Message.fromSnapshot(event.snapshot);
-        if (!removedMessages.contains(message.id) &&
-            messages.indexWhere((m) => m.id == message.id) == -1) {
-          // Check if message was removed or already in the list
-          messages.add(message);
-        }
-      });
+      if (mounted)
+        setState(() {
+          Message message = Message.fromSnapshot(event.snapshot);
+          if (!removedMessages.contains(message.id) &&
+              messages.indexWhere((m) => m.id == message.id) == -1) {
+            // Check if message was removed or already in the list
+            messages.add(message);
+          }
+        });
     });
 
     messagesRef.onChildChanged.listen((event) {
@@ -94,14 +96,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
 // Listen for removed messages
     messagesRef.onChildRemoved.listen((event) {
-      setState(() {
-        Message removedMessage = Message.fromSnapshot(event.snapshot);
-        removedMessages.add(removedMessage
-            .id); // Add removed message id to removedMessages list
-        messages.removeWhere((message) =>
-            message.id ==
-            removedMessage.id); // remove the message from messages
-      });
+      if (mounted)
+        setState(() {
+          Message removedMessage = Message.fromSnapshot(event.snapshot);
+          removedMessages.add(removedMessage
+              .id); // Add removed message id to removedMessages list
+          messages.removeWhere((message) =>
+              message.id ==
+              removedMessage.id); // remove the message from messages
+        });
     });
 
     DatabaseReference memberRef =
@@ -123,6 +126,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     });
     _scrollToBottom();
   }
+
+
 
   void _configureMessaging() async {
     await _messaging.requestPermission(
@@ -159,12 +164,13 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
   @override
   void dispose() {
+    super.dispose();
     messageCap = 10;
     messagesRef.onChildAdded.drain();
 
     _scrollController.dispose();
     messageFocusNode.dispose();
-    super.dispose();
+    _subscription.cancel();
   }
 
   Widget _bodyForWeb() {
@@ -435,13 +441,16 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).textTheme.bodyLarge!.color,
         ),
         centerTitle: true,
         elevation: 0,
         title: Text(
           widget.groupId,
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
         ),
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
@@ -459,7 +468,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             },
             icon: Icon(
               Icons.info,
-              color: Theme.of(context).secondaryHeaderColor,
+              color: Theme.of(context).textTheme.bodyLarge!.color,
             ),
           ),
         ],
