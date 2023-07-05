@@ -10,6 +10,8 @@ import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 
+import '../../../constants.dart';
+
 class SchedulePage extends StatefulWidget {
   final String username;
 
@@ -259,43 +261,42 @@ class _SchedulePageState extends State<SchedulePage> {
           ...schedule.map<Widget>((daySchedule) {
             if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
               return Column(
-                children: daySchedule['classes'].map<Widget>((classData) {
-                  return ListTile(
-                    title: Text(
-                      classData['name'],
+                children: [
+                  SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '  Schedule',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    subtitle: Text(
-                        '${classData['startTime']} - ${classData['endTime']}'),
-                  );
-                }).toList(),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: 300, // Set the desired width for the divider
+                      child: Divider(
+                        thickness: 1,
+                        color: Style.lightBlue,
+                      ),
+                    ),
+                  ),
+                  ...daySchedule['classes'].map<Widget>((classData) {
+                    return ListTile(
+                      title: Text(
+                        classData['name'],
+                      ),
+                      subtitle: Text(
+                        '${classData['startTime']} - ${classData['endTime']}',
+                      ),
+                    );
+                  }).toList(),
+                ],
               );
             } else {
               return Container();
             }
           }).toList(),
-          ...events[selectedDay]?.map<Widget>((event) {
-                return ListTile(
-                  title: Text(
-                    '${event.title} from ${event.groupId} group',
-                  ),
-                  subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Type: ${_getEventTypeString(event.type)}',
-                        ),
-                        Text(
-                          'Location: ${event.location ?? 'N/A'}',
-                        ),
-                        Text(
-                          'Description: ${event.description}',
-                        ),
-                        Text(
-                            '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}'),
-                      ]),
-                );
-              }).toList() ??
-              [],
+          eventsWidget(context),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -384,7 +385,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       {
                         DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
                         _createPersonalEvent(Event(creator: widget.username, type: _parseEventType(_selectedEventType), title: titleController.text, description: descriptionController.text,
-                            startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(startController.text), location: locationController.text));
+                            startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(endController.text), location: locationController.text));
                         Navigator.of(context).pop();
                       }
                     },
@@ -423,6 +424,62 @@ class _SchedulePageState extends State<SchedulePage> {
         backgroundColor: Theme.of(context).primaryColor,
       ),
     );
+  }
+
+  Widget eventsWidget(BuildContext context){
+    if (events[selectedDay]?.isNotEmpty == true) {
+      return Column(
+        children: [
+          SizedBox(height: 20),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '  Events',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: 300, // Set the desired width for the divider
+              child: Divider(
+                thickness: 1,
+                color: Style.lightBlue,
+              ),
+            ),
+          ),
+          ...?events[selectedDay]?.map<Widget>((event) {
+            return ListTile(
+              title: Text(
+                event.groupId != null
+                    ? '${event.title} from ${event.groupId} group'
+                    : event.title,
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Type: ${_getEventTypeString(event.type)}',
+                  ),
+                  Text(
+                    'Location: ${event.location ?? 'N/A'}',
+                  ),
+                  Text(
+                    'Description: ${event.description}',
+                  ),
+                  Text(
+                    '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      );
+    } else {
+      return Container(); // Empty container if there are no events
+    }
+
   }
 
   _createPersonalEvent(Event event) {
