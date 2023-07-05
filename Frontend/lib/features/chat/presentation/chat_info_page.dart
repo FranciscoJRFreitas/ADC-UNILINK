@@ -54,9 +54,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   late bool isAdmin = false;
   late MembersData? memberData;
   List<EventType> eventTypes = EventType.values;
-  GoogleMapController? _controller;
   String _selectedEventType = 'Academic';
-  bool isLocationSelected = false;
 
   @override
   void initState() {
@@ -1430,16 +1428,17 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
     LatLng? preLocation;
     Set<Marker> _markers = {};
     showDialog(
-        context: widget.context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return AlertDialog(
-              content: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: Stack(
-                  children: <Widget>[
-                    GoogleMap(
+      context: widget.context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            content: Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: GoogleMap(
                       onMapCreated: (GoogleMapController controller) {},
                       initialCameraPosition: CameraPosition(
                         target: LatLng(38.660999, -9.205094),
@@ -1457,31 +1456,38 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                       },
                       markers: _markers,
                     ),
-                    if (preLocation != null)
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      if (preLocation != null)
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedLocation = preLocation;
+                            });
+                            Navigator.of(context).pop(selectedLocation);
+                            Navigator.of(context).pop(selectedLocation);
+                          },
+                          child: Text('Select Location'),
+                        ),
                       ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            selectedLocation = preLocation;
-                          });
-                          Navigator.of(context).pop(selectedLocation);
-                          Navigator.of(context).pop(selectedLocation);
+                          selectedLocation = null;
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
                         },
-                        child: Text('Select Location'),
+                        child: Text('Close'),
                       ),
-                    ElevatedButton(
-                      onPressed: () {
-                        selectedLocation = null;
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Close'),
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                ],
               ),
-            );
-          });
+            ),
+          );
         });
+      },
+    );
   }
 }
 
