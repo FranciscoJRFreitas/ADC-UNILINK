@@ -140,8 +140,7 @@ class _MyMapState extends State<MyMap> {
     polylines[id] = polyline;
     setState(() {});
     await Future.delayed(Duration(seconds: 2));
-    getDirections(
-        destLat, destLong);
+    getDirections(destLat, destLong);
   }
 
   List<String> selectedDropdownItems = [];
@@ -253,24 +252,36 @@ class _MyMapState extends State<MyMap> {
     );
   }
 
-  void showOptionsDialog(BuildContext context) {
+  showOptionsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, setState) {
-            return AlertDialog(
+        return Stack(
+          children: [
+            ModalBarrier(
+              dismissible: false,
+              color: Colors.transparent,
+            ),
+            AlertDialog(
               title: Text('Select Options'),
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              content: MultiSelectDropdownDialog(
-                dropdownItems: dropdownItems,
-                selectedItems: selectedDropdownItems,
-                onChanged: (List<String> newSelectedItems) {
-                  setState(() {
-                    selectedDropdownItems = newSelectedItems;
-                  });
-                  updateMarkers();
-                },
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: dropdownItems.map((item) {
+                  return ListTile(
+                    title: Text(item),
+                    onTap: () {
+                      setState(() {
+                        if (!selectedDropdownItems.contains(item)) {
+                          selectedDropdownItems.add(item);
+                        } else {
+                          selectedDropdownItems.remove(item);
+                        }
+                      });
+                      updateMarkers();
+                    },
+                  );
+                }).toList(),
               ),
               actions: [
                 ElevatedButton(
@@ -280,8 +291,8 @@ class _MyMapState extends State<MyMap> {
                   child: Text('Done'),
                 ),
               ],
-            );
-          },
+            ),
+          ],
         );
       },
     );
@@ -500,60 +511,5 @@ class _MyMapState extends State<MyMap> {
     }
 
     setState(() {});
-  }
-}
-
-class MultiSelectDropdownDialog extends StatefulWidget {
-  final List<String> dropdownItems;
-  final List<String> selectedItems;
-  final ValueChanged<List<String>> onChanged;
-
-  MultiSelectDropdownDialog({
-    required this.dropdownItems,
-    required this.selectedItems,
-    required this.onChanged,
-  });
-
-  @override
-  _MultiSelectDropdownDialogState createState() =>
-      _MultiSelectDropdownDialogState();
-}
-
-class _MultiSelectDropdownDialogState extends State<MultiSelectDropdownDialog> {
-  List<String> selectedItems = [];
-
-  @override
-  void initState() {
-    selectedItems.addAll(widget.selectedItems);
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: widget.dropdownItems.map((String item) {
-          return CheckboxListTile(
-            title: Text(item),
-            value: selectedItems.contains(item),
-            onChanged: (bool? value) {
-              setState(() {
-                if (value == true) {
-                  selectedItems.add(item);
-                } else {
-                  selectedItems.remove(item);
-                }
-              });
-            },
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    widget.onChanged(selectedItems);
-    super.dispose();
   }
 }
