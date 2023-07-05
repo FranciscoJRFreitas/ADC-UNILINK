@@ -91,7 +91,6 @@ class Event {
   static EventType _parseEventType(String? eventTypeString) {
     if (eventTypeString != null) {
       eventTypeString = eventTypeString.toLowerCase();
-      print(eventTypeString);
 
       switch (eventTypeString) {
         case 'academic':

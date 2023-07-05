@@ -64,7 +64,6 @@ class _SchedulePageState extends State<SchedulePage> {
       DatabaseReference eventsRef =
           await FirebaseDatabase.instance.ref().child('events').child(groupId);
       await eventsRef.once().then((userDataSnapshot) {
-        print(userDataSnapshot.snapshot.value);
         Map<dynamic, dynamic> newevents =
             userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
         newevents.forEach((key, value) {
@@ -111,7 +110,6 @@ class _SchedulePageState extends State<SchedulePage> {
   EventType _parseEventType(String? eventTypeString) {
     if (eventTypeString != null) {
       eventTypeString = eventTypeString.toLowerCase();
-      print(eventTypeString);
 
       switch (eventTypeString) {
         case 'academic':
@@ -175,7 +173,6 @@ class _SchedulePageState extends State<SchedulePage> {
             onDaySelected: (DateTime selectDay, DateTime focusDay) {
               setState(() {
                 selectedDay = selectDay;
-                print(selectedDay);
                 focusedDay = selectDay;
               });
             },
