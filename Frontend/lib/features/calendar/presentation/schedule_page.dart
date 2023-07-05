@@ -216,213 +216,220 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: Column(
-        children: [
-          TableCalendar(
-            availableCalendarFormats: const {
-              CalendarFormat.month: 'Week',
-              CalendarFormat.twoWeeks: 'Month',
-              CalendarFormat.week: '2 Weeks',
-            },
-            firstDay: DateTime(2022, 6, 19),
-            lastDay: DateTime(2024, 6, 23),
-            focusedDay: focusedDay,
-            calendarFormat: format,
-            onFormatChanged: (CalendarFormat _format) {
-              setState(() {
-                format = _format;
-              });
-            },
-            onDaySelected: (DateTime selectDay, DateTime focusDay) {
-              setState(() {
-                selectedDay = selectDay;
-                focusedDay = selectDay;
-              });
-            },
-            headerStyle: HeaderStyle(
-              formatButtonVisible:
-                  true, // hides the format button, which is not needed here
-              titleCentered: true,
-            ),
-            calendarStyle: CalendarStyle(
-              // Other style properties...
-              selectedDecoration: BoxDecoration(
-                color: Colors.blue, // change to your desired color
-                shape: BoxShape.circle,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            TableCalendar(
+              availableCalendarFormats: const {
+                CalendarFormat.month: 'Week',
+                CalendarFormat.twoWeeks: 'Month',
+                CalendarFormat.week: '2 Weeks',
+              },
+              firstDay: DateTime(2022, 6, 19),
+              lastDay: DateTime(2024, 6, 23),
+              focusedDay: focusedDay,
+              calendarFormat: format,
+              onFormatChanged: (CalendarFormat _format) {
+                setState(() {
+                  format = _format;
+                });
+              },
+              onDaySelected: (DateTime selectDay, DateTime focusDay) {
+                setState(() {
+                  selectedDay = selectDay;
+                  focusedDay = selectDay;
+                });
+              },
+              headerStyle: HeaderStyle(
+                formatButtonVisible:
+                true, // hides the format button, which is not needed here
+                titleCentered: true,
               ),
+              calendarStyle: CalendarStyle(
+                // Other style properties...
+                selectedDecoration: BoxDecoration(
+                  color: Colors.blue, // change to your desired color
+                  shape: BoxShape.circle,
+                ),
+              ),
+              selectedDayPredicate: (day) {
+                return isSameDay(selectedDay, day);
+              },
+              eventLoader: (day) {
+                return events[day] ?? [];
+              },
             ),
-            selectedDayPredicate: (day) {
-              return isSameDay(selectedDay, day);
-            },
-            eventLoader: (day) {
-              return events[day] ?? [];
-            },
-          ),
-          ...schedule.map<Widget>((daySchedule) {
-            if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
-              return Column(
-                children: [
-                  SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '  Schedule',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 300, // Set the desired width for the divider
-                      child: Divider(
-                        thickness: 1,
-                        color: Style.lightBlue,
-                      ),
-                    ),
-                  ),
-                  ...daySchedule['classes'].map<Widget>((classData) {
-                    return ListTile(
-                      title: Text(
-                        classData['name'],
-                      ),
-                      subtitle: Text(
-                        '${classData['startTime']} - ${classData['endTime']}',
-                      ),
-                    );
-                  }).toList(),
-                ],
-              );
-            } else {
-              return Container();
-            }
-          }).toList(),
-          eventsWidget(context),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final newEvent = await showDialog<Event>(
-            context: context,
-            builder: (BuildContext context) {
-
-              final TextEditingController titleController =
-                  TextEditingController();
-              final TextEditingController descriptionController =
-                  TextEditingController();
-              final TextEditingController startController =
-                  TextEditingController();
-              final TextEditingController endController =
-                  TextEditingController();
-              final TextEditingController locationController =
-                  TextEditingController();
-              List<EventType> eventTypes = EventType.values;
-
-              return AlertDialog(
-                backgroundColor: Theme.of(context).canvasColor,
-                title: const Text(
-                  "Add an event",
-                  textAlign: TextAlign.left,
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
+            ...schedule.map<Widget>((daySchedule) {
+              if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
+                return Column(
                   children: [
-                    LineComboBox(
-                      selectedValue: _selectedEventType,
-                      items: eventTypes
-                          .map((e) => _getEventTypeString(e))
-                          .toList(),
-                      icon: Icons.type_specimen,
-                      onChanged: (dynamic newValue) {
-                        setState(() {
-                          _selectedEventType = newValue;
-                        });
-                      },
+                    SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '  Schedule',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ),
-                    LineTextField(
-                      icon: Icons.title,
-                      lableText: 'Title',
-                      controller: titleController,
-                      title: "",
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        width: 300, // Set the desired width for the divider
+                        child: Divider(
+                          thickness: 1,
+                          color: Style.lightBlue,
+                        ),
+                      ),
                     ),
-                    LineTextField(
-                      icon: Icons.description,
-                      lableText: "Description",
-                      controller: descriptionController,
-                      title: "",
-                    ),
-                    LineTextField(
-                      //Text for now (add Dropdown for Buildings)
-                      icon: Icons.place,
-                      lableText: "Location",
-                      controller: locationController,
-                      title: "",
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    LineDateTimeField(
-                      icon: Icons.schedule,
-                      controller: startController,
-                      hintText: "Start Time",
-                      firstDate: DateTime.now().subtract(Duration(days: 30)),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    LineDateTimeField(
-                      icon: Icons.schedule,
-                      controller: endController,
-                      hintText: "End Time",
-                      firstDate: DateTime.now().subtract(Duration(days: 30)),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    ),
+                    ...daySchedule['classes'].map<Widget>((classData) {
+                      return ListTile(
+                        title: Text(
+                          classData['name'],
+                        ),
+                        subtitle: Text(
+                          '${classData['startTime']} - ${classData['endTime']}',
+                        ),
+                      );
+                    }).toList(),
                   ],
-                ),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      {
-                        DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
-                        _createPersonalEvent(Event(creator: widget.username, type: _parseEventType(_selectedEventType), title: titleController.text, description: descriptionController.text,
-                            startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(endController.text), location: locationController.text));
-                        Navigator.of(context).pop();
-                      }
+                );
+              } else {
+                return Container();
+              }
+            }).toList(),
+
+            eventsWidget(context),
+          ],
+        ),
+      ),
+      floatingActionButton: addButton(context),
+    );
+  }
+
+  Widget addButton(BuildContext context){
+    return FloatingActionButton(
+      onPressed: () async {
+        final newEvent = await showDialog<Event>(
+          context: context,
+          builder: (BuildContext context) {
+
+            final TextEditingController titleController =
+            TextEditingController();
+            final TextEditingController descriptionController =
+            TextEditingController();
+            final TextEditingController startController =
+            TextEditingController();
+            final TextEditingController endController =
+            TextEditingController();
+            final TextEditingController locationController =
+            TextEditingController();
+            List<EventType> eventTypes = EventType.values;
+
+            return AlertDialog(
+              backgroundColor: Theme.of(context).canvasColor,
+              title: const Text(
+                "Add an event",
+                textAlign: TextAlign.left,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LineComboBox(
+                    selectedValue: _selectedEventType,
+                    items: eventTypes
+                        .map((e) => _getEventTypeString(e))
+                        .toList(),
+                    icon: Icons.type_specimen,
+                    onChanged: (dynamic newValue) {
+                      setState(() {
+                        _selectedEventType = newValue;
+                      });
                     },
-                    style: ElevatedButton.styleFrom(
-                        primary: Theme.of(context).primaryColor),
-                    child: const Text("CREATE"),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                        primary: Theme.of(context).primaryColor),
-                    child: const Text("CANCEL"),
+                  LineTextField(
+                    icon: Icons.title,
+                    lableText: 'Title',
+                    controller: titleController,
+                    title: "",
+                  ),
+                  LineTextField(
+                    icon: Icons.description,
+                    lableText: "Description",
+                    controller: descriptionController,
+                    title: "",
+                  ),
+                  LineTextField(
+                    //Text for now (add Dropdown for Buildings)
+                    icon: Icons.place,
+                    lableText: "Location",
+                    controller: locationController,
+                    title: "",
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  LineDateTimeField(
+                    icon: Icons.schedule,
+                    controller: startController,
+                    hintText: "Start Time",
+                    firstDate: DateTime.now().subtract(Duration(days: 30)),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  LineDateTimeField(
+                    icon: Icons.schedule,
+                    controller: endController,
+                    hintText: "End Time",
+                    firstDate: DateTime.now().subtract(Duration(days: 30)),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
                 ],
-              );
-            },
-          );
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () async {
+                    {
+                      DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+                      _createPersonalEvent(Event(creator: widget.username, type: _parseEventType(_selectedEventType), title: titleController.text, description: descriptionController.text,
+                          startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(endController.text), location: locationController.text));
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CREATE"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                  child: const Text("CANCEL"),
+                ),
+              ],
+            );
+          },
+        );
 
-          if (newEvent != null) {
-            
-            setState(() {
-              // This is where you'd actually add the new event to your event list
-              // For now I'll just print it
-              print('Added new event: $newEvent');
-            });
-          }
-        },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-        elevation: 6,
-        backgroundColor: Theme.of(context).primaryColor,
+        if (newEvent != null) {
+
+          setState(() {
+            // This is where you'd actually add the new event to your event list
+            // For now I'll just print it
+            print('Added new event: $newEvent');
+          });
+        }
+      },
+      child: const Icon(
+        Icons.add,
+        color: Colors.white,
+        size: 30,
       ),
+      elevation: 6,
+      backgroundColor: Theme.of(context).primaryColor,
     );
   }
 
@@ -468,7 +475,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     'Description: ${event.description}',
                   ),
                   Text(
-                    '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
+                    '${_formatDateTime(event.startTime, event.endTime)[0]} - ${_formatDateTime(event.startTime, event.endTime)[1]}',
                   ),
                 ],
               ),
@@ -482,7 +489,15 @@ class _SchedulePageState extends State<SchedulePage> {
 
   }
 
-  _createPersonalEvent(Event event) {
+  List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {
+    if (dateTime1.day != dateTime2.day || dateTime1.month != dateTime2.month || dateTime1.year != dateTime2.year) {
+      return [DateFormat('HH:mm of yyyy-MM-dd').format(dateTime1), DateFormat('HH:mm of yyyy-MM-dd').format(dateTime2)];
+    } else {
+      return [DateFormat('HH:mm').format(dateTime1), DateFormat('HH:mm').format(dateTime2)];
+    }
+  }
+
+  void _createPersonalEvent(Event event) {
 
     DatabaseReference eventsRef =
     FirebaseDatabase.instance.ref().child('schedule').child(widget.username).push();

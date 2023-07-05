@@ -197,7 +197,7 @@ class _MyMapState extends State<MyMap> {
                   alignment: Alignment.topRight,
                   child: ElevatedButton(
                     onPressed: () => showOptionsDialog(context),
-                    child: Text('Open Dropdown'),
+                    child: Text('Map Options'),
                   ),
                 ),
               ),
