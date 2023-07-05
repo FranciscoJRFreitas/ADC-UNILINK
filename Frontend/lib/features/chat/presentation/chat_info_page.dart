@@ -44,7 +44,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
   late Future<Uint8List?> groupPic;
   late List<MembersData> members = [];
   late List<Event> events = [];
@@ -879,7 +878,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     descriptionController.clear();
                     startController.clear();
                     endController.clear();
-                    locationController.clear();
+                    _selectedLocation = null;
                   },
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
@@ -1151,7 +1150,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           'endTime': end,
           'creator': storedUsername,
           'groupID': groupID,
-          'location': 0
+          'location': '0'
         }),
       );
     }
@@ -1189,7 +1188,6 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
       descriptionController.clear();
       startController.clear();
       endController.clear();
-      locationController.clear();
       showErrorSnackbar('Removed successfully!', false);
     } else {
       showErrorSnackbar('Failed to remove the event: ${response.body}', true);
