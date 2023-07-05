@@ -830,6 +830,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                       }
                     },
                   ),
+                  SizedBox(
+                    height: 10,
+                  ),
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: startController,

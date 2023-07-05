@@ -79,11 +79,11 @@ class Event {
   Map<String, dynamic> toJson() {
     return {
       'creator': creator,
-      'type': type,
+      'type': _getEventTypeString(type),
       'title': title,
       'description': description,
-      'startTime': startTime.toIso8601String(),
-      'endTime': endTime.toIso8601String(),
+      'startTime': startTime.toString(),
+      'endTime': endTime.toString(),
       'location': location,
     };
   }
