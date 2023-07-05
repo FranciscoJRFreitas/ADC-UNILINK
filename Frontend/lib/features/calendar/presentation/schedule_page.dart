@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
@@ -11,6 +12,7 @@ import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 
 import '../../../constants.dart';
+import '../../chat/presentation/chat_info_page.dart';
 
 class SchedulePage extends StatefulWidget {
   final String username;
@@ -22,6 +24,11 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController startController = TextEditingController();
+  final TextEditingController endController = TextEditingController();
+  List<EventType> eventTypes = EventType.values;
   List<dynamic> schedule = [];
   CalendarFormat format = CalendarFormat.week;
   //DateTime selectedDay = DateTime.now();
@@ -35,6 +42,8 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime focusedDay = DateTime.now();
   Map<DateTime, List<Event>> events = {};
   String _selectedEventType = 'Academic';
+  LatLng? _selectedLocation = null;
+  String selectLocationText = "Select Location";
 
   @override
   void initState() {
@@ -43,7 +52,6 @@ class _SchedulePageState extends State<SchedulePage> {
     selectedDay = customFormat.parse(formattedSelectedDateTime, true);
     loadSchedule();
     getUserEvents();
-
   }
 
   void getUserEvents() async {
@@ -65,15 +73,13 @@ class _SchedulePageState extends State<SchedulePage> {
     });
 
     for (String groupId in groups) {
-
       DatabaseReference eventsRef =
           await FirebaseDatabase.instance.ref().child('events').child(groupId);
 
       await eventsRef.once().then((userDataSnapshot) {
-
-        if(userDataSnapshot.snapshot.value != null) {
-          Map<dynamic, dynamic> newevents = userDataSnapshot.snapshot
-              .value as Map<dynamic, dynamic>;
+        if (userDataSnapshot.snapshot.value != null) {
+          Map<dynamic, dynamic> newevents =
+              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
@@ -97,15 +103,13 @@ class _SchedulePageState extends State<SchedulePage> {
               currentEvent.endTime.day,
             );
 
-            for (int i = 0; i <= endDate
-                .difference(startDate)
-                .inDays; i++) {
+            for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
               DateTime currentDate = startDate.add(Duration(days: i));
-              String formattedCurrentDateTime = customFormat.format(
-                  currentDate);
+              String formattedCurrentDateTime =
+                  customFormat.format(currentDate);
 
               DateTime parsedCurrentDateTime =
-              customFormat.parse(formattedCurrentDateTime, true);
+                  customFormat.parse(formattedCurrentDateTime, true);
 
               if (events.containsKey(parsedCurrentDateTime)) {
                 events[parsedCurrentDateTime]!.add(currentEvent);
@@ -114,58 +118,60 @@ class _SchedulePageState extends State<SchedulePage> {
               }
             }
           });
-        }});
+        }
+      });
     }
 
     _getPersonalEvents();
     setState(() {});
   }
 
-   void _getPersonalEvents() async {
-
+  void _getPersonalEvents() async {
     DatabaseReference eventsRef = await FirebaseDatabase.instance
         .ref()
         .child('schedule')
         .child(widget.username);
 
-     eventsRef.onChildAdded.listen((event) async {
-       setState(() {
-      Map<dynamic, dynamic> currEvent = event.snapshot.value as Map<dynamic, dynamic>;
-      print("SNAPSHOT: " + event.snapshot.value.toString());
-      Event currentEvent = Event(
-        type: _parseEventType(currEvent["type"]),
-        title: currEvent["title"],
-        description: currEvent['description'],
-        location: currEvent['location'],
-        startTime: DateTime.parse(currEvent["startTime"]),
-        endTime: DateTime.parse(currEvent["endTime"]),
-      );
+    eventsRef.onChildAdded.listen((event) async {
+      setState(() {
+        Map<dynamic, dynamic> currEvent =
+            event.snapshot.value as Map<dynamic, dynamic>;
+        print("SNAPSHOT: " + event.snapshot.value.toString());
+        Event currentEvent = Event(
+          type: _parseEventType(currEvent["type"]),
+          title: currEvent["title"],
+          description: currEvent['description'],
+          location: currEvent['location'],
+          startTime: DateTime.parse(currEvent["startTime"]),
+          endTime: DateTime.parse(currEvent["endTime"]),
+        );
 
-      // Update events array with the new event
-      DateTime startDate = DateTime(
-        currentEvent.startTime.year,
-        currentEvent.startTime.month,
-        currentEvent.startTime.day,
-      );
-      DateTime endDate = DateTime(
-        currentEvent.endTime.year,
-        currentEvent.endTime.month,
-        currentEvent.endTime.day,
-      );
+        // Update events array with the new event
+        DateTime startDate = DateTime(
+          currentEvent.startTime.year,
+          currentEvent.startTime.month,
+          currentEvent.startTime.day,
+        );
+        DateTime endDate = DateTime(
+          currentEvent.endTime.year,
+          currentEvent.endTime.month,
+          currentEvent.endTime.day,
+        );
 
-      for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
-        DateTime currentDate = startDate.add(Duration(days: i));
-        String formattedCurrentDateTime = customFormat.format(currentDate);
+        for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+          DateTime currentDate = startDate.add(Duration(days: i));
+          String formattedCurrentDateTime = customFormat.format(currentDate);
 
-        DateTime parsedCurrentDateTime = customFormat.parse(formattedCurrentDateTime, true);
+          DateTime parsedCurrentDateTime =
+              customFormat.parse(formattedCurrentDateTime, true);
 
-        if (events.containsKey(parsedCurrentDateTime)) {
-          events[parsedCurrentDateTime]!.add(currentEvent);
-        } else {
-          events[parsedCurrentDateTime] = [currentEvent];
+          if (events.containsKey(parsedCurrentDateTime)) {
+            events[parsedCurrentDateTime]!.add(currentEvent);
+          } else {
+            events[parsedCurrentDateTime] = [currentEvent];
+          }
         }
-      }
-     });
+      });
     });
   }
 
@@ -214,7 +220,6 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -302,29 +307,27 @@ class _SchedulePageState extends State<SchedulePage> {
           ],
         ),
       ),
-      floatingActionButton: addButton(context),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _createEventPopUpDialog(context);
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+        elevation: 6,
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
     );
   }
 
-  Widget addButton(BuildContext context){
-    return FloatingActionButton(
-      onPressed: () async {
-        final newEvent = await showDialog<Event>(
-          context: context,
-          builder: (BuildContext context) {
-
-            final TextEditingController titleController =
-            TextEditingController();
-            final TextEditingController descriptionController =
-            TextEditingController();
-            final TextEditingController startController =
-            TextEditingController();
-            final TextEditingController endController =
-            TextEditingController();
-            final TextEditingController locationController =
-            TextEditingController();
-            List<EventType> eventTypes = EventType.values;
-
+  _createEventPopUpDialog(BuildContext context) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
               backgroundColor: Theme.of(context).canvasColor,
               title: const Text(
@@ -336,9 +339,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 children: [
                   LineComboBox(
                     selectedValue: _selectedEventType,
-                    items: eventTypes
-                        .map((e) => _getEventTypeString(e))
-                        .toList(),
+                    items:
+                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -348,9 +350,12 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   LineTextField(
                     icon: Icons.title,
-                    lableText: 'Title',
+                    lableText: 'Title *',
                     controller: titleController,
                     title: "",
+                  ),
+                  SizedBox(
+                    height: 5,
                   ),
                   LineTextField(
                     icon: Icons.description,
@@ -358,12 +363,36 @@ class _SchedulePageState extends State<SchedulePage> {
                     controller: descriptionController,
                     title: "",
                   ),
-                  LineTextField(
-                    //Text for now (add Dropdown for Buildings)
+                  LineComboBox(
+                    deleteIcon: Icons.clear,
+                    onPressed: () {
+                      setState(() {
+                        selectLocationText = "Select Location";
+                        _selectedLocation = null;
+                      });
+                    },
+                    selectedValue: selectLocationText,
+                    items: [selectLocationText, "From FCT place", "From maps"],
                     icon: Icons.place,
-                    lableText: "Location",
-                    controller: locationController,
-                    title: "",
+                    onChanged: (newValue) async {
+                      if (newValue == "From FCT place" ||
+                          newValue == "From maps") {
+                        LatLng? selectedLocation = await showDialog<LatLng>(
+                          context: context,
+                          builder: (context) => EventLocationPopUp(
+                            context: context,
+                            isMapSelected: newValue == "From maps",
+                            location: _selectedLocation,
+                          ),
+                        );
+                        if (selectedLocation != null) {
+                          setState(() {
+                            selectLocationText = "1 Location Selected";
+                            _selectedLocation = selectedLocation;
+                          });
+                        }
+                      }
+                    },
                   ),
                   SizedBox(
                     height: 10,
@@ -371,7 +400,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: startController,
-                    hintText: "Start Time",
+                    hintText: "Start Time *",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -381,7 +410,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: endController,
-                    hintText: "End Time",
+                    hintText: "End Time *",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -392,8 +421,17 @@ class _SchedulePageState extends State<SchedulePage> {
                   onPressed: () async {
                     {
                       DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
-                      _createPersonalEvent(Event(creator: widget.username, type: _parseEventType(_selectedEventType), title: titleController.text, description: descriptionController.text,
-                          startTime: dateFormat.parse(startController.text), endTime: dateFormat.parse(endController.text), location: locationController.text));
+                      bool isNull = _selectedLocation == null;
+                      _createPersonalEvent(Event(
+                          creator: widget.username,
+                          type: _parseEventType(_selectedEventType),
+                          title: titleController.text,
+                          description: descriptionController.text,
+                          startTime: dateFormat.parse(startController.text),
+                          endTime: dateFormat.parse(endController.text),
+                          location: !isNull
+                              ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
+                              : '0'));
                       Navigator.of(context).pop();
                     }
                   },
@@ -404,6 +442,10 @@ class _SchedulePageState extends State<SchedulePage> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    titleController.clear();
+                    descriptionController.clear();
+                    startController.clear();
+                    endController.clear();
                   },
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
@@ -411,29 +453,11 @@ class _SchedulePageState extends State<SchedulePage> {
                 ),
               ],
             );
-          },
-        );
-
-        if (newEvent != null) {
-
-          setState(() {
-            // This is where you'd actually add the new event to your event list
-            // For now I'll just print it
-            print('Added new event: $newEvent');
-          });
-        }
-      },
-      child: const Icon(
-        Icons.add,
-        color: Colors.white,
-        size: 30,
-      ),
-      elevation: 6,
-      backgroundColor: Theme.of(context).primaryColor,
-    );
+          }));
+        });
   }
 
-  Widget eventsWidget(BuildContext context){
+  Widget eventsWidget(BuildContext context) {
     if (events[selectedDay]?.isNotEmpty == true) {
       return Column(
         children: [
@@ -486,7 +510,6 @@ class _SchedulePageState extends State<SchedulePage> {
     } else {
       return Container(); // Empty container if there are no events
     }
-
   }
 
   List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {
@@ -507,12 +530,29 @@ class _SchedulePageState extends State<SchedulePage> {
 
     // Add the event to the database
     eventsRef.set(event.toJson()).then((_) {
-        print('Event added successfully with ID: $eventId');
-      }).catchError((error) {
-        print('Failed to add event: $error');
-      });
-    }
+      titleController.clear();
+      descriptionController.clear();
+      startController.clear();
+      endController.clear();
+      _selectedLocation = null;
+      _showErrorSnackbar('Personal event added successfully!', false);
+    }).catchError((error) {
+      _showErrorSnackbar(
+          'There was an error while adding this personal event!', true);
+    });
+  }
 
+  void _showErrorSnackbar(String message, bool Error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
+  }
 
   String getDayOfWeek(DateTime date) {
     switch (date.weekday) {
