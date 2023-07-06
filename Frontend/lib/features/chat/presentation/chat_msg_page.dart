@@ -21,7 +21,6 @@ import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
-import 'package:unilink2023/constants.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
@@ -56,8 +55,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late bool info = false;
   late bool isScrollLocked = false;
   late String lastMessageId;
-
-  //late CameraDescription camera;
 
   @override
   void initState() {

@@ -127,3 +127,23 @@ Future<Set<Marker>> loadServLocationsFromJson() async {
   }
   return servMarkers;
 }
+
+Future<Set<Marker>> loadLocationsFromJson() async {
+  Set<Marker> allMarkers = {};
+  allMarkers.addAll(await loadEdLocationsFromJson());
+  allMarkers.addAll(await loadRestLocationsFromJson());
+  allMarkers.addAll(await loadParkLocationsFromJson());
+  allMarkers.addAll(await loadPortLocationsFromJson());
+  allMarkers.addAll(await loadServLocationsFromJson());
+  return allMarkers;
+}
+
+Future<String> getPlaceInLocations(String location) async {
+  String res = "";
+  Set<Marker> allMarkers = await loadLocationsFromJson();
+  allMarkers.forEach((element) {
+    if ('${element.position.latitude},${element.position.longitude}' ==
+        location) res = element.infoWindow.title!;
+  });
+  return res;
+}

@@ -424,7 +424,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       SingleChildScrollView(
                         //padding: EdgeInsets.all(16),
                         child: Container(
-                          padding: EdgeInsets.only(top: 10, bottom: 0),//VALOR A ALTERAR OU NAO),
+                          padding: EdgeInsets.only(
+                              top: 10, bottom: 0), //VALOR A ALTERAR OU NAO),
                           child: SizedBox(
                             height: 325, //VALOR A ALTERAR
                             child: ListView.builder(
@@ -1659,7 +1660,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
     edMarkers = await loadEdLocationsFromJson();
     restMarkers = await loadRestLocationsFromJson();
     parkMarkers = await loadParkLocationsFromJson();
-    portMarkers = await loadParkLocationsFromJson();
+    portMarkers = await loadPortLocationsFromJson();
     servMarkers = await loadServLocationsFromJson();
   }
 
