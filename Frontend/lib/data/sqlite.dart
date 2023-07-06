@@ -33,8 +33,8 @@ class SqliteService {
             'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT)');
         await database.execute(
             'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
-        await database.execute(
-            'CREATE TABLE chat(id TEXT PRIMARY KEY, isSystemMessage TEXT, containsFile TEXT, text TEXT,'' name TEXT, displayName TEXT, timestamp TEXT, extension TEXT)');
+        //await database.execute(
+            //'CREATE TABLE chat(id TEXT PRIMARY KEY, isSystemMessage TEXT, containsFile TEXT, text TEXT,'' name TEXT, displayName TEXT, timestamp TEXT, extension TEXT)');
         await database.insert('settings', {
           'checkIntro': null,
           'checkLogin': null,
@@ -42,7 +42,7 @@ class SqliteService {
           'index': "News",
           'currentPage': "0",
           'currentNews': "0",
-          'lastMessage': null,
+          //'lastMessage': null,
         });
       },
       version: 1,

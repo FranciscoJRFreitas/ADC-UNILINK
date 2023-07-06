@@ -26,6 +26,8 @@ class _MyMapState extends State<MyMap> {
   var center = LatLng(38.660999, -9.205094);
   var cameraposition;
   var isLocked = false;
+  var zoom = 17.0;
+  var tilt = 30.0;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -38,6 +40,7 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> portMarkers = Set();
   Set<Marker> servMarkers = Set();
   Map<PolylineId, Polyline> polylines = {};
+  //Set<Marker> currentPositionMarkers = Set();
 
   double distance = 0.0;
 
@@ -84,11 +87,35 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
+  /*void updateCurrentPositionMarker(loc.LocationData newLocation) async {
+    final ImageConfiguration imageConfiguration = createLocalImageConfiguration(
+        context,
+        size: Size.square(48)); // adjust the size as needed
+    final BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
+        imageConfiguration, 'assets/images/locationArrow.png');
+
+    setState(() {
+      currentPositionMarkers.clear();
+      currentPositionMarkers.add(
+        Marker(
+          markerId: MarkerId('current_position'),
+          position: LatLng(newLocation.latitude!, newLocation.longitude!),
+          icon: customIcon,
+          infoWindow: InfoWindow(
+            title: 'Current Position',
+          ),
+        ),
+      );
+      markers.addAll(currentPositionMarkers);
+    });
+  }*/
+
   getDirections(double? lat, double? long) async {
-    print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
-    print(distance);
+    //print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
+    //print(distance);
     if (mapController != null && isLocked) {
-      mapController!.moveCamera(CameraUpdate.newLatLng(cameraposition));
+      mapController!
+          .moveCamera(CameraUpdate.newLatLngZoom(cameraposition, zoom));
     }
     if (lat != null && long != null && isDirections) {
       List<LatLng> polylineCoordinates = [];
@@ -113,6 +140,19 @@ class _MyMapState extends State<MyMap> {
         print(result.errorMessage);
       }
 
+      if (mapController != null && isLocked) {
+        if (result.points.isNotEmpty && polylineCoordinates.length > 1) {
+          var bearing =
+              calculateBearing(polylineCoordinates[0], polylineCoordinates[1]);
+          mapController!.moveCamera(CameraUpdate.newCameraPosition(
+              CameraPosition(
+                  target: cameraposition, zoom: zoom, bearing: bearing, tilt: tilt)));
+        } else {
+          mapController!
+              .moveCamera(CameraUpdate.newLatLngZoom(cameraposition, zoom));
+        }
+      }
+
       if (isDirections) {
         addPolyLine(lat, long, polylineCoordinates);
       } else
@@ -123,6 +163,36 @@ class _MyMapState extends State<MyMap> {
       setState(() {
         polylines = {};
       });
+  }
+
+  double calculateBearing(LatLng start, LatLng end) {
+    double startLat = degreesToRadians(start.latitude);
+    double startLong = degreesToRadians(start.longitude);
+    double endLat = degreesToRadians(end.latitude);
+    double endLong = degreesToRadians(end.longitude);
+
+    double dLong = endLong - startLong;
+
+    double dPhi =
+        log(tan(endLat / 2.0 + pi / 4.0) / tan(startLat / 2.0 + pi / 4.0));
+
+    if (dLong.abs() > pi) {
+      if (dLong > 0.0) {
+        dLong = -(2.0 * pi - dLong);
+      } else {
+        dLong = (2.0 * pi + dLong);
+      }
+    }
+
+    return (radiansToDegrees(atan2(dLong, dPhi)) + 360.0) % 360.0;
+  }
+
+  double degreesToRadians(double degrees) {
+    return degrees * pi / 180.0;
+  }
+
+  double radiansToDegrees(double radians) {
+    return radians * 180.0 / pi;
   }
 
   double calculateDistance(double? lat, double? long) {
@@ -141,7 +211,7 @@ class _MyMapState extends State<MyMap> {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
-      color: Color.fromARGB(255, 9, 19, 202),
+      color: Colors.lightBlue,
       points: polylineCoordinates,
       width: 8,
     );
@@ -266,8 +336,12 @@ class _MyMapState extends State<MyMap> {
                       setState(() {
                         if (!isLocked) {
                           isLocked = true;
+                          zoom = 19.5;
+                          tilt = 30.0;
                         } else {
                           isLocked = false;
+                          zoom = 17.0;
+                          tilt = 0.0;
                         }
                         polylines = {};
                       });
@@ -360,6 +434,7 @@ class _MyMapState extends State<MyMap> {
       if (mounted) {
         setState(() {
           currentLocation = _locationResult;
+          //updateCurrentPositionMarker(currentLocation);
           if (isFirst) {
             isFirst = false;
             distance = calculateDistance(
@@ -453,7 +528,7 @@ class _MyMapState extends State<MyMap> {
                 setState(() {
                   isDirections = false;
                 });
-                await Future.delayed(Duration(seconds: 1));
+                await Future.delayed(Duration(milliseconds: 500));
               }
               isDirections = true;
               getDirections(latLng.latitude, latLng.longitude);
