@@ -1,3 +1,4 @@
+import 'package:unilink2023/features/chat/domain/Message.dart';
 import 'package:unilink2023/features/news/domain/FeedItem.dart';
 
 import '../features/userManagement/domain/User.dart';
@@ -44,6 +45,19 @@ import 'stub_cache_factory.dart'
         void removeNewsCache(){
           impl.removeNewsCache();
         }
+
+        void setMessages(Message message) {
+            impl.setMessages(message);
+        }
+
+        void updateMessage(Message message) {
+            impl.updateMessageCache(message);
+        }
+
+        void deleteMessage(String id) {
+            impl.deleteMessage(id);
+        }
+
     }
 
 final CacheGeneral cacheFactory = CacheGeneral();

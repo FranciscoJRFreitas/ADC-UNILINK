@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
@@ -41,6 +42,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10;
+  late int cacheMessageCap = 11;
   late bool isLoading = false;
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
@@ -49,6 +51,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       GlobalKey<CombinedButtonState>();
   late bool info = false;
   late bool isScrollLocked = false;
+  late String lastMessageId;
 
   //late CameraDescription camera;
 
@@ -67,44 +70,87 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
     messagesRef
         .orderByKey()
-        .limitToLast(messageCap)
+        .limitToLast(1)
         .onChildAdded
         .listen((event) {
-      setState(() {
+      setState(()  {
         Message message = Message.fromSnapshot(event.snapshot);
-        if (!removedMessages.contains(message.id) &&
-            messages.indexWhere((m) => m.id == message.id) == -1) {
           // Check if message was removed or already in the list
-          messages.add(message);
-        }
+        lastMessageId = message.id;
+        });
       });
-    });
 
-    messagesRef.onChildChanged.listen((event) {
-      setState(() {
-        Message updatedMessage = Message.fromSnapshot(event.snapshot);
-        int index =
-            messages.indexWhere((message) => message.id == updatedMessage.id);
-        if (index != -1) {
-          messages[index] = updatedMessage;
-        }
-      });
-    });
+    initMessages();
 
-// Listen for removed messages
-    messagesRef.onChildRemoved.listen((event) {
-      setState(() {
-        Message removedMessage = Message.fromSnapshot(event.snapshot);
-        removedMessages.add(removedMessage
-            .id); // Add removed message id to removedMessages list
-        messages.removeWhere((message) =>
-            message.id ==
-            removedMessage.id); // remove the message from messages
+  }
+
+  void initMessages() async {
+    List<Message> messagesFromCache = await cacheFactory.get('chat', '');
+   // String id = await cacheFactory.get('settings', 'lastMessage');
+    if(messagesFromCache.isNotEmpty && lastMessageId == messagesFromCache.last.id){
+      setState(() async {
+        messages = messagesFromCache;
       });
-    });
+    } else {
+
+      messagesFromCache = [];
+
+      messagesRef
+          .orderByKey()
+          .limitToLast(messageCap)
+          .onChildAdded
+          .listen((event) {
+        setState(() {
+          Message message = Message.fromSnapshot(event.snapshot);
+          if (!removedMessages.contains(message.id) &&
+              messages.indexWhere((m) => m.id == message.id) == -1) {
+            // Check if message was removed or already in the list
+            messages.add(message);
+            cacheFactory.setMessages(message);
+            messagesFromCache.add(message);
+            if(messagesFromCache.length == cacheMessageCap) {
+              cacheFactory.deleteMessage(messagesFromCache.removeAt(0).id);
+            }
+          }
+        });
+      });
+     // cacheFactory.set('lastMessage', messages.last.id);
+
+      messagesRef.onChildChanged.listen((event) {
+        setState(() {
+          Message updatedMessage = Message.fromSnapshot(event.snapshot);
+          int index =
+          messages.indexWhere((message) => message.id == updatedMessage.id);
+          int indexCache =
+          messages.indexWhere((message) => message.id == updatedMessage.id);
+          if (index != -1) {
+            messages[index] = updatedMessage;
+            if(index <= cacheMessageCap ) {
+              messagesFromCache[index] = updatedMessage;
+              cacheFactory.updateMessage(updatedMessage);
+            }
+          }
+          //cacheFactory.setMessages(message);
+        });
+      });
+      // Listen for removed messages
+      messagesRef.onChildRemoved.listen((event) {
+        setState(() {
+          Message removedMessage = Message.fromSnapshot(event.snapshot);
+          removedMessages.add(removedMessage
+              .id); // Add removed message id to removedMessages list
+          messages.removeWhere((message) =>
+          message.id ==
+              removedMessage.id);// remove the message from messages
+          cacheFactory.deleteMessage(removedMessage.id);
+          messagesFromCache.removeWhere((message) => message.id ==
+              removedMessage.id);
+        });
+      });
+    }
 
     DatabaseReference memberRef =
-        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
+    FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
     memberRef.child(widget.user.username).once().then((event) {
       bool isAdmin = event.snapshot.value as bool;

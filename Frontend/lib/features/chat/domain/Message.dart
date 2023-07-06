@@ -21,6 +21,32 @@ class Message {
     this.extension,
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      'isSystemMessage': isSystemMessage,
+      'id': id,
+      'containsFile': containsFile,
+      'text': text,
+      'name': name,
+      'displayName': displayName,
+      'timestamp': timestamp,
+      'extension' : extension,
+    };
+  }
+
+  static Message fromMap(Map<String, dynamic> map) {
+    return Message(
+      isSystemMessage: map['isSystemMessage'],
+      id: map['id'],
+      containsFile: map['containsFile'],
+      text: map['text'],
+      name: map['name'],
+      displayName: map['displayName'],
+      timestamp: map['timestamp'],
+      extension: map['extension'],
+    );
+  }
+
   factory Message.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     bool files = data["containsFile"] as bool;

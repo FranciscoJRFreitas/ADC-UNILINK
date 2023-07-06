@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:unilink2023/features/chat/domain/Message.dart';
 
 import '../features/news/domain/FeedItem.dart';
 import '../features/userManagement/domain/User.dart';
@@ -32,6 +33,8 @@ class SqliteService {
             'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT)');
         await database.execute(
             'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
+        await database.execute(
+            'CREATE TABLE chat(id TEXT PRIMARY KEY, isSystemMessage TEXT, containsFile TEXT, text TEXT,'' name TEXT, displayName TEXT, timestamp TEXT, extension TEXT)');
         await database.insert('settings', {
           'checkIntro': null,
           'checkLogin': null,
@@ -39,6 +42,7 @@ class SqliteService {
           'index': "News",
           'currentPage': "0",
           'currentNews': "0",
+          'lastMessage': null,
         });
       },
       version: 1,
@@ -104,6 +108,12 @@ class SqliteService {
     });
   }
 
+  Future<void> updateLastMessage(String value) async {
+    Database db = await getDatabase();
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET lastMessage = $value');
+    });
+  }
   Future<String?> getCheckIntro() async {
     Database db = await getDatabase();
     return await db.transaction((txn) async {
@@ -163,6 +173,19 @@ class SqliteService {
 
       if (maps.isNotEmpty && maps[0].containsKey('currentNews')) {
         return maps[0]['currentNews'];
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<String?> getLastMessage() async {
+    Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
+
+      if (maps.isNotEmpty && maps[0].containsKey('lastMessage')) {
+        return maps[0]['lastMessage'];
       } else {
         return null;
       }
@@ -287,6 +310,75 @@ class SqliteService {
       await txn.rawDelete('DELETE currentPage FROM settings');
       await txn.rawDelete('DELETE currentNews FROM settings');
       await txn.rawDelete('DELETE FROM news');
+    });
+  }
+
+  Future<List<Message>> getMessages() async {
+    final db = await getDatabase();
+
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('chat');
+
+      return List.generate(maps.length, (i) {
+        return Message(
+          isSystemMessage: maps[i]['isSystemMessage'] == 'true' ? true : false,
+          containsFile: maps[i]['containsFile'] == 'true' ? true : false,
+          id: maps[i]['id'],
+          text: maps[i]['text'],
+          name: maps[i]['name'],
+          displayName: maps[i]['displayName'],
+          timestamp: maps[i]['timestamp'],
+          extension: maps[i]['extension'],
+        );
+      });
+    });
+  }
+
+  Future<void> insertMessage(Message message) async {
+    // Get a reference to the database.
+    Database db = await getDatabase();
+
+    await db.transaction((txn) async {
+      await txn.insert(
+        'chat',
+        message.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
+  Future<void> updateMessage(Message message) async {
+    // Get a reference to the database.
+    final db = await getDatabase();
+
+    // Update the given Message.
+    await db.update(
+      'chat',
+      message.toMap(),
+      // Ensure that the Message has a matching id.
+      where: "id = ?",
+      whereArgs: [message.id],
+    );
+  }
+
+  Future<void> deleteMessage(String id) async {
+    // Get a reference to the database.
+    final db = await getDatabase();
+
+    // Remove the Message from the Database.
+    await db.delete(
+      'chat',
+      // Use a where clause to delete a specific message.
+      where: "id = ?",
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteMessagesInCache() async {
+    Database db = await getDatabase();
+    await db.transaction((txn) async {
+      await txn.rawDelete('DELETE lastMessage FROM settings');
+      await txn.rawDelete('DELETE FROM chat');
     });
   }
 }

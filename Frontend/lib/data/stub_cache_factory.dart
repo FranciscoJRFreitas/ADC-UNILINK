@@ -1,3 +1,4 @@
+import 'package:unilink2023/features/chat/domain/Message.dart';
 import 'package:unilink2023/features/news/domain/FeedItem.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
@@ -39,6 +40,25 @@ class CacheFactoryImpl extends CacheFactory{
   
   @override
   void setNews(FeedItem feedItem) {
+  }
+
+  @override
+  void removeMessagesCache() {
+  }
+
+  @override
+  void setMessages(Message message) {
+    // TODO: implement setMessages
+  }
+
+  @override
+  void deleteMessage(String id) {
+    // TODO: implement deleteMessage
+  }
+
+  @override
+  void updateMessageCache(Message message) {
+    // TODO: implement updateMessageCache
   }
 
 }
