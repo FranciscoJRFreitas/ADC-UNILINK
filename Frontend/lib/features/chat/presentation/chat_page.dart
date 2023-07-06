@@ -748,6 +748,11 @@ class _ChatPageState extends State<ChatPage> {
     String description,
     void Function(String, bool) showErrorSnackbar,
   ) async {
+    if (groupName.isEmpty) {
+      showErrorSnackbar("Please provide a name to create a group!", true);
+      return;
+    }
+
     final url = kBaseUrl + "rest/chat/create";
     final tokenID = await cacheFactory.get('users', 'token');
     final storedUsername = await cacheFactory.get('users', 'username');
