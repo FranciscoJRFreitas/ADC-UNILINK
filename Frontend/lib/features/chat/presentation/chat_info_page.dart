@@ -327,7 +327,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 ),
               ],
             ),
-            body: _showXButton());
+            body: _buildWeb());
   }
 
   Widget _buildWeb() {
@@ -351,6 +351,28 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
+                  if (kIsWeb)
+                    Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: TextButton.icon(
+                        icon: Icon(
+                          Icons.exit_to_app_rounded,
+                          color: Theme.of(context).secondaryHeaderColor,
+                          size: 16,
+                        ),
+                        label: Text('Leave',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(color: Colors.white)),
+                        onPressed: () {
+                          leavePopUpDialog(context);
+                        },
+                        style: TextButton.styleFrom(
+                          minimumSize: Size(50, 50),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               SizedBox(height: 20),
@@ -393,7 +415,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
           ),
 
           Container(
-            height: 395, //VALOR A ALTERAR
+            height: MediaQuery.of(context).size.height - 363, //VALOR A ALTERAR
             child: TabBarView(
               controller: _tabController,
               children: [
@@ -424,9 +446,11 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       SingleChildScrollView(
                         //padding: EdgeInsets.all(16),
                         child: Container(
-                          padding: EdgeInsets.only(top: 10, bottom: 0),//VALOR A ALTERAR OU NAO),
+                          padding: EdgeInsets.only(
+                              top: 10), //VALOR A ALTERAR OU NAO),
                           child: SizedBox(
-                            height: 325, //VALOR A ALTERAR
+                            height: MediaQuery.of(context).size.height -
+                                433, //VALOR A ALTERAR
                             child: ListView.builder(
                                 itemCount: events.length,
                                 itemBuilder: (context, index) {
@@ -571,126 +595,123 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 ),
                 // your events code here
 
-                SingleChildScrollView(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${members.length} Participants',
-                              style: Theme.of(context).textTheme.titleMedium,
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${members.length} Participants',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(fontSize: 16),
+                      ),
+                      if (isAdmin)
+                        Padding(
+                          padding: EdgeInsets.only(left: 15.0),
+                          child: TextButton.icon(
+                            icon: Icon(
+                              Icons.add_box_rounded,
+                              color: Theme.of(context).secondaryHeaderColor,
+                              size: 20,
                             ),
-                            if (isAdmin)
-                              Padding(
-                                padding: EdgeInsets.only(left: 15.0),
-                                child: TextButton.icon(
-                                  icon: Icon(
-                                    Icons.add_box_rounded,
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor,
-                                    size: 20,
-                                  ),
-                                  label: Text('Add more',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .copyWith(color: Colors.white)),
-                                  onPressed: () {
-                                    popUpDialog(context);
-                                  },
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size(50, 50),
-                                  ),
-                                ),
-                              ),
-                          ],
+                            label: Text('Add more',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(color: Colors.white)),
+                            onPressed: () {
+                              popUpDialog(context);
+                            },
+                            style: TextButton.styleFrom(
+                              minimumSize: Size(50, 50),
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 10),
-                        Container(
-                          padding: EdgeInsets.only(top: 10, bottom: 80),
-                          child: SizedBox(
-                            height: 300,
-                            child: ListView.builder(
-                                itemCount: members.length,
-                                itemBuilder: (context, index) {
-                                  MembersData member = members[index];
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        if (widget.username !=
-                                            member.username) {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ChatMemberInfo(
-                                                isAdmin: isAdmin,
-                                                sessionUsername:
-                                                    widget.username,
-                                                groupId: widget.groupId,
-                                                member: member,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      child: Container(
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 10, horizontal: 8),
-                                          child: ListTile(
-                                            leading: profilePicture2(
-                                                context, member.username),
-                                            title: Text(
-                                              '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  SingleChildScrollView(
+                    padding: EdgeInsets.all(16),
+                    child: Container(
+                      padding: EdgeInsets.only(top: 10),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 553,
+                        child: ListView.builder(
+                            itemCount: members.length,
+                            itemBuilder: (context, index) {
+                              MembersData member = members[index];
+                              return Material(
+                                color: Colors.transparent,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    if (widget.username != member.username) {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatMemberInfo(
+                                            isAdmin: isAdmin,
+                                            sessionUsername: widget.username,
+                                            groupId: widget.groupId,
+                                            member: member,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 5),
+                                      child: ListTile(
+                                        leading: profilePicture2(
+                                            context, member.username),
+                                        title: Text(
+                                          '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(height: 8),
+                                            Row(
                                               children: [
-                                                SizedBox(height: 8),
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.alternate_email,
-                                                        size: 20),
-                                                    SizedBox(width: 5),
-                                                    Text(
-                                                        'Username: ${member.username}'),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 5),
-                                                Divider(
-                                                  color:
-                                                      Provider.of<ThemeNotifier>(
-                                                                      context)
-                                                                  .currentTheme ==
-                                                              kDarkTheme
-                                                          ? Colors.white60
-                                                          : Theme.of(context)
-                                                              .primaryColor,
-                                                  thickness: 1,
+                                                Icon(Icons.alternate_email,
+                                                    size: 13),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  'Username: ${member.username}',
+                                                  style:
+                                                      TextStyle(fontSize: 13),
                                                 ),
                                               ],
                                             ),
-                                          ),
+                                            SizedBox(height: 5),
+                                          ],
                                         ),
                                       ),
                                     ),
-                                  );
-                                }),
-                          ),
-                        ),
-                      ]
-                      // your members code here
+                                  ),
+                                ),
+                              );
+                            }),
                       ),
-                ),
+                    ),
+                  ),
+                  Divider(
+                    color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                            kDarkTheme
+                        ? Colors.white60
+                        : Theme.of(context).primaryColor,
+                    thickness: 1,
+                  ),
+                ]
+                    // your members code here
+                    ),
               ],
             ),
           ),
