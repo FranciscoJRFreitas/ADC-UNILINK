@@ -123,7 +123,7 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
-  void setMessages(Message message) async {
+  void setMessages(String groupId, Message message) async {
     List<Message> messageList = await SqliteService().getMessages();
     bool isPresent = messageList.any((item) => item.id == message.id);
     if (!isPresent) {
@@ -132,12 +132,20 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
-  void deleteMessage(String id) {
+  void deleteMessage(String groupId, String id) {
     SqliteService().deleteMessage(id);
   }
 
   @override
-  void updateMessageCache(Message message) {
+  void updateMessageCache(String groupId, Message message) {
     SqliteService().updateMessage(message);
   }
+  
+  @override
+  Future<List<Message>> getMessages(String groupId) {
+    // TODO: implement getMessages
+    throw UnimplementedError();
+  }
+
+  
 }

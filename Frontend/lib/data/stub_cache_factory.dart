@@ -47,18 +47,24 @@ class CacheFactoryImpl extends CacheFactory{
   }
 
   @override
-  void setMessages(Message message) {
+  void setMessages(String groupId, Message message) {
     // TODO: implement setMessages
   }
 
   @override
-  void deleteMessage(String id) {
+  void deleteMessage(String groupId, String id) {
     // TODO: implement deleteMessage
   }
 
   @override
-  void updateMessageCache(Message message) {
+  void updateMessageCache(String groupId, Message message) {
     // TODO: implement updateMessageCache
+  }
+  
+  @override
+  Future<List<Message>> getMessages(String groupId) {
+    // TODO: implement getMessages
+    throw UnimplementedError();
   }
 
 }

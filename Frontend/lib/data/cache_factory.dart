@@ -14,7 +14,8 @@ abstract class CacheFactory {
   void printDb();
   void setNews(FeedItem feedItem);
   void removeMessagesCache();
-  void updateMessageCache(Message message);
-  void deleteMessage(String id);
-  void setMessages(Message message);
+  void updateMessageCache(String groupId, Message message);
+  void deleteMessage(String groupId, String id);
+  void setMessages(String groupId, Message message);
+  Future<List<Message>> getMessages(String groupId);
 }

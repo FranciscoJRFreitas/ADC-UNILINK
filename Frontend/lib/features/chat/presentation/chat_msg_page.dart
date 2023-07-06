@@ -45,7 +45,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
   late int messageCap = 10;
-  late int cacheMessageCap = 11;
+  late int cacheMessageCap = 12;
   late bool isLoading = false;
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
@@ -54,7 +54,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       GlobalKey<CombinedButtonState>();
   late bool info = false;
   late bool isScrollLocked = false;
-  late String lastMessageId;
+
+  //late String lastMessageId = '';
+
+  //late CameraDescription camera;
 
   @override
   void initState() {
@@ -69,87 +72,86 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
 
-    messagesRef
-        .orderByKey()
-        .limitToLast(1)
-        .once()
-        .then((event) {
-      setState(()  {
-        Message message = Message.fromSnapshot(event.snapshot);
-          // Check if message was removed or already in the list
-        lastMessageId = message.id;
-        });
-      });
+    // messagesRef
+    //     .orderByKey()
+    //     .limitToLast(1)
+    //     .once()
+    //     .then((event) {
+    //   setState(()  {
+    //     var valueMap = event.snapshot.value as Map<dynamic, dynamic>; // convert the snapshot value to Map
+    //     var lastMessageKey = valueMap.keys.first; // Get the key of the last message
+    //     var lastMessageData = valueMap[lastMessageKey];
+    //     Message message = Message.fromSnapshotValue(lastMessageKey, lastMessageData);
+    //     lastMessageId = message.id;
+    //     });
+    //   });
 
     initMessages();
-
   }
 
   void initMessages() async {
-    List<Message> messagesFromCache = await cacheFactory.get('chat', '');
-   // String id = await cacheFactory.get('settings', 'lastMessage');
-    if(messagesFromCache.isNotEmpty && lastMessageId == messagesFromCache.last.id){
-      setState(() async {
-        messages = messagesFromCache;
-      });
-    } else {
+    messages = await cacheFactory.getMessages(widget.groupId);
 
-      messagesFromCache = [];
-
+    if (messages.isEmpty) {
+      // Fetch messages from Firebase if the cache is empty
       messagesRef
           .orderByKey()
-          .limitToLast(messageCap)
-          .onChildAdded
-          .listen((event) {
-        setState(() {
-          Message message = Message.fromSnapshot(event.snapshot);
-          if (!removedMessages.contains(message.id) &&
-              messages.indexWhere((m) => m.id == message.id) == -1) {
-            // Check if message was removed or already in the list
-            messages.add(message);
-            cacheFactory.setMessages(message);
-            messagesFromCache.add(message);
-            if(messagesFromCache.length == cacheMessageCap) {
-              cacheFactory.deleteMessage(messagesFromCache.removeAt(0).id);
-            }
-          }
-        });
-      });
-     // cacheFactory.set('lastMessage', messages.last.id);
+          .limitToLast(cacheMessageCap)
+          .once()
+          .then((event) {
+        Map<dynamic, dynamic> valueMap =
+            event.snapshot.value as Map<dynamic, dynamic>;
 
-      messagesRef.onChildChanged.listen((event) {
-        setState(() {
-          Message updatedMessage = Message.fromSnapshot(event.snapshot);
-          int index =
-          messages.indexWhere((message) => message.id == updatedMessage.id);
-          int indexCache =
-          messages.indexWhere((message) => message.id == updatedMessage.id);
-          if (index != -1) {
-            messages[index] = updatedMessage;
-            if(index <= cacheMessageCap ) {
-              messagesFromCache[index] = updatedMessage;
-              cacheFactory.updateMessage(updatedMessage);
-            }
-          }
-          //cacheFactory.setMessages(message);
+        valueMap.forEach((key, value) {
+          Message message = Message.fromMapKey(key, value);
+          messages.add(message);
+          cacheFactory.setMessages(widget.groupId, message);
         });
+
+        setState(() {});
       });
-      // Listen for removed messages
-      messagesRef.onChildRemoved.listen((event) {
+
+      messagesRef.orderByKey().onChildAdded.listen((event) {
+        if (messages.length >= cacheMessageCap) {
+          messages
+              .removeAt(0); // remove the oldest message if the limit is reached
+        }
+
+        Message message = Message.fromSnapshot(event.snapshot);
         setState(() {
-          Message removedMessage = Message.fromSnapshot(event.snapshot);
-          removedMessages.add(removedMessage
-              .id); // Add removed message id to removedMessages list
-          messages.removeWhere((message) =>
-          message.id ==
-              removedMessage.id);// remove the message from messages
-          cacheFactory.deleteMessage(removedMessage.id);
-          messagesFromCache.removeWhere((message) => message.id ==
-              removedMessage.id);
+          messages.add(message);
         });
+
+        cacheFactory.setMessages(widget.groupId, message);
       });
     }
 
+    // Listen for updated messages
+    messagesRef.onChildChanged.listen((event) {
+      setState(() {
+        Message updatedMessage = Message.fromSnapshot(event.snapshot);
+        int messageIndex =
+            messages.indexWhere((message) => message.id == updatedMessage.id);
+        if (messageIndex != -1) {
+          messages[messageIndex] = updatedMessage;
+          cacheFactory.updateMessage(widget.groupId, updatedMessage);
+        }
+      });
+    });
+
+    // Listen for removed messages
+    messagesRef.onChildRemoved.listen((event) {
+      setState(() {
+        Message removedMessage = Message.fromSnapshot(event.snapshot);
+        removedMessages.add(removedMessage
+            .id); // Add removed message id to removedMessages list
+        messages.removeWhere((message) =>
+            message.id ==
+            removedMessage.id); // remove the message from messages
+        cacheFactory.deleteMessage(widget.groupId, removedMessage.id);
+        messages.removeWhere((message) => message.id == removedMessage.id);
+      });
+    });
     DatabaseReference memberRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
@@ -168,6 +170,11 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       }
     });
     _scrollToBottom();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void _configureMessaging() async {
@@ -201,16 +208,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         );
       }
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    messageCap = 10;
-    messagesRef.onChildAdded.drain();
-
-    _scrollController.dispose();
-    messageFocusNode.dispose();
   }
 
   Widget _bodyForWeb() {
