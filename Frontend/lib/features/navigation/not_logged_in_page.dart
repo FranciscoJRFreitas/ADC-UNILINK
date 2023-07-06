@@ -16,7 +16,7 @@ class NotLoggedInScreen extends StatefulWidget {
 
 class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   int _selectedIndex = 0;
-  List<String> _title = ["News", "Contacts", "Settings", "Map", "Login"];
+  List<String> _title = ["News", "Contacts", "Settings", "Campus", "Get Started"];
 
   _NotLoggedInScreenState(int? index) {
     if (index != null) _selectedIndex = index;
@@ -41,6 +41,9 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: kWhiteBackgroundColor,
+        ),
         backgroundColor: Theme.of(context).primaryColor, //roleColor,
         title: Text(
           _title[_selectedIndex],
@@ -73,8 +76,8 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
           children: <Widget>[
             SizedBox(height: 75),
             ListTile(
-              leading: Icon(Icons.login),
-              title: Text('Login'),
+              leading: Icon(Icons.flight_takeoff),
+              title: Text('Get Started'),
               onTap: () {
                 setState(() {
                   _selectedIndex = 4;
@@ -94,7 +97,7 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
             ),
             ListTile(
               leading: Icon(Icons.map),
-              title: Text('Map', style: Theme.of(context).textTheme.bodyLarge),
+              title: Text('Campus', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () {
                 setState(() {
                   _selectedIndex = 3;

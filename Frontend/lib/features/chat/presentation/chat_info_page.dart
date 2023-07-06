@@ -1,20 +1,22 @@
 import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
+import 'package:unilink2023/widgets/LineButton.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
-import 'package:unilink2023/widgets/LineDateField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/my_date_event_field.dart';
+import 'package:unilink2023/widgets/my_text_button.dart';
 import 'package:unilink2023/widgets/my_text_field.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +24,9 @@ import 'package:http/http.dart' as http;
 import '../../../data/cache_factory_provider.dart';
 import '../../../domain/Token.dart';
 import '../../../widgets/LineDateTimeField.dart';
+
+import 'package:provider/provider.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
 
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
@@ -33,13 +38,13 @@ class ChatInfoPage extends StatefulWidget {
   State<ChatInfoPage> createState() => _ChatInfoPageState();
 }
 
-class _ChatInfoPageState extends State<ChatInfoPage> {
+class _ChatInfoPageState extends State<ChatInfoPage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
   late Future<Uint8List?> groupPic;
   late List<MembersData> members = [];
   late List<Event> events = [];
@@ -50,6 +55,9 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   late MembersData? memberData;
   List<EventType> eventTypes = EventType.values;
   String _selectedEventType = 'Academic';
+  bool isLocationSelected = false;
+  bool _isHovering = false;
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -134,6 +142,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
         events.removeWhere((event) => event.id == eventId);
       });
     });
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   void _showErrorSnackbar(String message, bool Error) {
@@ -150,6 +159,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
 
   void dispose() {
     super.dispose();
+    _tabController?.dispose();
   }
 
   Future<Uint8List?> downloadGroupPictureData() async {
@@ -293,21 +303,23 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   @override
   Widget build(BuildContext context) {
     return kIsWeb
-        ? Scaffold(
-            body: _showXButton(),
-          )
+        ? _buildWeb()
         : Scaffold(
             appBar: AppBar(
+              iconTheme: IconThemeData(
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
               centerTitle: true,
               elevation: 0,
               title: Text(
                 "Group Information",
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Theme.of(context).textTheme.bodyLarge!.color),
               ),
               backgroundColor: Theme.of(context).primaryColor,
               actions: <Widget>[
                 IconButton(
-                  icon: const Icon(Icons.exit_to_app_rounded),
+                  icon: Icon(Icons.exit_to_app_rounded),
                   tooltip: 'Leave Group',
                   onPressed: () {
                     leavePopUpDialog(context);
@@ -316,6 +328,377 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
               ],
             ),
             body: _showXButton());
+  }
+
+  Widget _buildWeb() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // other parts of your code
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  profilePicture(context),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      widget.groupId,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Divider(
+                thickness: 3,
+                color: Style.lightBlue,
+              ),
+              SizedBox(height: 10),
+              Row(children: [
+                Text('Description: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 16)),
+                Text(
+                  desc,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ]),
+              SizedBox(height: 5),
+              Divider(
+                thickness: 3,
+                color: Style.lightBlue,
+              ),
+              SizedBox(height: 5),
+            ],
+          ),
+          TabBar(
+            controller: _tabController,
+            dividerColor: Style.lightBlue,
+            indicatorColor: Style.lightBlue,
+            tabs: [
+              Tab(
+                  icon: Icon(Icons.event, color: Style.lightBlue),
+                  text: 'Events'),
+              Tab(
+                  icon: Icon(Icons.group, color: Style.lightBlue),
+                  text: 'Members'),
+            ],
+          ),
+
+          Container(
+            height: 380, // specify the height of the container
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isAdmin) ...[
+                      Padding(
+                        padding: EdgeInsets.only(left: 15.0),
+                        child: TextButton.icon(
+                          icon: Icon(
+                            Icons.event,
+                            color: Theme.of(context).secondaryHeaderColor,
+                            size: 20,
+                          ),
+                          label: Text('Add event',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium! /*.copyWith(color: Colors.white)*/),
+                          onPressed: () {
+                            _createEventPopUpDialog(context);
+                          },
+                          style: TextButton.styleFrom(
+                            minimumSize: Size(50, 50),
+                          ),
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        //padding: EdgeInsets.all(16),
+                        child: Container(
+                          padding: EdgeInsets.only(top: 10, bottom: 80),
+                          child: SizedBox(
+                            height: 200,
+                            child: ListView.builder(
+                                itemCount: events.length,
+                                itemBuilder: (context, index) {
+                                  Event event = events[index];
+                                  return Material(
+                                    color: Colors.transparent,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        // if (widget.username != member.username) {
+                                        //   Navigator.of(context).push(
+                                        //     MaterialPageRoute(
+                                        //       builder: (context) => ChatMemberInfo(
+                                        //         isAdmin: isAdmin,
+                                        //         sessionUsername: widget.username,
+                                        //         groupId: widget.groupId,
+                                        //         member: member,
+                                        //       ),
+                                        //     ),
+                                        //   );
+                                        // }
+                                      },
+                                      child: Stack(
+                                        children: <Widget>[
+                                          Divider(
+                                            color: Provider.of<ThemeNotifier>(
+                                                            context)
+                                                        .currentTheme ==
+                                                    kDarkTheme
+                                                ? Colors.white60
+                                                : Theme.of(context)
+                                                    .primaryColor,
+                                            thickness: 1,
+                                          ),
+                                          Container(
+                                            color: Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 10, horizontal: 8),
+                                              child: ListTile(
+                                                title: Text(
+                                                  event.title +
+                                                      " (${_getEventTypeString(event.type)} Event)",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(height: 8),
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.description,
+                                                            size: 20),
+                                                        SizedBox(width: 5),
+                                                        Text(event.description),
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 8),
+                                                    if (event.location !=
+                                                        null) ...[
+                                                      Row(
+                                                        children: [
+                                                          Icon(Icons.place,
+                                                              size: 20),
+                                                          SizedBox(width: 5),
+                                                          Text('Location: ' +
+                                                              event.location!),
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: 8),
+                                                    ],
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.schedule,
+                                                            size: 20),
+                                                        SizedBox(width: 5),
+                                                        Text(
+                                                            "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 8),
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.schedule,
+                                                            size: 20),
+                                                        SizedBox(width: 5),
+                                                        Text(
+                                                            "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 5),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          if (isAdmin)
+                                            Positioned(
+                                              top: 0,
+                                              bottom: 0,
+                                              right: 20,
+                                              child: MouseRegion(
+                                                onHover: (event) => setState(
+                                                    () => _isHovering = true),
+                                                onExit: (event) => setState(
+                                                    () => _isHovering = false),
+                                                child: IconButton(
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: _isHovering
+                                                        ? Colors.red
+                                                        : Colors.blue,
+                                                  ),
+                                                  onPressed: () {
+                                                    _removeEventPopUpDialog(
+                                                        context, event.id!);
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          Divider(
+                                            color: Colors.black87,
+                                            thickness: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        thickness: 3,
+                        color: Style.lightBlue,
+                      ),
+                    ],
+                  ],
+                ),
+                // your events code here
+
+                SingleChildScrollView(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${members.length} Participants',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            if (isAdmin)
+                              Padding(
+                                padding: EdgeInsets.only(left: 15.0),
+                                child: TextButton.icon(
+                                  icon: Icon(
+                                    Icons.add_box_rounded,
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
+                                    size: 20,
+                                  ),
+                                  label: Text('Add more',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(color: Colors.white)),
+                                  onPressed: () {
+                                    popUpDialog(context);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    minimumSize: Size(50, 50),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Container(
+                          padding: EdgeInsets.only(top: 10, bottom: 80),
+                          child: SizedBox(
+                            height: 300,
+                            child: ListView.builder(
+                                itemCount: members.length,
+                                itemBuilder: (context, index) {
+                                  MembersData member = members[index];
+                                  return Material(
+                                    color: Colors.transparent,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        if (widget.username !=
+                                            member.username) {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ChatMemberInfo(
+                                                isAdmin: isAdmin,
+                                                sessionUsername:
+                                                    widget.username,
+                                                groupId: widget.groupId,
+                                                member: member,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 10, horizontal: 8),
+                                          child: ListTile(
+                                            leading: profilePicture2(
+                                                context, member.username),
+                                            title: Text(
+                                              '${member.dispName}${member.username == widget.username ? ' (You)' : ''}${member.isAdmin ? ' (Admin)' : ''}',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            subtitle: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height: 8),
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.alternate_email,
+                                                        size: 20),
+                                                    SizedBox(width: 5),
+                                                    Text(
+                                                        'Username: ${member.username}'),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 5),
+                                                Divider(
+                                                  color:
+                                                      Provider.of<ThemeNotifier>(
+                                                                      context)
+                                                                  .currentTheme ==
+                                                              kDarkTheme
+                                                          ? Colors.white60
+                                                          : Theme.of(context)
+                                                              .primaryColor,
+                                                  thickness: 1,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ),
+                      ]
+                      // your members code here
+                      ),
+                ),
+              ],
+            ),
+          ),
+
+          // other parts of your code
+        ],
+      ),
+    );
   }
 
   Widget _showXButton() {
@@ -339,7 +722,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           ),
           SizedBox(height: 20),
           Divider(
-            thickness: 1,
+            thickness: 3,
             color: Style.lightBlue,
           ),
           SizedBox(height: 10),
@@ -349,7 +732,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
           ),
           SizedBox(height: 5),
           Divider(
-            thickness: 1,
+            thickness: 3,
             color: Style.lightBlue,
           ),
           SizedBox(height: 5),
@@ -365,8 +748,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 label: Text('Add event',
                     style: Theme.of(context)
                         .textTheme
-                        .bodyMedium!
-                        .copyWith(color: Colors.white)),
+                        .bodyMedium! /*.copyWith(color: Colors.white)*/),
                 onPressed: () {
                   _createEventPopUpDialog(context);
                 },
@@ -378,7 +760,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             Container(
               padding: EdgeInsets.only(top: 10, bottom: 80),
               child: SizedBox(
-                height: 250,
+                height: 300,
                 child: ListView.builder(
                     itemCount: events.length,
                     itemBuilder: (context, index) {
@@ -402,11 +784,17 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                           },
                           child: Stack(
                             children: <Widget>[
-                              Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
-                                elevation: 5,
-                                margin: EdgeInsets.symmetric(vertical: 8),
+                              Divider(
+                                color: Provider.of<ThemeNotifier>(context)
+                                            .currentTheme ==
+                                        kDarkTheme
+                                    ? Colors.white60
+                                    : Theme.of(context).primaryColor,
+                                thickness: 1,
+                              ),
+                              Container(
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 8),
@@ -458,7 +846,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                                 "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
                                           ],
                                         ),
-                                        SizedBox(height: 8),
+                                        SizedBox(height: 5),
                                       ],
                                     ),
                                   ),
@@ -469,14 +857,29 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                   top: 0,
                                   bottom: 0,
                                   right: 20,
-                                  child: IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      _removeEventPopUpDialog(
-                                          context, event.id!);
-                                    },
+                                  child: MouseRegion(
+                                    onHover: (event) =>
+                                        setState(() => _isHovering = true),
+                                    onExit: (event) =>
+                                        setState(() => _isHovering = false),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: _isHovering
+                                            ? Colors.red
+                                            : Colors.blue,
+                                      ),
+                                      onPressed: () {
+                                        _removeEventPopUpDialog(
+                                            context, event.id!);
+                                      },
+                                    ),
                                   ),
                                 ),
+                              Divider(
+                                color: Colors.black87,
+                                thickness: 1,
+                              ),
                             ],
                           ),
                         ),
@@ -486,7 +889,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
             ),
             SizedBox(height: 5),
             Divider(
-              thickness: 1,
+              thickness: 3,
               color: Style.lightBlue,
             ),
           ],
@@ -520,35 +923,13 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                   ),
                 ),
-              if (kIsWeb)
-                Padding(
-                  padding: EdgeInsets.only(left: 15.0),
-                  child: TextButton.icon(
-                    icon: Icon(
-                      Icons.exit_to_app_rounded,
-                      color: Theme.of(context).secondaryHeaderColor,
-                      size: 20,
-                    ),
-                    label: Text('Leave group',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: Colors.white)),
-                    onPressed: () {
-                      leavePopUpDialog(context);
-                    },
-                    style: TextButton.styleFrom(
-                      minimumSize: Size(50, 50),
-                    ),
-                  ),
-                ),
             ],
           ),
           SizedBox(height: 20),
           Container(
             padding: EdgeInsets.only(top: 10, bottom: 80),
             child: SizedBox(
-              height: 1000,
+              height: members.length * 80,
               child: ListView.builder(
                   itemCount: members.length,
                   itemBuilder: (context, index) {
@@ -570,11 +951,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                             );
                           }
                         },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          margin: EdgeInsets.symmetric(vertical: 8),
+                        child: Container(
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           child: Padding(
                             padding: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 8),
@@ -596,6 +974,15 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                                       Text('Username: ${member.username}'),
                                     ],
                                   ),
+                                  SizedBox(height: 5),
+                                  Divider(
+                                    color: Provider.of<ThemeNotifier>(context)
+                                                .currentTheme ==
+                                            kDarkTheme
+                                        ? Colors.white60
+                                        : Theme.of(context).primaryColor,
+                                    thickness: 1,
+                                  ),
                                 ],
                               ),
                             ),
@@ -605,7 +992,29 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     );
                   }),
             ),
-          )
+          ),
+          if (kIsWeb)
+            Padding(
+              padding: EdgeInsets.only(left: 15.0),
+              child: TextButton.icon(
+                icon: Icon(
+                  Icons.exit_to_app_rounded,
+                  color: Theme.of(context).secondaryHeaderColor,
+                  size: 20,
+                ),
+                label: Text('Leave group',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: Colors.white)),
+                onPressed: () {
+                  leavePopUpDialog(context);
+                },
+                style: TextButton.styleFrom(
+                  minimumSize: Size(50, 50),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -708,8 +1117,8 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                     _showErrorSnackbar);
 
                 if (!kIsWeb) {
-                  await FirebaseMessaging.instance
-                      .unsubscribeFromTopic(widget.groupId);
+                  /*await FirebaseMessaging.instance
+                      .unsubscribeFromTopic(widget.groupId);*/
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
@@ -746,13 +1155,15 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
   }
 
   _createEventPopUpDialog(BuildContext context) {
+    LatLng? _selectedLocation = null;
+    String selectLocationText = "Select Location";
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).canvasColor,
               title: const Text(
                 "Add an event",
                 textAlign: TextAlign.left,
@@ -773,22 +1184,49 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   ),
                   LineTextField(
                     icon: Icons.title,
-                    lableText: 'Event Title',
+                    lableText: 'Title *',
                     controller: titleController,
                     title: "",
                   ),
+                  SizedBox(
+                    height: 5,
+                  ),
                   LineTextField(
                     icon: Icons.description,
-                    lableText: "Event Description",
+                    lableText: "Description",
                     controller: descriptionController,
                     title: "",
                   ),
-                  LineTextField(
-                    //Text for now (add Dropdown for Buildings)
+                  LineComboBox(
+                    deleteIcon: Icons.clear,
+                    onPressed: () {
+                      setState(() {
+                        selectLocationText = "Select Location";
+                        _selectedLocation = null;
+                      });
+                    },
+                    selectedValue: selectLocationText,
+                    items: [selectLocationText, "From FCT place", "From maps"],
                     icon: Icons.place,
-                    lableText: "Event Location",
-                    controller: locationController,
-                    title: "",
+                    onChanged: (newValue) async {
+                      if (newValue == "From FCT place" ||
+                          newValue == "From maps") {
+                        LatLng? selectedLocation = await showDialog<LatLng>(
+                          context: context,
+                          builder: (context) => EventLocationPopUp(
+                            context: context,
+                            isMapSelected: newValue == "From maps",
+                            location: _selectedLocation,
+                          ),
+                        );
+                        if (selectedLocation != null) {
+                          setState(() {
+                            selectLocationText = "1 Location Selected";
+                            _selectedLocation = selectedLocation;
+                          });
+                        }
+                      }
+                    },
                   ),
                   SizedBox(
                     height: 10,
@@ -796,7 +1234,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: startController,
-                    hintText: "Event Start Time",
+                    hintText: "Start Time *",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -806,7 +1244,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   LineDateTimeField(
                     icon: Icons.schedule,
                     controller: endController,
-                    hintText: "Event End Time",
+                    hintText: "End Time *",
                     firstDate: DateTime.now().subtract(Duration(days: 30)),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                   ),
@@ -824,7 +1262,7 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                           startController.text,
                           endController.text,
                           widget.groupId,
-                          locationController.text, //add Location controller
+                          _selectedLocation, //add Location controller
                           _showErrorSnackbar);
                       Navigator.of(context).pop();
                     }
@@ -836,6 +1274,12 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    userNameController.clear();
+                    titleController.clear();
+                    descriptionController.clear();
+                    startController.clear();
+                    endController.clear();
+                    _selectedLocation = null;
                   },
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
@@ -984,13 +1428,15 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
                   },
                 );
               },
-              child: ClipOval(
-                child: FittedBox(
-                  child: Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.fill,
+              child: Container(
+                width: 50.0, // Set your desired width
+                height: 50.0, // and height
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: MemoryImage(snapshot.data!),
                   ),
-                  fit: BoxFit.cover,
                 ),
               ),
             );
@@ -1025,119 +1471,422 @@ class _ChatInfoPageState extends State<ChatInfoPage> {
       ),
     );
   }
-}
 
-Future<void> inviteGroup(
-  BuildContext context,
-  String groupId,
-  String userId,
-  void Function(String, bool) showErrorSnackbar,
-) async {
-  final url =
-      kBaseUrl + "rest/chat/invite?groupId=" + groupId + "&userId=" + userId;
-  final tokenID = await cacheFactory.get('users', 'token');
-  final storedUsername = await cacheFactory.get('users', 'username');
-  Token token = new Token(tokenID: tokenID, username: storedUsername);
+  Future<void> inviteGroup(
+    BuildContext context,
+    String groupId,
+    String userId,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url =
+        kBaseUrl + "rest/chat/invite?groupId=" + groupId + "&userId=" + userId;
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
 
-  final response = await http.post(Uri.parse(url), headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ${json.encode(token.toJson())}'
-  });
-
-  if (response.statusCode == 200) {
-    showErrorSnackbar('Invite sent!', false);
-  } else {
-    showErrorSnackbar('Error sending the invite!', true);
-  }
-}
-
-Future<void> createEvent(
-  BuildContext context,
-  String type,
-  String title,
-  String description,
-  String start,
-  String end,
-  String groupID,
-  String location,
-  void Function(String, bool) showErrorSnackbar,
-) async {
-  final url = kBaseUrl + "rest/events/add";
-  final tokenID = await cacheFactory.get('users', 'token');
-  final storedUsername = await cacheFactory.get('users', 'username');
-  Token token = new Token(tokenID: tokenID, username: storedUsername);
-
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
+    final response = await http.post(Uri.parse(url), headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${json.encode(token.toJson())}'
-    },
-    body: jsonEncode({
-      'title': title,
-      'type': type,
-      'description': description,
-      'startTime': start,
-      'endTime': end,
-      'creator': storedUsername,
-      'groupID': groupID,
-      'location': location
-    }),
-  );
+    });
 
-  if (response.statusCode == 200) {
-    showErrorSnackbar('Created an event successfully!', false);
-  } else {
-    showErrorSnackbar('Failed to create an event: ${response.body}', true);
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Invite sent!', false);
+    } else {
+      showErrorSnackbar('Error sending the invite!', true);
+    }
   }
-}
 
-Future<void> removeEvent(
-  BuildContext context,
-  String eventId,
-  String groupId,
-  void Function(String, bool) showErrorSnackbar,
-) async {
-  final url = kBaseUrl + "rest/events/delete?eventID=$eventId&groupID=$groupId";
-  final tokenID = await cacheFactory.get('users', 'token');
-  final storedUsername = await cacheFactory.get('users', 'username');
-  Token token = new Token(tokenID: tokenID, username: storedUsername);
+  Future<void> createEvent(
+    BuildContext context,
+    String type,
+    String title,
+    String description,
+    String start,
+    String end,
+    String groupID,
+    LatLng? location,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url = kBaseUrl + "rest/events/add";
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
 
-  final response = await http.delete(
-    Uri.parse(url),
-    headers: {
+    if (type.isEmpty || title.isEmpty || start.isEmpty || end.isEmpty) {
+      showErrorSnackbar('Obligatory fields missing!', true);
+      return;
+    }
+
+    var response;
+    if (location != null) {
+      response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${json.encode(token.toJson())}'
+        },
+        body: jsonEncode({
+          'title': title,
+          'type': type,
+          'description': description,
+          'startTime': start,
+          'endTime': end,
+          'creator': storedUsername,
+          'groupID': groupID,
+          'location': "${location.latitude},${location.longitude}"
+        }),
+      );
+    } else {
+      response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${json.encode(token.toJson())}'
+        },
+        body: jsonEncode({
+          'title': title,
+          'type': type,
+          'description': description,
+          'startTime': start,
+          'endTime': end,
+          'creator': storedUsername,
+          'groupID': groupID,
+          'location': '0'
+        }),
+      );
+    }
+
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Created an event successfully!', false);
+    } else {
+      showErrorSnackbar('Failed to create an event: ${response.body}', true);
+    }
+  }
+
+  Future<void> removeEvent(
+    BuildContext context,
+    String eventId,
+    String groupId,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url =
+        kBaseUrl + "rest/events/delete?eventID=$eventId&groupID=$groupId";
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      userNameController.clear();
+      titleController.clear();
+      descriptionController.clear();
+      startController.clear();
+      endController.clear();
+      showErrorSnackbar('Removed successfully!', false);
+    } else {
+      showErrorSnackbar('Failed to remove the event: ${response.body}', true);
+    }
+  }
+
+  Future<void> leaveGroup(
+    BuildContext context,
+    String groupId,
+    String userId,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url =
+        kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
+    final tokenID = await cacheFactory.get('users', 'token');
+    Token token = new Token(tokenID: tokenID, username: userId);
+
+    final response = await http.post(Uri.parse(url), headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${json.encode(token.toJson())}'
-    },
-  );
+    });
 
-  if (response.statusCode == 200) {
-    showErrorSnackbar('Removed successfully!', false);
-  } else {
-    showErrorSnackbar('Failed to remove the event: ${response.body}', true);
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Left group!', false);
+    } else {
+      showErrorSnackbar('Error Leaving group!', true);
+    }
   }
 }
 
-Future<void> leaveGroup(
-  BuildContext context,
-  String groupId,
-  String userId,
-  void Function(String, bool) showErrorSnackbar,
-) async {
-  final url =
-      kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
-  final tokenID = await cacheFactory.get('users', 'token');
-  Token token = new Token(tokenID: tokenID, username: userId);
+class EventLocationPopUp extends StatefulWidget {
+  final BuildContext context;
+  final LatLng? location;
+  final bool isMapSelected;
 
-  final response = await http.post(Uri.parse(url), headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ${json.encode(token.toJson())}'
+  EventLocationPopUp({
+    required this.context,
+    required this.location,
+    required this.isMapSelected,
   });
 
-  if (response.statusCode == 200) {
-    showErrorSnackbar('Left group!', false);
-  } else {
-    showErrorSnackbar('Error Leaving group!', true);
+  @override
+  _EventLocationPopUpState createState() => _EventLocationPopUpState();
+}
+
+class _EventLocationPopUpState extends State<EventLocationPopUp> {
+  String? selectedPlace;
+  LatLng? selectedLocation;
+  late Set<Marker> edMarkers = Set();
+  late Set<Marker> restMarkers = Set();
+  late Set<Marker> parkMarkers = Set();
+  late Set<Marker> portMarkers = Set();
+  late Set<Marker> servMarkers = Set();
+
+  @override
+  void initState() {
+    super.initState();
+    loadMarkers();
+    if (widget.isMapSelected) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showMapDialog());
+    } else {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _showFCTPlaceDialog());
+    }
+  }
+
+  loadMarkers() async {
+    edMarkers = await loadEdLocationsFromJson();
+    restMarkers = await loadRestLocationsFromJson();
+    parkMarkers = await loadParkLocationsFromJson();
+    portMarkers = await loadParkLocationsFromJson();
+    servMarkers = await loadServLocationsFromJson();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  void _showFCTPlaceDialog() {
+    showDialog<LatLng>(
+      context: widget.context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).canvasColor,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (selectedPlace != null) ...[
+                    IconButton(
+                      hoverColor: Theme.of(context).hoverColor.withOpacity(0.1),
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: () {
+                        setState(() {
+                          selectedPlace = null;
+                        });
+                      },
+                    ),
+                    SizedBox(
+                      width: 10,
+                    )
+                  ],
+                  Text(
+                    "Select a FCT Location",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontSize: 30),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: selectedPlace == null
+                      ? [
+                          ListTile(
+                            title: Text(
+                              'Building',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontSize: 20),
+                            ),
+                            onTap: () => setState(() {
+                              selectedPlace = 'Building';
+                            }),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Restaurant',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontSize: 20),
+                            ),
+                            onTap: () => setState(() {
+                              selectedPlace = 'Restaurant';
+                            }),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Park',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontSize: 20),
+                            ),
+                            onTap: () => setState(() {
+                              selectedPlace = 'Park';
+                            }),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Port',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontSize: 20),
+                            ),
+                            onTap: () => setState(() {
+                              selectedPlace = 'Port';
+                            }),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Service',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontSize: 20),
+                            ),
+                            onTap: () => setState(() {
+                              selectedPlace = 'Service';
+                            }),
+                          ),
+                        ]
+                      : getMarkersForPlace(selectedPlace!)
+                          .map((marker) => ListTile(
+                              title: Text(
+                                marker.infoWindow.title!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall!
+                                    .copyWith(fontSize: 20),
+                              ),
+                              onTap: () => {
+                                    setState(() {
+                                      selectedLocation = marker.position;
+                                    }),
+                                    Navigator.of(context).pop(selectedLocation),
+                                    Navigator.of(context).pop(selectedLocation),
+                                  }))
+                          .toList(),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(
+                    'Cancel',
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).secondaryHeaderColor),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Set<Marker> getMarkersForPlace(String place) {
+    switch (place) {
+      case 'Building':
+        return edMarkers;
+      case 'Restaurant':
+        return restMarkers;
+      case 'Park':
+        return parkMarkers;
+      case 'Port':
+        return portMarkers;
+      case 'Service':
+        return servMarkers;
+      default:
+        return {};
+    }
+  }
+
+  void _showMapDialog() {
+    LatLng? preLocation;
+    Set<Marker> _markers = {};
+    showDialog(
+      context: widget.context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            content: Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: GoogleMap(
+                      onMapCreated: (GoogleMapController controller) {},
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(38.660999, -9.205094),
+                        zoom: 17,
+                      ),
+                      onTap: (LatLng location) {
+                        setState(() {
+                          preLocation = location;
+                          _markers.clear();
+                          _markers.add(Marker(
+                            markerId: MarkerId(preLocation.toString()),
+                            position: preLocation!,
+                          ));
+                        });
+                      },
+                      markers: _markers,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      if (preLocation != null)
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedLocation = preLocation;
+                            });
+                            Navigator.of(context).pop(selectedLocation);
+                            Navigator.of(context).pop(selectedLocation);
+                          },
+                          child: Text('Select Location'),
+                        ),
+                      ElevatedButton(
+                        onPressed: () {
+                          selectedLocation = null;
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Close'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
   }
 }
 

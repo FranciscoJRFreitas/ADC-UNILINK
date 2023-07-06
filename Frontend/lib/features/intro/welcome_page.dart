@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../constants.dart';
+import '../../domain/ThemeNotifier.dart';
 import '../screen.dart';
 import '../../widgets/widget.dart';
 
@@ -9,7 +12,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  //final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -18,22 +20,21 @@ class _WelcomePageState extends State<WelcomePage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Column(
                 children: [
                   Center(
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      child: Image(
-                        image: AssetImage('assets/images/NOVA_Logo.png'),
-                      ),
+                      width: MediaQuery.of(context).size.width * 0.15,
+                      child: Image.asset('assets/icon/ICON_UNILINK-03.png'),
                     ),
                   ),
                   SizedBox(
-                    height: 10,
+                    height: 5,
                   ),
                   Text(
-                    "Bem-vindo à nova plataforma UniHub!",
+                    "Welcome to the new UniHub platform!",
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -43,7 +44,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: Text(
-                      "A tornar as faculdades mais acessiveis...",
+                      "Making universities more accessible...",
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
@@ -51,47 +52,53 @@ class _WelcomePageState extends State<WelcomePage> {
                 ],
               ),
               SizedBox(
-                height: 200,
+                height: 100,
               ),
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.grey[850],
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: MyTextButton(
-                        bgColor: Theme.of(context).primaryColor,
-                        buttonName: 'Register',
+
+              MyTextButton(
+                  buttonName: 'Register',
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => RegisterPage()));
+                  },
+                  bgColor: Theme.of(context).primaryColor,
+                  textColor: Colors.white70,
+                  height: 45),
+              SizedBox(height: 20),
+              // Provide some space between buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 10),
+                  Text(
+                    'Already a user?  ',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) => RegisterPage()));
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => LoginPage(),
+                            ),
+                          );
                         },
-                        textColor: Colors.black87,
-                        height: 60,
-                      ),
-                    ),
-                    Expanded(
-                      child: MyTextButton(
-                        bgColor: Colors.transparent,
-                        buttonName: 'Login',
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => LoginPage(),
-                              ));
-                        },
-                        textColor: Colors.white,
-                        height: 60,
-                      ),
-                    ),
-                  ],
-                ),
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'Login',
+                            style:
+                                Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                      color: Colors.blue.shade400,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                          ),
+                        )),
+                  ),
+                ],
               ),
             ],
           ),

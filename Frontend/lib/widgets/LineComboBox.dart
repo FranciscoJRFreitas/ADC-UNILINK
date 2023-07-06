@@ -7,12 +7,16 @@ class LineComboBox extends StatefulWidget {
     required this.selectedValue,
     required this.onChanged,
     this.icon,
+    this.deleteIcon,
+    this.onPressed,
   }) : super(key: key);
 
   final List<String> items;
   final String selectedValue;
   final Function(String?) onChanged;
   final IconData? icon;
+  final IconData? deleteIcon;
+  final void Function()? onPressed;
 
   @override
   _LineComboBoxState createState() => _LineComboBoxState();
@@ -48,23 +52,38 @@ class _LineComboBoxState extends State<LineComboBox> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(42.12431, 0, 0, 0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: widget.selectedValue,
-                iconEnabledColor: Theme.of(context).primaryColor,
-                dropdownColor: Theme.of(context).scaffoldBackgroundColor,
-                style: Theme.of(context).textTheme.bodyLarge,
-                onChanged: widget.onChanged,
-                isExpanded: true,
-                items:
-                    widget.items.map<DropdownMenuItem<String>>((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
-                  );
-                }).toList(),
-              ),
+            padding: EdgeInsets.fromLTRB(
+                42.5, 0, 0, widget.deleteIcon != null ? 20.0 : 0.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: widget.selectedValue,
+                      iconEnabledColor: Theme.of(context).primaryColor,
+                      dropdownColor: Theme.of(context).canvasColor,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      onChanged: widget.onChanged,
+                      isExpanded: true,
+                      items: widget.items
+                          .map<DropdownMenuItem<String>>((String item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                widget.deleteIcon != null
+                    ? IconButton(
+                        hoverColor: Colors.transparent,
+                        tooltip: "Clear Location",
+                        icon: Icon(widget.deleteIcon, color: Colors.grey),
+                        onPressed: widget.onPressed,
+                      )
+                    : Container(),
+              ],
             ),
           ),
         ],

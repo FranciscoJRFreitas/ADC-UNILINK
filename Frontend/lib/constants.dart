@@ -13,7 +13,7 @@ const kHeadline = TextStyle(
 );
 
 const kButtonText = TextStyle(
-  color: Colors.black87,
+  //color: Colors.black87,
   fontSize: 16,
   fontWeight: FontWeight.bold,
 );
@@ -94,13 +94,13 @@ final ThemeData kLightTheme = ThemeData(
 
   textTheme: TextTheme(
     bodyLarge:
-        TextStyle(color: Colors.black, fontSize: 16 // Black for light theme
+        TextStyle(color: Colors.black, fontSize: 20 // Black for light theme
             ),
     bodyMedium:
-        TextStyle(color: Colors.black54, fontSize: 14 // Black for light theme
+        TextStyle(color: Colors.black54, fontSize: 16 // Black for light theme
             ),
     bodySmall:
-        TextStyle(color: Colors.black54, fontSize: 10 // Black for light theme
+        TextStyle(color: Colors.black54, fontSize: 13 // Black for light theme
             ),
     titleLarge: TextStyle(
         fontWeight: FontWeight.bold, fontSize: 40, color: Colors.black),
@@ -144,6 +144,8 @@ final ThemeData kLightTheme = ThemeData(
   secondaryHeaderColor: Colors.black,
   cardColor: Colors.white10,
   iconTheme: IconThemeData(color: Colors.white),
+  canvasColor: Color.fromARGB(255, 193, 192, 199),
+  dividerColor: Style.lightBlue,
   // customize other properties as needed
 );
 
@@ -203,6 +205,8 @@ final ThemeData kDarkTheme = ThemeData(
   primaryIconTheme: IconThemeData(color: Style.grey),
   secondaryHeaderColor: Colors.white,
   cardColor: Colors.white30, iconTheme: IconThemeData(color: Colors.white),
+  canvasColor: kBackgroundColor,
+  dividerColor: Style.darkBlue,
 
   // customize other properties as needed
 );

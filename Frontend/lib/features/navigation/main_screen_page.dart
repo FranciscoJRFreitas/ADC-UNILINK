@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:unilink2023/features/anomaly/anomalypage.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
@@ -51,7 +52,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "Contacts",
     "Settings",
     "Student",
-    "Map",
+    "Campus",
+    "Anomaly",
     "Teacher",
     "Director",
   ];
@@ -107,8 +109,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ChatPage(user: _currentUser), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
-        SchedulePage(), //estudante //9
+        SchedulePage(
+          username: _currentUser.username,
+        ), //estudante //9
         MyMap(), //10
+        ReportAnomalyPage(),
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
       ];
@@ -212,6 +217,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return _buildWebLayout(context);
+    } else {
+      return _buildWebLayout(context);
+    }
+  }
+
+  @override
+  Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
 
@@ -227,19 +241,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       ),
       child: Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Theme.of(context).textTheme.bodyLarge!.color,
+          ),
           backgroundColor: Theme.of(context).primaryColor, //roleColor,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
             _title[_selectedIndex],
             style: Theme.of(context).textTheme.bodyLarge,
-            selectionColor: Colors.white,
+            selectionColor: Colors.black,
           ),
           centerTitle: true,
           actions: [
             Tooltip(
               message: 'Quick Logout',
               child: IconButton(
-                icon: Icon(Icons.logout),
+                icon: Icon(Icons.logout,
+                    color: Theme.of(context).textTheme.bodyLarge!.color),
                 color: roleColor == Colors.yellow ? Colors.black : Colors.white,
                 onPressed: () async {
                   final token = await cacheFactory.get('users', 'token');
@@ -254,6 +272,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             )
           ],
         ),
+
         drawer: Drawer(
           backgroundColor: Theme.of(context).primaryColor,
           child: ListView(
@@ -372,16 +391,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       },
                     )
                   : Container(),
-              ListTile(
-                leading: Icon(Icons.newspaper),
-                title: Text('News'),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 0;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
               ExpansionTile(
                   leading: Icon(
                     Icons.group,
@@ -395,6 +404,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 1;
+                          _bottomNavigationIndex = 1;
                         });
                         Navigator.pop(context);
                       },
@@ -410,44 +420,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       },
                     )
                   ]),
-
-              /* ExpansionTile(
-                leading: Icon(Icons.person),
-                title:
-                    Text('Profile', style: Theme.of(context).textTheme.bodyLarge),
-                children: <Widget>[
-                 ListTile(
-                    title: Text('Modify Attributes',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 3;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Change Password',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 4;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Remove Account',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 5;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),*/
+              ListTile(
+                leading: Icon(Icons.newspaper),
+                title: Text('News'),
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 0;
+                    _bottomNavigationIndex = 0;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
               ListTile(
                 leading: Icon(Icons.chat),
                 title:
@@ -455,6 +438,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 6;
+                    _bottomNavigationIndex = 3;
                   });
                   Navigator.pop(context);
                 },
@@ -462,10 +446,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ListTile(
                 leading: Icon(Icons.map),
                 title:
-                    Text('Map', style: Theme.of(context).textTheme.bodyLarge),
+                    Text('Campus', style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
                     _selectedIndex = 10;
+                    _bottomNavigationIndex = 2;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.analytics),
+                title: Text('Anomaly',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 11;
                   });
                   Navigator.pop(context);
                 },
@@ -494,11 +490,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 8;
+                    _bottomNavigationIndex = 4;
                   });
                   Navigator.pop(context);
                 },
               ),
-
               ListTile(
                 leading: Icon(Icons.logout_sharp),
                 title: Text('Logout',
@@ -524,7 +520,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 type: BottomNavigationBarType.fixed,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 unselectedItemColor: Theme.of(context).secondaryHeaderColor,
-                selectedItemColor: Theme.of(context).primaryColor,
+                selectedItemColor: Theme.of(context).dividerColor,
                 currentIndex: _bottomNavigationIndex,
                 onTap: (index) {
                   setState(() {
@@ -558,7 +554,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.map, 10, AxisDirection.right),
-                    label: 'Map',
+                    label: 'Campus',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.chat, 6, AxisDirection.down),
@@ -715,7 +711,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       int index = 0;
       if (page == "News") index = 0;
       if (page == "Contacts") index = 1;
-      if (page == "Map") index = 3;
+      if (page == "Campus") index = 3;
 
       Navigator.pushAndRemoveUntil(
         context,

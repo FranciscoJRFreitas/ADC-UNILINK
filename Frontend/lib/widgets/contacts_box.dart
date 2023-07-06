@@ -54,15 +54,16 @@ class ContactCard extends StatelessWidget {
                 ],
               ),
               child: Row(
-                // <-- Add this
                 children: [
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundImage: AssetImage(
-                        'assets/images/NOVA_Logo.png'), // replace with your image file
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0),
+                    child: CircleAvatar(
+                      radius: 25,
+                      backgroundImage:
+                          AssetImage('assets/images/NOVA_Logo.png'),
+                    ),
                   ),
-                  SizedBox(
-                      width: 20), // To give some space between image and text
+                  SizedBox(width: 20),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

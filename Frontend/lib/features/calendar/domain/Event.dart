@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class Event {
   final String? id;
+  final String? groupId;
   final EventType type;
   final String title;
   final String description;
@@ -13,6 +14,7 @@ class Event {
   Event({
     this.id,
     this.creator,
+    this.groupId,
     required this.type,
     required this.title,
     required this.description,
@@ -47,6 +49,20 @@ class Event {
     );
   }
 
+  factory Event.fromSnapshotGroupId(String id, DataSnapshot snapshot) {
+    final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+    return Event(
+      groupId: id,
+      creator: data['creator'] as String,
+      type: _parseEventType(data['type'] as String),
+      title: data['title'] as String,
+      description: data['description'] as String,
+      startTime: DateTime.parse(data['startTime']),
+      endTime: DateTime.parse(data['endTime']),
+      location: data['location'] as String,
+    );
+  }
+
   factory Event.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
@@ -63,11 +79,11 @@ class Event {
   Map<String, dynamic> toJson() {
     return {
       'creator': creator,
-      'type': type,
+      'type': _getEventTypeString(type),
       'title': title,
       'description': description,
-      'startTime': startTime.toIso8601String(),
-      'endTime': endTime.toIso8601String(),
+      'startTime': startTime.toString(),
+      'endTime': endTime.toString(),
       'location': location,
     };
   }
@@ -75,7 +91,6 @@ class Event {
   static EventType _parseEventType(String? eventTypeString) {
     if (eventTypeString != null) {
       eventTypeString = eventTypeString.toLowerCase();
-      print(eventTypeString);
 
       switch (eventTypeString) {
         case 'academic':
@@ -107,6 +122,7 @@ class Event {
 
     return EventType.academic;
   }
+
 
   static String _getEventTypeString(EventType eventType) {
     switch (eventType) {

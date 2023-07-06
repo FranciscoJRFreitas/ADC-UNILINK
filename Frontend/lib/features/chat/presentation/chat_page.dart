@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,8 +16,15 @@ import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/domain/Token.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 import 'package:unilink2023/features/chat/presentation/chat_msg_page.dart';
-import 'package:unilink2023/widgets/my_text_field.dart';
-import 'package:unilink2023/widgets/widgets.dart';
+import 'package:unilink2023/widgets/LineTextField.dart';
+
+import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
+import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
+
+import 'package:provider/provider.dart';
+import 'package:unilink2023/domain/ThemeNotifier.dart';
+import '../domain/Message.dart';
 
 class ChatPage extends StatefulWidget {
   final User user;
@@ -36,12 +44,24 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController searchController = TextEditingController();
   List<Group> allGroups = [];
   List<Group> filteredGroups = [];
+  Map<String, Message> firstMessageOfGroups = {};
 
   @override
   void initState() {
     super.initState();
-
     groupsStream = listenForGroups();
+  }
+
+  String formatDateInMillis(int? timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis!);
+    var formatter = DateFormat('d/M/y');
+    return formatter.format(date);
+  }
+
+  String formatTimeInMillis(int timeInMillis) {
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis);
+    var formatter = DateFormat('HH:mm');
+    return formatter.format(date);
   }
 
   Stream<List<Group>> listenForGroups() {
@@ -54,6 +74,8 @@ class _ChatPageState extends State<ChatPage> {
         FirebaseDatabase.instance.ref().child('groups');
     DatabaseReference membersRef =
         FirebaseDatabase.instance.ref().child('members');
+    DatabaseReference messagesRef =
+        FirebaseDatabase.instance.ref().child('messages');
 
     StreamController<List<Group>> streamController = StreamController();
     List<Group> groups = [];
@@ -61,6 +83,17 @@ class _ChatPageState extends State<ChatPage> {
     // Listen for initial data and subsequent child additions
     chatRef.onChildAdded.listen((event) async {
       String groupId = event.snapshot.key as String;
+
+      messagesRef
+          .child(groupId)
+          .orderByKey()
+          .limitToLast(1)
+          .onChildAdded
+          .listen((event) async {
+        setState(() {
+          firstMessageOfGroups[groupId] = Message.fromSnapshot(event.snapshot);
+        });
+      });
 
       // Fetch group details from groupsRef
       DatabaseEvent groupSnapshot = await groupsRef.child(groupId).once();
@@ -82,6 +115,7 @@ class _ChatPageState extends State<ChatPage> {
           numberOfMembers: numberOfMembers,
         );
         groups.add(group);
+
         setState(() {
           allGroups.add(group);
           filteredGroups.add(group);
@@ -216,15 +250,20 @@ class _ChatPageState extends State<ChatPage> {
             flex: 1,
             child: _buildLeftWidget(context),
           ),
-          if (selectedGroup != null)
+          if (selectedGroup != null) ...[
+            Container(
+              width: 1, // You can adjust the thickness of the divider
+              color: Colors.grey, // You can adjust the color of the divider
+            ),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: GroupMessagesPage(
                 key: ValueKey(selectedGroup.id),
                 groupId: selectedGroup.id,
                 user: widget.user,
               ),
             ),
+          ],
         ],
       ),
     );
@@ -234,14 +273,16 @@ class _ChatPageState extends State<ChatPage> {
     // Your existing widget code, with modifications to onTap:
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        elevation: 0,
+        iconTheme: IconThemeData(
+          color: kWhiteBackgroundColor,
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, //roleColor,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Text(
           "Groups",
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+        centerTitle: true,
       ),
       body: Stack(
         children: <Widget>[
@@ -280,71 +321,87 @@ class _ChatPageState extends State<ChatPage> {
                       return ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGroup = group;
-                                downloadGroupPictureData(group.id);
-                              });
-                            },
-                            child: Card(
-                              color: selectedGroup == group
-                                  ? Theme.of(context).primaryColorDark
-                                  : null,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 5,
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 8),
-                                child: ListTile(
-                                  leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(200),
-                                      child: groupPicture(context, group.id)),
-                                  title: Text(
-                                    '${group.DisplayName}',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 8),
-                                      Row(
+                          Message? firstMessage =
+                              firstMessageOfGroups[group.id];
+                          return Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedGroup = group;
+                                    downloadGroupPictureData(group.id);
+                                  });
+                                },
+                                child: Container(
+                                  color: selectedGroup == group
+                                      ? Theme.of(context).primaryColorDark
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 8),
+                                    child: ListTile(
+                                      leading: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(200),
+                                          child:
+                                              groupPicture(context, group.id)),
+                                      title: Text(
+                                        '${group.DisplayName}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      trailing: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          Icon(Icons.person, size: 20),
-                                          SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              'Description: ${group.description}',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
+                                          Text(
+                                            formatTimeInMillis(
+                                                firstMessage!.timestamp),
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.grey),
                                           ),
                                         ],
                                       ),
-                                      SizedBox(height: 8),
-                                      Row(
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Icon(Icons.people, size: 20),
-                                          SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              '${group.numberOfMembers} members',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              //Maybe have icon?
+                                              //Icon(Icons.message, size: 20),
+                                              //SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  '${firstMessage.displayName}: ${firstMessage.text}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
+                                          ),
+                                          Divider(
+                                            color: Provider.of<ThemeNotifier>(
+                                                            context)
+                                                        .currentTheme ==
+                                                    kDarkTheme
+                                                ? Colors.white60
+                                                : Theme.of(context)
+                                                    .primaryColor,
+                                            thickness: 1,
                                           ),
                                         ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           );
                         }).toList(),
                       );
@@ -527,23 +584,25 @@ class _ChatPageState extends State<ChatPage> {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: const Text(
+              title: Text(
                 "Create a group",
                 textAlign: TextAlign.left,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MyTextField(
-                    small: false,
-                    hintText: 'Group name',
-                    inputType: TextInputType.text,
+                  LineTextField(
+                    icon: Icons.title,
+                    lableText: 'Group name',
                     controller: groupNameController,
                   ),
-                  MyTextField(
-                    small: false,
-                    hintText: 'Group Description',
-                    inputType: TextInputType.text,
+                  SizedBox(
+                    height: 8,
+                  ),
+                  LineTextField(
+                    icon: Icons.description,
+                    lableText: 'Group Description',
                     controller: descriptionController,
                   ),
                 ],
@@ -555,8 +614,6 @@ class _ChatPageState extends State<ChatPage> {
                       createGroup(context, groupNameController.text,
                           descriptionController.text, _showErrorSnackbar);
                       Navigator.of(context).pop();
-                      showSnackbar(
-                          context, Colors.green, "Group created successfully.");
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -711,11 +768,76 @@ class _ChatPageState extends State<ChatPage> {
 
     if (response.statusCode == 200) {
       showErrorSnackbar('Created a group successfully!', false);
-      if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
+      //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
     } else {
       showErrorSnackbar('Failed to create a group: ${response.body}', true);
     }
     groupNameController.clear();
     descriptionController.clear();
+  }
+
+  Future<void> logout(
+    BuildContext context,
+    String username,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    final url = kBaseUrl + "rest/logout/";
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final FirebaseAuth.User? _currentUser =
+          FirebaseAuth.FirebaseAuth.instance.currentUser;
+
+      if (_currentUser != null) {
+        DatabaseReference userRef =
+            FirebaseDatabase.instance.ref().child('chat').child(username);
+        DatabaseReference userGroupsRef = userRef.child('Groups');
+
+        // Retrieve user's group IDs from the database
+        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+        // Unsubscribe from all the groups
+        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+          /*Map<dynamic, dynamic> userGroups =
+              userGroupsSnapshot.value as Map<dynamic, dynamic>;
+          for (String groupId in userGroups.keys) {
+            if (!kIsWeb) //PROVISIONAL
+              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+          }*/
+        }
+      }
+
+      FirebaseAuth.FirebaseAuth.instance.signOut();
+      cacheFactory.removeLoginCache();
+
+      String page = await cacheFactory.get("settings", "index");
+      int index = 0;
+      if (page == "News") index = 0;
+      if (page == "Contacts") index = 1;
+      if (page == "Campus") index = 3;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NotLoggedInScreen(index: index)),
+        (Route<dynamic> route) => false,
+      );
+
+      showErrorSnackbar('${response.body}', false);
+    } else {
+      showErrorSnackbar('${response.body}', true);
+    }
   }
 }

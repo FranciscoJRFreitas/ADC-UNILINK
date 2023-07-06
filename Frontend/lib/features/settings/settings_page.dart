@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       case 'Contacts':
                         iconData = Icons.call;
                         break;
-                      case 'Map':
+                      case 'Campus':
                         iconData = Icons.map;
                         break;
                       default:
@@ -300,7 +300,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       case 'Contacts':
                         iconData = Icons.call;
                         break;
-                      case 'Map':
+                      case 'Campus':
                         iconData = Icons.map;
                         break;
                       default:
@@ -315,7 +315,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         Text(
                           (snapshot.data == 'News' ||
                                   snapshot.data == 'Contacts' ||
-                                  snapshot.data == 'Map')
+                                  snapshot.data == 'Campus')
                               ? snapshot.data
                               : 'News',
                           overflow: TextOverflow.ellipsis,

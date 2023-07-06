@@ -165,32 +165,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         Column(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Don't have an account? ",
-                                  style: kBodyText.copyWith(color: Colors.blue),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                        builder: (context) => RegisterPage(),
-                                      ),
-                                    );
-                                  },
-                                  child: Text('Register',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
                             MyTextButton(
                               buttonName: _isLoading ? 'Loading...' : 'Login',
                               onTap: _isLoading
@@ -211,8 +185,46 @@ class _LoginPageState extends State<LoginPage> {
                                       });
                                     },
                               bgColor: Theme.of(context).primaryColor,
-                              textColor: Colors.black87,
-                              height: 60,
+                              textColor: Colors.white70,
+                              height: 50,
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account?  ",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) =>
+                                                RegisterPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'Register',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(
+                                                color: Colors.blue.shade400,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                        ),
+                                      )),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -349,7 +361,7 @@ Future<int> login(
       if (page == "Schedule") index = 9;
       if (page == "Chat") index = 6;
       if (page == "Contacts") index = 7;
-      if (page == "Map") index = 10;
+      if (page == "Campus") index = 10;
 
       Navigator.pushAndRemoveUntil(
         context,

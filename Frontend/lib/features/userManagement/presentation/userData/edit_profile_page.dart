@@ -274,7 +274,7 @@ class _EditProfilePage extends State<EditProfilePage> {
     double offset = MediaQuery.of(context).size.width * 0.08;
     return Dialog(
       insetPadding: EdgeInsets.fromLTRB(offset, 80, offset, 50),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).canvasColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(20.0)),
       ),
@@ -295,7 +295,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                     SizedBox(height: 40),
                     Divider(
                       thickness: 2,
-                      color: Theme.of(context).primaryColor,
+                      color: Style.lightBlue,
                     ),
                     SizedBox(height: 15),
                     Padding(
@@ -400,7 +400,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                             _showErrorSnackbar,
                           );
                         },
-                        bgColor: Theme.of(context).primaryColor,
+                        bgColor: Theme.of(context).dividerColor,
                         textColor: Colors.white,
                         height: 45,
                       ),
