@@ -110,21 +110,21 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
         setState(() {});
       });
-
-      messagesRef.orderByKey().onChildAdded.listen((event) {
-        if (messages.length >= cacheMessageCap) {
-          messages
-              .removeAt(0); // remove the oldest message if the limit is reached
-        }
-
-        Message message = Message.fromSnapshot(event.snapshot);
-        setState(() {
-          messages.add(message);
-        });
-
-        cacheFactory.setMessages(widget.groupId, message);
-      });
     }
+
+    messagesRef.orderByKey().onChildAdded.listen((event) {
+      if (messages.length >= cacheMessageCap) {
+        messages
+            .removeAt(0); // remove the oldest message if the limit is reached
+      }
+
+      Message message = Message.fromSnapshot(event.snapshot);
+      setState(() {
+        messages.add(message);
+      });
+
+      cacheFactory.setMessages(widget.groupId, message);
+    });
 
     // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
