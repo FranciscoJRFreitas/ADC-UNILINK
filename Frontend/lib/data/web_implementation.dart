@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:html';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
+import '../features/chat/domain/Message.dart';
 import '../features/news/domain/FeedItem.dart';
 import 'cache_factory.dart';
 
@@ -22,6 +23,7 @@ class CacheFactoryImpl implements CacheFactory {
   @override
   Future<dynamic>? get(String table, String value) async {
     if (table == 'news') return await getNews();
+    if(table == 'chat') return await getMessages();
     if (table == 'users' && value == 'user') return await getUser();
     final cookies = document.cookie?.split(';');
     for (final cookie in cookies!) {
@@ -123,6 +125,15 @@ class CacheFactoryImpl implements CacheFactory {
     set('creationTime', user.creationTime);
   }
 
+  Future<List<dynamic>> _getMessagesList() async {
+    String? jsonString = window.localStorage['chat'];
+    if (jsonString != null) {
+      return jsonDecode(jsonString);
+    } else {
+      return [];
+    }
+  }
+
   Future<List<dynamic>> _getNewsList() async {
     String? jsonString = window.localStorage['news'];
     if (jsonString != null) {
@@ -130,6 +141,10 @@ class CacheFactoryImpl implements CacheFactory {
     } else {
       return [];
     }
+  }
+
+  void _setMessagesList(List<dynamic> messagesList) {
+    window.localStorage['chat'] = jsonEncode(messagesList);
   }
 
   void _setNewsList(List<dynamic> newsList) {
@@ -146,6 +161,16 @@ class CacheFactoryImpl implements CacheFactory {
       }
     });
   }
+  @override
+  void setMessages(Message message) {
+    _getMessagesList().then((messagesList) {
+      bool isPresent = messagesList.any((element) => element['id'] == message.id);
+      if (!isPresent) {
+        messagesList.add(message.toMap());
+        _setMessagesList(messagesList);
+      }
+    });
+  }
 
   Future<List<FeedItem>> getNews() async {
     List<dynamic>? jsonNewsList = await _getNewsList();
@@ -157,5 +182,45 @@ class CacheFactoryImpl implements CacheFactory {
     window.localStorage.remove('news');
     if (get('settings', 'currentPage') != null) delete('currentPage');
     if (get('settings', 'currentNews') != null) delete('currentNews');
+  }
+
+  @override
+  void removeMessagesCache() {
+   window.localStorage.remove('chat');
+   if (get('settings', 'lastMessage') != null) delete('lastMessage');
+  }
+
+  Future<List<Message>> getMessages() async {
+    List<dynamic>? jsonMessagesList = await _getMessagesList();
+    return jsonMessagesList.map((jsonMessage) => Message.fromMap(jsonMessage)).toList();
+  }
+
+  @override
+  void deleteMessage(String id) async {
+    // get the existing messages
+    var messages = await _getMessagesList();
+
+    // filter out the message with the matching id
+    messages = messages.where((msg) => msg['id'] != id).toList();
+
+    // save the modified list back to local storage
+    _setMessagesList(messages);
+  }
+
+  @override
+  void updateMessageCache(Message message) async {
+    // get the existing messages
+    var messages = await _getMessagesList();
+
+    // find the index of the message to be updated
+    var messageIndex = messages.indexWhere((msg) => msg['id'] == message.id);
+
+    // replace the old message with the updated one
+    if (messageIndex != -1) {
+      messages[messageIndex] = message.toMap();
+    }
+
+    // save the modified list back to local storage
+    _setMessagesList(messages);
   }
 }

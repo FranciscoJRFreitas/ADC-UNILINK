@@ -1,4 +1,5 @@
 import 'package:unilink2023/data/sqlite.dart';
+import 'package:unilink2023/features/chat/domain/Message.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
 import '../features/news/domain/FeedItem.dart';
@@ -34,6 +35,8 @@ class CacheFactoryImpl implements CacheFactory {
       await SqliteService().updateCurrentPage(value);
     else if (property == 'currentNews')
       await SqliteService().updateCurrentNews(value);
+    else if (property == 'lastMessage')
+      await SqliteService().updateLastMessage(value);
   }
 
   @override
@@ -56,8 +59,12 @@ class CacheFactoryImpl implements CacheFactory {
       return await SqliteService().getToken();
     else if (value == 'user')
       return await SqliteService().getUser();
+    else if (value == 'lastMessage')
+      return await SqliteService().getLastMessage();
     else if (table == 'news')
       return await SqliteService().getNews();
+    else if (table == 'chat')
+      return await SqliteService().getMessages();
     else
       return await SqliteService().getValue(table, value);
   }
@@ -108,5 +115,29 @@ class CacheFactoryImpl implements CacheFactory {
     if (!isPresent) {
       SqliteService().insertNews(feedItem);
     }
+  }
+
+  @override
+  void removeMessagesCache() {
+    SqliteService().deleteMessagesInCache();
+  }
+
+  @override
+  void setMessages(Message message) async {
+    List<Message> messageList = await SqliteService().getMessages();
+    bool isPresent = messageList.any((item) => item.id == message.id);
+    if (!isPresent) {
+      SqliteService().insertMessage(message);
+    }
+  }
+
+  @override
+  void deleteMessage(String id) {
+    SqliteService().deleteMessage(id);
+  }
+
+  @override
+  void updateMessageCache(Message message) {
+    SqliteService().updateMessage(message);
   }
 }

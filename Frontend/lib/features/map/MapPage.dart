@@ -24,6 +24,8 @@ class _MyMapState extends State<MyMap> {
   bool isSattelite = true;
   bool isFirst = true;
   var center = LatLng(38.660999, -9.205094);
+  var cameraposition;
+  var isLocked = false;
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -53,6 +55,7 @@ class _MyMapState extends State<MyMap> {
   @override
   void initState() {
     super.initState();
+    cameraposition = center;
     WidgetsBinding.instance.addPostFrameCallback((_) => initializeAsync());
     rootBundle.loadString('assets/json/map_style.json').then((string) {
       _mapStyle = string;
@@ -84,6 +87,9 @@ class _MyMapState extends State<MyMap> {
   getDirections(double? lat, double? long) async {
     print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
     print(distance);
+    if (mapController != null && isLocked) {
+      mapController!.moveCamera(CameraUpdate.newLatLng(cameraposition));
+    }
     if (lat != null && long != null && isDirections) {
       List<LatLng> polylineCoordinates = [];
 
@@ -96,6 +102,8 @@ class _MyMapState extends State<MyMap> {
         PointLatLng(lat, long),
         travelMode: distance >= 0.75 ? TravelMode.driving : TravelMode.walking,
       );
+      cameraposition =
+          LatLng(currentLocation.latitude ?? 0, currentLocation.longitude ?? 0);
 
       if (result.points.isNotEmpty) {
         result.points.forEach((PointLatLng point) {
@@ -177,10 +185,12 @@ class _MyMapState extends State<MyMap> {
               GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
                   controller.setMapStyle(_mapStyle);
+                  mapController =
+                      controller; // Store the GoogleMapController instance
                 },
                 zoomGesturesEnabled: true,
                 initialCameraPosition: CameraPosition(
-                  target: center,
+                  target: cameraposition,
                   zoom: 17.0,
                 ),
                 polygons: selectedDropdownItems.contains("Campus")
@@ -242,6 +252,27 @@ class _MyMapState extends State<MyMap> {
                       });
                     },
                     child: Text('Stop giving directions'),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom:
+                    60.0, // Adjust the offset to position the buttons as desired
+                right: 20.0,
+                child: Visibility(
+                  visible: isDirections,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (!isLocked) {
+                          isLocked = true;
+                        } else {
+                          isLocked = false;
+                        }
+                        polylines = {};
+                      });
+                    },
+                    child: Text(isLocked ? "Unlock Camera" : "Lock Camera"),
                   ),
                 ),
               ),
