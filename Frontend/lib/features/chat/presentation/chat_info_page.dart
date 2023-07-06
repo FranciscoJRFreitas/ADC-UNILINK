@@ -393,7 +393,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
           ),
 
           Container(
-            height: 380, // specify the height of the container
+            height: 395, //VALOR A ALTERAR
             child: TabBarView(
               controller: _tabController,
               children: [
@@ -424,9 +424,9 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       SingleChildScrollView(
                         //padding: EdgeInsets.all(16),
                         child: Container(
-                          padding: EdgeInsets.only(top: 10, bottom: 80),
+                          padding: EdgeInsets.only(top: 10, bottom: 0),//VALOR A ALTERAR OU NAO),
                           child: SizedBox(
-                            height: 200,
+                            height: 325, //VALOR A ALTERAR
                             child: ListView.builder(
                                 itemCount: events.length,
                                 itemBuilder: (context, index) {
