@@ -26,7 +26,7 @@ public class AnomalyResources {
 
     @POST
     @Path("/send")
-    public Response sendAnomaly(String Description, @Context HttpHeaders headers) {
+    public Response sendAnomaly(AnomalyData data , @Context HttpHeaders headers) {
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
@@ -45,11 +45,44 @@ public class AnomalyResources {
         }
         Transaction txn = datastore.newTransaction();
         try {
-            AnomalyData anomaly = new AnomalyData(Description);
+            AnomalyData anomaly = new AnomalyData(data.title, data.description, data.coordinates);
             Key anomalyKey = datastore.newKeyFactory().setKind("Anomaly").newKey(anomaly.AnoamlyID);
             Entity.Builder anomalyBuilder = Entity.newBuilder(anomalyKey)
-                    .set("description", anomaly.description);
+                    .set("title", anomaly.title)
+                    .set("description", anomaly.description)
+                    .set("coordinates", anomaly.coordinates);
             txn.add(anomalyBuilder.build());
+            txn.commit();
+            return Response.ok("{}").build();
+        } finally {
+            if (txn.isActive()) txn.rollback();
+        }
+    }
+
+    @POST
+    @Path("/resolve")
+    public Response resolveAnomaly(String anomalyId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+        Transaction txn = datastore.newTransaction();
+        try {
+            Key anomalyKey = datastore.newKeyFactory().setKind("Anomaly").newKey(anomalyId);
+
+            txn.delete(anomalyKey);
             txn.commit();
             return Response.ok("{}").build();
         } finally {
