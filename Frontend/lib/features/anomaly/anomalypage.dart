@@ -19,10 +19,17 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
   LatLng? selectedLocation = null;
 
   void sendAnomaly(BuildContext context) {
-    final anomalyText = anomalyController.text;
-    sendAnomalytoServer(context, anomalytitleController.text, anomalyText,
-        selectedLocation!, _showErrorSnackbar);
-    print('Anomaly Report: $anomalyText');
+    final anomalytitle = anomalytitleController.text;
+    final anomalydesc = anomalyController.text;
+    if (anomalydesc.isEmpty || anomalytitle.isEmpty) {
+      _showErrorSnackbar('Fill out the obrigatory fields', true);
+    }
+    String coordinates = selectedLocation != null
+        ? "${selectedLocation!.latitude},${selectedLocation!.longitude}"
+        : "No locations specified";
+    sendAnomalytoServer(
+        context, anomalytitle, anomalydesc, coordinates, _showErrorSnackbar);
+    print('Anomaly Report: $anomalydesc');
     // You can perform further actions here, such as sending the anomaly report to a server or displaying a confirmation dialog.
   }
 
@@ -163,7 +170,7 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
     BuildContext context,
     String title,
     String description,
-    LatLng coord,
+    String coord,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + "rest/anomaly/send";
@@ -177,13 +184,9 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
-      body: jsonEncode({
-        'title': title,
-        'Description': description,
-        'coord': "${coord.latitude},${coord.longitude}"
-      }),
+      body: jsonEncode(
+          {'title': title, 'description': description, 'coordinates': coord}),
     );
-    print(coord);
     if (response.statusCode == 200) {
       showErrorSnackbar('Sent Anomaly successfully!', false);
       print('Anomaly Report: $description');
