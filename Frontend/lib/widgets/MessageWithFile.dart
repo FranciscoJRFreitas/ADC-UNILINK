@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -141,25 +142,26 @@ class _MessageWithFileState extends State<MessageWithFile> {
 
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Edit Message', style: Theme.of(context).textTheme.titleMedium),
+          title: Text('Edit Message',
+              style: Theme.of(context).textTheme.titleMedium),
           content: TextField(
             style: Theme.of(context).textTheme.bodyLarge,
             onChanged: (value) {
               editedText = value; // Update the edited text
             },
-            controller:
-            TextEditingController(text: editedText),
+            controller: TextEditingController(text: editedText),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
               focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey)),
               enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
+                  borderSide:
+                      BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
               errorBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.red, width: 2.0)),
               focusedErrorBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.red, width: 2.0)),
-            ),// Set initial value
+            ), // Set initial value
           ),
           actions: [
             TextButton(
@@ -192,8 +194,10 @@ class _MessageWithFileState extends State<MessageWithFile> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Confirm Delete', style: Theme.of(context).textTheme.titleMedium),
-          content: Text('Are you sure you want to delete this message?', style: Theme.of(context).textTheme.bodyLarge),
+          title: Text('Confirm Delete',
+              style: Theme.of(context).textTheme.titleMedium),
+          content: Text('Are you sure you want to delete this message?',
+              style: Theme.of(context).textTheme.bodyLarge),
           actions: [
             TextButton(
               onPressed: () async {
@@ -228,14 +232,20 @@ class _MessageWithFileState extends State<MessageWithFile> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Details', style: Theme.of(context).textTheme.titleMedium),
+          title:
+              Text('Details', style: Theme.of(context).textTheme.titleMedium),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Username: ${widget.sender}", style: Theme.of(context).textTheme.bodyLarge),
+              Text("Username: ${widget.sender}",
+                  style: Theme.of(context).textTheme.bodyLarge),
               SizedBox(height: 12), // Add some spacing between lines
-              Text( formatDateInMillis(widget.time) + ", " + formatTimeInMillis(widget.time), style: Theme.of(context).textTheme.bodyLarge),
+              Text(
+                  formatDateInMillis(widget.time) +
+                      ", " +
+                      formatTimeInMillis(widget.time),
+                  style: Theme.of(context).textTheme.bodyLarge),
             ],
           ),
           actions: [
@@ -359,7 +369,7 @@ class _MessageWithFileState extends State<MessageWithFile> {
   }
 
   Future<Uint8List?> downloadFileData(String id) async {
-    return FirebaseStorage.instance
+    return await FirebaseStorage.instance
         .ref('GroupAttachements/${widget.groupId}/$id.${widget.fileExtension}')
         .getData()
         .onError((error, stackTrace) => null);
@@ -427,108 +437,82 @@ class _MessageWithFileState extends State<MessageWithFile> {
     );
   }
 
-  Future<Uint8List?> downloadMessagePictureData(String id) async {
-    return FirebaseStorage.instance
+  // Future<Uint8List?> downloadMessagePictureData(String id) async {
+  //   return await FirebaseStorage.instance
+  //       .ref(
+  //           'GroupAttachements/${widget.groupId}/${id}.${widget.fileExtension}')
+  //       .getData()
+  //       .onError((error, stackTrace) => null);
+  // }
+
+  Future<String?> getImageUrl(String id) async {
+    String? url = await FirebaseStorage.instance
         .ref(
             'GroupAttachements/${widget.groupId}/${id}.${widget.fileExtension}')
-        .getData()
-        .onError((error, stackTrace) => null);
+        .getDownloadURL()
+        .onError((error, stackTrace) => "");
+    return url;
   }
 
   Widget picture(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-      future: downloadMessagePictureData(widget.id),
-      builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+    return FutureBuilder<String?>(
+      future: getImageUrl(widget.id),
+      builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
         if (snapshot.hasData) {
-          final Completer<ui.Image> completer = Completer();
-          final Uint8List imageData = snapshot.data!;
-
-          ui.decodeImageFromList(imageData, (ui.Image image) {
-            completer.complete(image);
-          });
-
-          return FutureBuilder<ui.Image>(
-            future: completer.future,
-            builder:
-                (BuildContext context, AsyncSnapshot<ui.Image> imageSnapshot) {
-              if (imageSnapshot.hasData) {
-                final double screenWidth = MediaQuery.of(context).size.width;
-                final double screenHeight = MediaQuery.of(context).size.height;
-
-                final double aspectRatio =
-                    imageSnapshot.data!.width.toDouble() /
-                        imageSnapshot.data!.height.toDouble();
-                double containerWidth;
-                double containerHeight;
-
-                if (aspectRatio >= 1) {
-                  // Landscape or square image
-                  containerWidth =
-                      screenWidth / 4.0; // Adjust the width of the container
-                  containerHeight = containerWidth / aspectRatio;
-                } else {
-                  // Portrait image
-                  containerHeight =
-                      screenHeight / 2.0; // Adjust the height of the container
-                  containerWidth = containerHeight * aspectRatio;
-                }
-
-                return GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext dialogContext) {
-                        return Dialog(
-                          child: Stack(
-                            alignment: Alignment.topRight,
-                            children: [
-                              PhotoView(
-                                imageProvider: MemoryImage(imageData),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: IconButton(
-                                  icon: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.rectangle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black,
-                                          blurRadius: 15.0,
-                                          spreadRadius: 2.0,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
+          final String imageUrl = snapshot.data!;
+          return CachedNetworkImage(
+            imageUrl: imageUrl,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+            imageBuilder: (context, imageProvider) {
+              return GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return Dialog(
+                        child: Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            PhotoView(
+                              imageProvider: imageProvider,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: IconButton(
+                                icon: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black,
+                                        blurRadius: 15.0,
+                                        spreadRadius: 2.0,
+                                      ),
+                                    ],
                                   ),
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop();
-                                  },
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
                                 ),
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                },
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Image.memory(
-                    imageData,
-                    fit: BoxFit.contain,
-                    width: containerWidth,
-                    height: containerHeight,
-                  ),
-                );
-              } else {
-                return const Icon(
-                  Icons.image,
-                  size: 80,
-                );
-              }
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Image(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+              );
             },
           );
         } else {

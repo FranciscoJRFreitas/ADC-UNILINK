@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
@@ -92,30 +93,33 @@ class _MessageImageState extends State<MessageImage> {
     );
   }
 
-  Future<Uint8List?> downloadMessagePictureData(String id) async {
-    return FirebaseStorage.instance
+  Future<String?> downloadMessagePictureData(String id) async {
+    return await FirebaseStorage.instance
         .ref('GroupAttachements/${widget.groupId}/' + id)
-        .getData()
-        .onError((error, stackTrace) => null);
+        .getDownloadURL()
+        .onError((error, stackTrace) => "");
   }
 
   Widget picture(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-        future: downloadMessagePictureData(widget.id),
-        builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
-          if (snapshot.hasData) {
-            return GestureDetector(
+    return FutureBuilder<String?>(
+      future: downloadMessagePictureData(widget.id),
+      builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+        if (snapshot.hasData) {
+          return CachedNetworkImage(
+            imageUrl: snapshot.data!,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+            imageBuilder: (context, imageProvider) => GestureDetector(
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (BuildContext dialogContext) {
-                    // Here
                     return Dialog(
                       child: Stack(
                         alignment: Alignment.topRight,
                         children: [
                           PhotoView(
-                            imageProvider: MemoryImage(snapshot.data!),
+                            imageProvider: imageProvider,
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -136,10 +140,9 @@ class _MessageImageState extends State<MessageImage> {
                                   Icons.close,
                                   color: Colors.white,
                                 ),
-                              ), // Choose your icon and color
+                              ),
                               onPressed: () {
-                                Navigator.of(dialogContext)
-                                    .pop(); // Use dialogContext here
+                                Navigator.of(dialogContext).pop();
                               },
                             ),
                           ),
@@ -149,16 +152,19 @@ class _MessageImageState extends State<MessageImage> {
                   },
                 );
               },
-              child: Image.memory(snapshot.data!),
-            );
-          } else {
-            return const Icon(
-              Icons.account_circle,
-              size: 80,
-            );
-          }
+              child: Image(image: imageProvider),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return const Icon(
+            Icons.account_circle,
+            size: 80,
+          );
+        } else {
           return const CircularProgressIndicator();
-        });
+        }
+      },
+    );
   }
 
   Widget profilePicture(BuildContext context) {
