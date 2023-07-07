@@ -46,16 +46,20 @@ import 'stub_cache_factory.dart'
           impl.removeNewsCache();
         }
 
-        void setMessages(Message message) {
-            impl.setMessages(message);
+        void setMessages(String groupId, Message message) {
+            impl.setMessages(groupId, message);
         }
 
-        void updateMessage(Message message) {
-            impl.updateMessageCache(message);
+        void updateMessage(String groupId, Message message) {
+            impl.updateMessageCache(groupId, message);
         }
 
-        void deleteMessage(String id) {
-            impl.deleteMessage(id);
+        void deleteMessage(String groupId, String id) {
+            impl.deleteMessage(groupId, id);
+        }
+
+        Future<List<Message>> getMessages(String groupId) {
+          return impl.getMessages(groupId);
         }
 
     }

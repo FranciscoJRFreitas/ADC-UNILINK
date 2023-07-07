@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,12 +14,22 @@ class ReportAnomalyPage extends StatefulWidget {
 }
 
 class ReportAnomalyPageState extends State<ReportAnomalyPage> {
+  final TextEditingController anomalytitleController = TextEditingController();
   final TextEditingController anomalyController = TextEditingController();
+  LatLng? selectedLocation = null;
 
   void sendAnomaly(BuildContext context) {
-    final anomalyText = anomalyController.text;
-    sendAnomalytoServer(context, anomalyText, _showErrorSnackbar);
-    print('Anomaly Report: $anomalyText');
+    final anomalytitle = anomalytitleController.text;
+    final anomalydesc = anomalyController.text;
+    if (anomalydesc.isEmpty || anomalytitle.isEmpty) {
+      _showErrorSnackbar('Fill out the obrigatory fields', true);
+    }
+    String coordinates = selectedLocation != null
+        ? "${selectedLocation!.latitude},${selectedLocation!.longitude}"
+        : "No locations specified";
+    sendAnomalytoServer(
+        context, anomalytitle, anomalydesc, coordinates, _showErrorSnackbar);
+    print('Anomaly Report: $anomalydesc');
     // You can perform further actions here, such as sending the anomaly report to a server or displaying a confirmation dialog.
   }
 
@@ -30,6 +41,14 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
         child: Column(
           children: [
             TextField(
+              controller: anomalytitleController,
+              decoration: InputDecoration(
+                labelText: 'Anomaly Title',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
               controller: anomalyController,
               maxLines: 5,
               decoration: InputDecoration(
@@ -38,13 +57,100 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
               ),
             ),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () => sendAnomaly(context),
-              child: Text('Send'),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Open the popup map here
+                    _openMapPopup(context);
+                  },
+                  child: Text(selectedLocation == null
+                      ? 'Select Location'
+                      : 'Reselect Location'),
+                ),
+                SizedBox(width: 16.0),
+                ElevatedButton(
+                  onPressed: () => sendAnomaly(context),
+                  child: Text('Send'),
+                ),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _openMapPopup(BuildContext context) {
+    Set<Marker> _markers = {}; // Declare markers set
+    LatLng? preLocation;
+    GoogleMapController? mapController;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            content: Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: GoogleMap(
+                      onMapCreated: (GoogleMapController controller) {
+                        mapController = controller;
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(38.660999, -9.205094),
+                        zoom: 17,
+                      ),
+                      onTap: (LatLng location) {
+                        setState(() {
+                          preLocation = location;
+                          _markers.clear();
+                          _markers.add(Marker(
+                            markerId: MarkerId(preLocation.toString()),
+                            position: preLocation!,
+                          ));
+                          if (mapController != null) {
+                            mapController!.animateCamera(
+                              CameraUpdate.newLatLng(preLocation!),
+                            );
+                          }
+                        });
+                      },
+                      markers: _markers,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      if (preLocation != null)
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedLocation = preLocation;
+                            });
+                            Navigator.of(context).pop(selectedLocation);
+                          },
+                          child: Text('Select Location'),
+                        ),
+                      ElevatedButton(
+                        onPressed: () {
+                          selectedLocation = null;
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Close'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+      },
     );
   }
 
@@ -62,7 +168,9 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
 
   Future<void> sendAnomalytoServer(
     BuildContext context,
+    String title,
     String description,
+    String coord,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + "rest/anomaly/send";
@@ -76,11 +184,9 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
-      body: jsonEncode({
-        'Description': description,
-      }),
+      body: jsonEncode(
+          {'title': title, 'description': description, 'coordinates': coord}),
     );
-
     if (response.statusCode == 200) {
       showErrorSnackbar('Sent Anomaly successfully!', false);
       print('Anomaly Report: $description');
