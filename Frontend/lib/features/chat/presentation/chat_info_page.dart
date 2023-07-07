@@ -1680,7 +1680,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
     edMarkers = await loadEdLocationsFromJson();
     restMarkers = await loadRestLocationsFromJson();
     parkMarkers = await loadParkLocationsFromJson();
-    portMarkers = await loadParkLocationsFromJson();
+    portMarkers = await loadPortLocationsFromJson();
     servMarkers = await loadServLocationsFromJson();
   }
 
