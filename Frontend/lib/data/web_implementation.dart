@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:html';
+import 'dart:io';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
 import '../features/chat/domain/Message.dart';
@@ -7,6 +8,7 @@ import '../features/news/domain/FeedItem.dart';
 import 'cache_factory.dart';
 
 class CacheFactoryImpl implements CacheFactory {
+  final int cacheMessagesLimit = 12; // Define your cache limit here
   CacheFactoryImpl._();
 
   static final CacheFactoryImpl _instance = CacheFactoryImpl._();
@@ -23,7 +25,7 @@ class CacheFactoryImpl implements CacheFactory {
   @override
   Future<dynamic>? get(String table, String value) async {
     if (table == 'news') return await getNews();
-    if(table == 'chat') return await getMessages();
+    if (table == 'chat') return await getMessages(value);
     if (table == 'users' && value == 'user') return await getUser();
     final cookies = document.cookie?.split(';');
     for (final cookie in cookies!) {
@@ -125,8 +127,9 @@ class CacheFactoryImpl implements CacheFactory {
     set('creationTime', user.creationTime);
   }
 
-  Future<List<dynamic>> _getMessagesList() async {
-    String? jsonString = window.localStorage['chat'];
+  Future<List<dynamic>> _getMessagesList(String groupId) async {
+    String groupRef = groupId;
+    String? jsonString = await window.localStorage[groupRef];
     if (jsonString != null) {
       return jsonDecode(jsonString);
     } else {
@@ -143,8 +146,12 @@ class CacheFactoryImpl implements CacheFactory {
     }
   }
 
-  void _setMessagesList(List<dynamic> messagesList) {
-    window.localStorage['chat'] = jsonEncode(messagesList);
+  void _setMessagesList(String groupId, List<dynamic> messagesList) async {
+    if (messagesList.length > cacheMessagesLimit) {
+      messagesList =
+          messagesList.sublist(messagesList.length - cacheMessagesLimit);
+    }
+    window.localStorage[groupId] = jsonEncode(messagesList);
   }
 
   void _setNewsList(List<dynamic> newsList) {
@@ -154,21 +161,20 @@ class CacheFactoryImpl implements CacheFactory {
   @override
   void setNews(FeedItem newsItem) {
     _getNewsList().then((newsList) {
-      bool isPresent = newsList.any((element) => element['title'] == newsItem.title);
+      bool isPresent =
+          newsList.any((element) => element['title'] == newsItem.title);
       if (!isPresent) {
         newsList.add(newsItem.toMap());
         _setNewsList(newsList);
       }
     });
   }
+
   @override
-  void setMessages(Message message) {
-    _getMessagesList().then((messagesList) {
-      bool isPresent = messagesList.any((element) => element['id'] == message.id);
-      if (!isPresent) {
-        messagesList.add(message.toMap());
-        _setMessagesList(messagesList);
-      }
+  void setMessages(String groupId, Message message) {
+    _getMessagesList(groupId).then((messagesList) {
+      messagesList.add(message.toMap());
+      _setMessagesList(groupId, messagesList);
     });
   }
 
@@ -186,41 +192,32 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void removeMessagesCache() {
-   window.localStorage.remove('chat');
-   if (get('settings', 'lastMessage') != null) delete('lastMessage');
-  }
-
-  Future<List<Message>> getMessages() async {
-    List<dynamic>? jsonMessagesList = await _getMessagesList();
-    return jsonMessagesList.map((jsonMessage) => Message.fromMap(jsonMessage)).toList();
+    window.localStorage.remove('chat');
+    if (get('settings', 'lastMessage') != null) delete('lastMessage');
   }
 
   @override
-  void deleteMessage(String id) async {
-    // get the existing messages
-    var messages = await _getMessagesList();
+  Future<List<Message>> getMessages(String groupId) async {
+    List<dynamic>? jsonMessagesList = await _getMessagesList(groupId);
+    return jsonMessagesList
+        .map((jsonMessage) => Message.fromMap(jsonMessage))
+        .toList();
+  }
 
-    // filter out the message with the matching id
+  @override
+  void deleteMessage(String groupId, String id) async {
+    var messages = await _getMessagesList(groupId);
     messages = messages.where((msg) => msg['id'] != id).toList();
-
-    // save the modified list back to local storage
-    _setMessagesList(messages);
+    _setMessagesList(groupId, messages);
   }
 
   @override
-  void updateMessageCache(Message message) async {
-    // get the existing messages
-    var messages = await _getMessagesList();
-
-    // find the index of the message to be updated
+  void updateMessageCache(String groupId, Message message) async {
+    var messages = await _getMessagesList(groupId);
     var messageIndex = messages.indexWhere((msg) => msg['id'] == message.id);
-
-    // replace the old message with the updated one
     if (messageIndex != -1) {
       messages[messageIndex] = message.toMap();
     }
-
-    // save the modified list back to local storage
-    _setMessagesList(messages);
+    _setMessagesList(groupId, messages);
   }
 }
