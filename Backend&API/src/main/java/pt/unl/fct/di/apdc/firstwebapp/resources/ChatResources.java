@@ -98,6 +98,71 @@ public class ChatResources {
         return Response.ok("{}").build();
     }
 
+    @DELETE
+    @Path("/delete/{groupId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteGroup(@PathParam("groupId") String groupId, @Context HttpHeaders headers) {
+
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
+        DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
+        DatabaseReference deletedChatRef = chatsRef.child(groupId);
+
+        // Check if the group exists
+        if (deletedChatRef == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Group not found.").build();
+        }
+
+        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
+
+        // Retrieve all members of the group
+        membersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot memberSnapshot : dataSnapshot.getChildren()) {
+                    String memberId = memberSnapshot.getKey();
+
+                    DatabaseReference memberChatsRef = FirebaseDatabase.getInstance().getReference("chat").child(memberId);
+                    DatabaseReference memberGroupsRef = memberChatsRef.child("Groups");
+
+                    // Remove the group from each member's chats
+                    memberGroupsRef.child(groupId).removeValueAsync();
+                }
+
+                // Delete the group and its associated data
+                deletedChatRef.removeValueAsync();
+                membersRef.removeValueAsync();
+                DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(groupId);
+                messagesRef.removeValueAsync();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle any errors
+            }
+        });
+
+        return Response.ok("{}").build();
+    }
+
+
+
+
     @POST
     @Path("/invite")
     @Consumes(MediaType.APPLICATION_JSON)
