@@ -110,11 +110,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             cacheFactory.setMessages(widget.groupId, message);
           }
         });
-
       });
     }
-
-
 
     // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
@@ -160,7 +157,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
       }
     });
-    _scrollToBottom();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -211,7 +210,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 if (notification is ScrollEndNotification &&
                     _scrollController.position.pixels == 0) {
                   // Load older messages here
-                  isLoading = true;
                   loadOlderMessages();
                 }
                 return false;
@@ -512,7 +510,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 onNotification: (ScrollNotification notification) {
                   if (notification is ScrollEndNotification &&
                       _scrollController.position.pixels == 0) {
-                    isLoading = true;
                     loadOlderMessages();
                   }
                   return false;
@@ -873,7 +870,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
         // Add the older messages at the beginning of the messages list
         setState(() {
-          isScrollLocked = true;
           messages.insertAll(0, olderMessages);
         });
       }
@@ -938,8 +934,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   id: message.id,
                   isAdmin: isAdmin,
                 ));
-
-          if (!isScrollLocked) _scrollToBottom();
 
           return Column(
             children: widgets,
