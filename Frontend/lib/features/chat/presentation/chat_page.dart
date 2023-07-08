@@ -24,14 +24,16 @@ import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
+import '../domain/Group.dart';
 import '../domain/Message.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ChatPage extends StatefulWidget {
   final User user;
+  String? selectedGroup;
 
-  ChatPage({required this.user});
+  ChatPage({required this.user, this.selectedGroup});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -42,7 +44,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController descriptionController = TextEditingController();
   late Stream<List<Group>> groupsStream = Stream.empty();
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  Group? selectedGroup;
+  late Group? _selectedGroup = null;
   final TextEditingController searchController = TextEditingController();
   List<Group> allGroups = [];
   List<Group> filteredGroups = [];
@@ -52,7 +54,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    listenForGroups();
+    if (mounted) listenForGroups();
     WidgetsBinding.instance?.addObserver(this);
   }
 
@@ -61,11 +63,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     setState(() {
       isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom == 0.0;
     });
-    print(MediaQuery.of(context).viewInsets.bottom);
   }
 
   void dispose() {
-    super.dispose();
+    if (mounted) super.dispose();
     WidgetsBinding.instance?.removeObserver(this);
   }
 
@@ -119,9 +120,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           .limitToLast(1)
           .onChildAdded
           .listen((event) async {
-        setState(() {
-          firstMessageOfGroups[groupId] = Message.fromSnapshot(event.snapshot);
-        });
+        if (mounted)
+          setState(() {
+            firstMessageOfGroups[groupId] =
+                Message.fromSnapshot(event.snapshot);
+          });
       });
 
       // Fetch group details from groupsRef
@@ -158,6 +161,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         setState(() {});
         streamController.add(groups);
       }
+
+      if (widget.selectedGroup != null)
+        setState(() {
+          var matchingGroup =
+              allGroups.where((e) => e.id == widget.selectedGroup);
+          if (matchingGroup.isNotEmpty) {
+            _selectedGroup = matchingGroup.first;
+          }
+        });
     });
 
     // Listen for child removal using onChildRemoved
@@ -273,13 +285,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      return _buildWebLayout(context, selectedGroup);
+      return _buildWebLayout(context);
     } else {
       return _buildMobileLayout(context);
     }
   }
 
-  Widget _buildWebLayout(BuildContext context, Group? selectedGroup) {
+  Widget _buildWebLayout(BuildContext context) {
     return Scaffold(
       body: Row(
         children: [
@@ -287,16 +299,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             flex: 1,
             child: _buildLeftWidget(context),
           ),
-          if (selectedGroup != null) ...[
+          if (_selectedGroup != null) ...[
             Container(
-              width: 1, // You can adjust the thickness of the divider
-              color: Colors.grey, // You can adjust the color of the divider
+              width: 1,
+              color: Colors.grey,
             ),
             Expanded(
               flex: 3,
               child: GroupMessagesPage(
-                key: ValueKey(selectedGroup.id),
-                groupId: selectedGroup.id,
+                key: ValueKey(_selectedGroup!.id),
+                groupId: _selectedGroup!.id,
                 user: widget.user,
               ),
             ),
@@ -366,12 +378,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    selectedGroup = group;
+                                    _selectedGroup = group;
                                     downloadGroupPictureData(group.id);
                                   });
                                 },
                                 child: Container(
-                                  color: selectedGroup == group
+                                  color: _selectedGroup == group
                                       ? Theme.of(context).primaryColorDark
                                       : Theme.of(context)
                                           .scaffoldBackgroundColor,
@@ -449,31 +461,39 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   },
                 ),
               ),
-              Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        popUpDialogWeb(context);
-                      },
-                      elevation: 6,
-                      backgroundColor: Theme.of(context).primaryColor,
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  )),
             ],
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          popUpDialogWeb(context);
+        },
+        elevation: 50,
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
       ),
     );
   }
 
   Widget _buildMobileLayout(BuildContext context) {
+    if (_selectedGroup != null) {
+      Future.delayed(Duration(milliseconds: 200), () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => GroupMessagesPage(
+              key: ValueKey(_selectedGroup!.id),
+              groupId: _selectedGroup!.id,
+              user: widget.user,
+            ),
+          ),
+        );
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -527,20 +547,18 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              setState(() {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => GroupMessagesPage(
-                                      key: ValueKey(group.id),
-                                      groupId: group.id,
-                                      user: widget.user,
-                                    ),
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => GroupMessagesPage(
+                                    key: ValueKey(group.id),
+                                    groupId: group.id,
+                                    user: widget.user,
                                   ),
-                                );
-                              });
+                                ),
+                              );
                             },
                             child: Container(
-                              color: selectedGroup == group
+                              color: _selectedGroup == group
                                   ? Theme.of(context).primaryColorDark
                                   : Theme.of(context).scaffoldBackgroundColor,
                               child: Padding(
@@ -688,96 +706,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         });
   }
 
-/*
   popUpDialogMobile(BuildContext context) {
     TextEditingController groupNameController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Style.darkBlue,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-              top: Radius.circular(
-                  20))), // allows the modal to take up the entire height
-      builder: (context) => StatefulBuilder(
-
-        builder: ((context, setState) {
-          return SingleChildScrollView(
-            child: Container(
-              height: isKeyboardOpen
-                  ? MediaQuery.of(context).size.height - 200
-                  : MediaQuery.of(context).size.height - 471,
-              padding: EdgeInsets.only(
-                  bottom:
-                      MediaQuery.of(context).viewInsets.bottom), // full screen
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.keyboard_double_arrow_down),
-                    onPressed: () {
-                      Navigator.pop(context); // closes the modal
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Text(
-                      "Create a group",
-                      textAlign: TextAlign.left,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium, // replace with your style
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  LineTextField(
-                    icon: Icons.title,
-                    lableText: 'Group name',
-                    controller: groupNameController,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  LineTextField(
-                    icon: Icons.description,
-                    lableText: 'Group Description',
-                    controller: descriptionController,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          {
-                            createGroup(context, groupNameController.text,
-                                descriptionController.text, _showErrorSnackbar);
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor),
-                        child: const Text("CREATE"),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }*/
-  popUpDialogMobile(BuildContext context) {
-    TextEditingController groupNameController = TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
-    print("----------------------------------------------" +
-        isKeyboardOpen.toString());
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -785,8 +716,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
-        final mediaQuery =
-            MediaQuery.of(context); // Moved inside builder function
+        final mediaQuery = MediaQuery.of(context);
         return StatefulBuilder(builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
@@ -1002,12 +932,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       }),
     );
 
-    if (response.statusCode == 200) {
-      showErrorSnackbar('Created a group successfully!', false);
-      //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
-    } else {
-      showErrorSnackbar('Failed to create a group: ${response.body}', true);
-    }
+    // if (response.statusCode == 200) {
+    //   showErrorSnackbar('Created a group successfully!', false);
+    //   //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
+    // } else {
+    //   showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    // }
     groupNameController.clear();
     descriptionController.clear();
   }

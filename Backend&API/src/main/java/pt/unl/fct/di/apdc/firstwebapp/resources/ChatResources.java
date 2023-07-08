@@ -67,19 +67,41 @@ public class ChatResources {
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat
 
+        // Check if the group already exists
+        newChatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Group already exists, return an error response
+                } else {
+                    // Group doesn't exist, proceed with creating it
+                    createNewGroup(group, newChatRef, token.username);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle any errors that occurred
+            }
+        });
+
+        return Response.ok("{}").build();
+    }
+
+    private void createNewGroup(Group group, DatabaseReference newChatRef, String username) {
         // Set the data for the new chat
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
         newChatRef.child("description").setValueAsync(group.description);
 
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(newChatRef.getKey());
-        //when creating a group the creater becomes the admin
+        // When creating a group, the creator becomes the admin
         membersRef.child(group.adminID).setValueAsync(true); // Set the creator as a member
 
         DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(newChatRef.getKey());
         DatabaseReference newMessageRef = messagesRef.push(); // Generate a unique ID for the new message
 
         // Set the data for the new message
-        //when the group is created put a welcome message in the group
+        // When the group is created, put a welcome message in the group
         newMessageRef.child("containsFile").setValueAsync(false);
         newMessageRef.child("name").setValueAsync(group.adminID);
         newMessageRef.child("displayName").setValueAsync(group.adminID);
@@ -88,15 +110,14 @@ public class ChatResources {
         newMessageRef.child("isSystemMessage").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
-        DatabaseReference newChatsForUserRef = chatsByUser.child(token.username);
+        DatabaseReference newChatsForUserRef = chatsByUser.child(username);
 
         Map<String, Object> groupsUpdates = new HashMap<>();
         groupsUpdates.put(group.DisplayName, true);
 
         newChatsForUserRef.child("Groups").updateChildrenAsync(groupsUpdates);
-
-        return Response.ok("{}").build();
     }
+
 
     @DELETE
     @Path("/delete/{groupId}")

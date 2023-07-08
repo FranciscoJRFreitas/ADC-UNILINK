@@ -45,8 +45,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   FilePickerResult? picked;
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
-  late int messageCap = 10;
-  late int cacheMessageCap = 12;
   late bool isLoading = false;
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
@@ -83,7 +81,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       // Fetch messages from Firebase if the cache is empty
       messagesRef
           .orderByKey()
-          .limitToLast(cacheMessageCap)
+          .limitToLast(kCacheMessageLimit)
           .onChildAdded
           .listen((event) {
         Message message = Message.fromSnapshot(event.snapshot);
@@ -99,7 +97,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       });
     } else {
       messagesRef.orderByKey().onChildAdded.listen((event) {
-        if (messages.length > cacheMessageCap) {
+        if (messages.length > kCacheMessageLimit) {
           messages
               .removeAt(0); // remove the oldest message if the limit is reached
         }
@@ -112,7 +110,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             cacheFactory.setMessages(widget.groupId, message);
           }
         });
-
       });
     }
 
@@ -160,7 +157,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
       }
     });
-    _scrollToBottom();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -211,7 +210,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 if (notification is ScrollEndNotification &&
                     _scrollController.position.pixels == 0) {
                   // Load older messages here
-                  isLoading = true;
                   loadOlderMessages();
                 }
                 return false;
@@ -512,7 +510,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 onNotification: (ScrollNotification notification) {
                   if (notification is ScrollEndNotification &&
                       _scrollController.position.pixels == 0) {
-                    isLoading = true;
                     loadOlderMessages();
                   }
                   return false;
@@ -853,7 +850,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef
         .orderByChild('timestamp')
         .endAt(oldestMessageTimestamp - 1)
-        .limitToLast(messageCap)
+        .limitToLast(kFetchFBMesageLimit)
         .once()
         .then((msgSnapshot) {
       if (msgSnapshot.snapshot.value != null) {
@@ -873,7 +870,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
         // Add the older messages at the beginning of the messages list
         setState(() {
-          isScrollLocked = true;
           messages.insertAll(0, olderMessages);
         });
       }
@@ -938,8 +934,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   id: message.id,
                   isAdmin: isAdmin,
                 ));
-
-          if (!isScrollLocked) _scrollToBottom();
 
           return Column(
             children: widgets,
