@@ -1197,84 +1197,89 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Style.darkBlue,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: isKeyboardOpen
-                  ? MediaQuery.of(context).size.height - 400
-                  : MediaQuery.of(context).size.height - 600,
+              height: MediaQuery.of(context).size.height,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                //mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.keyboard_double_arrow_down),
-                    onPressed: () {
-                      Navigator.pop(context); // closes the modal
-                    },
+                  Positioned(
+                    right: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pop(context); // closes the modal
+                      },
+                    ),
                   ),
-                  Container(
-                    padding:
-                        EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Send an Invite",
-                          style: Theme.of(context).textTheme.titleMedium,
-                          textAlign: TextAlign.left,
-                        ),
-                        TextField(
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          controller: userNameController,
-                          decoration: InputDecoration(
-                            hintText: "Enter a valid username",
-                            hintStyle: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .copyWith(color: Colors.grey),
-                            contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
-                            focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey)),
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Color.fromARGB(92, 161, 161, 161))),
-                            errorBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.red, width: 2.0)),
-                            focusedErrorBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.red, width: 2.0)),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  // padding to account for button
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+                        child: Column(
                           children: [
+                            Text(
+                              "Send an Invite",
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.left,
+                            ),
+                            TextField(
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              controller: userNameController,
+                              decoration: InputDecoration(
+                                hintText: "Enter a valid username",
+                                hintStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall!
+                                    .copyWith(color: Colors.grey),
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(0, 10, 20, 10),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey)),
+                                enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color:
+                                            Color.fromARGB(92, 161, 161, 161))),
+                                errorBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.red, width: 2.0)),
+                                focusedErrorBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.red, width: 2.0)),
+                              ),
+                            ),
                             SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () async {
-                                {
-                                  inviteGroup(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    inviteGroup(
                                       context,
                                       widget.groupId,
                                       userNameController.text,
-                                      _showErrorSnackbar);
-                                  userNameController.clear();
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black87),
-                              child: const Text("INVITE"),
+                                      _showErrorSnackbar,
+                                    );
+                                    userNameController.clear();
+                                    Navigator.of(context).pop();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black87,
+                                  ),
+                                  child: const Text("INVITE"),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1361,57 +1366,68 @@ class _ChatInfoPageState extends State<ChatInfoPage>
           return Container(
             padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom),
-            height: MediaQuery.of(context).size.height - 600,
+            height: MediaQuery.of(context).size.height * 0.30,
             child: Column(
               children: [
-                IconButton(
-                  icon: Icon(Icons.keyboard_double_arrow_down),
-                  onPressed: () {
-                    Navigator.pop(context); // closes the modal
-                  },
-                ),
                 Container(
                   padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Stack(
                     children: [
-                      Text(
-                        "Leave Group",
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Are you sure you want to leave this group?",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          leaveGroup(context, widget.groupId, widget.username,
-                              _showErrorSnackbar);
-
-                          if (!kIsWeb) {
-                            /*await FirebaseMessaging.instance
-                              .unsubscribeFromTopic(widget.groupId);*/
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                          } else {
-                            Future.delayed(Duration(milliseconds: 100), () {
-                              Navigator.pop(context);
-                              Navigator.pushReplacement(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => MainScreen(index: 6),
-                                ),
-                              );
-                            });
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            Navigator.pop(context); // closes the modal
+                          },
                         ),
-                        child: const Text("CONFIRM"),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                              height:
+                                  40), // Add extra space at top for close button
+                          Text(
+                            "Leave Group",
+                            textAlign: TextAlign.left,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Are you sure you want to leave this group?",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () async {
+                              leaveGroup(context, widget.groupId,
+                                  widget.username, _showErrorSnackbar);
+
+                              if (!kIsWeb) {
+                                /*await FirebaseMessaging.instance
+                .unsubscribeFromTopic(widget.groupId);*/
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                              } else {
+                                Future.delayed(Duration(milliseconds: 100), () {
+                                  Navigator.pop(context);
+                                  Navigator.pushReplacement(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) =>
+                                          MainScreen(index: 6),
+                                    ),
+                                  );
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                            ),
+                            child: const Text("CONFIRM"),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1569,151 +1585,149 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Style.darkBlue,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: isKeyboardOpen
-                  ? MediaQuery.of(context).size.height - 57
-                  : MediaQuery.of(context).size.height - 300,
+              height: MediaQuery.of(context).size.height,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.keyboard_double_arrow_down),
-                    onPressed: () {
-                      Navigator.pop(context); // closes the modal
-                    },
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          "Add an event",
-                          textAlign: TextAlign.left,
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            LineComboBox(
-                              selectedValue: _selectedEventType,
-                              items: eventTypes
-                                  .map((e) => _getEventTypeString(e))
-                                  .toList(),
-                              icon: Icons.type_specimen,
-                              onChanged: (dynamic newValue) {
-                                setState(() {
-                                  _selectedEventType = newValue;
-                                });
-                              },
-                            ),
-                            LineTextField(
-                              icon: Icons.title,
-                              lableText: 'Title *',
-                              controller: titleController,
-                              title: "",
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            LineTextField(
-                              icon: Icons.description,
-                              lableText: "Description",
-                              controller: descriptionController,
-                              title: "",
-                            ),
-                            LineComboBox(
-                              deleteIcon: Icons.clear,
-                              onPressed: () {
-                                setState(() {
-                                  selectLocationText = "Select Location";
-                                  _selectedLocation = null;
-                                });
-                              },
-                              selectedValue: selectLocationText,
-                              items: [
-                                selectLocationText,
-                                "From FCT place",
-                                "From maps"
-                              ],
-                              icon: Icons.place,
-                              onChanged: (newValue) async {
-                                if (newValue == "From FCT place" ||
-                                    newValue == "From maps") {
-                                  LatLng? selectedLocation =
-                                      await showDialog<LatLng>(
-                                    context: context,
-                                    builder: (context) => EventLocationPopUp(
-                                      context: context,
-                                      isMapSelected: newValue == "From maps",
-                                      location: _selectedLocation,
-                                    ),
-                                  );
-                                  if (selectedLocation != null) {
-                                    setState(() {
-                                      selectLocationText =
-                                          "1 Location Selected";
-                                      _selectedLocation = selectedLocation;
-                                    });
-                                  }
-                                }
-                              },
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: startController,
-                              hintText: "Start Time *",
-                              firstDate:
-                                  DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: endController,
-                              hintText: "End Time *",
-                              firstDate:
-                                  DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                createEvent(
-                                    context,
-                                    _selectedEventType,
-                                    titleController.text,
-                                    descriptionController.text,
-                                    startController.text,
-                                    endController.text,
-                                    widget.groupId,
-                                    _selectedLocation,
-                                    _showErrorSnackbar);
-                                Navigator.of(context).pop();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black87),
-                              child: const Text("CREATE"),
-                            ),
-                          ],
-                        ),
-                      ],
+                  Positioned(
+                    right: 0,
+                    top: MediaQuery.of(context).size.height * 0.98,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pop(context); // closes the modal
+                      },
                     ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                          height:
+                              40), // Add extra space at top for close button
+                      const Text(
+                        "Add an event",
+                        textAlign: TextAlign.left,
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LineComboBox(
+                            selectedValue: _selectedEventType,
+                            items: eventTypes
+                                .map((e) => _getEventTypeString(e))
+                                .toList(),
+                            icon: Icons.type_specimen,
+                            onChanged: (dynamic newValue) {
+                              setState(() {
+                                _selectedEventType = newValue;
+                              });
+                            },
+                          ),
+                          LineTextField(
+                            icon: Icons.title,
+                            lableText: 'Title *',
+                            controller: titleController,
+                            title: "",
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          LineTextField(
+                            icon: Icons.description,
+                            lableText: "Description",
+                            controller: descriptionController,
+                            title: "",
+                          ),
+                          LineComboBox(
+                            deleteIcon: Icons.clear,
+                            onPressed: () {
+                              setState(() {
+                                selectLocationText = "Select Location";
+                                _selectedLocation = null;
+                              });
+                            },
+                            selectedValue: selectLocationText,
+                            items: [
+                              selectLocationText,
+                              "From FCT place",
+                              "From maps"
+                            ],
+                            icon: Icons.place,
+                            onChanged: (newValue) async {
+                              if (newValue == "From FCT place" ||
+                                  newValue == "From maps") {
+                                LatLng? selectedLocation =
+                                    await showDialog<LatLng>(
+                                  context: context,
+                                  builder: (context) => EventLocationPopUp(
+                                    context: context,
+                                    isMapSelected: newValue == "From maps",
+                                    location: _selectedLocation,
+                                  ),
+                                );
+                                if (selectedLocation != null) {
+                                  setState(() {
+                                    selectLocationText = "1 Location Selected";
+                                    _selectedLocation = selectedLocation;
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          LineDateTimeField(
+                            icon: Icons.schedule,
+                            controller: startController,
+                            hintText: "Start Time *",
+                            firstDate:
+                                DateTime.now().subtract(Duration(days: 30)),
+                            lastDate: DateTime.now().add(Duration(days: 365)),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          LineDateTimeField(
+                            icon: Icons.schedule,
+                            controller: endController,
+                            hintText: "End Time *",
+                            firstDate:
+                                DateTime.now().subtract(Duration(days: 30)),
+                            lastDate: DateTime.now().add(Duration(days: 365)),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () async {
+                                  createEvent(
+                                      context,
+                                      _selectedEventType,
+                                      titleController.text,
+                                      descriptionController.text,
+                                      startController.text,
+                                      endController.text,
+                                      widget.groupId,
+                                      _selectedLocation,
+                                      _showErrorSnackbar);
+                                  Navigator.of(context).pop();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black87),
+                                child: const Text("CREATE"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1790,44 +1804,48 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return Container(
-            height: MediaQuery.of(context).size.height - 600,
+            height: MediaQuery.of(context).size.height * 0.3,
             padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Column(
+            child: Stack(
               children: [
-                IconButton(
-                  icon: Icon(Icons.keyboard_double_arrow_down),
-                  onPressed: () {
-                    Navigator.pop(context); // closes the modal
-                  },
-                ),
-                Container(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "Remove an event",
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Are you sure you want remove this event? This action is irreversible.",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          removeEvent(context, eventId, widget.groupId,
-                              _showErrorSnackbar);
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black87),
-                        child: const Text("CONFIRM"),
-                      ),
-                    ],
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context); // closes the modal
+                    },
                   ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                        height: 40), // Add extra space at top for close button
+                    const Text(
+                      "Remove an event",
+                      textAlign: TextAlign.left,
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: EdgeInsets.only(left: 8),
+                      child: Text(
+                          "Are you sure you want remove this event? This action is irreversible.",
+                          style: Theme.of(context).textTheme.bodyLarge!),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        removeEvent(context, eventId, widget.groupId,
+                            _showErrorSnackbar);
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black87),
+                      child: const Text("CONFIRM"),
+                    ),
+                  ],
                 ),
               ],
             ),

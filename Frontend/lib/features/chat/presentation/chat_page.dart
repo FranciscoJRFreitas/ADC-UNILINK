@@ -769,62 +769,67 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         return StatefulBuilder(builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: isKeyboardOpen
-                  ? mediaQuery.size.height - 200
-                  : mediaQuery.size.height - 471,
+              height: mediaQuery.size.height * 0.9,
               padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.keyboard_double_arrow_down),
-                    onPressed: () {
-                      Navigator.pop(context); // closes the modal
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Text(
-                      "Create a group",
-                      textAlign: TextAlign.left,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  LineTextField(
-                    icon: Icons.title,
-                    lableText: 'Group name',
-                    controller: groupNameController,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  LineTextField(
-                    icon: Icons.description,
-                    lableText: 'Group Description',
-                    controller: descriptionController,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          createGroup(
-                            context,
-                            groupNameController.text,
-                            descriptionController.text,
-                            _showErrorSnackbar,
-                          );
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor),
-                        child: const Text("CREATE"),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                          "Create a group",
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      LineTextField(
+                        icon: Icons.title,
+                        lableText: 'Group name',
+                        controller: groupNameController,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      LineTextField(
+                        icon: Icons.description,
+                        lableText: 'Group Description',
+                        controller: descriptionController,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              createGroup(
+                                context,
+                                groupNameController.text,
+                                descriptionController.text,
+                                _showErrorSnackbar,
+                              );
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                            ),
+                            child: const Text("CREATE"),
+                          ),
+                        ],
                       ),
                     ],
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pop(context); // closes the modal
+                      },
+                    ),
                   ),
                 ],
               ),

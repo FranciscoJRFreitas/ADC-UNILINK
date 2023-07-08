@@ -236,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
               if (_isLoading)
                 Container(
                   color:
-                      Colors.black.withOpacity(0.5), // semi-transparent overlay
+                      Colors.black.withOpacity(0.3), // semi-transparent overlay
                   child: Center(
                     child: CircularProgressIndicator(), // a loading spinner
                   ),
