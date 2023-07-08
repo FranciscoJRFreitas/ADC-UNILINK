@@ -838,15 +838,9 @@ class _MyMapState extends State<MyMap> {
           icon: BitmapDescriptor.fromBytes(restaurant),
           infoWindow: InfoWindow(
             title: name,
-            onTap: () async {
-              if (isDirections) {
-                setState(() {
-                  isDirections = false;
-                });
-                await Future.delayed(Duration(milliseconds: 500));
-              }
-              isDirections = true;
-              getDirections(latLng.latitude, latLng.longitude);
+            onTap: () {
+              showMarkerInfoWindow(MarkerId(name), name,
+                  feature['properties']['description'] ?? '');
             },
           ),
         ),
