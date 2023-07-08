@@ -981,12 +981,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       }),
     );
 
-    if (response.statusCode == 200) {
-      showErrorSnackbar('Created a group successfully!', false);
-      //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
-    } else {
-      showErrorSnackbar('Failed to create a group: ${response.body}', true);
-    }
     groupNameController.clear();
     descriptionController.clear();
   }
