@@ -460,7 +460,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.analytics),
+                leading: Icon(Icons.dangerous),
                 title: Text('Anomaly',
                     style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
