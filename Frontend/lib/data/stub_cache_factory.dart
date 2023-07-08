@@ -1,3 +1,4 @@
+import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/features/chat/domain/Message.dart';
 import 'package:unilink2023/features/news/domain/FeedItem.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
@@ -48,23 +49,28 @@ class CacheFactoryImpl extends CacheFactory{
 
   @override
   void setMessages(String groupId, Message message) {
-    // TODO: implement setMessages
   }
 
   @override
   void deleteMessage(String groupId, String id) {
-    // TODO: implement deleteMessage
   }
 
   @override
   void updateMessageCache(String groupId, Message message) {
-    // TODO: implement updateMessageCache
   }
   
   @override
   Future<List<Message>> getMessages(String groupId) {
-    // TODO: implement getMessages
     throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Group>> getGroups() {
+    throw UnimplementedError();
+  }
+
+  @override
+  void addGroup(Group group) {
   }
 
 }

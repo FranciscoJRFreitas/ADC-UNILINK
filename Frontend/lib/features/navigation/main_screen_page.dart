@@ -30,17 +30,19 @@ import 'package:flutter/services.dart';
 
 class MainScreen extends StatefulWidget {
   final int? index;
+  final DateTime? date;
 
-  MainScreen({this.index});
+  MainScreen({this.index, this.date});
 
   @override
-  _MainScreenState createState() => _MainScreenState(index);
+  _MainScreenState createState() => _MainScreenState(index, date);
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late AnimationController _controller;
   int _selectedIndex = 0;
   int _bottomNavigationIndex = 0;
+  DateTime scheduleDate = DateTime.now();
   List<String> _title = [
     "News",
     "Search",
@@ -63,7 +65,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
-  _MainScreenState(int? index) {
+  _MainScreenState(int? index, DateTime? date) {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
@@ -74,6 +76,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ? 4
                   : 0;
     }
+    if (date != null) scheduleDate = date;
   }
 
   @override
@@ -110,7 +113,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(
-          username: _currentUser.username,
+          username: _currentUser.username, date: scheduleDate
         ), //estudante //9
         MyMap(), //10
         ReportAnomalyPage(),

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
@@ -83,36 +84,39 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       messagesRef
           .orderByKey()
           .limitToLast(cacheMessageCap)
-          .once()
-          .then((event) {
-        Map<dynamic, dynamic> valueMap =
-            event.snapshot.value as Map<dynamic, dynamic>;
-
-        valueMap.forEach((key, value) {
-          Message message = Message.fromMapKey(key, value);
-          cacheFactory.setMessages(widget.groupId, message);
+          .onChildAdded
+          .listen((event) {
+        Message message = Message.fromSnapshot(event.snapshot);
+        setState(() {
+          bool repeated = messages.any((element) => element.id == message.id);
+          if (!repeated) {
+            messages.add(message);
+            cacheFactory.setMessages(widget.groupId, message);
+          }
         });
 
         setState(() {});
       });
+    } else {
+      messagesRef.orderByKey().onChildAdded.listen((event) {
+        if (messages.length > cacheMessageCap) {
+          messages
+              .removeAt(0); // remove the oldest message if the limit is reached
+        }
+
+        Message message = Message.fromSnapshot(event.snapshot);
+        setState(() {
+          bool repeated = messages.any((element) => element.id == message.id);
+          if (!repeated) {
+            messages.add(message);
+            cacheFactory.setMessages(widget.groupId, message);
+          }
+        });
+
+      });
     }
 
-    messagesRef.orderByKey().onChildAdded.listen((event) {
-      if (messages.length > cacheMessageCap) {
-        messages
-            .removeAt(0); // remove the oldest message if the limit is reached
-      }
 
-      Message message = Message.fromSnapshot(event.snapshot);
-      setState(() {
-        bool repeated = messages.any((element) => element.id == message.id);
-        if (!repeated) {
-          messages.add(message);
-          if (messages.length > 1)
-            cacheFactory.setMessages(widget.groupId, message);
-        }
-      });
-    });
 
     // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
@@ -344,16 +348,20 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     child: TextFormField(
                       controller: messageController,
                       focusNode: messageFocusNode,
-                      keyboardType: TextInputType.multiline,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      decoration: const InputDecoration(
+                      keyboardType: TextInputType.text,
+                      style: TextStyle(
+                          color: Theme.of(context).secondaryHeaderColor,
+                          fontSize: 16),
+                      decoration: InputDecoration(
                         hintText: "Send a message...",
-                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
+                        hintStyle: TextStyle(
+                            color: Theme.of(context).secondaryHeaderColor,
+                            fontSize: 16),
                         border: InputBorder.none,
                       ),
-                      minLines: 5, //Normal textInputField will be displayed
+                      minLines: 1, //Normal textInputField will be displayed
                       maxLines:
-                          null, // when user presses enter it will adapt to it
+                          10, // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
                       },
@@ -638,17 +646,24 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     const SizedBox(
                       width: 12,
                     ),
-                    Expanded(
+                    Flexible(
                       child: TextFormField(
                         controller: messageController,
                         focusNode: messageFocusNode,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
+                        keyboardType: TextInputType.text,
+                        style: TextStyle(
+                            color: Theme.of(context).secondaryHeaderColor,
+                            fontSize: 16),
+                        decoration: InputDecoration(
                           hintText: "Send a message...",
-                          hintStyle:
-                              TextStyle(color: Colors.white, fontSize: 16),
+                          hintStyle: TextStyle(
+                              color: Theme.of(context).secondaryHeaderColor,
+                              fontSize: 16),
                           border: InputBorder.none,
                         ),
+                        minLines: 1, //Normal textInputField will be displayed
+                        maxLines:
+                            4, // when user presses enter it will adapt to it
                         onFieldSubmitted: (String value) {
                           sendMessage(value);
                         },

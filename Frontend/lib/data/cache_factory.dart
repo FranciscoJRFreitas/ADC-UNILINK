@@ -1,5 +1,6 @@
 import 'package:unilink2023/features/chat/domain/Message.dart';
 
+import '../features/chat/domain/Group.dart';
 import '../features/news/domain/FeedItem.dart';
 import '../features/userManagement/domain/User.dart';
 
@@ -18,4 +19,6 @@ abstract class CacheFactory {
   void deleteMessage(String groupId, String id);
   void setMessages(String groupId, Message message);
   Future<List<Message>> getMessages(String groupId);
+  Future<List<Group>> getGroups();
+  void addGroup(Group group);
 }

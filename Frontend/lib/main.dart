@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/features/intro/splash_page.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +12,10 @@ import 'domain/Notification.dart';
 import 'domain/UserNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
-//import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -33,40 +34,43 @@ void main() async {
 
   dynamic themeSetting = await cacheFactory.get('settings', 'theme');
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => ThemeNotifier(themeSetting),
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'UniLink',
-            theme: ThemeData(
-              //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-              scaffoldBackgroundColor: kBackgroundColor,
-              //primarySwatch: Colors.blue,
-              visualDensity: VisualDensity.adaptivePlatformDensity,
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (context) => ThemeNotifier(themeSetting),
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'UniLink',
+              theme: ThemeData(
+                //textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+                scaffoldBackgroundColor: kBackgroundColor,
+                //primarySwatch: Colors.blue,
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+              ),
             ),
           ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => UserNotifier(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => MapNotifier(),
-          child: MyApp(),
-        ),
-        Provider<NotificationService>(
-          create: (context) => NotificationService(),
-        ),
-        Provider<FirebaseMessagingService>(
-          create: (context) =>
-              FirebaseMessagingService(context.read<NotificationService>()),
-        ),
-      ],
-      child: MyApp(),
-    ),
-  );
+          ChangeNotifierProvider(
+            create: (context) => UserNotifier(),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => MapNotifier(),
+            child: MyApp(),
+          ),
+          Provider<NotificationService>(
+            create: (context) => NotificationService(),
+          ),
+          Provider<FirebaseMessagingService>(
+            create: (context) =>
+                FirebaseMessagingService(context.read<NotificationService>()),
+          ),
+        ],
+        child: MyApp(),
+      ),
+    );
+  }); //prevent landscape mode
 }
 
 class MyApp extends StatelessWidget {
