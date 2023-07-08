@@ -52,6 +52,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    if(mounted)
     groupsStream = listenForGroups();
     WidgetsBinding.instance?.addObserver(this);
   }
@@ -65,6 +66,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   void dispose() {
+    if(mounted)
     super.dispose();
     WidgetsBinding.instance?.removeObserver(this);
   }
@@ -82,6 +84,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   Stream<List<Group>> listenForGroups() {
+
     DatabaseReference chatRef = FirebaseDatabase.instance
         .ref()
         .child('chat')
@@ -107,6 +110,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           .limitToLast(1)
           .onChildAdded
           .listen((event) async {
+            if(mounted)
         setState(() {
           firstMessageOfGroups[groupId] = Message.fromSnapshot(event.snapshot);
         });
@@ -133,6 +137,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         );
         groups.add(group);
 
+        if(mounted)
         setState(() {
           allGroups.add(group);
           filteredGroups.add(group);

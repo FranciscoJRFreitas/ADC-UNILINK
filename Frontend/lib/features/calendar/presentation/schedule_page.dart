@@ -16,11 +16,12 @@ import '../../chat/presentation/chat_info_page.dart';
 
 class SchedulePage extends StatefulWidget {
   final String username;
+  final DateTime date;
 
-  SchedulePage({required this.username});
+  SchedulePage({required this.username, required this.date});
 
   @override
-  _SchedulePageState createState() => _SchedulePageState();
+  _SchedulePageState createState() => _SchedulePageState(date);
 }
 
 class _SchedulePageState extends State<SchedulePage> {
@@ -31,15 +32,15 @@ class _SchedulePageState extends State<SchedulePage> {
   List<EventType> eventTypes = EventType.values;
   List<dynamic> schedule = [];
   CalendarFormat format = CalendarFormat.week;
-  //DateTime selectedDay = DateTime.now();
   DateFormat customFormat = DateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'");
-  DateTime selectedDay = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-    DateTime.now().day,
-  );
 
+  DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
+  _SchedulePageState(date){
+    selectedDay = DateTime(date.year, date.month, date.day);
+    focusedDay = date;
+  }
+
   Map<DateTime, List<Event>> events = {};
   String _selectedEventType = 'Academic';
   LatLng? _selectedLocation = null;

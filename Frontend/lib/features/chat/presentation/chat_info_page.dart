@@ -59,90 +59,97 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   void initState() {
     super.initState();
     groupPic = downloadGroupPictureData();
-    membersRef =
-        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
-    membersRef.onChildAdded.listen((event) async {
-      String memberId = event.snapshot.key as String;
 
-      if (memberId == widget.username && event.snapshot.value as bool) {
-        setState(() {
-          isAdmin = true;
-        });
-      }
-      DatabaseReference chatRef =
-          FirebaseDatabase.instance.ref().child('chat').child(memberId);
+      membersRef =
+          FirebaseDatabase.instance.ref().child('members').child(
+              widget.groupId);
 
-      chatRef.once().then((userDataSnapshot) {
-        if (userDataSnapshot.snapshot.value != null) {
-          dynamic userData = userDataSnapshot.snapshot.value;
-          String? dispName = userData['DisplayName'] as String?;
+      membersRef.onChildAdded.listen((event) async {
+        String memberId = event.snapshot.key as String;
 
+        if (memberId == widget.username && event.snapshot.value as bool) {
           setState(() {
-            if (dispName != null) {
-              members.add(MembersData(
-                  username: memberId,
-                  dispName: dispName,
-                  isAdmin: event.snapshot.value as bool));
-            }
+            isAdmin = true;
           });
         }
-      });
-    });
-    membersRef.onChildRemoved.listen((event) {
-      String memberId = event.snapshot.key as String;
+        DatabaseReference chatRef =
+        FirebaseDatabase.instance.ref().child('chat').child(memberId);
 
-      setState(() {
-        members.removeWhere((member) => member.username == memberId);
+        chatRef.once().then((userDataSnapshot) {
+          if (userDataSnapshot.snapshot.value != null) {
+            dynamic userData = userDataSnapshot.snapshot.value;
+            String? dispName = userData['DisplayName'] as String?;
+
+            setState(() {
+              if (dispName != null) {
+                members.add(MembersData(
+                    username: memberId,
+                    dispName: dispName,
+                    isAdmin: event.snapshot.value as bool));
+              }
+            });
+          }
+        });
       });
-    });
+
+      membersRef.onChildRemoved.listen((event) {
+        String memberId = event.snapshot.key as String;
+
+        setState(() {
+          members.removeWhere((member) => member.username == memberId);
+        });
+      });
 
 // Listen for child changed events
-    membersRef.onChildChanged.listen((event) {
-      String memberId = event.snapshot.key as String;
 
-      setState(() {
-        // Find the member in the list and update its isAdmin value
-        int index = members.indexWhere((member) => member.username == memberId);
-        if (index != -1) {
-          members[index].isAdmin = event.snapshot.value as bool;
-        }
+      membersRef.onChildChanged.listen((event) {
+        String memberId = event.snapshot.key as String;
+
+        setState(() {
+          // Find the member in the list and update its isAdmin value
+          int index = members.indexWhere((member) =>
+          member.username == memberId);
+          if (index != -1) {
+            members[index].isAdmin = event.snapshot.value as bool;
+          }
+        });
       });
-    });
 
-    chatsRef =
-        FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
-    chatsRef.once().then((chatSnapshot) {
-      Map<dynamic, dynamic> chatsData =
-          chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
-      setState(() {
-        desc = chatsData["description"];
+      chatsRef =
+          FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
+      chatsRef.once().then((chatSnapshot) {
+        Map<dynamic, dynamic> chatsData =
+        chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
+
+        setState(() {
+          desc = chatsData["description"];
+        });
       });
-    });
 
-    DatabaseReference eventsRef =
-        FirebaseDatabase.instance.ref().child('events').child(widget.groupId);
-    eventsRef.onChildAdded.listen((event) {
-
-      setState(() {
-        String? id = event.snapshot.key; // Here is how you get the key
-        Event currentEvent = id != null
-            ? Event.fromSnapshotId(id, event.snapshot)
-            : Event.fromSnapshot(event.snapshot);
-        events.add(currentEvent);
+      DatabaseReference eventsRef =
+      FirebaseDatabase.instance.ref().child('events').child(widget.groupId);
+      eventsRef.onChildAdded.listen((event) {
+        setState(() {
+          String? id = event.snapshot.key; // Here is how you get the key
+          Event currentEvent = id != null
+              ? Event.fromSnapshotId(id, event.snapshot)
+              : Event.fromSnapshot(event.snapshot);
+          events.add(currentEvent);
+        });
       });
-    });
 
-    eventsRef.onChildRemoved.listen((event) {
-      String eventId = event.snapshot.key as String;
+      eventsRef.onChildRemoved.listen((event) {
+        String eventId = event.snapshot.key as String;
 
 
-      setState(() {
-        events.removeWhere((event) => event.id == eventId);
+        setState(() {
+          events.removeWhere((event) => event.id == eventId);
+        });
       });
-    });
-    _tabController = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance?.addObserver(this);
+      _tabController = TabController(length: 2, vsync: this);
+      WidgetsBinding.instance?.addObserver(this);
   }
+
 
   void _showErrorSnackbar(String message, bool Error) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -168,10 +175,12 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     print(value);
     if (value < 50) {
       // adjust this value based on your needs
+      if(mounted)
       setState(() {
         isKeyboardOpen = false;
       });
     } else {
+      if(mounted)
       setState(() {
         isKeyboardOpen = true;
       });
@@ -562,8 +571,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                   SizedBox(width: 10),
                                                   InkWell(
                                                     onTap: () {
-                                                      // Handle click on clock icon
-                                                      // Navigate to another page or perform desired action
+                                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                                                          MainScreen(index: 9, date: event.startTime)));
                                                     },
                                                     child: Icon(Icons.schedule, size: 20, color: Style.lightBlue),
                                                   ),
