@@ -5,6 +5,7 @@ import '../../constants.dart';
 import '../../domain/ThemeNotifier.dart';
 import '../screen.dart';
 import '../../widgets/widget.dart';
+import 'package:flutter/foundation.dart';
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -12,7 +13,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +26,9 @@ class _WelcomePageState extends State<WelcomePage> {
                 children: [
                   Center(
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 0.15,
+                      width: kIsWeb
+                          ? MediaQuery.of(context).size.width * 0.20
+                          : MediaQuery.of(context).size.width * 0.30,
                       child: Image.asset('assets/icon/ICON_UNILINK-03.png'),
                     ),
                   ),
@@ -35,7 +37,10 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                   Text(
                     "Welcome to the new UniHub platform!",
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontSize: kIsWeb ? 40 : 20),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(
@@ -45,7 +50,10 @@ class _WelcomePageState extends State<WelcomePage> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: Text(
                       "Making universities more accessible...",
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(fontSize: kIsWeb ? 20 : 13),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -90,11 +98,13 @@ class _WelcomePageState extends State<WelcomePage> {
                         child: RichText(
                           text: TextSpan(
                             text: 'Login',
-                            style:
-                                Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                      color: Colors.blue.shade400,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  color: Colors.blue.shade400,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         )),
                   ),

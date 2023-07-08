@@ -220,9 +220,13 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void deleteMessage(String groupId, String id) async {
-    var messages = await _getMessagesList(groupId);
-    messages = messages.where((msg) => msg['id'] != id).toList();
-    _setMessagesList(groupId, messages);
+    if (id == '-1') {
+      _setMessagesList(groupId, []);
+    } else {
+      var messages = await _getMessagesList(groupId);
+      messages = messages.where((msg) => msg['id'] != id).toList();
+      _setMessagesList(groupId, messages);
+    }
   }
 
   @override

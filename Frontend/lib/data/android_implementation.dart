@@ -139,6 +139,7 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void deleteMessage(String groupId, String id) {
+    if (id == '-1') SqliteService().deleteMessage(groupId);
     SqliteService().deleteMessage(id);
   }
 

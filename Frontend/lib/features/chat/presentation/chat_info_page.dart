@@ -12,12 +12,8 @@ import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
-import 'package:unilink2023/widgets/LineButton.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
-import 'package:unilink2023/widgets/my_date_event_field.dart';
-import 'package:unilink2023/widgets/my_text_button.dart';
-import 'package:unilink2023/widgets/my_text_field.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 
@@ -56,7 +52,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   List<EventType> eventTypes = EventType.values;
   String _selectedEventType = 'Academic';
   bool isLocationSelected = false;
-  bool _isHovering = false;
   TabController? _tabController;
   bool isKeyboardOpen = false;
 
@@ -265,7 +260,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
               ),
             );
           } else {
-            return const Icon(
+            return Icon(
+              color: Theme.of(context).secondaryHeaderColor,
               Icons.group,
               size: 80,
             );
@@ -284,7 +280,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
             width: 80,
             height: 80,
             child: CircleAvatar(
-              backgroundColor: Colors.white70,
+              backgroundColor: Colors.transparent,
               radius: 20,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(200),
@@ -383,7 +379,9 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
-                                .copyWith(color: Colors.white)),
+                                .copyWith(
+                                    color: Theme.of(context)
+                                        .secondaryHeaderColor)),
                         onPressed: () {
                           leavePopUpDialogWeb(context);
                         },
@@ -400,17 +398,29 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 color: Style.lightBlue,
               ),
               SizedBox(height: 10),
-              Row(children: [
-                Text('Description: ',
+              Row(
+                children: [
+                  Text(
+                    'Description: ',
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium!
-                        .copyWith(fontSize: 16)),
-                Text(
-                  desc,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ]),
+                        .copyWith(fontSize: 16),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection:
+                          Axis.horizontal, // use this for horizontal scrolling
+                      child: Text(
+                        desc,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 5),
               Divider(
                 thickness: 3,
@@ -423,6 +433,17 @@ class _ChatInfoPageState extends State<ChatInfoPage>
             controller: _tabController,
             dividerColor: Style.lightBlue,
             indicatorColor: Style.lightBlue,
+            labelStyle: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .copyWith(color: Theme.of(context).secondaryHeaderColor),
+            labelColor: Theme.of(context).secondaryHeaderColor,
+            overlayColor: MaterialStatePropertyAll(Theme.of(context)
+                .scaffoldBackgroundColor
+                .withRed(Theme.of(context).scaffoldBackgroundColor.red - 20)
+                .withBlue(Theme.of(context).scaffoldBackgroundColor.blue - 20)
+                .withGreen(
+                    Theme.of(context).scaffoldBackgroundColor.green - 20)),
             tabs: [
               Tab(
                   icon: Icon(Icons.event, color: Style.lightBlue),
@@ -441,151 +462,306 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isAdmin) ...[
-                      Padding(
-                        padding: EdgeInsets.only(left: 15.0),
-                        child: TextButton.icon(
-                          icon: Icon(
-                            Icons.event,
-                            color: Theme.of(context).secondaryHeaderColor,
-                            size: 20,
-                          ),
-                          label: Text('Add event',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium! /*.copyWith(color: Colors.white)*/),
-                          onPressed: () {
-                            _createEventPopUpDialogWeb(context);
-                          },
-                          style: TextButton.styleFrom(
-                            minimumSize: Size(50, 50),
-                          ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${events.length} ${(events.length != 1) ? 'Events' : 'Event'}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(fontSize: 16),
                         ),
-                      ),
-                      SingleChildScrollView(
-                        //padding: EdgeInsets.all(16),
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              top: 10), //VALOR A ALTERAR OU NAO),
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height -
-                                433, //VALOR A ALTERAR
-                            child: ListView.builder(
-                                itemCount: events.length,
-                                itemBuilder: (context, index) {
-                                  Event event = events[index];
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        // if (widget.username != member.username) {
-                                        //   Navigator.of(context).push(
-                                        //     MaterialPageRoute(
-                                        //       builder: (context) => ChatMemberInfo(
-                                        //         isAdmin: isAdmin,
-                                        //         sessionUsername: widget.username,
-                                        //         groupId: widget.groupId,
-                                        //         member: member,
-                                        //       ),
-                                        //     ),
-                                        //   );
-                                        // }
-                                      },
-                                      child: Stack(
-                                        children: <Widget>[
-                                          Divider(
-                                            color: Provider.of<ThemeNotifier>(
-                                                            context)
-                                                        .currentTheme ==
-                                                    kDarkTheme
-                                                ? Colors.white60
-                                                : Theme.of(context)
-                                                    .primaryColor,
-                                            thickness: 1,
-                                          ),
-                                          Container(
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 10, horizontal: 8),
-                                              child: ListTile(
-                                                title: Text(
-                                                  event.title +
-                                                      " (${_getEventTypeString(event.type)} Event)",
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        Icon(Icons.description,
-                                                            size: 20),
-                                                        SizedBox(width: 5),
-                                                        Text(event.description),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 8),
-                                                    if (event.location !=
-                                                        null) ...[
+                        if (isAdmin) ...[
+                          Padding(
+                            padding: EdgeInsets.only(left: 15.0),
+                            child: TextButton.icon(
+                              icon: Icon(
+                                Icons.event,
+                                color: Theme.of(context).secondaryHeaderColor,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Add event',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor),
+                              ),
+                              onPressed: () {
+                                _createEventPopUpDialogWeb(context);
+                              },
+                              style: TextButton.styleFrom(
+                                minimumSize: Size(50, 50),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SingleChildScrollView(
+                      //padding: EdgeInsets.all(16),
+                      child: Container(
+                        padding:
+                            EdgeInsets.only(top: 10), //VALOR A ALTERAR OU NAO),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height -
+                              433, //VALOR A ALTERAR
+                          child: ListView.builder(
+                              itemCount: events.length,
+                              itemBuilder: (context, index) {
+                                Event event = events[index];
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // if (widget.username != member.username) {
+                                      //   Navigator.of(context).push(
+                                      //     MaterialPageRoute(
+                                      //       builder: (context) => ChatMemberInfo(
+                                      //         isAdmin: isAdmin,
+                                      //         sessionUsername: widget.username,
+                                      //         groupId: widget.groupId,
+                                      //         member: member,
+                                      //       ),
+                                      //     ),
+                                      //   );
+                                      // }
+                                    },
+                                    child: Stack(
+                                      children: <Widget>[
+                                        Divider(
+                                          color: Provider.of<ThemeNotifier>(
+                                                          context)
+                                                      .currentTheme ==
+                                                  kDarkTheme
+                                              ? Colors.white60
+                                              : Theme.of(context).primaryColor,
+                                          thickness: 1,
+                                        ),
+                                        Container(
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 8),
+                                            child: ListTile(
+                                              title: Text(
+                                                event.title,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              subtitle: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.type_specimen,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
                                                       Row(
                                                         children: [
-                                                          Icon(Icons.place,
-                                                              size: 20),
-                                                          SizedBox(width: 5),
-                                                          Text('Location: ' +
-                                                              event.location!),
+                                                          Text(
+                                                            'Type: ',
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .titleMedium!
+                                                                .copyWith(
+                                                                    fontSize:
+                                                                        14),
+                                                          ),
+                                                          Text(
+                                                            _getEventTypeString(
+                                                                event.type),
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .bodyMedium,
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
                                                         ],
                                                       ),
-                                                      SizedBox(height: 8),
                                                     ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.description,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                        'Description: ',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium!
+                                                            .copyWith(
+                                                                fontSize: 14),
+                                                      ),
+                                                      Flexible(
+                                                        child: Text(
+                                                          event.description,
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  if (event.location !=
+                                                      '0') ...[
                                                     Row(
                                                       children: [
-                                                        Icon(Icons.schedule,
-                                                            size: 20),
+                                                        Icon(Icons.place,
+                                                            size: 20,
+                                                            color: Style
+                                                                .lightBlue),
                                                         SizedBox(width: 5),
                                                         Text(
-                                                            "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                                          'Location: ',
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleMedium!
+                                                                  .copyWith(
+                                                                      fontSize:
+                                                                          14),
+                                                        ),
+                                                        FutureBuilder<String>(
+                                                          future:
+                                                              getPlaceInLocations(
+                                                                  event
+                                                                      .location!),
+                                                          builder: (BuildContext
+                                                                  context,
+                                                              AsyncSnapshot<
+                                                                      String>
+                                                                  snapshot) {
+                                                            if (snapshot
+                                                                    .connectionState ==
+                                                                ConnectionState
+                                                                    .waiting) {
+                                                              return SizedBox
+                                                                  .shrink();
+                                                            } else {
+                                                              if (snapshot
+                                                                  .hasError)
+                                                                return Text(
+                                                                    'Error: ${snapshot.error}');
+                                                              else
+                                                                return Text(
+                                                                  snapshot
+                                                                      .data!,
+                                                                  style: Theme.of(
+                                                                          context)
+                                                                      .textTheme
+                                                                      .bodyMedium,
+                                                                  maxLines: 1,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                );
+                                                            }
+                                                          },
+                                                        ),
                                                       ],
                                                     ),
                                                     SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        Icon(Icons.schedule,
-                                                            size: 20),
-                                                        SizedBox(width: 5),
-                                                        Text(
-                                                            "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 5),
                                                   ],
-                                                ),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.schedule,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                        'Start: ',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium!
+                                                            .copyWith(
+                                                                fontSize: 14),
+                                                      ),
+                                                      Flexible(
+                                                        child: Text(
+                                                          '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.schedule,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                        'End: ',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium!
+                                                            .copyWith(
+                                                                fontSize: 14),
+                                                      ),
+                                                      Flexible(
+                                                        child: Text(
+                                                          '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ),
-                                          if (isAdmin)
-                                            Positioned(
-                                              top: 0,
-                                              bottom: 0,
-                                              right: 20,
-                                              child: MouseRegion(
-                                                onHover: (event) => setState(
-                                                    () => _isHovering = true),
-                                                onExit: (event) => setState(
-                                                    () => _isHovering = false),
+                                        ),
+                                        if (isAdmin) ...[
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Positioned(
+                                              top: 15,
+                                              right: 10,
+                                              child: Container(
+                                                width: 24,
+                                                height: 24,
                                                 child: IconButton(
-                                                  icon: Icon(
-                                                    Icons.delete,
-                                                    color: _isHovering
-                                                        ? Colors.red
-                                                        : Colors.blue,
-                                                  ),
+                                                  padding: EdgeInsets.zero,
+                                                  icon: Icon(Icons.delete,
+                                                      color: Colors.blue),
                                                   onPressed: () {
                                                     _removeEventPopUpDialogWeb(
                                                         context, event.id!);
@@ -593,33 +769,32 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                 ),
                                               ),
                                             ),
-                                          Divider(
-                                            color: Colors.black87,
-                                            thickness: 1,
                                           ),
                                         ],
-                                      ),
+                                        Divider(
+                                          color: Colors.black87,
+                                          thickness: 1,
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                }),
-                          ),
+                                  ),
+                                );
+                              }),
                         ),
                       ),
-                      Divider(
-                        thickness: 3,
-                        color: Style.lightBlue,
-                      ),
-                    ],
+                    ),
+                    Divider(
+                      thickness: 3,
+                      color: Style.lightBlue,
+                    ),
                   ],
                 ),
-                // your events code here
-
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        '${members.length} Participants',
+                        '${members.length} ${(members.length != 1) ? 'Participants' : 'Participant'}',
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium!
@@ -638,7 +813,9 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium!
-                                    .copyWith(color: Colors.white)),
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor)),
                             onPressed: () {
                               popUpDialogWeb(context);
                             },
@@ -773,7 +950,9 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
-                                .copyWith(color: Colors.white)),
+                                .copyWith(
+                                    color: Theme.of(context)
+                                        .secondaryHeaderColor)),
                         onPressed: () {
                           leavePopUpDialogMobile(context);
                         },
@@ -813,6 +992,11 @@ class _ChatInfoPageState extends State<ChatInfoPage>
             controller: _tabController,
             dividerColor: Style.lightBlue,
             indicatorColor: Style.lightBlue,
+            labelStyle: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .copyWith(color: Theme.of(context).secondaryHeaderColor),
+            labelColor: Theme.of(context).secondaryHeaderColor,
             tabs: [
               Tab(
                   icon: Icon(Icons.event, color: Style.lightBlue),
@@ -831,174 +1015,202 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isAdmin) ...[
-                      Padding(
-                        padding: EdgeInsets.only(left: 15.0),
-                        child: TextButton.icon(
-                          icon: Icon(
-                            Icons.event,
-                            color: Theme.of(context).secondaryHeaderColor,
-                            size: 20,
-                          ),
-                          label: Text('Add event',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium! /*.copyWith(color: Colors.white)*/),
-                          onPressed: () {
-                            _createEventPopUpDialogMobile(context);
-                          },
-                          style: TextButton.styleFrom(
-                            minimumSize: Size(50, 50),
-                          ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${events.length} ${(events.length != 1) ? 'Events' : 'Event'}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(fontSize: 16),
                         ),
-                      ),
-                      SingleChildScrollView(
-                        //padding: EdgeInsets.all(16),
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              top: 10), //VALOR A ALTERAR OU NAO),
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height -
-                                451, //VALOR A ALTERAR
-                            child: ListView.builder(
-                                itemCount: events.length,
-                                itemBuilder: (context, index) {
-                                  Event event = events[index];
-                                  return Material(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        // if (widget.username != member.username) {
-                                        //   Navigator.of(context).push(
-                                        //     MaterialPageRoute(
-                                        //       builder: (context) => ChatMemberInfo(
-                                        //         isAdmin: isAdmin,
-                                        //         sessionUsername: widget.username,
-                                        //         groupId: widget.groupId,
-                                        //         member: member,
-                                        //       ),
-                                        //     ),
-                                        //   );
-                                        // }
-                                      },
-                                      child: Stack(
-                                        children: <Widget>[
-                                          Divider(
-                                            color: Provider.of<ThemeNotifier>(
-                                                            context)
-                                                        .currentTheme ==
-                                                    kDarkTheme
-                                                ? Colors.white60
-                                                : Theme.of(context)
-                                                    .primaryColor,
-                                            thickness: 1,
-                                          ),
-                                          Container(
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 10, horizontal: 8),
-                                              child: ListTile(
-                                                title: Text(
-                                                  event.title +
-                                                      " (${_getEventTypeString(event.type)} Event)",
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        Icon(Icons.description,
-                                                            size: 20),
-                                                        SizedBox(width: 5),
-                                                        Text(event.description),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 8),
-                                                    if (event.location !=
-                                                        null) ...[
-                                                      Row(
-                                                        children: [
-                                                          Icon(Icons.place,
-                                                              size: 20),
-                                                          SizedBox(width: 5),
-                                                          Text('Location: ' +
-                                                              event.location!),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: 8),
+                        if (isAdmin) ...[
+                          Padding(
+                            padding: EdgeInsets.only(left: 15.0),
+                            child: TextButton.icon(
+                              icon: Icon(
+                                Icons.event,
+                                color: Theme.of(context).secondaryHeaderColor,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Add event',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor),
+                              ),
+                              onPressed: () {
+                                _createEventPopUpDialogMobile(context);
+                              },
+                              style: TextButton.styleFrom(
+                                minimumSize: Size(50, 50),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SingleChildScrollView(
+                      //padding: EdgeInsets.all(16),
+                      child: Container(
+                        padding:
+                            EdgeInsets.only(top: 10), //VALOR A ALTERAR OU NAO),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height -
+                              451, //VALOR A ALTERAR
+                          child: ListView.builder(
+                              itemCount: events.length,
+                              itemBuilder: (context, index) {
+                                Event event = events[index];
+                                return Material(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // if (widget.username != member.username) {
+                                      //   Navigator.of(context).push(
+                                      //     MaterialPageRoute(
+                                      //       builder: (context) => ChatMemberInfo(
+                                      //         isAdmin: isAdmin,
+                                      //         sessionUsername: widget.username,
+                                      //         groupId: widget.groupId,
+                                      //         member: member,
+                                      //       ),
+                                      //     ),
+                                      //   );
+                                      // }
+                                    },
+                                    child: Stack(
+                                      children: <Widget>[
+                                        Divider(
+                                          color: Provider.of<ThemeNotifier>(
+                                                          context)
+                                                      .currentTheme ==
+                                                  kDarkTheme
+                                              ? Colors.white60
+                                              : Theme.of(context).primaryColor,
+                                          thickness: 1,
+                                        ),
+                                        Container(
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 8),
+                                            child: ListTile(
+                                              title: Text(
+                                                event.title,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              subtitle: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.type_specimen,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text('Type: ' +
+                                                          _getEventTypeString(
+                                                              event.type)),
                                                     ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.description,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text('Description: ' +
+                                                          event.description),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  if (event.location !=
+                                                      '0') ...[
                                                     Row(
                                                       children: [
-                                                        Icon(Icons.schedule,
-                                                            size: 20),
+                                                        Icon(Icons.place,
+                                                            size: 20,
+                                                            color: Style
+                                                                .lightBlue),
                                                         SizedBox(width: 5),
-                                                        Text(
-                                                            "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                                        Text('Location: ' +
+                                                            event.location!),
                                                       ],
                                                     ),
                                                     SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        Icon(Icons.schedule,
-                                                            size: 20),
-                                                        SizedBox(width: 5),
-                                                        Text(
-                                                            "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 5),
                                                   ],
-                                                ),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.schedule,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                          "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}"),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.schedule,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                          "End: ${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}"),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 5),
+                                                ],
                                               ),
                                             ),
                                           ),
-                                          if (isAdmin)
-                                            Positioned(
-                                              top: 0,
-                                              bottom: 0,
-                                              right: 20,
-                                              child: MouseRegion(
-                                                onHover: (event) => setState(
-                                                    () => _isHovering = true),
-                                                onExit: (event) => setState(
-                                                    () => _isHovering = false),
-                                                child: IconButton(
-                                                  icon: Icon(
-                                                    Icons.delete,
-                                                    color: _isHovering
-                                                        ? Colors.red
-                                                        : Colors.blue,
-                                                  ),
-                                                  onPressed: () {
-                                                    _removeEventPopUpDialogMobile(
-                                                        context, event.id!);
-                                                  },
-                                                ),
-                                              ),
+                                        ),
+                                        if (isAdmin) ...[
+                                          Positioned(
+                                            top: 0,
+                                            bottom: 0,
+                                            right: 20,
+                                            child: IconButton(
+                                              icon: Icon(Icons.delete,
+                                                  color: Colors.blue),
+                                              onPressed: () {
+                                                _removeEventPopUpDialogMobile(
+                                                    context, event.id!);
+                                              },
                                             ),
-                                          Divider(
-                                            color: Colors.black87,
-                                            thickness: 1,
                                           ),
                                         ],
-                                      ),
+                                        Divider(
+                                          color: Colors.black87,
+                                          thickness: 1,
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                }),
-                          ),
+                                  ),
+                                );
+                              }),
                         ),
                       ),
-                      Divider(
-                        thickness: 3,
-                        color: Style.lightBlue,
-                      ),
-                    ],
+                    ),
+                    Divider(
+                      thickness: 3,
+                      color: Style.lightBlue,
+                    ),
                   ],
                 ),
                 // your events code here
@@ -1008,7 +1220,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        '${members.length} Participants',
+                        '${members.length} ${(members.length != 1) ? 'Participants' : 'Participant'}',
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium!
@@ -1027,7 +1239,9 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium!
-                                    .copyWith(color: Colors.white)),
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor)),
                             onPressed: () {
                               popUpDialogMobile(context);
                             },
@@ -1201,84 +1415,89 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Style.darkBlue,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: isKeyboardOpen
-                  ? MediaQuery.of(context).size.height - 400
-                  : MediaQuery.of(context).size.height - 600,
+              height: MediaQuery.of(context).size.height,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                //mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.keyboard_double_arrow_down),
-                    onPressed: () {
-                      Navigator.pop(context); // closes the modal
-                    },
+                  Positioned(
+                    right: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pop(context); // closes the modal
+                      },
+                    ),
                   ),
-                  Container(
-                    padding:
-                        EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Send an Invite",
-                          style: Theme.of(context).textTheme.titleMedium,
-                          textAlign: TextAlign.left,
-                        ),
-                        TextField(
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          controller: userNameController,
-                          decoration: InputDecoration(
-                            hintText: "Enter a valid username",
-                            hintStyle: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .copyWith(color: Colors.grey),
-                            contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
-                            focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey)),
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Color.fromARGB(92, 161, 161, 161))),
-                            errorBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.red, width: 2.0)),
-                            focusedErrorBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.red, width: 2.0)),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  // padding to account for button
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+                        child: Column(
                           children: [
+                            Text(
+                              "Send an Invite",
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.left,
+                            ),
+                            TextField(
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              controller: userNameController,
+                              decoration: InputDecoration(
+                                hintText: "Enter a valid username",
+                                hintStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall!
+                                    .copyWith(color: Colors.grey),
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(0, 10, 20, 10),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey)),
+                                enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color:
+                                            Color.fromARGB(92, 161, 161, 161))),
+                                errorBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.red, width: 2.0)),
+                                focusedErrorBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.red, width: 2.0)),
+                              ),
+                            ),
                             SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () async {
-                                {
-                                  inviteGroup(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    inviteGroup(
                                       context,
                                       widget.groupId,
                                       userNameController.text,
-                                      _showErrorSnackbar);
-                                  userNameController.clear();
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black87),
-                              child: const Text("INVITE"),
+                                      _showErrorSnackbar,
+                                    );
+                                    userNameController.clear();
+                                    Navigator.of(context).pop();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black87,
+                                  ),
+                                  child: const Text("INVITE"),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1365,57 +1584,68 @@ class _ChatInfoPageState extends State<ChatInfoPage>
           return Container(
             padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom),
-            height: MediaQuery.of(context).size.height - 600,
+            height: MediaQuery.of(context).size.height * 0.30,
             child: Column(
               children: [
-                IconButton(
-                  icon: Icon(Icons.keyboard_double_arrow_down),
-                  onPressed: () {
-                    Navigator.pop(context); // closes the modal
-                  },
-                ),
                 Container(
                   padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Stack(
                     children: [
-                      Text(
-                        "Leave Group",
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Are you sure you want to leave this group?",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          leaveGroup(context, widget.groupId, widget.username,
-                              _showErrorSnackbar);
-
-                          if (!kIsWeb) {
-                            /*await FirebaseMessaging.instance
-                              .unsubscribeFromTopic(widget.groupId);*/
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                          } else {
-                            Future.delayed(Duration(milliseconds: 100), () {
-                              Navigator.pop(context);
-                              Navigator.pushReplacement(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => MainScreen(index: 6),
-                                ),
-                              );
-                            });
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            Navigator.pop(context); // closes the modal
+                          },
                         ),
-                        child: const Text("CONFIRM"),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                              height:
+                                  40), // Add extra space at top for close button
+                          Text(
+                            "Leave Group",
+                            textAlign: TextAlign.left,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Are you sure you want to leave this group?",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () async {
+                              leaveGroup(context, widget.groupId,
+                                  widget.username, _showErrorSnackbar);
+
+                              if (!kIsWeb) {
+                                /*await FirebaseMessaging.instance
+                .unsubscribeFromTopic(widget.groupId);*/
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                              } else {
+                                Future.delayed(Duration(milliseconds: 100), () {
+                                  Navigator.pop(context);
+                                  Navigator.pushReplacement(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) =>
+                                          MainScreen(index: 6),
+                                    ),
+                                  );
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                            ),
+                            child: const Text("CONFIRM"),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1573,151 +1803,149 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Style.darkBlue,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: isKeyboardOpen
-                  ? MediaQuery.of(context).size.height - 57
-                  : MediaQuery.of(context).size.height - 300,
+              height: MediaQuery.of(context).size.height,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.keyboard_double_arrow_down),
-                    onPressed: () {
-                      Navigator.pop(context); // closes the modal
-                    },
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          "Add an event",
-                          textAlign: TextAlign.left,
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            LineComboBox(
-                              selectedValue: _selectedEventType,
-                              items: eventTypes
-                                  .map((e) => _getEventTypeString(e))
-                                  .toList(),
-                              icon: Icons.type_specimen,
-                              onChanged: (dynamic newValue) {
-                                setState(() {
-                                  _selectedEventType = newValue;
-                                });
-                              },
-                            ),
-                            LineTextField(
-                              icon: Icons.title,
-                              lableText: 'Title *',
-                              controller: titleController,
-                              title: "",
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            LineTextField(
-                              icon: Icons.description,
-                              lableText: "Description",
-                              controller: descriptionController,
-                              title: "",
-                            ),
-                            LineComboBox(
-                              deleteIcon: Icons.clear,
-                              onPressed: () {
-                                setState(() {
-                                  selectLocationText = "Select Location";
-                                  _selectedLocation = null;
-                                });
-                              },
-                              selectedValue: selectLocationText,
-                              items: [
-                                selectLocationText,
-                                "From FCT place",
-                                "From maps"
-                              ],
-                              icon: Icons.place,
-                              onChanged: (newValue) async {
-                                if (newValue == "From FCT place" ||
-                                    newValue == "From maps") {
-                                  LatLng? selectedLocation =
-                                      await showDialog<LatLng>(
-                                    context: context,
-                                    builder: (context) => EventLocationPopUp(
-                                      context: context,
-                                      isMapSelected: newValue == "From maps",
-                                      location: _selectedLocation,
-                                    ),
-                                  );
-                                  if (selectedLocation != null) {
-                                    setState(() {
-                                      selectLocationText =
-                                          "1 Location Selected";
-                                      _selectedLocation = selectedLocation;
-                                    });
-                                  }
-                                }
-                              },
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: startController,
-                              hintText: "Start Time *",
-                              firstDate:
-                                  DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: endController,
-                              hintText: "End Time *",
-                              firstDate:
-                                  DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                createEvent(
-                                    context,
-                                    _selectedEventType,
-                                    titleController.text,
-                                    descriptionController.text,
-                                    startController.text,
-                                    endController.text,
-                                    widget.groupId,
-                                    _selectedLocation,
-                                    _showErrorSnackbar);
-                                Navigator.of(context).pop();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black87),
-                              child: const Text("CREATE"),
-                            ),
-                          ],
-                        ),
-                      ],
+                  Positioned(
+                    right: 0,
+                    top: MediaQuery.of(context).size.height * 0.98,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pop(context); // closes the modal
+                      },
                     ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                          height:
+                              40), // Add extra space at top for close button
+                      const Text(
+                        "Add an event",
+                        textAlign: TextAlign.left,
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LineComboBox(
+                            selectedValue: _selectedEventType,
+                            items: eventTypes
+                                .map((e) => _getEventTypeString(e))
+                                .toList(),
+                            icon: Icons.type_specimen,
+                            onChanged: (dynamic newValue) {
+                              setState(() {
+                                _selectedEventType = newValue;
+                              });
+                            },
+                          ),
+                          LineTextField(
+                            icon: Icons.title,
+                            lableText: 'Title *',
+                            controller: titleController,
+                            title: "",
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          LineTextField(
+                            icon: Icons.description,
+                            lableText: "Description",
+                            controller: descriptionController,
+                            title: "",
+                          ),
+                          LineComboBox(
+                            deleteIcon: Icons.clear,
+                            onPressed: () {
+                              setState(() {
+                                selectLocationText = "Select Location";
+                                _selectedLocation = null;
+                              });
+                            },
+                            selectedValue: selectLocationText,
+                            items: [
+                              selectLocationText,
+                              "From FCT place",
+                              "From maps"
+                            ],
+                            icon: Icons.place,
+                            onChanged: (newValue) async {
+                              if (newValue == "From FCT place" ||
+                                  newValue == "From maps") {
+                                LatLng? selectedLocation =
+                                    await showDialog<LatLng>(
+                                  context: context,
+                                  builder: (context) => EventLocationPopUp(
+                                    context: context,
+                                    isMapSelected: newValue == "From maps",
+                                    location: _selectedLocation,
+                                  ),
+                                );
+                                if (selectedLocation != null) {
+                                  setState(() {
+                                    selectLocationText = "1 Location Selected";
+                                    _selectedLocation = selectedLocation;
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          LineDateTimeField(
+                            icon: Icons.schedule,
+                            controller: startController,
+                            hintText: "Start Time *",
+                            firstDate:
+                                DateTime.now().subtract(Duration(days: 30)),
+                            lastDate: DateTime.now().add(Duration(days: 365)),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          LineDateTimeField(
+                            icon: Icons.schedule,
+                            controller: endController,
+                            hintText: "End Time *",
+                            firstDate:
+                                DateTime.now().subtract(Duration(days: 30)),
+                            lastDate: DateTime.now().add(Duration(days: 365)),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () async {
+                                  createEvent(
+                                      context,
+                                      _selectedEventType,
+                                      titleController.text,
+                                      descriptionController.text,
+                                      startController.text,
+                                      endController.text,
+                                      widget.groupId,
+                                      _selectedLocation,
+                                      _showErrorSnackbar);
+                                  Navigator.of(context).pop();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black87),
+                                child: const Text("CREATE"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1755,10 +1983,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                     ElevatedButton(
                       onPressed: () async {
                         {
-                          removeEvent(
-                              context,
-                              eventId, //Need a way to get eventId
-                              widget.groupId,
+                          removeEvent(context, eventId, widget.groupId,
                               _showErrorSnackbar);
                           Navigator.of(context).pop();
                         }
@@ -1794,44 +2019,48 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return Container(
-            height: MediaQuery.of(context).size.height - 600,
+            height: MediaQuery.of(context).size.height * 0.3,
             padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Column(
+            child: Stack(
               children: [
-                IconButton(
-                  icon: Icon(Icons.keyboard_double_arrow_down),
-                  onPressed: () {
-                    Navigator.pop(context); // closes the modal
-                  },
-                ),
-                Container(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "Remove an event",
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Are you sure you want remove this event? This action is irreversible.",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          removeEvent(context, eventId, widget.groupId,
-                              _showErrorSnackbar);
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black87),
-                        child: const Text("CONFIRM"),
-                      ),
-                    ],
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context); // closes the modal
+                    },
                   ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                        height: 40), // Add extra space at top for close button
+                    const Text(
+                      "Remove an event",
+                      textAlign: TextAlign.left,
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: EdgeInsets.only(left: 8),
+                      child: Text(
+                          "Are you sure you want remove this event? This action is irreversible.",
+                          style: Theme.of(context).textTheme.bodyLarge!),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        removeEvent(context, eventId, widget.groupId,
+                            _showErrorSnackbar);
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black87),
+                      child: const Text("CONFIRM"),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -2100,6 +2329,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     String userId,
     void Function(String, bool) showErrorSnackbar,
   ) async {
+    cacheFactory.deleteMessage(groupId, '-1'); //Deleting group from cache
     final url =
         kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
     final tokenID = await cacheFactory.get('users', 'token');
@@ -2307,15 +2537,15 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
 
   Set<Marker> getMarkersForPlace(String place) {
     switch (place) {
-      case 'Building':
+      case 'Edifícios':
         return edMarkers;
-      case 'Restaurant':
+      case 'Restaurantes':
         return restMarkers;
-      case 'Park':
+      case 'Parques de Estacionamento':
         return parkMarkers;
-      case 'Port':
+      case 'Portões':
         return portMarkers;
-      case 'Service':
+      case 'Serviços':
         return servMarkers;
       default:
         return {};

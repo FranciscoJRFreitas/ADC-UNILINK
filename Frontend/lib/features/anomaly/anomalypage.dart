@@ -29,8 +29,6 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
         : "No locations specified";
     sendAnomalytoServer(
         context, anomalytitle, anomalydesc, coordinates, _showErrorSnackbar);
-    print('Anomaly Report: $anomalydesc');
-    // You can perform further actions here, such as sending the anomaly report to a server or displaying a confirmation dialog.
   }
 
   @override
@@ -189,7 +187,6 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
     );
     if (response.statusCode == 200) {
       showErrorSnackbar('Sent Anomaly successfully!', false);
-      print('Anomaly Report: $description');
       showDialog(
         context: context,
         builder: (BuildContext context) {
