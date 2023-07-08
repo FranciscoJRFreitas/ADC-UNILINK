@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:html';
 import 'dart:io';
+import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
@@ -9,7 +10,6 @@ import '../features/news/domain/FeedItem.dart';
 import 'cache_factory.dart';
 
 class CacheFactoryImpl implements CacheFactory {
-  final int cacheMessagesLimit = 12; // Define your cache limit here
   CacheFactoryImpl._();
 
   static final CacheFactoryImpl _instance = CacheFactoryImpl._();
@@ -157,9 +157,9 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   void _setMessagesList(String groupId, List<dynamic> messagesList) async {
-    if (messagesList.length > cacheMessagesLimit) {
+    if (messagesList.length > kCacheMessageLimit) {
       messagesList =
-          messagesList.sublist(messagesList.length - cacheMessagesLimit);
+          messagesList.sublist(messagesList.length - kCacheMessageLimit);
     }
     window.localStorage[groupId] = jsonEncode(messagesList);
   }
