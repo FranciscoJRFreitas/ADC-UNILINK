@@ -40,7 +40,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  late Stream<List<Group>> groupsStream;
+  late Stream<List<Group>> groupsStream = Stream.empty();
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   Group? selectedGroup;
   final TextEditingController searchController = TextEditingController();
@@ -52,7 +52,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    groupsStream = listenForGroups();
+    listenForGroups();
     WidgetsBinding.instance?.addObserver(this);
   }
 
@@ -81,7 +81,22 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return formatter.format(date);
   }
 
-  Stream<List<Group>> listenForGroups() {
+  void listenForGroups() async {
+
+    StreamController<List<Group>> streamController = StreamController();
+
+    List<Group> groups = await cacheFactory.getGroups();
+
+    groups.forEach((element) {
+      bool exists = allGroups.any((e) => e.id == element.id);
+      if(!exists) {
+        setState(() {
+          allGroups.add(element);
+          filteredGroups.add(element);
+        });
+      }
+    });
+
     DatabaseReference chatRef = FirebaseDatabase.instance
         .ref()
         .child('chat')
@@ -93,9 +108,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         FirebaseDatabase.instance.ref().child('members');
     DatabaseReference messagesRef =
         FirebaseDatabase.instance.ref().child('messages');
-
-    StreamController<List<Group>> streamController = StreamController();
-    List<Group> groups = [];
 
     // Listen for initial data and subsequent child additions
     chatRef.onChildAdded.listen((event) async {
@@ -131,13 +143,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           description: description,
           numberOfMembers: numberOfMembers,
         );
-        groups.add(group);
 
-        setState(() {
-          allGroups.add(group);
-          filteredGroups.add(group);
-        });
+        bool exists = groups.any((element) => element.id == group.id);
+        if (!exists) {
+          print(true);
+          groups.add(group);
+          cacheFactory.addGroup(group);
+          setState(() {
+            allGroups.add(group);
+            filteredGroups.add(group);
+          });
+        }
 
+        setState(() {});
         streamController.add(groups);
       }
     });
@@ -151,7 +169,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       });
     });
 
-    return streamController.stream;
+    streamController.add(groups);
+
+    groupsStream = streamController.stream;
   }
 
   Future<Uint8List?> downloadGroupPictureData(String groupId) async {
@@ -293,7 +313,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         iconTheme: IconThemeData(
           color: kWhiteBackgroundColor,
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor, //roleColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        //roleColor,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Text(
           "Groups",
@@ -681,7 +702,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               top: Radius.circular(
                   20))), // allows the modal to take up the entire height
       builder: (context) => StatefulBuilder(
-        
+
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(

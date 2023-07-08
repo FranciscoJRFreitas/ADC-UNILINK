@@ -75,6 +75,10 @@ import 'stub_cache_factory.dart'
             impl.addGroup(group);
         }
 
+        void removeGroupsCache() {
+            impl.removeGroupsCache();
+        }
+
     }
 
 final CacheGeneral cacheFactory = CacheGeneral();

@@ -116,8 +116,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       });
     }
 
-
-
     // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
       setState(() {
