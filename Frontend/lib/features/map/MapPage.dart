@@ -57,6 +57,7 @@ class _MyMapState extends State<MyMap> {
   ];
 
   String _mapStyle = '';
+  bool isPopupOpen = false;
 
   @override
   void initState() {
@@ -608,44 +609,39 @@ class _MyMapState extends State<MyMap> {
   }
 
   void showMarkerInfoWindow(MarkerId markerId, String name, String desc) {
-    final Marker tappedMarker =
-        markers.firstWhere((marker) => marker.markerId == markerId);
+    isPopupOpen = true;
     final String title = name;
     final String snippet = desc;
 
     showDialog(
       context: context,
+      barrierDismissible:
+          false, // Prevent dismissing the popup by tapping outside
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title!),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(snippet!),
-              if (!kIsWeb)
-                ElevatedButton(
-                  onPressed: () async {
-                    if (isDirections) {
-                      setState(() {
-                        isDirections = false;
-                      });
-                      await Future.delayed(Duration(seconds: 1));
-                    }
-                    isDirections = true;
-                    getDirections(tappedMarker.position.latitude,
-                        tappedMarker.position.longitude);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Get Directions'),
-                ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Close'),
+        return Stack(
+          children: [
+            ModalBarrier(
+              dismissible: false,
+              color: Colors.transparent,
+            ),
+            AlertDialog(
+              title: Text(title!),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(snippet!),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await Future.delayed(Duration(milliseconds: 50));
+                      isPopupOpen = false;
+                    },
+                    child: Text('Close'),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -810,17 +806,20 @@ class _MyMapState extends State<MyMap> {
 
       edMarkers.add(
         Marker(
-          markerId: MarkerId(name),
-          icon: BitmapDescriptor.fromBytes(buildings),
-          position: latLng,
-          onTap: () {
-            kIsWeb
-                ? showMarkerInfoWindow(MarkerId(name), name,
-                    feature['properties']['description'] ?? '')
-                : showMarkerInfoWindowMobile(MarkerId(name), name,
-                    feature['properties']['description'] ?? '');
-          },
-        ),
+            markerId: MarkerId(name),
+            icon: BitmapDescriptor.fromBytes(buildings),
+            position: latLng,
+            onTap: () {
+              if (!isPopupOpen) {
+                if (kIsWeb) {
+                  showMarkerInfoWindow(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                } else {
+                  showMarkerInfoWindowMobile(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                }
+              }
+            }),
         //icon: BitmapDescriptor.fromAssetImage(configuration, assetName),
         //onTap: getDirections(),
       );
@@ -831,20 +830,21 @@ class _MyMapState extends State<MyMap> {
       List<dynamic> coordinates = feature['geometry']['coordinates'];
       LatLng latLng = LatLng(coordinates[1], coordinates[0]);
 
-      restMarkers.add(
-        Marker(
+      restMarkers.add(Marker(
           markerId: MarkerId(name),
-          position: latLng,
           icon: BitmapDescriptor.fromBytes(restaurant),
-          infoWindow: InfoWindow(
-            title: name,
-            onTap: () {
-              showMarkerInfoWindow(MarkerId(name), name,
-                  feature['properties']['description'] ?? '');
-            },
-          ),
-        ),
-      );
+          position: latLng,
+          onTap: () {
+            if (!isPopupOpen) {
+              if (kIsWeb) {
+                showMarkerInfoWindow(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
+              } else {
+                showMarkerInfoWindowMobile(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
+              }
+            }
+          }));
     }
 
     for (var feature in parkingLotsData) {
@@ -854,17 +854,20 @@ class _MyMapState extends State<MyMap> {
 
       parkMarkers.add(
         Marker(
-          markerId: MarkerId(name),
-          icon: BitmapDescriptor.fromBytes(parking),
-          position: latLng,
-          onTap: () {
-            kIsWeb
-                ? showMarkerInfoWindow(MarkerId(name), name,
-                    feature['properties']['description'] ?? '')
-                : showMarkerInfoWindowMobile(MarkerId(name), name,
-                    feature['properties']['description'] ?? '');
-          },
-        ),
+            markerId: MarkerId(name),
+            icon: BitmapDescriptor.fromBytes(parking),
+            position: latLng,
+            onTap: () {
+              if (!isPopupOpen) {
+                if (kIsWeb) {
+                  showMarkerInfoWindow(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                } else {
+                  showMarkerInfoWindowMobile(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                }
+              }
+            }),
       );
     }
 
@@ -875,17 +878,20 @@ class _MyMapState extends State<MyMap> {
 
       portMarkers.add(
         Marker(
-          markerId: MarkerId(name),
-          position: latLng,
-          icon: BitmapDescriptor.fromBytes(gates),
-          onTap: () {
-            kIsWeb
-                ? showMarkerInfoWindow(MarkerId(name), name,
-                    feature['properties']['description'] ?? '')
-                : showMarkerInfoWindowMobile(MarkerId(name), name,
-                    feature['properties']['description'] ?? '');
-          },
-        ),
+            markerId: MarkerId(name),
+            position: latLng,
+            icon: BitmapDescriptor.fromBytes(gates),
+            onTap: () {
+              if (!isPopupOpen) {
+                if (kIsWeb) {
+                  showMarkerInfoWindow(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                } else {
+                  showMarkerInfoWindowMobile(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                }
+              }
+            }),
       );
     }
 
@@ -896,15 +902,19 @@ class _MyMapState extends State<MyMap> {
 
       servMarkers.add(
         Marker(
-            icon: BitmapDescriptor.fromBytes(service),
             markerId: MarkerId(name),
+            icon: BitmapDescriptor.fromBytes(service),
             position: latLng,
             onTap: () {
-              kIsWeb
-                  ? showMarkerInfoWindow(MarkerId(name), name,
-                      feature['properties']['description'] ?? '')
-                  : showMarkerInfoWindowMobile(MarkerId(name), name,
+              if (!isPopupOpen) {
+                if (kIsWeb) {
+                  showMarkerInfoWindow(MarkerId(name), name,
                       feature['properties']['description'] ?? '');
+                } else {
+                  showMarkerInfoWindowMobile(MarkerId(name), name,
+                      feature['properties']['description'] ?? '');
+                }
+              }
             }),
       );
     }
