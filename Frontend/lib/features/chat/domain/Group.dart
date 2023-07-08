@@ -10,4 +10,22 @@ class Group {
     required this.description,
     required this.numberOfMembers,
   });
+
+  static Group fromMap(Map<String, dynamic> map) {
+    return Group(
+      id: map['id'],
+      DisplayName: map['displayName'],
+      description: map['description'],
+      numberOfMembers: map['numberOfMembers'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'displayName': DisplayName,
+      'description': description,
+      'numberOfMembers': numberOfMembers,
+    };
+  }
 }
