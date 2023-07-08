@@ -72,20 +72,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
 
-    // messagesRef
-    //     .orderByKey()
-    //     .limitToLast(1)
-    //     .once()
-    //     .then((event) {
-    //   setState(()  {
-    //     var valueMap = event.snapshot.value as Map<dynamic, dynamic>; // convert the snapshot value to Map
-    //     var lastMessageKey = valueMap.keys.first; // Get the key of the last message
-    //     var lastMessageData = valueMap[lastMessageKey];
-    //     Message message = Message.fromSnapshotValue(lastMessageKey, lastMessageData);
-    //     lastMessageId = message.id;
-    //     });
-    //   });
-
     initMessages();
   }
 
@@ -104,7 +90,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
         valueMap.forEach((key, value) {
           Message message = Message.fromMapKey(key, value);
-          messages.add(message);
           cacheFactory.setMessages(widget.groupId, message);
         });
 
@@ -113,17 +98,20 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     }
 
     messagesRef.orderByKey().onChildAdded.listen((event) {
-      if (messages.length >= cacheMessageCap) {
+      if (messages.length > cacheMessageCap) {
         messages
             .removeAt(0); // remove the oldest message if the limit is reached
       }
 
       Message message = Message.fromSnapshot(event.snapshot);
       setState(() {
-        messages.add(message);
+        bool repeated = messages.any((element) => element.id == message.id);
+        if (!repeated) {
+          messages.add(message);
+          cacheFactory.setMessages(widget.groupId, message);
+        }
       });
 
-      cacheFactory.setMessages(widget.groupId, message);
     });
 
     // Listen for updated messages
@@ -152,6 +140,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         messages.removeWhere((message) => message.id == removedMessage.id);
       });
     });
+
     DatabaseReference memberRef =
         FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
@@ -262,8 +251,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                       child: IconButton(
                                         icon: Container(
                                           decoration: BoxDecoration(
-                                            shape: BoxShape
-                                                .rectangle, // use circle if the icon is circular
+                                            shape: BoxShape.rectangle,
+                                            // use circle if the icon is circular
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.black,
@@ -312,8 +301,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                         child: IconButton(
                                           icon: Container(
                                             decoration: BoxDecoration(
-                                              shape: BoxShape
-                                                  .rectangle, // use circle if the icon is circular
+                                              shape: BoxShape.rectangle,
+                                              // use circle if the icon is circular
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black,
@@ -553,8 +542,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                       child: IconButton(
                                         icon: Container(
                                           decoration: BoxDecoration(
-                                            shape: BoxShape
-                                                .rectangle, // use circle if the icon is circular
+                                            shape: BoxShape.rectangle,
+                                            // use circle if the icon is circular
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.black,
@@ -603,8 +592,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                         child: IconButton(
                                           icon: Container(
                                             decoration: BoxDecoration(
-                                              shape: BoxShape
-                                                  .rectangle, // use circle if the icon is circular
+                                              shape: BoxShape.rectangle,
+                                              // use circle if the icon is circular
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black,
@@ -1083,8 +1072,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .rectangle, // use circle if the icon is circular
+                                  shape: BoxShape.rectangle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -1148,10 +1137,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     );
   }
 
-  // Future<void> _initCamera() async {
-  //   final cameras = await availableCameras();
-  //   camera = cameras.first;
-  // }
+// Future<void> _initCamera() async {
+//   final cameras = await availableCameras();
+//   camera = cameras.first;
+// }
 }
 
 class DisplayPictureScreen extends StatelessWidget {
