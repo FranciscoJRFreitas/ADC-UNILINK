@@ -5,14 +5,20 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:unilink2023/data/cache_factory_provider.dart';
+import 'package:unilink2023/domain/UserNotifier.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 
+import '../../../application/loadLocations.dart';
 import '../../../constants.dart';
 import '../../chat/presentation/chat_info_page.dart';
+import '../../chat/presentation/chat_page.dart';
+import '../../navigation/main_screen_page.dart';
 
 class SchedulePage extends StatefulWidget {
   final String username;
@@ -33,7 +39,6 @@ class _SchedulePageState extends State<SchedulePage> {
   List<dynamic> schedule = [];
   CalendarFormat format = CalendarFormat.week;
   DateFormat customFormat = DateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'");
-
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
   _SchedulePageState(date) {
@@ -228,7 +233,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 children: [
                   _buildTableCalendar(context),
                   ..._scheduleWidget(context),
-                  eventsWidget(context),
+                  _eventsWidget(context),
                 ],
               ),
             )
@@ -240,7 +245,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     child: Column(
                       children: [
                         ..._scheduleWidget(context),
-                        eventsWidget(context),
+                        _eventsWidget(context),
                       ],
                     ),
                   ),
@@ -259,6 +264,359 @@ class _SchedulePageState extends State<SchedulePage> {
         elevation: 6,
         backgroundColor: Theme.of(context).primaryColor,
       ),
+    );
+  }
+
+  Widget _buildTableCalendar(BuildContext context) {
+    return TableCalendar(
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Week',
+        CalendarFormat.twoWeeks: 'Month',
+        CalendarFormat.week: '2 Weeks',
+      },
+      firstDay: DateTime(2000, 1, 1),
+      lastDay: DateTime(2030, 1, 1),
+      focusedDay: focusedDay,
+      calendarFormat: format,
+      onFormatChanged: (CalendarFormat _format) {
+        setState(() {
+          format = _format;
+        });
+      },
+      onDaySelected: (DateTime selectDay, DateTime focusDay) {
+        setState(() {
+          selectedDay = selectDay;
+          focusedDay = selectDay;
+        });
+      },
+      headerStyle: HeaderStyle(
+        formatButtonVisible:
+            true, // hides the format button, which is not needed here
+        titleCentered: true,
+      ),
+      calendarStyle: CalendarStyle(
+        // Other style properties...
+        selectedDecoration: BoxDecoration(
+          color: Colors.blue, // change to your desired color
+          shape: BoxShape.circle,
+        ),
+      ),
+      selectedDayPredicate: (day) {
+        return isSameDay(selectedDay, day);
+      },
+      eventLoader: (day) {
+        return events[day] ?? [];
+      },
+    );
+  }
+
+  List<Widget> _scheduleWidget(BuildContext context) {
+    return schedule.map<Widget>((daySchedule) {
+      if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
+        return Column(
+          children: [
+            SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '  Schedule',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                width: 300, // Set the desired width for the divider
+                child: Divider(
+                  thickness: 1,
+                  color: Style.lightBlue,
+                ),
+              ),
+            ),
+            ...daySchedule['classes'].map<Widget>((classData) {
+              return ListTile(
+                title: Text(
+                  classData['name'],
+                ),
+                subtitle: Text(
+                  '${classData['startTime']} - ${classData['endTime']}',
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      } else {
+        return Container();
+      }
+    }).toList();
+  }
+
+  Widget _eventsWidget(BuildContext context) {
+    Map<String, List<Event>> groupEvents =
+        {}; // New map to separate events by group
+    List<Event> personalEvents = [];
+
+    // Separate the events into the new containers
+    events[selectedDay]?.forEach((event) {
+      if (event.groupId != null) {
+        if (!groupEvents.containsKey(event.groupId)) {
+          groupEvents[event.groupId!] = [];
+        }
+        groupEvents[event.groupId]!.add(event);
+      } else {
+        personalEvents.add(event);
+      }
+    });
+
+    return Column(
+      children: [
+        if (personalEvents.isNotEmpty)
+          _buildSectionHeader("Personal Events", context, false),
+        ...personalEvents
+            .map((event) => _buildEventTile(event, context))
+            .toList(),
+        for (var groupId in groupEvents.keys) ...[
+          _buildSectionHeader(groupId, context, true),
+          ...groupEvents[groupId]!
+              .map((event) => _buildEventTile(event, context))
+              .toList(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildEventTile(Event event, BuildContext context) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: ListTile(
+          title: Row(
+            children: [
+              InkWell(
+                child: Text(
+                  event.title,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              if (event.location != "0") ...[
+                SizedBox(width: 10),
+                InkWell(
+                  onTap: () {
+                    // Handle click on clock icon
+                    // Navigate to another page or perform desired action
+                  },
+                  child:
+                      Icon(Icons.directions, size: 20, color: Style.lightBlue),
+                ),
+              ]
+            ],
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.type_specimen, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Row(
+                    children: [
+                      Text(
+                        'Type: ',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(fontSize: 14),
+                      ),
+                      Text(
+                        _getEventTypeString(event.type),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.description, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Text(
+                    'Description: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 14),
+                  ),
+                  Flexible(
+                    child: Text(
+                      event.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              if (event.location != '0') ...[
+                Row(
+                  children: [
+                    Icon(Icons.place, size: 20, color: Style.lightBlue),
+                    SizedBox(width: 5),
+                    Text(
+                      'Location: ',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(fontSize: 14),
+                    ),
+                    FutureBuilder<String>(
+                      future: getPlaceInLocations(event.location!),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SizedBox.shrink();
+                        } else {
+                          if (snapshot.hasError)
+                            return Text('Error: ${snapshot.error}');
+                          else
+                            return snapshot.data == ""
+                                ? Text(
+                                    "Custom Location",
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                : Text(
+                                    snapshot.data!,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+              ],
+              Row(
+                children: [
+                  Icon(Icons.schedule, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Text(
+                    'Start: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 14),
+                  ),
+                  Flexible(
+                    child: Text(
+                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.schedule, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Text(
+                    'End: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 14),
+                  ),
+                  Flexible(
+                    child: Text(
+                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(
+      String groupId, BuildContext context, bool hasChatRedirect) {
+    return Column(
+      children: [
+        SizedBox(height: 20),
+        Row(
+          children: [
+            if (hasChatRedirect)
+              Row(
+                children: [
+                  Text(
+                    "  '$groupId' Events",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Tooltip(
+                    message: 'Go to $groupId',
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MainScreen(
+                                index: 6,
+                                selectedGroup: groupId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.chat,
+                            color: Theme.of(context).secondaryHeaderColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            if (!hasChatRedirect)
+              Text(
+                '  $groupId',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+          ],
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            width: 300,
+            child: Divider(
+              thickness: 1,
+              color: Style.lightBlue,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -395,145 +753,6 @@ class _SchedulePageState extends State<SchedulePage> {
             );
           }));
         });
-  }
-
-  Widget _buildTableCalendar(BuildContext context) {
-    return TableCalendar(
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Week',
-        CalendarFormat.twoWeeks: 'Month',
-        CalendarFormat.week: '2 Weeks',
-      },
-      firstDay: DateTime(2000, 1, 1),
-      lastDay: DateTime(2030, 1, 1),
-      focusedDay: focusedDay,
-      calendarFormat: format,
-      onFormatChanged: (CalendarFormat _format) {
-        setState(() {
-          format = _format;
-        });
-      },
-      onDaySelected: (DateTime selectDay, DateTime focusDay) {
-        setState(() {
-          selectedDay = selectDay;
-          focusedDay = selectDay;
-        });
-      },
-      headerStyle: HeaderStyle(
-        formatButtonVisible:
-            true, // hides the format button, which is not needed here
-        titleCentered: true,
-      ),
-      calendarStyle: CalendarStyle(
-        // Other style properties...
-        selectedDecoration: BoxDecoration(
-          color: Colors.blue, // change to your desired color
-          shape: BoxShape.circle,
-        ),
-      ),
-      selectedDayPredicate: (day) {
-        return isSameDay(selectedDay, day);
-      },
-      eventLoader: (day) {
-        return events[day] ?? [];
-      },
-    );
-  }
-
-  List<Widget> _scheduleWidget(BuildContext context) {
-    return schedule.map<Widget>((daySchedule) {
-      if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
-        return Column(
-          children: [
-            SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '  Schedule',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                width: 300, // Set the desired width for the divider
-                child: Divider(
-                  thickness: 1,
-                  color: Style.lightBlue,
-                ),
-              ),
-            ),
-            ...daySchedule['classes'].map<Widget>((classData) {
-              return ListTile(
-                title: Text(
-                  classData['name'],
-                ),
-                subtitle: Text(
-                  '${classData['startTime']} - ${classData['endTime']}',
-                ),
-              );
-            }).toList(),
-          ],
-        );
-      } else {
-        return Container();
-      }
-    }).toList();
-  }
-
-  Widget eventsWidget(BuildContext context) {
-    if (events[selectedDay]?.isNotEmpty == true) {
-      return Column(
-        children: [
-          SizedBox(height: 20),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '  Events',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 300, // Set the desired width for the divider
-              child: Divider(
-                thickness: 1,
-                color: Style.lightBlue,
-              ),
-            ),
-          ),
-          ...?events[selectedDay]?.map<Widget>((event) {
-            return ListTile(
-              title: Text(
-                event.groupId != null
-                    ? '${event.title} from ${event.groupId} group'
-                    : event.title,
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Type: ${_getEventTypeString(event.type)}',
-                  ),
-                  Text(
-                    'Location: ${event.location ?? 'N/A'}',
-                  ),
-                  Text(
-                    'Description: ${event.description}',
-                  ),
-                  Text(
-                    '${_formatDateTime(event.startTime, event.endTime)[0]} - ${_formatDateTime(event.startTime, event.endTime)[1]}',
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ],
-      );
-    } else {
-      return Container(); // Empty container if there are no events
-    }
   }
 
   List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {

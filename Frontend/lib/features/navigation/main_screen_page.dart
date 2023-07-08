@@ -19,6 +19,7 @@ import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/UserNotifier.dart';
 import '../../domain/Token.dart';
+import '../chat/domain/Group.dart';
 import '../userManagement/domain/User.dart';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
@@ -31,8 +32,9 @@ import 'package:flutter/services.dart';
 class MainScreen extends StatefulWidget {
   final int? index;
   final DateTime? date;
+  final String? selectedGroup;
 
-  MainScreen({this.index, this.date});
+  MainScreen({this.index, this.date, this.selectedGroup});
 
   @override
   _MainScreenState createState() => _MainScreenState(index, date);
@@ -109,12 +111,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         HomePage(), //3
         ChangePasswordPage(), //4
         RemoveAccountPage(), //5
-        ChatPage(user: _currentUser), //6
+        ChatPage(
+          user: _currentUser,
+          selectedGroup: widget.selectedGroup,
+        ), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(
-          username: _currentUser.username, date: scheduleDate
-        ), //estudante //9
+            username: _currentUser.username,
+            date: scheduleDate), //estudante //9
         MyMap(), //10
         ReportAnomalyPage(),
         Placeholder(), //professor //11
