@@ -36,7 +36,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-  _SchedulePageState(date){
+  _SchedulePageState(date) {
     selectedDay = DateTime(date.year, date.month, date.day);
     focusedDay = date;
   }
@@ -222,92 +222,31 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            TableCalendar(
-              availableCalendarFormats: const {
-                CalendarFormat.month: 'Week',
-                CalendarFormat.twoWeeks: 'Month',
-                CalendarFormat.week: '2 Weeks',
-              },
-              firstDay: DateTime(2022, 6, 19),
-              lastDay: DateTime(2024, 6, 23),
-              focusedDay: focusedDay,
-              calendarFormat: format,
-              onFormatChanged: (CalendarFormat _format) {
-                setState(() {
-                  format = _format;
-                });
-              },
-              onDaySelected: (DateTime selectDay, DateTime focusDay) {
-                setState(() {
-                  selectedDay = selectDay;
-                  focusedDay = selectDay;
-                });
-              },
-              headerStyle: HeaderStyle(
-                formatButtonVisible:
-                true, // hides the format button, which is not needed here
-                titleCentered: true,
+      body: format == CalendarFormat.month
+          ? SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildTableCalendar(context),
+                  ..._scheduleWidget(context),
+                  eventsWidget(context),
+                ],
               ),
-              calendarStyle: CalendarStyle(
-                // Other style properties...
-                selectedDecoration: BoxDecoration(
-                  color: Colors.blue, // change to your desired color
-                  shape: BoxShape.circle,
+            )
+          : Column(
+              children: [
+                _buildTableCalendar(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        ..._scheduleWidget(context),
+                        eventsWidget(context),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              selectedDayPredicate: (day) {
-                return isSameDay(selectedDay, day);
-              },
-              eventLoader: (day) {
-                return events[day] ?? [];
-              },
+              ],
             ),
-            ...schedule.map<Widget>((daySchedule) {
-              if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
-                return Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '  Schedule',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        width: 300, // Set the desired width for the divider
-                        child: Divider(
-                          thickness: 1,
-                          color: Style.lightBlue,
-                        ),
-                      ),
-                    ),
-                    ...daySchedule['classes'].map<Widget>((classData) {
-                      return ListTile(
-                        title: Text(
-                          classData['name'],
-                        ),
-                        subtitle: Text(
-                          '${classData['startTime']} - ${classData['endTime']}',
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                );
-              } else {
-                return Container();
-              }
-            }).toList(),
-
-            eventsWidget(context),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _createEventPopUpDialog(context);
@@ -458,6 +397,90 @@ class _SchedulePageState extends State<SchedulePage> {
         });
   }
 
+  Widget _buildTableCalendar(BuildContext context) {
+    return TableCalendar(
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Week',
+        CalendarFormat.twoWeeks: 'Month',
+        CalendarFormat.week: '2 Weeks',
+      },
+      firstDay: DateTime(2000, 1, 1),
+      lastDay: DateTime(2030, 1, 1),
+      focusedDay: focusedDay,
+      calendarFormat: format,
+      onFormatChanged: (CalendarFormat _format) {
+        setState(() {
+          format = _format;
+        });
+      },
+      onDaySelected: (DateTime selectDay, DateTime focusDay) {
+        setState(() {
+          selectedDay = selectDay;
+          focusedDay = selectDay;
+        });
+      },
+      headerStyle: HeaderStyle(
+        formatButtonVisible:
+            true, // hides the format button, which is not needed here
+        titleCentered: true,
+      ),
+      calendarStyle: CalendarStyle(
+        // Other style properties...
+        selectedDecoration: BoxDecoration(
+          color: Colors.blue, // change to your desired color
+          shape: BoxShape.circle,
+        ),
+      ),
+      selectedDayPredicate: (day) {
+        return isSameDay(selectedDay, day);
+      },
+      eventLoader: (day) {
+        return events[day] ?? [];
+      },
+    );
+  }
+
+  List<Widget> _scheduleWidget(BuildContext context) {
+    return schedule.map<Widget>((daySchedule) {
+      if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
+        return Column(
+          children: [
+            SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '  Schedule',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                width: 300, // Set the desired width for the divider
+                child: Divider(
+                  thickness: 1,
+                  color: Style.lightBlue,
+                ),
+              ),
+            ),
+            ...daySchedule['classes'].map<Widget>((classData) {
+              return ListTile(
+                title: Text(
+                  classData['name'],
+                ),
+                subtitle: Text(
+                  '${classData['startTime']} - ${classData['endTime']}',
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      } else {
+        return Container();
+      }
+    }).toList();
+  }
+
   Widget eventsWidget(BuildContext context) {
     if (events[selectedDay]?.isNotEmpty == true) {
       return Column(
@@ -514,17 +537,27 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {
-    if (dateTime1.day != dateTime2.day || dateTime1.month != dateTime2.month || dateTime1.year != dateTime2.year) {
-      return [DateFormat('HH:mm of yyyy-MM-dd').format(dateTime1), DateFormat('HH:mm of yyyy-MM-dd').format(dateTime2)];
+    if (dateTime1.day != dateTime2.day ||
+        dateTime1.month != dateTime2.month ||
+        dateTime1.year != dateTime2.year) {
+      return [
+        DateFormat('HH:mm of yyyy-MM-dd').format(dateTime1),
+        DateFormat('HH:mm of yyyy-MM-dd').format(dateTime2)
+      ];
     } else {
-      return [DateFormat('HH:mm').format(dateTime1), DateFormat('HH:mm').format(dateTime2)];
+      return [
+        DateFormat('HH:mm').format(dateTime1),
+        DateFormat('HH:mm').format(dateTime2)
+      ];
     }
   }
 
   void _createPersonalEvent(Event event) {
-
-    DatabaseReference eventsRef =
-    FirebaseDatabase.instance.ref().child('schedule').child(widget.username).push();
+    DatabaseReference eventsRef = FirebaseDatabase.instance
+        .ref()
+        .child('schedule')
+        .child(widget.username)
+        .push();
 
     // Generate a new ID for the event
     String? eventId = eventsRef.key;
