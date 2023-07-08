@@ -62,6 +62,10 @@ import 'stub_cache_factory.dart'
           return impl.getMessages(groupId);
         }
 
+        void removeMessagesCache(){
+            impl.removeMessagesCache();
+        }
+
     }
 
 final CacheGeneral cacheFactory = CacheGeneral();

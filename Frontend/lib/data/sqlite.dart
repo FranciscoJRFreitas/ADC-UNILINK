@@ -15,6 +15,7 @@ class SqliteService {
   SqliteService._internal();
 
   void initializeDB() async {
+
     String path = await getDatabasesPath();
     String dbPath = join(path, 'database.db');
 
@@ -33,8 +34,9 @@ class SqliteService {
             'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT)');
         await database.execute(
             'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
-        //await database.execute(
-            //'CREATE TABLE chat(id TEXT PRIMARY KEY, isSystemMessage TEXT, containsFile TEXT, text TEXT,'' name TEXT, displayName TEXT, timestamp TEXT, extension TEXT)');
+        await database.execute(
+            'CREATE TABLE chat(id TEXT PRIMARY KEY, groupId TEXT, isSystemMessage TEXT, containsFile TEXT, text TEXT,'
+            ' name TEXT, displayName TEXT, timestamp INTEGER, extension TEXT)');
         await database.insert('settings', {
           'checkIntro': null,
           'checkLogin': null,
@@ -42,8 +44,8 @@ class SqliteService {
           'index': "News",
           'currentPage': "0",
           'currentNews': "0",
-          //'lastMessage': null,
         });
+
       },
       version: 1,
     );
@@ -108,12 +110,6 @@ class SqliteService {
     });
   }
 
-  Future<void> updateLastMessage(String value) async {
-    Database db = await getDatabase();
-    await db.transaction((txn) async {
-      await txn.rawUpdate('UPDATE settings SET lastMessage = $value');
-    });
-  }
   Future<String?> getCheckIntro() async {
     Database db = await getDatabase();
     return await db.transaction((txn) async {
@@ -313,35 +309,40 @@ class SqliteService {
     });
   }
 
-  Future<List<Message>> getMessages() async {
+  Future<List<Message>> getMessages(String groupId) async {
     final db = await getDatabase();
 
     return await db.transaction((txn) async {
       final List<Map<String, dynamic>> maps = await txn.query('chat');
 
-      return List.generate(maps.length, (i) {
+      List<Map<String, dynamic>> filteredMaps =
+          maps.where((element) => element['groupId'] == groupId).toList();
+
+      return filteredMaps.map((map) {
         return Message(
-          isSystemMessage: maps[i]['isSystemMessage'] == 'true' ? true : false,
-          containsFile: maps[i]['containsFile'] == 'true' ? true : false,
-          id: maps[i]['id'],
-          text: maps[i]['text'],
-          name: maps[i]['name'],
-          displayName: maps[i]['displayName'],
-          timestamp: maps[i]['timestamp'],
-          extension: maps[i]['extension'],
+          isSystemMessage: map['isSystemMessage'] == '1' ? true : false,
+          containsFile: map['containsFile'] == '1' ? true : false,
+          id: map['id'],
+          text: map['text'],
+          name: map['name'],
+          displayName: map['displayName'],
+          timestamp: map['timestamp'],
+          extension: map['extension'],
         );
-      });
+      }).toList();
     });
   }
 
-  Future<void> insertMessage(Message message) async {
+  Future<void> insertMessage(String groupId, Message message) async {
     // Get a reference to the database.
     Database db = await getDatabase();
+    Map<String, dynamic> msg = message.toMap();
 
+    msg.addAll({'groupId': groupId});
     await db.transaction((txn) async {
       await txn.insert(
         'chat',
-        message.toMap(),
+        msg,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     });
@@ -377,7 +378,6 @@ class SqliteService {
   Future<void> deleteMessagesInCache() async {
     Database db = await getDatabase();
     await db.transaction((txn) async {
-      await txn.rawDelete('DELETE lastMessage FROM settings');
       await txn.rawDelete('DELETE FROM chat');
     });
   }

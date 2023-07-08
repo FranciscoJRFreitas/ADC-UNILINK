@@ -710,6 +710,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
+      cacheFactory.removeMessagesCache();
 
       String page = await cacheFactory.get("settings", "index");
       int index = 0;

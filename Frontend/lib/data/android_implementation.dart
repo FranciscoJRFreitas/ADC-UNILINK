@@ -35,8 +35,6 @@ class CacheFactoryImpl implements CacheFactory {
       await SqliteService().updateCurrentPage(value);
     else if (property == 'currentNews')
       await SqliteService().updateCurrentNews(value);
-    else if (property == 'lastMessage')
-      await SqliteService().updateLastMessage(value);
   }
 
   @override
@@ -64,7 +62,7 @@ class CacheFactoryImpl implements CacheFactory {
     else if (table == 'news')
       return await SqliteService().getNews();
     else if (table == 'chat')
-      return await SqliteService().getMessages();
+      return await SqliteService().getMessages(value);
     else
       return await SqliteService().getValue(table, value);
   }
@@ -96,6 +94,11 @@ class CacheFactoryImpl implements CacheFactory {
     for (var row in result) {
       print(row);
     }
+    result = await db.query('chat');
+    print("\nchat: \n");
+    for (var row in result) {
+      print(row);
+    }
   }
 
   @override
@@ -124,10 +127,10 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void setMessages(String groupId, Message message) async {
-    List<Message> messageList = await SqliteService().getMessages();
+    List<Message> messageList = await SqliteService().getMessages(groupId);
     bool isPresent = messageList.any((item) => item.id == message.id);
     if (!isPresent) {
-      SqliteService().insertMessage(message);
+      SqliteService().insertMessage(groupId, message);
     }
   }
 
@@ -142,10 +145,13 @@ class CacheFactoryImpl implements CacheFactory {
   }
   
   @override
-  Future<List<Message>> getMessages(String groupId) {
+  Future<List<Message>> getMessages(String groupId) async {
     // TODO: implement getMessages
-    throw UnimplementedError();
+    //printDb();
+   return await SqliteService().getMessages(groupId);
   }
+
+
 
   
 }
