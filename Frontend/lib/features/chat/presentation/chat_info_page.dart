@@ -565,16 +565,18 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                       // Handle click on clock icon
                                                       // Navigate to another page or perform desired action
                                                     },
-                                                    child: Icon(Icons.directions, size: 20, color: Style.lightBlue),
+                                                    child: Icon(Icons.schedule, size: 20, color: Style.lightBlue),
                                                   ),
+                                                  if (event.location != "0") ... [
                                                   SizedBox(width: 10),
                                                   InkWell(
                                                     onTap: () {
                                                       // Handle click on clock icon
                                                       // Navigate to another page or perform desired action
                                                     },
-                                                    child: Icon(Icons.schedule, size: 20, color: Style.lightBlue),
+                                                    child: Icon(Icons.directions, size: 20, color: Style.lightBlue),
                                                   ),
+                                                  ]
                                                 ],
                                               ),
                                               subtitle: Column(
@@ -583,9 +585,45 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                   SizedBox(height: 8),
                                                   Row(
                                                     children: [
+                                                      Icon(Icons.type_specimen,
+                                                          size: 20,
+                                                          color:
+                                                          Style.lightBlue),
+                                                      SizedBox(width: 5),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            'Type: ',
+                                                            style: Theme.of(
+                                                                context)
+                                                                .textTheme
+                                                                .titleMedium!
+                                                                .copyWith(
+                                                                fontSize:
+                                                                14),
+                                                          ),
+                                                          Text(
+                                                            _getEventTypeString(
+                                                                event.type),
+                                                            style: Theme.of(
+                                                                context)
+                                                                .textTheme
+                                                                .bodyMedium,
+                                                            maxLines: 1,
+                                                            overflow:
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Row(
+                                                    children: [
                                                       Icon(Icons.description, size: 20, color: Style.lightBlue),
                                                       SizedBox(width: 5),
-                                                      Text(
+                                                                                                            Text(
                                                         'Description: ',
                                                         style: Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 14),
                                                       ),
