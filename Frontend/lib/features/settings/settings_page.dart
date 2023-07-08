@@ -142,7 +142,8 @@ class _SettingsPageState extends State<SettingsPage> {
               openNotificationSettings();
             }),
       Option(
-          icon: Icon(Icons.password, size: 30.0),
+          icon: Icon(Icons.password,
+              color: Theme.of(context).secondaryHeaderColor, size: 30.0),
           title: 'Change Password',
           subtitle: 'Change your password for a new one.',
           onTap: () {

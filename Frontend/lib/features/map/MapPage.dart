@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -146,7 +147,10 @@ class _MyMapState extends State<MyMap> {
               calculateBearing(polylineCoordinates[0], polylineCoordinates[1]);
           mapController!.moveCamera(CameraUpdate.newCameraPosition(
               CameraPosition(
-                  target: cameraposition, zoom: zoom, bearing: bearing, tilt: tilt)));
+                  target: cameraposition,
+                  zoom: zoom,
+                  bearing: bearing,
+                  tilt: tilt)));
         } else {
           mapController!
               .moveCamera(CameraUpdate.newLatLngZoom(cameraposition, zoom));
@@ -403,6 +407,50 @@ class _MyMapState extends State<MyMap> {
     );
   }
 
+  void showMarkerInfoWindow(MarkerId markerId, String name, String desc) {
+    final Marker tappedMarker =
+        markers.firstWhere((marker) => marker.markerId == markerId);
+    final String title = name;
+    final String snippet = desc;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title!),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(snippet!),
+              if (!kIsWeb)
+                ElevatedButton(
+                  onPressed: () async {
+                    if (isDirections) {
+                      setState(() {
+                        isDirections = false;
+                      });
+                      await Future.delayed(Duration(seconds: 1));
+                    }
+                    isDirections = true;
+                    getDirections(tappedMarker.position.latitude,
+                        tappedMarker.position.longitude);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Get Directions'),
+                ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   _getLocation() async {
     bool serviceEnabled;
     loc.PermissionStatus permissionGranted;
@@ -492,23 +540,13 @@ class _MyMapState extends State<MyMap> {
         Marker(
           markerId: MarkerId(name),
           position: latLng,
-          //icon: BitmapDescriptor.fromAssetImage(configuration, assetName),
-          //onTap: getDirections(),
-          infoWindow: InfoWindow(
-            title: name,
-            snippet: feature['properties']['description'] ?? '',
-            onTap: () async {
-              if (isDirections) {
-                setState(() {
-                  isDirections = false;
-                });
-                await Future.delayed(Duration(seconds: 1));
-              }
-              isDirections = true;
-              getDirections(latLng.latitude, latLng.longitude);
-            },
-          ),
+          onTap: () {
+            showMarkerInfoWindow(MarkerId(name), name,
+                feature['properties']['description'] ?? '');
+          },
         ),
+        //icon: BitmapDescriptor.fromAssetImage(configuration, assetName),
+        //onTap: getDirections(),
       );
     }
 
@@ -521,19 +559,10 @@ class _MyMapState extends State<MyMap> {
         Marker(
           markerId: MarkerId(name),
           position: latLng,
-          infoWindow: InfoWindow(
-            title: name,
-            onTap: () async {
-              if (isDirections) {
-                setState(() {
-                  isDirections = false;
-                });
-                await Future.delayed(Duration(milliseconds: 500));
-              }
-              isDirections = true;
-              getDirections(latLng.latitude, latLng.longitude);
-            },
-          ),
+          onTap: () {
+            showMarkerInfoWindow(MarkerId(name), name,
+                feature['properties']['description'] ?? '');
+          },
         ),
       );
     }
@@ -547,19 +576,10 @@ class _MyMapState extends State<MyMap> {
         Marker(
           markerId: MarkerId(name),
           position: latLng,
-          infoWindow: InfoWindow(
-            title: name,
-            onTap: () async {
-              if (isDirections) {
-                setState(() {
-                  isDirections = false;
-                });
-                await Future.delayed(Duration(seconds: 1));
-              }
-              isDirections = true;
-              getDirections(latLng.latitude, latLng.longitude);
-            },
-          ),
+          onTap: () {
+            showMarkerInfoWindow(MarkerId(name), name,
+                feature['properties']['description'] ?? '');
+          },
         ),
       );
     }
@@ -573,19 +593,10 @@ class _MyMapState extends State<MyMap> {
         Marker(
           markerId: MarkerId(name),
           position: latLng,
-          infoWindow: InfoWindow(
-            title: name,
-            onTap: () async {
-              if (isDirections) {
-                setState(() {
-                  isDirections = false;
-                });
-                await Future.delayed(Duration(seconds: 1));
-              }
-              isDirections = true;
-              getDirections(latLng.latitude, latLng.longitude);
-            },
-          ),
+          onTap: () {
+            showMarkerInfoWindow(MarkerId(name), name,
+                feature['properties']['description'] ?? '');
+          },
         ),
       );
     }
@@ -599,19 +610,10 @@ class _MyMapState extends State<MyMap> {
         Marker(
           markerId: MarkerId(name),
           position: latLng,
-          infoWindow: InfoWindow(
-            title: name,
-            onTap: () async {
-              if (isDirections) {
-                setState(() {
-                  isDirections = false;
-                });
-                await Future.delayed(Duration(seconds: 1));
-              }
-              isDirections = true;
-              getDirections(latLng.latitude, latLng.longitude);
-            },
-          ),
+          onTap: () {
+            showMarkerInfoWindow(MarkerId(name), name,
+                feature['properties']['description'] ?? '');
+          },
         ),
       );
     }

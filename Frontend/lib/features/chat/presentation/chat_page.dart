@@ -26,6 +26,8 @@ import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import '../domain/Message.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ChatPage extends StatefulWidget {
   final User user;
 
@@ -35,7 +37,7 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   late Stream<List<Group>> groupsStream;
@@ -45,11 +47,26 @@ class _ChatPageState extends State<ChatPage> {
   List<Group> allGroups = [];
   List<Group> filteredGroups = [];
   Map<String, Message> firstMessageOfGroups = {};
+  bool isKeyboardOpen = false;
 
   @override
   void initState() {
     super.initState();
     groupsStream = listenForGroups();
+    WidgetsBinding.instance?.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    setState(() {
+      isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom == 0.0;
+    });
+    print(MediaQuery.of(context).viewInsets.bottom);
+  }
+
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance?.removeObserver(this);
   }
 
   String formatDateInMillis(int? timeInMillis) {
@@ -417,7 +434,7 @@ class _ChatPageState extends State<ChatPage> {
                     padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                     child: FloatingActionButton(
                       onPressed: () {
-                        popUpDialog(context);
+                        popUpDialogWeb(context);
                       },
                       elevation: 6,
                       backgroundColor: Theme.of(context).primaryColor,
@@ -474,82 +491,98 @@ class _ChatPageState extends State<ChatPage> {
           ),
           Expanded(
             child: StreamBuilder<List<Group>>(
-              stream: groupsStream, // Replace with your stream of groups
+              stream: groupsStream,
               builder:
                   (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else if (snapshot.hasData) {
-                  List<Group> groups = snapshot.data!;
-
+                  List<Group> groups = filteredGroups;
                   return ListView(
                     padding: EdgeInsets.only(top: 10, bottom: 80),
                     children: groups.map((group) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => GroupMessagesPage(
-                                key: ValueKey(group.id),
-                                groupId: group.id,
-                                user: widget.user,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5,
-                          margin: EdgeInsets.symmetric(vertical: 8),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 8),
-                            child: ListTile(
-                              leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(200),
-                                  child: groupPicture(context, group.id)),
-                              title: Text(
-                                '${group.DisplayName}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 8),
-                                  Row(
+                      Message? firstMessage = firstMessageOfGroups[group.id];
+                      return Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => GroupMessagesPage(
+                                      key: ValueKey(group.id),
+                                      groupId: group.id,
+                                      user: widget.user,
+                                    ),
+                                  ),
+                                );
+                              });
+                            },
+                            child: Container(
+                              color: selectedGroup == group
+                                  ? Theme.of(context).primaryColorDark
+                                  : Theme.of(context).scaffoldBackgroundColor,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 8),
+                                child: ListTile(
+                                  leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(200),
+                                      child: groupPicture(context, group.id)),
+                                  title: Text(
+                                    '${group.DisplayName}',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  trailing: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Icon(Icons.person, size: 20),
-                                      SizedBox(width: 5),
-                                      Expanded(
-                                        child: Text(
-                                          'Description: ${group.description}',
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
+                                      Text(
+                                        formatTimeInMillis(
+                                            firstMessage!.timestamp),
+                                        style: TextStyle(
+                                            fontSize: 10, color: Colors.grey),
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 8),
-                                  Row(
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.people, size: 20),
-                                      SizedBox(width: 5),
-                                      Expanded(
-                                        child: Text(
-                                          '${group.numberOfMembers} members',
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
+                                      SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          //Maybe have icon?
+                                          //Icon(Icons.message, size: 20),
+                                          //SizedBox(width: 5),
+                                          Expanded(
+                                            child: Text(
+                                              '${firstMessage.displayName}: ${firstMessage.text}',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                          SizedBox(height: 8),
+                                        ],
+                                      ),
+                                      Divider(
+                                        color:
+                                            Provider.of<ThemeNotifier>(context)
+                                                        .currentTheme ==
+                                                    kDarkTheme
+                                                ? Colors.white60
+                                                : Theme.of(context)
+                                                    .primaryColor,
+                                        thickness: 1,
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       );
                     }).toList(),
                   );
@@ -563,7 +596,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          popUpDialog(context);
+          popUpDialogMobile(context);
         },
         elevation: 50,
         backgroundColor: Theme.of(context).primaryColor,
@@ -576,7 +609,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  popUpDialog(BuildContext context) {
+  popUpDialogWeb(BuildContext context) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -632,6 +665,174 @@ class _ChatPageState extends State<ChatPage> {
             );
           }));
         });
+  }
+
+/*
+  popUpDialogMobile(BuildContext context) {
+    TextEditingController groupNameController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(
+                  20))), // allows the modal to take up the entire height
+      builder: (context) => StatefulBuilder(
+        
+        builder: ((context, setState) {
+          return SingleChildScrollView(
+            child: Container(
+              height: isKeyboardOpen
+                  ? MediaQuery.of(context).size.height - 200
+                  : MediaQuery.of(context).size.height - 471,
+              padding: EdgeInsets.only(
+                  bottom:
+                      MediaQuery.of(context).viewInsets.bottom), // full screen
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.keyboard_double_arrow_down),
+                    onPressed: () {
+                      Navigator.pop(context); // closes the modal
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      "Create a group",
+                      textAlign: TextAlign.left,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium, // replace with your style
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  LineTextField(
+                    icon: Icons.title,
+                    lableText: 'Group name',
+                    controller: groupNameController,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  LineTextField(
+                    icon: Icons.description,
+                    lableText: 'Group Description',
+                    controller: descriptionController,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          {
+                            createGroup(context, groupNameController.text,
+                                descriptionController.text, _showErrorSnackbar);
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor),
+                        child: const Text("CREATE"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }*/
+  popUpDialogMobile(BuildContext context) {
+    TextEditingController groupNameController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
+    print("----------------------------------------------" +
+        isKeyboardOpen.toString());
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        final mediaQuery =
+            MediaQuery.of(context); // Moved inside builder function
+        return StatefulBuilder(builder: ((context, setState) {
+          return SingleChildScrollView(
+            child: Container(
+              height: isKeyboardOpen
+                  ? mediaQuery.size.height - 200
+                  : mediaQuery.size.height - 471,
+              padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.keyboard_double_arrow_down),
+                    onPressed: () {
+                      Navigator.pop(context); // closes the modal
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      "Create a group",
+                      textAlign: TextAlign.left,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  LineTextField(
+                    icon: Icons.title,
+                    lableText: 'Group name',
+                    controller: groupNameController,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  LineTextField(
+                    icon: Icons.description,
+                    lableText: 'Group Description',
+                    controller: descriptionController,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          createGroup(
+                            context,
+                            groupNameController.text,
+                            descriptionController.text,
+                            _showErrorSnackbar,
+                          );
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor),
+                        child: const Text("CREATE"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }));
+      },
+    );
   }
 
   Widget groupPicture(BuildContext context, String groupId) {
@@ -720,7 +921,11 @@ class _ChatPageState extends State<ChatPage> {
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () {
-                  popUpDialog(context);
+                  if (kIsWeb) {
+                    popUpDialogWeb(context);
+                  } else {
+                    popUpDialogMobile(context);
+                  }
                 },
                 child: Icon(
                   Icons.add_circle,

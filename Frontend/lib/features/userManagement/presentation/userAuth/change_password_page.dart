@@ -54,7 +54,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             'assets/images/back_arrow.svg',
             width: 40,
             height: 30,
-            color: Colors.white,
           ),
         ),
       ),

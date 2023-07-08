@@ -340,16 +340,20 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   const SizedBox(
                     width: 12,
                   ),
-                  Expanded(
+                  Flexible(
                     child: TextFormField(
                       controller: messageController,
                       focusNode: messageFocusNode,
+                      keyboardType: TextInputType.multiline,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       decoration: const InputDecoration(
                         hintText: "Send a message...",
                         hintStyle: TextStyle(color: Colors.white, fontSize: 16),
                         border: InputBorder.none,
                       ),
+                      minLines: 5, //Normal textInputField will be displayed
+                      maxLines:
+                          null, // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
                       },
@@ -493,107 +497,60 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           ),
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification notification) {
-                if (notification is ScrollEndNotification &&
-                    _scrollController.position.pixels == 0) {
-                  isLoading = true;
-                  loadOlderMessages();
-                }
-                return false;
-              },
-              child: chatMessages(),
+      body: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification notification) {
+                  if (notification is ScrollEndNotification &&
+                      _scrollController.position.pixels == 0) {
+                    isLoading = true;
+                    loadOlderMessages();
+                  }
+                  return false;
+                },
+                child: chatMessages(),
+              ),
             ),
-          ),
-          Container(
-            alignment: Alignment.bottomCenter,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            Container(
+              alignment: Alignment.bottomCenter,
               width: MediaQuery.of(context).size.width,
-              color: Color.fromARGB(0, 0, 0, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    child: pickedFile != null
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                                Row(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.topCenter,
-                                      child: Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              10,
-                                          child: Text(
-                                            pickedFile!.name,
-                                            textAlign: TextAlign.center,
-                                          )),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: IconButton(
-                                        icon: Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.rectangle,
-                                            // use circle if the icon is circular
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black,
-                                                blurRadius: 15.0,
-                                                spreadRadius: 2.0,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                          ),
-                                        ), // Choose your icon and color
-                                        onPressed: () {
-                                          setState(() {
-                                            pickedFile = null;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                messageImageWidget(context),
-                              ])
-                        : picked != null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                width: MediaQuery.of(context).size.width,
+                color: Color.fromARGB(0, 0, 0, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      child: pickedFile != null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
                                   Row(
                                     children: [
                                       Align(
                                         alignment: Alignment.topCenter,
                                         child: Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              10,
-                                          child: Text(
-                                            picked!.files.first.name,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                10,
+                                            child: Text(
+                                              pickedFile!.name,
+                                              textAlign: TextAlign.center,
+                                            )),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: IconButton(
                                           icon: Container(
                                             decoration: BoxDecoration(
-                                              shape: BoxShape.rectangle,
-                                              // use circle if the icon is circular
+                                              shape: BoxShape
+                                                  .rectangle, // use circle if the icon is circular
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black,
@@ -609,98 +566,103 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                           ), // Choose your icon and color
                                           onPressed: () {
                                             setState(() {
-                                              picked = null;
+                                              pickedFile = null;
                                             });
                                           },
                                         ),
                                       ),
                                     ],
                                   ),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: const Icon(
-                                      Icons.insert_drive_file,
-                                      size: 60,
-                                      color: Colors.white,
+                                  messageImageWidget(context),
+                                ])
+                          : picked != null
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.topCenter,
+                                          child: Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                10,
+                                            child: Text(
+                                              picked!.files.first.name,
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: IconButton(
+                                            icon: Container(
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape
+                                                    .rectangle, // use circle if the icon is circular
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black,
+                                                    blurRadius: 15.0,
+                                                    spreadRadius: 2.0,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                              ),
+                                            ), // Choose your icon and color
+                                            onPressed: () {
+                                              setState(() {
+                                                picked = null;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  )
-                                ],
-                              )
-                            : const SizedBox(),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      controller: messageController,
-                      focusNode: messageFocusNode,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: "Send a message...",
-                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
-                        border: InputBorder.none,
-                      ),
-                      onFieldSubmitted: (String value) {
-                        sendMessage(value);
-                      },
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: const Icon(
+                                        Icons.insert_drive_file,
+                                        size: 60,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  ],
+                                )
+                              : const SizedBox(),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      combinedButtonKey.currentState?.collapseOverlay();
-                      sendMessage(messageController.text.isEmpty
-                          ? ""
-                          : messageController.text);
-                      setState(() {});
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    Expanded(
+                      child: TextFormField(
+                        controller: messageController,
+                        focusNode: messageFocusNode,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          hintText: "Send a message...",
+                          hintStyle:
+                              TextStyle(color: Colors.white, fontSize: 16),
+                          border: InputBorder.none,
                         ),
+                        onFieldSubmitted: (String value) {
+                          sendMessage(value);
+                        },
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  CombinedButton(
-                    key: combinedButtonKey,
-                    image: GestureDetector(
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    GestureDetector(
                       onTap: () {
-                        setState(() {
-                          attachImage();
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.image,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    file: GestureDetector(
-                      onTap: () {
-                        attachFile();
+                        combinedButtonKey.currentState?.collapseOverlay();
+                        sendMessage(messageController.text.isEmpty
+                            ? ""
+                            : messageController.text);
                         setState(() {});
                       },
                       child: Container(
@@ -710,40 +672,87 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Icon(
-                            Icons.picture_as_pdf_rounded,
+                            Icons.send,
                             color: Colors.white,
                           ),
                         ),
                       ),
                     ),
-                    camera: GestureDetector(
-                      onTap: () {
-                        takePicture();
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30),
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    CombinedButton(
+                      key: combinedButtonKey,
+                      image: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            attachImage();
+                          });
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.image,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                        child: Center(
-                          child: Icon(
-                            Icons.add_a_photo,
-                            color: Colors.white,
+                      ),
+                      file: GestureDetector(
+                        onTap: () {
+                          attachFile();
+                          setState(() {});
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.picture_as_pdf_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      camera: GestureDetector(
+                        onTap: () {
+                          takePicture();
+                          setState(() {});
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.add_a_photo,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -865,62 +874,65 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
     int? lastTimestamp = 0;
 
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        Message message = messages[index];
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          Message message = messages[index];
 
-        if (index != 0) {
-          lastTimestamp = messages[index - 1].timestamp;
-        }
+          if (index != 0) {
+            lastTimestamp = messages[index - 1].timestamp;
+          }
 
-        List<Widget> widgets = [];
+          List<Widget> widgets = [];
 
-        if (isDifferentDay(lastTimestamp, message.timestamp)) {
-          widgets.add(MessageTile(
-            message: formatDateInMillis(message.timestamp),
-            sender: "",
-            senderDisplay: "",
-            time: 0,
-            isAdmin: false,
-            sentByMe: false,
-            isSystemMessage: true,
-            groupId: widget.groupId,
-            id: message.id,
-          ));
-        }
+          if (isDifferentDay(lastTimestamp, message.timestamp)) {
+            widgets.add(MessageTile(
+              message: formatDateInMillis(message.timestamp),
+              sender: "",
+              senderDisplay: "",
+              time: 0,
+              isAdmin: false,
+              sentByMe: false,
+              isSystemMessage: true,
+              groupId: widget.groupId,
+              id: message.id,
+            ));
+          }
 
-        widgets.add(message.containsFile
-            ? MessageWithFile(
-                id: message.id,
-                sender: message.name,
-                senderDisplay: message.displayName,
-                time: message.timestamp,
-                sentByMe: widget.user.username == message.name,
-                groupId: widget.groupId,
-                isAdmin: isAdmin,
-                fileExtension: message.extension!,
-                message: message.text,
-              )
-            : MessageTile(
-                message: message.text,
-                sender: message.name,
-                senderDisplay: message.displayName,
-                time: message.timestamp,
-                sentByMe: widget.user.username == message.name,
-                isSystemMessage: message.isSystemMessage,
-                groupId: widget.groupId,
-                id: message.id,
-                isAdmin: isAdmin,
-              ));
+          widgets.add(message.containsFile
+              ? MessageWithFile(
+                  id: message.id,
+                  sender: message.name,
+                  senderDisplay: message.displayName,
+                  time: message.timestamp,
+                  sentByMe: widget.user.username == message.name,
+                  groupId: widget.groupId,
+                  isAdmin: isAdmin,
+                  fileExtension: message.extension!,
+                  message: message.text,
+                )
+              : MessageTile(
+                  message: message.text,
+                  sender: message.name,
+                  senderDisplay: message.displayName,
+                  time: message.timestamp,
+                  sentByMe: widget.user.username == message.name,
+                  isSystemMessage: message.isSystemMessage,
+                  groupId: widget.groupId,
+                  id: message.id,
+                  isAdmin: isAdmin,
+                ));
 
-        if (!isScrollLocked) _scrollToBottom();
+          if (!isScrollLocked) _scrollToBottom();
 
-        return Column(
-          children: widgets,
-        );
-      },
+          return Column(
+            children: widgets,
+          );
+        },
+      ),
     );
   }
 

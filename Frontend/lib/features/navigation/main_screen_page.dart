@@ -399,6 +399,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       style: Theme.of(context).textTheme.bodyLarge),
                   children: [
                     ListTile(
+                      leading: Icon(Icons.search),
                       title: Text('Search Users',
                           style: Theme.of(context).textTheme.bodyLarge),
                       onTap: () {
@@ -410,6 +411,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       },
                     ),
                     ListTile(
+                      leading: Icon(
+                        Icons.manage_search,
+                      ),
                       title: Text('List Users',
                           style: Theme.of(context).textTheme.bodyLarge),
                       onTap: () {
@@ -445,8 +449,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
               ListTile(
                 leading: Icon(Icons.map),
-                title:
-                    Text('Campus', style: Theme.of(context).textTheme.bodyLarge),
+                title: Text('Campus',
+                    style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
                     _selectedIndex = 10;
