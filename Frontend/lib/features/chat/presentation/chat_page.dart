@@ -433,26 +433,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   },
                 ),
               ),
-              Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        popUpDialogWeb(context);
-                      },
-                      elevation: 6,
-                      backgroundColor: Theme.of(context).primaryColor,
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  )),
             ],
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          popUpDialogWeb(context);
+        },
+        elevation: 50,
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
       ),
     );
   }

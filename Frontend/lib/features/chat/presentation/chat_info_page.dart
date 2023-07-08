@@ -60,96 +60,92 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     super.initState();
     groupPic = downloadGroupPictureData();
 
-      membersRef =
-          FirebaseDatabase.instance.ref().child('members').child(
-              widget.groupId);
+    membersRef =
+        FirebaseDatabase.instance.ref().child('members').child(widget.groupId);
 
-      membersRef.onChildAdded.listen((event) async {
-        String memberId = event.snapshot.key as String;
+    membersRef.onChildAdded.listen((event) async {
+      String memberId = event.snapshot.key as String;
 
-        if (memberId == widget.username && event.snapshot.value as bool) {
+      if (memberId == widget.username && event.snapshot.value as bool) {
+        setState(() {
+          isAdmin = true;
+        });
+      }
+      DatabaseReference chatRef =
+          FirebaseDatabase.instance.ref().child('chat').child(memberId);
+
+      chatRef.once().then((userDataSnapshot) {
+        if (userDataSnapshot.snapshot.value != null) {
+          dynamic userData = userDataSnapshot.snapshot.value;
+          String? dispName = userData['DisplayName'] as String?;
+
           setState(() {
-            isAdmin = true;
+            if (dispName != null) {
+              members.add(MembersData(
+                  username: memberId,
+                  dispName: dispName,
+                  isAdmin: event.snapshot.value as bool));
+            }
           });
         }
-        DatabaseReference chatRef =
-        FirebaseDatabase.instance.ref().child('chat').child(memberId);
-
-        chatRef.once().then((userDataSnapshot) {
-          if (userDataSnapshot.snapshot.value != null) {
-            dynamic userData = userDataSnapshot.snapshot.value;
-            String? dispName = userData['DisplayName'] as String?;
-
-            setState(() {
-              if (dispName != null) {
-                members.add(MembersData(
-                    username: memberId,
-                    dispName: dispName,
-                    isAdmin: event.snapshot.value as bool));
-              }
-            });
-          }
-        });
       });
+    });
 
-      membersRef.onChildRemoved.listen((event) {
-        String memberId = event.snapshot.key as String;
+    membersRef.onChildRemoved.listen((event) {
+      String memberId = event.snapshot.key as String;
 
-        setState(() {
-          members.removeWhere((member) => member.username == memberId);
-        });
+      setState(() {
+        members.removeWhere((member) => member.username == memberId);
       });
+    });
 
 // Listen for child changed events
 
-      membersRef.onChildChanged.listen((event) {
-        String memberId = event.snapshot.key as String;
+    membersRef.onChildChanged.listen((event) {
+      String memberId = event.snapshot.key as String;
 
-        setState(() {
-          // Find the member in the list and update its isAdmin value
-          int index = members.indexWhere((member) =>
-          member.username == memberId);
-          if (index != -1) {
-            members[index].isAdmin = event.snapshot.value as bool;
-          }
-        });
+      setState(() {
+        // Find the member in the list and update its isAdmin value
+        int index = members.indexWhere((member) => member.username == memberId);
+        if (index != -1) {
+          members[index].isAdmin = event.snapshot.value as bool;
+        }
       });
+    });
 
-      chatsRef =
-          FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
-      chatsRef.once().then((chatSnapshot) {
-        Map<dynamic, dynamic> chatsData =
-        chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
+    chatsRef =
+        FirebaseDatabase.instance.ref().child('groups').child(widget.groupId);
+    chatsRef.once().then((chatSnapshot) {
+      Map<dynamic, dynamic> chatsData =
+          chatSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
-        setState(() {
-          desc = chatsData["description"];
-        });
+      setState(() {
+        desc = chatsData["description"];
       });
+    });
 
-      DatabaseReference eventsRef =
-      FirebaseDatabase.instance.ref().child('events').child(widget.groupId);
-      eventsRef.onChildAdded.listen((event) {
-        setState(() {
-          String? id = event.snapshot.key; // Here is how you get the key
-          Event currentEvent = id != null
-              ? Event.fromSnapshotId(id, event.snapshot)
-              : Event.fromSnapshot(event.snapshot);
-          events.add(currentEvent);
-        });
+    DatabaseReference eventsRef =
+        FirebaseDatabase.instance.ref().child('events').child(widget.groupId);
+    eventsRef.onChildAdded.listen((event) {
+      setState(() {
+        String? id = event.snapshot.key; // Here is how you get the key
+        Event currentEvent = id != null
+            ? Event.fromSnapshotId(id, event.snapshot)
+            : Event.fromSnapshot(event.snapshot);
+        events.add(currentEvent);
       });
+    });
 
-      eventsRef.onChildRemoved.listen((event) {
-        String eventId = event.snapshot.key as String;
+    eventsRef.onChildRemoved.listen((event) {
+      String eventId = event.snapshot.key as String;
 
-
-        setState(() {
-          events.removeWhere((event) => event.id == eventId);
-        });
+      setState(() {
+        events.removeWhere((event) => event.id == eventId);
       });
-      _tabController = TabController(length: 2, vsync: this);
-      WidgetsBinding.instance?.addObserver(this);
+    });
+    _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance?.addObserver(this);
   }
-
 
   void _showErrorSnackbar(String message, bool Error) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -175,15 +171,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     print(value);
     if (value < 50) {
       // adjust this value based on your needs
-      if(mounted)
-      setState(() {
-        isKeyboardOpen = false;
-      });
+      if (mounted)
+        setState(() {
+          isKeyboardOpen = false;
+        });
     } else {
-      if(mounted)
-      setState(() {
-        isKeyboardOpen = true;
-      });
+      if (mounted)
+        setState(() {
+          isKeyboardOpen = true;
+        });
     }
   }
 
@@ -328,33 +324,32 @@ class _ChatInfoPageState extends State<ChatInfoPage>
 
   @override
   Widget build(BuildContext context) {
-
     return kIsWeb
         ? _buildLayout(context)
         : Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Theme.of(context).textTheme.bodyLarge!.color,
-          ),
-          centerTitle: true,
-          elevation: 0,
-          title: Text(
-            "Group Information",
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                color: Theme.of(context).textTheme.bodyLarge!.color),
-          ),
-          backgroundColor: Theme.of(context).primaryColor,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.exit_to_app_rounded),
-              tooltip: 'Leave Group',
-              onPressed: () {
-                leavePopUpDialogMobile(context);
-              },
+            appBar: AppBar(
+              iconTheme: IconThemeData(
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
+              centerTitle: true,
+              elevation: 0,
+              title: Text(
+                "Group Information",
+                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Theme.of(context).textTheme.bodyLarge!.color),
+              ),
+              backgroundColor: Theme.of(context).primaryColor,
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.exit_to_app_rounded),
+                  tooltip: 'Leave Group',
+                  onPressed: () {
+                    leavePopUpDialogMobile(context);
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-        body: _buildLayout(context));
+            body: _buildLayout(context));
   }
 
   Widget _buildLayout(BuildContext context) {
@@ -392,11 +387,13 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 .textTheme
                                 .bodyMedium!
                                 .copyWith(
-                                color: Theme.of(context)
-                                    .secondaryHeaderColor)),
+                                    color: Theme.of(context)
+                                        .secondaryHeaderColor)),
                         onPressed: () {
-                          if (kIsWeb) leavePopUpDialogWeb(context);
-                          else leavePopUpDialogMobile(context);
+                          if (kIsWeb)
+                            leavePopUpDialogWeb(context);
+                          else
+                            leavePopUpDialogMobile(context);
                         },
                         style: TextButton.styleFrom(
                           minimumSize: Size(50, 50),
@@ -423,7 +420,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   Expanded(
                     child: SingleChildScrollView(
                       scrollDirection:
-                      Axis.horizontal, // use this for horizontal scrolling
+                          Axis.horizontal, // use this for horizontal scrolling
                       child: Text(
                         desc,
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -456,7 +453,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 .withRed(Theme.of(context).scaffoldBackgroundColor.red - 20)
                 .withBlue(Theme.of(context).scaffoldBackgroundColor.blue - 20)
                 .withGreen(
-                Theme.of(context).scaffoldBackgroundColor.green - 20)),
+                    Theme.of(context).scaffoldBackgroundColor.green - 20)),
             tabs: [
               Tab(
                   icon: Icon(Icons.event, color: Style.lightBlue),
@@ -500,12 +497,14 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                     .textTheme
                                     .bodyMedium!
                                     .copyWith(
-                                    color: Theme.of(context)
-                                        .secondaryHeaderColor),
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor),
                               ),
                               onPressed: () {
-                                if (kIsWeb) _createEventPopUpDialogWeb(context);
-                                else _createEventPopUpDialogMobile(context);
+                                if (kIsWeb)
+                                  _createEventPopUpDialogWeb(context);
+                                else
+                                  _createEventPopUpDialogMobile(context);
                               },
                               style: TextButton.styleFrom(
                                 minimumSize: Size(50, 50),
@@ -519,7 +518,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       //padding: EdgeInsets.all(16),
                       child: Container(
                         padding:
-                        EdgeInsets.only(top: 10), //VALOR A ALTERAR OU NAO),
+                            EdgeInsets.only(top: 10), //VALOR A ALTERAR OU NAO),
                         child: SizedBox(
                           height: MediaQuery.of(context).size.height -
                               433, //VALOR A ALTERAR
@@ -548,48 +547,66 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                       children: <Widget>[
                                         Divider(
                                           color: Provider.of<ThemeNotifier>(
-                                              context)
-                                              .currentTheme ==
-                                              kDarkTheme
+                                                          context)
+                                                      .currentTheme ==
+                                                  kDarkTheme
                                               ? Colors.white60
                                               : Theme.of(context).primaryColor,
                                           thickness: 1,
                                         ),
                                         Container(
-                                          color: Theme.of(context).scaffoldBackgroundColor,
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
                                           child: Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 8),
                                             child: ListTile(
                                               title: Row(
                                                 children: [
                                                   InkWell(
                                                     child: Text(
                                                       event.title,
-                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
                                                     ),
                                                   ),
                                                   SizedBox(width: 10),
                                                   InkWell(
                                                     onTap: () {
-                                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                                                          MainScreen(index: 9, date: event.startTime)));
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  MainScreen(
+                                                                      index: 9,
+                                                                      date: event
+                                                                          .startTime)));
                                                     },
-                                                    child: Icon(Icons.schedule, size: 20, color: Style.lightBlue),
+                                                    child: Icon(Icons.schedule,
+                                                        size: 20,
+                                                        color: Style.lightBlue),
                                                   ),
-                                                  if (event.location != "0") ... [
-                                                  SizedBox(width: 10),
-                                                  InkWell(
-                                                    onTap: () {
-                                                      // Handle click on clock icon
-                                                      // Navigate to another page or perform desired action
-                                                    },
-                                                    child: Icon(Icons.directions, size: 20, color: Style.lightBlue),
-                                                  ),
+                                                  if (event.location !=
+                                                      "0") ...[
+                                                    SizedBox(width: 10),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        // Handle click on clock icon
+                                                        // Navigate to another page or perform desired action
+                                                      },
+                                                      child: Icon(
+                                                          Icons.directions,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
+                                                    ),
                                                   ]
                                                 ],
                                               ),
                                               subtitle: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   SizedBox(height: 8),
                                                   Row(
@@ -597,31 +614,31 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                       Icon(Icons.type_specimen,
                                                           size: 20,
                                                           color:
-                                                          Style.lightBlue),
+                                                              Style.lightBlue),
                                                       SizedBox(width: 5),
                                                       Row(
                                                         children: [
                                                           Text(
                                                             'Type: ',
                                                             style: Theme.of(
-                                                                context)
+                                                                    context)
                                                                 .textTheme
                                                                 .titleMedium!
                                                                 .copyWith(
-                                                                fontSize:
-                                                                14),
+                                                                    fontSize:
+                                                                        14),
                                                           ),
                                                           Text(
                                                             _getEventTypeString(
                                                                 event.type),
                                                             style: Theme.of(
-                                                                context)
+                                                                    context)
                                                                 .textTheme
                                                                 .bodyMedium,
                                                             maxLines: 1,
                                                             overflow:
-                                                            TextOverflow
-                                                                .ellipsis,
+                                                                TextOverflow
+                                                                    .ellipsis,
                                                           ),
                                                         ],
                                                       ),
@@ -630,18 +647,29 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                   SizedBox(height: 8),
                                                   Row(
                                                     children: [
-                                                      Icon(Icons.description, size: 20, color: Style.lightBlue),
+                                                      Icon(Icons.description,
+                                                          size: 20,
+                                                          color:
+                                                              Style.lightBlue),
                                                       SizedBox(width: 5),
-                                                                                                            Text(
+                                                      Text(
                                                         'Description: ',
-                                                        style: Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 14),
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium!
+                                                            .copyWith(
+                                                                fontSize: 14),
                                                       ),
                                                       Flexible(
                                                         child: Text(
                                                           event.description,
-                                                          style: Theme.of(context).textTheme.bodyMedium,
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
                                                           maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
                                                       ),
                                                     ],
@@ -659,25 +687,25 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                         Text(
                                                           'Location: ',
                                                           style:
-                                                          Theme.of(context)
-                                                              .textTheme
-                                                              .titleMedium!
-                                                              .copyWith(
-                                                              fontSize:
-                                                              14),
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleMedium!
+                                                                  .copyWith(
+                                                                      fontSize:
+                                                                          14),
                                                         ),
                                                         FutureBuilder<String>(
                                                           future:
-                                                          getPlaceInLocations(
-                                                              event
-                                                                  .location!),
+                                                              getPlaceInLocations(
+                                                                  event
+                                                                      .location!),
                                                           builder: (BuildContext
-                                                          context,
+                                                                  context,
                                                               AsyncSnapshot<
-                                                                  String>
-                                                              snapshot) {
+                                                                      String>
+                                                                  snapshot) {
                                                             if (snapshot
-                                                                .connectionState ==
+                                                                    .connectionState ==
                                                                 ConnectionState
                                                                     .waiting) {
                                                               return SizedBox
@@ -688,28 +716,30 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                 return Text(
                                                                     'Error: ${snapshot.error}');
                                                               else
-                                                                return snapshot.data == "" ? Text(
-                                                                  "Custom Location",
-                                                                  style: Theme.of(
-                                                                      context)
-                                                                      .textTheme
-                                                                      .bodyMedium,
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                                ) : Text(
-                                                                  snapshot
-                                                                      .data!,
-                                                                  style: Theme.of(
-                                                                      context)
-                                                                      .textTheme
-                                                                      .bodyMedium,
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                                );
+                                                                return snapshot
+                                                                            .data ==
+                                                                        ""
+                                                                    ? Text(
+                                                                        "Custom Location",
+                                                                        style: Theme.of(context)
+                                                                            .textTheme
+                                                                            .bodyMedium,
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      )
+                                                                    : Text(
+                                                                        snapshot
+                                                                            .data!,
+                                                                        style: Theme.of(context)
+                                                                            .textTheme
+                                                                            .bodyMedium,
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      );
                                                             }
                                                           },
                                                         ),
@@ -722,7 +752,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                       Icon(Icons.schedule,
                                                           size: 20,
                                                           color:
-                                                          Style.lightBlue),
+                                                              Style.lightBlue),
                                                       SizedBox(width: 5),
                                                       Text(
                                                         'Start: ',
@@ -730,15 +760,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                             .textTheme
                                                             .titleMedium!
                                                             .copyWith(
-                                                            fontSize: 14),
+                                                                fontSize: 14),
                                                       ),
                                                       Flexible(
                                                         child: Text(
                                                           '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
                                                           style:
-                                                          Theme.of(context)
-                                                              .textTheme
-                                                              .bodyMedium,
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
                                                           maxLines: 1,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -752,7 +782,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                       Icon(Icons.schedule,
                                                           size: 20,
                                                           color:
-                                                          Style.lightBlue),
+                                                              Style.lightBlue),
                                                       SizedBox(width: 5),
                                                       Text(
                                                         'End: ',
@@ -760,15 +790,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                             .textTheme
                                                             .titleMedium!
                                                             .copyWith(
-                                                            fontSize: 14),
+                                                                fontSize: 14),
                                                       ),
                                                       Flexible(
                                                         child: Text(
                                                           '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
                                                           style:
-                                                          Theme.of(context)
-                                                              .textTheme
-                                                              .bodyMedium,
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
                                                           maxLines: 1,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -782,7 +812,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                           ),
                                         ),
                                         if (isAdmin) ...[
-
                                           Positioned(
                                             top: 15,
                                             right: 10,
@@ -794,13 +823,16 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                 icon: Icon(Icons.delete,
                                                     color: Colors.blue),
                                                 onPressed: () {
-                                                  if(kIsWeb) _removeEventPopUpDialogWeb(context, event.id!);
-                                                  else _removeEventPopUpDialogMobile(context, event.id!);
+                                                  if (kIsWeb)
+                                                    _removeEventPopUpDialogWeb(
+                                                        context, event.id!);
+                                                  else
+                                                    _removeEventPopUpDialogMobile(
+                                                        context, event.id!);
                                                 },
                                               ),
                                             ),
                                           ),
-
                                         ],
                                         Divider(
                                           color: Colors.black87,
@@ -845,11 +877,13 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                     .textTheme
                                     .bodyMedium!
                                     .copyWith(
-                                    color: Theme.of(context)
-                                        .secondaryHeaderColor)),
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor)),
                             onPressed: () {
-                              if (kIsWeb) popUpDialogWeb(context);
-                              else popUpDialogMobile(context);
+                              if (kIsWeb)
+                                popUpDialogWeb(context);
+                              else
+                                popUpDialogMobile(context);
                             },
                             style: TextButton.styleFrom(
                               minimumSize: Size(50, 50),
@@ -903,7 +937,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                         ),
                                         subtitle: Column(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                              CrossAxisAlignment.start,
                                           children: [
                                             SizedBox(height: 8),
                                             Row(
@@ -914,7 +948,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                 Text(
                                                   'Username: ${member.username}',
                                                   style:
-                                                  TextStyle(fontSize: 13),
+                                                      TextStyle(fontSize: 13),
                                                 ),
                                               ],
                                             ),
@@ -935,8 +969,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                     color: Style.lightBlue,
                   ),
                 ]
-                  // your members code here
-                ),
+                    // your members code here
+                    ),
               ],
             ),
           ),
@@ -1228,24 +1262,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                               leaveGroup(context, widget.groupId,
                                   widget.username, _showErrorSnackbar);
 
-                              if (!kIsWeb) {
-                                /*await FirebaseMessaging.instance
-                .unsubscribeFromTopic(widget.groupId);*/
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                              } else {
-                                Future.delayed(Duration(milliseconds: 100), () {
-                                  Navigator.pop(context);
-                                  Navigator.pushReplacement(
-                                    context,
-                                    CupertinoPageRoute(
-                                      builder: (context) =>
-                                          MainScreen(index: 6),
-                                    ),
-                                  );
-                                });
-                              }
+                              Future.delayed(Duration(milliseconds: 200), () {
+                                Navigator.pop(context);
+                                Navigator.pushReplacement(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => MainScreen(index: 6),
+                                  ),
+                                );
+                              });
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black87,
@@ -1891,11 +1916,11 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       );
     }
 
-      if (response.statusCode == 200) {
-        showErrorSnackbar('Created an event successfully!', false);
-      } else {
-        showErrorSnackbar('Failed to create an event: ${response.body}', true);
-      }
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Created an event successfully!', false);
+    } else {
+      showErrorSnackbar('Failed to create an event: ${response.body}', true);
+    }
   }
 
   Future<void> removeEvent(
@@ -1918,17 +1943,16 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       },
     );
 
-      if (response.statusCode == 200) {
-        userNameController.clear();
-        titleController.clear();
-        descriptionController.clear();
-        startController.clear();
-        endController.clear();
-        showErrorSnackbar('Removed successfully!', false);
-      } else {
-        showErrorSnackbar('Failed to remove the event: ${response.body}', true);
-      }
-
+    if (response.statusCode == 200) {
+      userNameController.clear();
+      titleController.clear();
+      descriptionController.clear();
+      startController.clear();
+      endController.clear();
+      showErrorSnackbar('Removed successfully!', false);
+    } else {
+      showErrorSnackbar('Failed to remove the event: ${response.body}', true);
+    }
   }
 
   Future<void> leaveGroup(
