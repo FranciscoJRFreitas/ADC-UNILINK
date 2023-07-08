@@ -136,6 +136,7 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void deleteMessage(String groupId, String id) {
+    if (id == '-1') SqliteService().deleteMessage(groupId);
     SqliteService().deleteMessage(id);
   }
 
@@ -143,15 +144,11 @@ class CacheFactoryImpl implements CacheFactory {
   void updateMessageCache(String groupId, Message message) {
     SqliteService().updateMessage(message);
   }
-  
+
   @override
   Future<List<Message>> getMessages(String groupId) async {
     // TODO: implement getMessages
     //printDb();
-   return await SqliteService().getMessages(groupId);
+    return await SqliteService().getMessages(groupId);
   }
-
-
-
-  
 }

@@ -108,10 +108,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         bool repeated = messages.any((element) => element.id == message.id);
         if (!repeated) {
           messages.add(message);
-          cacheFactory.setMessages(widget.groupId, message);
+          if (messages.length > 1)
+            cacheFactory.setMessages(widget.groupId, message);
         }
       });
-
     });
 
     // Listen for updated messages

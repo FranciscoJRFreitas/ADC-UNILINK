@@ -12,12 +12,8 @@ import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
-import 'package:unilink2023/widgets/LineButton.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
-import 'package:unilink2023/widgets/my_date_event_field.dart';
-import 'package:unilink2023/widgets/my_text_button.dart';
-import 'package:unilink2023/widgets/my_text_field.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 
@@ -2100,6 +2096,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     String userId,
     void Function(String, bool) showErrorSnackbar,
   ) async {
+    cacheFactory.deleteMessage(groupId, '-1'); //Deleting group from cache
     final url =
         kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
     final tokenID = await cacheFactory.get('users', 'token');
