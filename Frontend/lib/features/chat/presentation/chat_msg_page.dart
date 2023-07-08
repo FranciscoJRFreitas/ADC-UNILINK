@@ -83,36 +83,39 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       messagesRef
           .orderByKey()
           .limitToLast(cacheMessageCap)
-          .once()
-          .then((event) {
-        Map<dynamic, dynamic> valueMap =
-            event.snapshot.value as Map<dynamic, dynamic>;
-
-        valueMap.forEach((key, value) {
-          Message message = Message.fromMapKey(key, value);
-          cacheFactory.setMessages(widget.groupId, message);
+          .onChildAdded
+          .listen((event) {
+        Message message = Message.fromSnapshot(event.snapshot);
+        setState(() {
+          bool repeated = messages.any((element) => element.id == message.id);
+          if (!repeated) {
+            messages.add(message);
+            cacheFactory.setMessages(widget.groupId, message);
+          }
         });
 
         setState(() {});
       });
+    } else {
+      messagesRef.orderByKey().onChildAdded.listen((event) {
+        if (messages.length > cacheMessageCap) {
+          messages
+              .removeAt(0); // remove the oldest message if the limit is reached
+        }
+
+        Message message = Message.fromSnapshot(event.snapshot);
+        setState(() {
+          bool repeated = messages.any((element) => element.id == message.id);
+          if (!repeated) {
+            messages.add(message);
+            cacheFactory.setMessages(widget.groupId, message);
+          }
+        });
+
+      });
     }
 
-    messagesRef.orderByKey().onChildAdded.listen((event) {
-      if (messages.length > cacheMessageCap) {
-        messages
-            .removeAt(0); // remove the oldest message if the limit is reached
-      }
 
-      Message message = Message.fromSnapshot(event.snapshot);
-      setState(() {
-        bool repeated = messages.any((element) => element.id == message.id);
-        if (!repeated) {
-          messages.add(message);
-          cacheFactory.setMessages(widget.groupId, message);
-        }
-      });
-
-    });
 
     // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {

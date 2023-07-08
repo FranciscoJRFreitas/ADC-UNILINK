@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:html';
 import 'dart:io';
+import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
 import '../features/chat/domain/Message.dart';
@@ -137,6 +138,15 @@ class CacheFactoryImpl implements CacheFactory {
     }
   }
 
+  Future<List<dynamic>> _getGroupsList() async {
+    String? jsonString = await window.localStorage['groups'];
+    if (jsonString != null) {
+      return jsonDecode(jsonString);
+    } else {
+      return [];
+    }
+  }
+
   Future<List<dynamic>> _getNewsList() async {
     String? jsonString = window.localStorage['news'];
     if (jsonString != null) {
@@ -152,6 +162,10 @@ class CacheFactoryImpl implements CacheFactory {
           messagesList.sublist(messagesList.length - cacheMessagesLimit);
     }
     window.localStorage[groupId] = jsonEncode(messagesList);
+  }
+
+  void _setGroupsList(List<dynamic> messagesList) async {
+    window.localStorage['groups'] = jsonEncode(messagesList);
   }
 
   void _setNewsList(List<dynamic> newsList) {
@@ -219,5 +233,21 @@ class CacheFactoryImpl implements CacheFactory {
       messages[messageIndex] = message.toMap();
     }
     _setMessagesList(groupId, messages);
+  }
+
+  @override
+  Future<List<Group>> getGroups() async {
+    List<dynamic>? jsonMessagesList = await _getGroupsList();
+    return jsonMessagesList
+        .map((jsonMessage) => Group.fromMap(jsonMessage))
+        .toList();
+  }
+
+  @override
+  void addGroup(Group group) {
+    _getGroupsList().then((groupsList) {
+      groupsList.add(group.toMap());
+      _setGroupsList(groupsList);
+    });
   }
 }
