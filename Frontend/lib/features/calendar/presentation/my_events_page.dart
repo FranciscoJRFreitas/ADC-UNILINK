@@ -10,6 +10,7 @@ import 'package:unilink2023/features/navigation/main_screen_page.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
+import 'package:unilink2023/widgets/LocationPopUp.dart';
 
 class MyEventsPage extends StatefulWidget {
   final String username;
@@ -63,7 +64,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     await chatRef.once().then((event) {
       Map<dynamic, dynamic> newgroup =
-      event.snapshot.value as Map<dynamic, dynamic>;
+          event.snapshot.value as Map<dynamic, dynamic>;
       newgroup.forEach((key, value) {
         setState(() {
           groups.add(key);
@@ -73,12 +74,12 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     for (String groupId in groups) {
       DatabaseReference eventsRef =
-      await FirebaseDatabase.instance.ref().child('events').child(groupId);
+          await FirebaseDatabase.instance.ref().child('events').child(groupId);
 
       await eventsRef.once().then((userDataSnapshot) {
         if (userDataSnapshot.snapshot.value != null) {
           Map<dynamic, dynamic> newevents =
-          userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
@@ -91,7 +92,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
                 startTime: DateTime.parse(currEvent["startTime"]),
                 endTime: DateTime.parse(currEvent["endTime"]));
 
-              events.add(currentEvent);
+            events.add(currentEvent);
           });
         }
       });
@@ -99,22 +100,25 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
-    return events.isEmpty ? noEventWidget() : Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(8),
-        child: Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _eventsWidget(context),
-              ],
+    return events.isEmpty
+        ? noEventWidget()
+        : Scaffold(
+            body: Container(
+              padding: EdgeInsets.all(8),
+              child: Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _eventsWidget(context),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
   }
 
   Widget _eventsWidget(BuildContext context) {
@@ -442,7 +446,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
                   LineComboBox(
                     selectedValue: _selectedEventType,
                     items:
-                    eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -630,5 +634,3 @@ class _MyEventsPageState extends State<MyEventsPage> {
     return EventType.academic;
   }
 }
-
-
