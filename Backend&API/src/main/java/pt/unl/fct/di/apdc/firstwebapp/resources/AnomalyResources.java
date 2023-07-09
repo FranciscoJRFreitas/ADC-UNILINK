@@ -10,6 +10,7 @@ import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -47,28 +48,91 @@ public class AnomalyResources {
         if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
-        AnomalyData anomaly = new AnomalyData(data.title, data.description, data.coordinates);
+        AnomalyData anomaly = new AnomalyData(data.title, data.description, data.coordinates, data.sender);
 
         DatabaseReference anomaliesRef = FirebaseDatabase.getInstance().getReference("anomaly");
-        Map<String, Object> eventData = new HashMap<>();
-        eventData.put("title", anomaly.title);
-        eventData.put("description", anomaly.description);
-        eventData.put("location", anomaly.coordinates);
-        anomaliesRef.child(anomaly.AnoamlyID).setValueAsync(eventData);
-        /*Transaction txn = datastore.newTransaction();
-        try {
-            AnomalyData anomaly = new AnomalyData(data.title, data.description, data.coordinates);
-            Key anomalyKey = datastore.newKeyFactory().setKind("Anomaly").newKey(anomaly.AnoamlyID);
-            Entity.Builder anomalyBuilder = Entity.newBuilder(anomalyKey)
-                    .set("title", anomaly.title)
-                    .set("description", anomaly.description)
-                    .set("coordinates", anomaly.coordinates);
-            txn.add(anomalyBuilder.build());
-            txn.commit();
-            return Response.ok("{}").build();
-        } finally {
-            if (txn.isActive()) txn.rollback();
-        }*/
+        Map<String, Object> anomalyData = new HashMap<>();
+        anomalyData.put("sender", anomaly.sender);
+        anomalyData.put("title", anomaly.title);
+        anomalyData.put("description", anomaly.description);
+        anomalyData.put("location", anomaly.coordinates);
+        anomalyData.put("status", "Detected");
+        anomaliesRef.child(anomaly.id).setValueAsync(anomalyData);
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/confirm")
+    public Response confirmAnomaly(String anomalyId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
+        DatabaseReference anomaliesRef = FirebaseDatabase.getInstance().getReference("anomaly");
+        anomaliesRef.child(anomalyId).setValueAsync("status", "Confirmed");
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/reject")
+    public Response rejectAnomaly(String anomalyId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
+        DatabaseReference anomaliesRef = FirebaseDatabase.getInstance().getReference("anomaly");
+        anomaliesRef.child(anomalyId).setValueAsync("status", "Rejected");
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/inProgress")
+    public Response reviewingAnomaly(String anomalyId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+        }
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
+        DatabaseReference anomaliesRef = FirebaseDatabase.getInstance().getReference("anomaly");
+        anomaliesRef.child(anomalyId).setValueAsync("status", "In Progress");
         return Response.ok().build();
     }
 
@@ -93,18 +157,33 @@ public class AnomalyResources {
         }
 
         DatabaseReference anomaliesRef = FirebaseDatabase.getInstance().getReference("anomaly");
-        anomaliesRef.child(anomalyId).removeValueAsync();
-       /* Transaction txn = datastore.newTransaction();
-        try {
-            Key anomalyKey = datastore.newKeyFactory().setKind("Anomaly").newKey(anomalyId);
+        anomaliesRef.child(anomalyId).setValueAsync("status", "Solved");
+        return Response.ok().build();
+    }
 
-            txn.delete(anomalyKey);
-            txn.commit();
-            return Response.ok("{}").build();
-        } finally {
-            if (txn.isActive()) txn.rollback();
+    @POST
+    @Path("/delete")
+    public Response deleteAnomaly(String anomalyId, @Context HttpHeaders headers) {
+        String authTokenHeader = headers.getHeaderString("Authorization");
+        String authToken = authTokenHeader.substring("Bearer".length()).trim();
+        AuthToken token = g.fromJson(authToken, AuthToken.class);
+
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+                .setKind("User Token").newKey(token.username);
+
+        Entity originalToken = datastore.get(tokenKey);
+
+        if (originalToken == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
         }
-    }*/
+
+        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+        }
+
+        DatabaseReference anomaliesRef = FirebaseDatabase.getInstance().getReference("anomaly");
+        anomaliesRef.child(anomalyId).removeValueAsync();
+
         return Response.ok().build();
     }
 }

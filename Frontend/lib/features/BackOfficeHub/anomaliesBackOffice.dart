@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:unilink2023/features/BackOfficeHub/Domain/Anomaly.dart';
 
 import '../../constants.dart';
+import '../anomaly/Domain/Anomaly.dart';
 
 class AnomaliesPage extends StatefulWidget {
   @override
@@ -17,33 +17,11 @@ class _AnomaliesPageState extends State<AnomaliesPage> {
   void initState() {
     super.initState();
     _anomaliesRef = FirebaseDatabase.instance.ref('anomaly');
-    // _anomaliesRef.once().then((snapshot) {
-    //   if (snapshot.snapshot.value != null) {
-    //     Map<dynamic, dynamic> values =
-    //         snapshot.snapshot.value as Map<dynamic, dynamic>;
-    //     values.forEach((key, value) {
-    //       setState(() {
-    //         _anomalies.add(Anomaly(
-    //           anomalyId: key,
-    //           title: value['title'],
-    //           description: value['description'],
-    //           coordinates: value['coordinates'],
-    //         ));
-    //       });
-    //     });
-    //   }
-    // });
 
     _anomaliesRef.onChildAdded.listen((event) {
-      Map<dynamic, dynamic> curranomalies =
-          event.snapshot.value as Map<dynamic, dynamic>;
+      var anomaly = Anomaly.fromSnapshot(event.snapshot);
       setState(() {
-        _anomalies.add(Anomaly(
-          anomalyId: event.snapshot.key,
-          title: curranomalies['title'],
-          description: curranomalies['description'],
-          coordinates: curranomalies['location'],
-        ));
+        _anomalies.add(anomaly);
       });
     });
 

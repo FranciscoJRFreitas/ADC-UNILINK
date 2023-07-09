@@ -127,7 +127,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           username: _currentUser.username, date: scheduleDate
         ), //estudante //9
         MyMap(markerLocation: markerLocation), //10
-        ReportAnomalyPage(),
+        ReportAnomalyPage(user: _currentUser),
         BackOfficePage(),
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
@@ -239,7 +239,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
   }
 
-  @override
   Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
