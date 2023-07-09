@@ -45,6 +45,19 @@ class _BackOfficePageState extends State<BackOfficePage> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
+                  _selectedButton = 'Event Menagement';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                primary:
+                    _selectedButton == 'Event Menagement' ? Colors.green : null,
+              ),
+              child: Text('Event Management'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) => AnomaliesPage()),
                   );
