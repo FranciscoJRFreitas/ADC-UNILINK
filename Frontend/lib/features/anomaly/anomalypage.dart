@@ -204,7 +204,9 @@ class ReportAnomalyPageState extends State<ReportAnomalyPage> {
           );
         },
       );
+      anomalytitleController.clear();
       anomalyController.clear();
+      selectedLocation = null;
     } else {
       showErrorSnackbar('Failed to send Anomaly: ${response.body}', true);
     }
