@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/features/BackOfficeHub/BackOfficePage.dart';
 import 'package:unilink2023/features/anomaly/anomalypage.dart';
+import 'package:unilink2023/features/calendar/presentation/my_events_page.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
@@ -66,6 +67,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "BackOffice Hub",
     "Teacher",
     "Director",
+    "Events",
   ];
   late List<double> scales = List.filled(_widgetOptions().length, 1);
   late User _currentUser;
@@ -126,13 +128,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(
-          username: _currentUser.username, date: scheduleDate
-        ), //estudante //9
+            username: _currentUser.username,
+            date: scheduleDate), //estudante //9
         MyMap(markerLocation: markerLocation), //10
         ReportAnomalyPage(user: _currentUser),
         BackOfficePage(),
-        Placeholder(), //professor //11
+        Placeholder(),
+
         Placeholder(), //diretor //12
+        MyEventsPage(username: _currentUser.username),
       ];
 
   Widget picture(BuildContext context) {
@@ -161,8 +165,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -260,7 +264,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           iconTheme: IconThemeData(
             color: Theme.of(context).textTheme.bodyLarge!.color,
           ),
-          backgroundColor: Theme.of(context).primaryColor, //roleColor,
+          backgroundColor: Theme.of(context).primaryColor,
+          //roleColor,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
             _title[_selectedIndex],
@@ -378,6 +383,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               setState(() {
                                 scheduleDate = DateTime.now();
                                 _selectedIndex = 9;
+                              });
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.event_note),
+                            title: Text('My Events'),
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = 15;
                               });
                               Navigator.pop(context);
                             },

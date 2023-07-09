@@ -554,10 +554,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text(
-                                        formatTimeInMillis(
-                                            firstMessage != null
-                                                ? firstMessage.timestamp
-                                                : 0),
+                                        formatTimeInMillis(firstMessage != null
+                                            ? firstMessage.timestamp
+                                            : 0),
                                         style: TextStyle(
                                             fontSize: 10, color: Colors.grey),
                                       ),

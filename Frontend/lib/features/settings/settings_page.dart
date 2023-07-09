@@ -5,9 +5,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/features/settings/edit_starting_page.dart';
+import 'package:unilink2023/features/settings/edit_language.dart';
 import '../../data/cache_factory_provider.dart';
 import '../userManagement/presentation/userAuth/change_password_page.dart';
 import '../userManagement/presentation/userAuth/remove_account_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:country_flags/country_flags.dart';
+import 'package:circle_flags/circle_flags.dart';
 
 class SettingsPage extends StatefulWidget {
   final bool loggedIn;
@@ -46,23 +50,104 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget layoutLoggedIn(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final options = [
       Option(
           icon: Icon(
               _currentTheme == "Dark" ? Icons.nights_stay : Icons.wb_sunny,
               color: Theme.of(context).secondaryHeaderColor,
               size: 40.0),
-          title: 'Theme',
-          subtitle: 'Change between dark and light themes.',
+          title: localizations.theme,
+          subtitle: localizations.changeBetweenThemes,
           toggleButton: true,
           onTap: () {
             getSettings();
           }),
       Option(
+        icon: Icon(Icons.translate,
+            color: Theme.of(context).secondaryHeaderColor, size: 30.0),
+        title: localizations.language,
+        subtitle: "",
+        rightWidget: Padding(
+          padding: EdgeInsets.only(right: 20.0),
+          child: Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween, // Distribute space evenly
+            children: [
+              FutureBuilder(
+                future: cacheFactory.get('settings', 'language'),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else {
+                    Widget flagWidget;
+                    switch (snapshot.data) {
+                      case 'portugues':
+                        flagWidget = flagWidget = Image.asset(
+                          'assets/icon/portuguese_flag.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        );
+                        break;
+                      case 'english':
+                        flagWidget = Image.asset(
+                          'assets/icon/english_flag.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        );
+                        break;
+                      default:
+                        flagWidget = Image.asset(
+                          'assets/icon/english_flag.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        );
+                    }
+                    return Row(
+                      children: [
+                        flagWidget,
+                        SizedBox(
+                            width: 5.0), // Add space between the flag and text
+                        Text(
+                          (snapshot.data == 'portugues' ||
+                                  snapshot.data == 'english')
+                              ? snapshot.data[0].toUpperCase() +
+                                  snapshot.data.substring(1)
+                              : 'English',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+              SizedBox(), // Add an empty SizedBox to ensure proper alignment
+            ],
+          ),
+        ),
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return EditLanguagePage(
+                onDialogClosed: () {
+                  setState(() {});
+                },
+                loggedIn: false,
+              );
+            },
+          );
+        },
+      ),
+      Option(
         icon: Icon(Icons.waving_hand,
             color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-        title: 'Starting Page',
-        subtitle: 'Select your preferable starting page.',
+        title: localizations.startingPage,
+        subtitle: localizations.selectYourPage,
         rightWidget: Padding(
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
@@ -136,16 +221,16 @@ class _SettingsPageState extends State<SettingsPage> {
         Option(
             icon: Icon(Icons.notifications,
                 color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-            title: 'Notifications',
-            subtitle: 'Don\'t miss out on any updates!',
+            title: localizations.notifications,
+            subtitle: localizations.dontMissUpdates,
             onTap: () {
               openNotificationSettings();
             }),
       Option(
           icon: Icon(Icons.password,
               color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-          title: 'Change Password',
-          subtitle: 'Change your password for a new one.',
+          title: localizations.changePassword,
+          subtitle: localizations.changePasswordSubtitle,
           onTap: () {
             Navigator.push(
               context,
@@ -157,8 +242,8 @@ class _SettingsPageState extends State<SettingsPage> {
       Option(
           icon: Icon(Icons.delete_forever,
               color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-          title: 'Remove Account',
-          subtitle: 'Delete your current account.',
+          title: localizations.removeAccount,
+          subtitle: localizations.deleteAccount,
           onTap: () {
             Navigator.push(
               context,
@@ -168,8 +253,8 @@ class _SettingsPageState extends State<SettingsPage> {
       Option(
           icon: Icon(Icons.privacy_tip,
               color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-          title: 'About',
-          subtitle: 'Verify our terms and conditions and privacy policy.',
+          title: localizations.about,
+          subtitle: localizations.verifyTermsAndPrivacy,
           onTap: () {}),
     ];
 
@@ -264,23 +349,104 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget layoutNotLoggedIn(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final options = [
       Option(
           icon: Icon(
               _currentTheme == "Dark" ? Icons.nights_stay : Icons.wb_sunny,
               color: Theme.of(context).secondaryHeaderColor,
               size: 40.0),
-          title: 'Theme',
-          subtitle: 'Change between dark and light themes.',
+          title: localizations.theme,
+          subtitle: localizations.changeBetweenThemes,
           toggleButton: true,
           onTap: () {
             getSettings();
           }),
       Option(
+        icon: Icon(Icons.translate,
+            color: Theme.of(context).secondaryHeaderColor, size: 30.0),
+        title: localizations.language,
+        subtitle: "",
+        rightWidget: Padding(
+          padding: EdgeInsets.only(right: 20.0),
+          child: Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween, // Distribute space evenly
+            children: [
+              FutureBuilder(
+                future: cacheFactory.get('settings', 'language'),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else {
+                    Widget flagWidget;
+                    switch (snapshot.data) {
+                      case 'portugues':
+                        flagWidget = flagWidget = Image.asset(
+                          'assets/icon/portuguese_flag.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        );
+                        break;
+                      case 'english':
+                        flagWidget = Image.asset(
+                          'assets/icon/english_flag.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        );
+                        break;
+                      default:
+                        flagWidget = Image.asset(
+                          'assets/icon/english_flag.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        );
+                    }
+                    return Row(
+                      children: [
+                        flagWidget,
+                        SizedBox(
+                            width: 5.0), // Add space between the flag and text
+                        Text(
+                          (snapshot.data == 'portugues' ||
+                                  snapshot.data == 'english')
+                              ? snapshot.data[0].toUpperCase() +
+                                  snapshot.data.substring(1)
+                              : 'English',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+              SizedBox(), // Add an empty SizedBox to ensure proper alignment
+            ],
+          ),
+        ),
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return EditLanguagePage(
+                onDialogClosed: () {
+                  setState(() {});
+                },
+                loggedIn: false,
+              );
+            },
+          );
+        },
+      ),
+      Option(
         icon: Icon(Icons.waving_hand,
             color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-        title: 'Starting Page',
-        subtitle: 'Select your preferable starting page.',
+        title: localizations.startingPage,
+        subtitle: localizations.selectYourPage,
         rightWidget: Padding(
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
@@ -349,8 +515,8 @@ class _SettingsPageState extends State<SettingsPage> {
         Option(
             icon: Icon(Icons.notifications,
                 color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-            title: 'Notifications',
-            subtitle: 'Don\'t miss out on any updates!',
+            title: localizations.notifications,
+            subtitle: localizations.dontMissUpdates,
             onTap: () {
               openNotificationSettings();
             }),
