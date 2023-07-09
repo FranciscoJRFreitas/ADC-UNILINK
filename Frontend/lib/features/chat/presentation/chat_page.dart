@@ -85,13 +85,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     List<Group> groups = await cacheFactory.getGroups();
 
     groups.forEach((element) {
-      bool exists = allGroups.any((e) => e.id == element.id);
-      if (!exists) {
-        setState(() {
-          allGroups.add(element);
-          filteredGroups.add(element);
-        });
-      }
+      setState(() {
+        allGroups.add(element);
+        filteredGroups.add(element);
+      });
     });
 
     DatabaseReference chatRef = FirebaseDatabase.instance
@@ -145,7 +142,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
         bool exists = groups.any((element) => element.id == group.id);
         if (!exists) {
-          print(true);
           groups.add(group);
           cacheFactory.addGroup(group);
           setState(() {

@@ -7,14 +7,19 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter/services.dart';
+import 'package:unilink2023/application/loadLocations.dart';
 import '../../data/cache_factory_provider.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
 import '../../../constants.dart';
 
 class MyMap extends StatefulWidget {
+  final String? markerLocation;
+
+  MyMap({this.markerLocation});
+
   @override
-  _MyMapState createState() => _MyMapState();
+  _MyMapState createState() => _MyMapState(markerLocation);
 }
 
 class _MyMapState extends State<MyMap> {
@@ -31,6 +36,16 @@ class _MyMapState extends State<MyMap> {
   var isLocked = false;
   var zoom = 17.0;
   var tilt = 30.0;
+  String myMarkerLocation = "";
+
+  _MyMapState(String? markerLocation) {
+
+    if (markerLocation != null && markerLocation != "") {
+      myMarkerLocation = markerLocation;
+      addEventMarker();
+    }
+
+  }
 
   PolylinePoints polylinePoints = PolylinePoints();
 
@@ -88,6 +103,27 @@ class _MyMapState extends State<MyMap> {
         _mapStyle = string;
       });
     });
+
+  }
+
+  void addEventMarker() async {
+    List<String> latLngValues = myMarkerLocation.split(',');
+    double latitude = double.parse(latLngValues[0]);
+    double longitude = double.parse(latLngValues[1]);
+    LatLng location = LatLng(latitude, longitude);
+    String name = await getPlaceInLocations(myMarkerLocation);
+    if (name == '') name = "Custom Location";
+    markers.add(Marker(markerId: MarkerId(name), position: location,
+            onTap: () {
+                if (kIsWeb) {
+                  showMarkerInfoWindow(MarkerId(name), name,
+                       '');
+                } else {
+                  showMarkerInfoWindowMobile(MarkerId(name), name,
+                       '');
+                }
+              }
+            ));
   }
 
   /*void updateCurrentPositionMarker(loc.LocationData newLocation) async {
@@ -253,6 +289,7 @@ class _MyMapState extends State<MyMap> {
 
   @override
   Widget build(BuildContext context) {
+    print(markers);
     return Scaffold(
       body: Builder(
         builder: (BuildContext context) {

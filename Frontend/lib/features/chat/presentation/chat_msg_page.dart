@@ -77,41 +77,24 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   void initMessages() async {
     messages = await cacheFactory.getMessages(widget.groupId);
 
-    if (messages.isEmpty) {
-      // Fetch messages from Firebase if the cache is empty
-      messagesRef
-          .orderByKey()
-          .limitToLast(kCacheMessageLimit)
-          .onChildAdded
-          .listen((event) {
-        Message message = Message.fromSnapshot(event.snapshot);
-        setState(() {
-          bool repeated = messages.any((element) => element.id == message.id);
-          if (!repeated) {
-            messages.add(message);
-            cacheFactory.setMessages(widget.groupId, message);
-          }
-        });
-
-        setState(() {});
-      });
-    } else {
-      messagesRef.orderByKey().onChildAdded.listen((event) {
-        if (messages.length > kCacheMessageLimit) {
-          messages
-              .removeAt(0); // remove the oldest message if the limit is reached
+    // Listen for added messages
+    messagesRef
+        .orderByKey()
+        .limitToLast(kCacheMessageLimit)
+        .onChildAdded
+        .listen((event) {
+      if (messages.length > kCacheMessageLimit) {
+        messages.removeAt(0);
+      }
+      Message message = Message.fromSnapshot(event.snapshot);
+      setState(() {
+        bool repeated = messages.any((element) => element.id == message.id);
+        if (!repeated) {
+          messages.add(message);
+          cacheFactory.setMessages(widget.groupId, message);
         }
-
-        Message message = Message.fromSnapshot(event.snapshot);
-        setState(() {
-          bool repeated = messages.any((element) => element.id == message.id);
-          if (!repeated) {
-            messages.add(message);
-            cacheFactory.setMessages(widget.groupId, message);
-          }
-        });
       });
-    }
+    });
 
     // Listen for updated messages
     messagesRef.onChildChanged.listen((event) {
@@ -355,9 +338,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                             fontSize: 16),
                         border: InputBorder.none,
                       ),
-                      minLines: 1, //Normal textInputField will be displayed
-                      maxLines:
-                          10, // when user presses enter it will adapt to it
+                      minLines: 1,
+                      //Normal textInputField will be displayed
+                      maxLines: 10,
+                      // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
                       },
@@ -552,8 +536,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                         child: IconButton(
                                           icon: Container(
                                             decoration: BoxDecoration(
-                                              shape: BoxShape
-                                                  .rectangle, // use circle if the icon is circular
+                                              shape: BoxShape.rectangle,
+                                              // use circle if the icon is circular
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black,
@@ -602,8 +586,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                           child: IconButton(
                                             icon: Container(
                                               decoration: BoxDecoration(
-                                                shape: BoxShape
-                                                    .rectangle, // use circle if the icon is circular
+                                                shape: BoxShape.rectangle,
+                                                // use circle if the icon is circular
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: Colors.black,
@@ -656,9 +640,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                               fontSize: 16),
                           border: InputBorder.none,
                         ),
-                        minLines: 1, //Normal textInputField will be displayed
-                        maxLines:
-                            4, // when user presses enter it will adapt to it
+                        minLines: 1,
+                        //Normal textInputField will be displayed
+                        maxLines: 4,
+                        // when user presses enter it will adapt to it
                         onFieldSubmitted: (String value) {
                           sendMessage(value);
                         },

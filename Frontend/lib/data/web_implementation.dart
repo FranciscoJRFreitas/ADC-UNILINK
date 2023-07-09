@@ -205,9 +205,11 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
-  void removeMessagesCache() {
-    window.localStorage.remove('chat');
-    if (get('settings', 'lastMessage') != null) delete('lastMessage');
+  void removeMessagesCache() async {
+    List<Group> groups = await getGroups();
+    groups.forEach((element) {
+      window.localStorage.remove(element.id);
+    });
   }
 
   @override
