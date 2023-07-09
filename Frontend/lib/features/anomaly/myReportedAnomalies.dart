@@ -72,6 +72,35 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
+                      SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Anomaly Description'),
+                                content: SingleChildScrollView(
+                                  child: Text(
+                                    anomaliesList[index].description,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text('Close'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Icon(Icons.description,
+                            size: 20, color: _statusColor),
+                      ),
                       if (anomaliesList[index].coordinates != "0") ...[
                         SizedBox(width: 10),
                         InkWell(
