@@ -592,8 +592,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                     SizedBox(width: 10),
                                                     InkWell(
                                                       onTap: () {
-                                                        Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                                                            MainScreen(index: 10, location: event.location)));
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    MainScreen(
+                                                                        index:
+                                                                            10,
+                                                                        location:
+                                                                            event.location)));
                                                       },
                                                       child: Icon(
                                                           Icons.directions,
@@ -1175,23 +1182,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 leaveGroup(context, widget.groupId, widget.username,
                     _showErrorSnackbar);
 
-                if (!kIsWeb) {
-                  /*await FirebaseMessaging.instance
-                      .unsubscribeFromTopic(widget.groupId);*/
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                } else {
-                  Future.delayed(Duration(milliseconds: 100), () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) => MainScreen(index: 6),
-                      ),
-                    );
-                  });
-                }
+                Future.delayed(Duration(milliseconds: 100), () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => MainScreen(index: 6),
+                  ),
+                );
+                });
               },
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).primaryColor,
@@ -1262,14 +1261,14 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                               leaveGroup(context, widget.groupId,
                                   widget.username, _showErrorSnackbar);
 
-                              Future.delayed(Duration(milliseconds: 200), () {
-                                Navigator.pop(context);
-                                Navigator.pushReplacement(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => MainScreen(index: 6),
-                                  ),
-                                );
+                              Future.delayed(Duration(milliseconds: 100), () {
+                              Navigator.pop(context);
+                              Navigator.pushReplacement(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => MainScreen(index: 6),
+                                ),
+                              );
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -1962,7 +1961,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     void Function(String, bool) showErrorSnackbar,
   ) async {
     cacheFactory.removeGroup(groupId);
-    cacheFactory.deleteMessage(groupId, '-1'); //Deleting group messages from cache
+    cacheFactory.deleteMessage(
+        groupId, '-1'); //Deleting group messages from cache
     final url =
         kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
     final tokenID = await cacheFactory.get('users', 'token');
