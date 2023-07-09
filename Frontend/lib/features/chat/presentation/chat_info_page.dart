@@ -356,7 +356,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
 
   Widget _buildLayout(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -364,7 +364,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 16),
+              SizedBox(height: 10),
               Row(
                 children: [
                   profilePicture(context),
@@ -404,7 +404,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                     ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Divider(
                 thickness: 3,
                 color: Style.lightBlue,
@@ -522,8 +522,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                         padding:
                             EdgeInsets.only(top: 10), //VALOR A ALTERAR OU NAO),
                         child: SizedBox(
-                          height: MediaQuery.of(context).size.height -
-                              433, //VALOR A ALTERAR
+                          height: kIsWeb ? MediaQuery.of(context).size.height - 435 : MediaQuery.of(context).size.height * 0.4, //VALOR A ALTERAR
                           child: ListView.builder(
                               itemCount: events.length,
                               itemBuilder: (context, index) {
@@ -1069,7 +1068,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery.of(context).size.height * 0.6,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Stack(
@@ -1440,14 +1439,13 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery.of(context).size.height * 0.85,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Stack(
                 children: [
                   Positioned(
                     right: 0,
-                    top: MediaQuery.of(context).size.height * 0.98,
                     child: IconButton(
                       icon: Icon(Icons.close),
                       onPressed: () {
@@ -1455,7 +1453,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       },
                     ),
                   ),
-                  Column(
+                  SingleChildScrollView(
+                    child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
@@ -1580,7 +1579,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       ),
                     ],
                   ),
-                ],
+                  ) ],
               ),
             ),
           );
