@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:unilink2023/features/BackOfficeHub/BackOfficePage.dart';
 import 'package:unilink2023/features/anomaly/anomalypage.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
@@ -58,6 +59,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "Student",
     "Campus",
     "Anomaly",
+    "BackOffice Hub",
     "Teacher",
     "Director",
   ];
@@ -122,6 +124,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             date: scheduleDate), //estudante //9
         MyMap(), //10
         ReportAnomalyPage(),
+        BackOfficePage(),
         Placeholder(), //professor //11
         Placeholder(), //diretor //12
       ];
@@ -474,6 +477,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 11;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.analytics),
+                title: Text('BackOffice Hub',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 12;
                   });
                   Navigator.pop(context);
                 },
