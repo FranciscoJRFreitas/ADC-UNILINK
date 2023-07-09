@@ -1,12 +1,13 @@
 import 'package:firebase_database/firebase_database.dart';
 
 class Anomaly {
-  final String? anomalyId;
+  final String anomalyId;
   final String sender;
   final String title;
   final String description;
   final String coordinates;
-  final String status;
+  String status;
+  final int timestamp;
 
   Anomaly({
     required this.anomalyId,
@@ -15,6 +16,7 @@ class Anomaly {
     required this.description,
     required this.coordinates,
     required this.status,
+    required this.timestamp,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,6 +27,7 @@ class Anomaly {
       'description': description,
       'location': coordinates,
       'status': status,
+      'timestamp': timestamp,
     };
   }
 
@@ -36,13 +39,15 @@ class Anomaly {
       description: map['description'],
       coordinates: map['location'],
       status: map['status'],
+      timestamp: map['timestamp'],
     );
   }
 
   factory Anomaly.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Anomaly(
-      anomalyId: snapshot.key,
+      anomalyId: snapshot.key!,
+      timestamp: data['timestamp'] as int,
       sender: data['sender'] as String,
       title: data['title'] as String,
       description: data['description'] as String,
@@ -54,6 +59,7 @@ class Anomaly {
   factory Anomaly.fromMapKey(var key, Map<dynamic, dynamic> data) {
     return Anomaly(
       anomalyId: key,
+      timestamp: data['timestamp'] as int,
       sender: data['sender'] as String,
       title: data['title'] as String,
       description: data['description'] as String,

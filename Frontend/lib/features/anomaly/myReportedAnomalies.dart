@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 import 'package:unilink2023/features/anomaly/Domain/Anomaly.dart';
 
 import '../../application/loadLocations.dart';
@@ -29,6 +30,13 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
           anomaliesList.add(anomaly);
         });
       }
+    });
+
+    anomalyRef.onChildRemoved.listen((event) {
+      setState(() {
+        anomaliesList
+            .removeWhere((anomaly) => anomaly.anomalyId == event.snapshot.key);
+      });
     });
   }
 
@@ -172,7 +180,32 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
                             ),
                           ],
                         ),
+                        SizedBox(height: 8),
                       ],
+                      Row(
+                        children: [
+                          Icon(Icons.hourglass_bottom,
+                              size: 20, color: _statusColor),
+                          SizedBox(width: 5),
+                          Text(
+                            'Reported Time: ',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(fontSize: 14),
+                          ),
+                          Flexible(
+                            child: Text(
+                              formatTimeInMillis(
+                                  anomaliesList[index].timestamp),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Container(
@@ -209,5 +242,15 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
       default:
         return Colors.grey;
     }
+  }
+
+  String formatTimeInMillis(int timeInMillis) {
+    String res = '';
+    var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis);
+    var formatter = DateFormat('HH:mm');
+    res += formatter.format(date);
+    formatter = DateFormat('d/M/y');
+    res += ' ' + formatter.format(date);
+    return res;
   }
 }

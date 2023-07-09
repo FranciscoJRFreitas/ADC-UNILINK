@@ -208,7 +208,7 @@ class ReportAnomalyTabState extends State<ReportAnomalyTab> {
           return AlertDialog(
             title: Text('Anomaly Reported'),
             content: Text(
-                'Thank you for reporting an anomaly. We are working on the issue.'),
+                'Thank you for reporting this anomaly. We are working on the issue.'),
             actions: <Widget>[
               TextButton(
                 child: Text('OK'),
