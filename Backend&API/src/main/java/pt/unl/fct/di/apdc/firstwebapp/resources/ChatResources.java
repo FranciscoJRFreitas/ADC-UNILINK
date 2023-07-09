@@ -63,6 +63,11 @@ public class ChatResources {
         if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(group.adminID);
+        Entity admin = datastore.get(userKey);
+        if(admin == null){
+            return Response.status(Status.NOT_FOUND).entity("AdminId doesnt exist").build();
+        }
 
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat
@@ -75,7 +80,7 @@ public class ChatResources {
                     // Group already exists, return an error response
                 } else {
                     // Group doesn't exist, proceed with creating it
-                    createNewGroup(group, newChatRef, token.username);
+                    createNewGroup(group, newChatRef);
                 }
             }
 
@@ -88,7 +93,7 @@ public class ChatResources {
         return Response.ok("{}").build();
     }
 
-    private void createNewGroup(Group group, DatabaseReference newChatRef, String username) {
+    private void createNewGroup(Group group, DatabaseReference newChatRef) {
         // Set the data for the new chat
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
         newChatRef.child("description").setValueAsync(group.description);
@@ -110,7 +115,7 @@ public class ChatResources {
         newMessageRef.child("isSystemMessage").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
-        DatabaseReference newChatsForUserRef = chatsByUser.child(username);
+        DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);
 
         Map<String, Object> groupsUpdates = new HashMap<>();
         groupsUpdates.put(group.DisplayName, true);
