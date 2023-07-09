@@ -399,8 +399,15 @@ class _SchedulePageState extends State<SchedulePage> {
                 SizedBox(width: 10),
                 InkWell(
                   onTap: () {
-                    // Handle click on clock icon
-                    // Navigate to another page or perform desired action
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MainScreen(
+                                    index:
+                                    10,
+                                    location:
+                                    event.location)));
                   },
                   child:
                       Icon(Icons.directions, size: 20, color: Style.lightBlue),
