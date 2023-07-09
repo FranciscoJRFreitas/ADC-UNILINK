@@ -73,4 +73,8 @@ class CacheFactoryImpl extends CacheFactory{
   void addGroup(Group group) {
   }
 
+  @override
+  void removeGroupsCache() {
+  }
+
 }
