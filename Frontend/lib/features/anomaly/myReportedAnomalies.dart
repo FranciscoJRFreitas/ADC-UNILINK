@@ -44,15 +44,21 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(children: [
-      Row(
-        children: [
-          Text(
-            '   You have reported ${anomaliesList.length} ${anomaliesList.length == 1 ? 'anomaly' : 'anomalies'}!',
-            style: Theme.of(context).textTheme.titleMedium,
-          )
-        ],
-      ),
+        body: Column(
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 16.0), // Adjust the padding value as needed
+                      child: Text(
+                        'You have reported ${anomaliesList.length} ${anomaliesList.length == 1 ? 'anomaly' : 'anomalies'}!',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       Expanded(
         // Wrap ListView.builder in an Expanded widget
         child: ListView.builder(

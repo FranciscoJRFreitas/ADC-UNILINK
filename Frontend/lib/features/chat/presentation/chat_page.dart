@@ -153,8 +153,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         setState(() {});
       }
 
-      if (widget.selectedGroup != null)
+      if (widget.selectedGroup != null && widget.selectedGroup != "")
         setState(() {
+          print("SELECTED GROUP: " + widget.selectedGroup!);
           var matchingGroup =
               allGroups.where((e) => e.id == widget.selectedGroup);
           if (matchingGroup.isNotEmpty) {
@@ -288,7 +289,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             flex: 1,
             child: _buildLeftWidget(context),
           ),
-          if (_selectedGroup != null) ...[
+          if (_selectedGroup != null && _selectedGroup != "") ...[
             Container(
               width: 1,
               color: Colors.grey,
@@ -462,7 +463,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   Widget _buildMobileLayout(BuildContext context) {
     List<Group> groups = filteredGroups;
-    if (_selectedGroup != null) {
+    if (_selectedGroup != null && _selectedGroup != "") {
       Future.delayed(Duration(milliseconds: 200), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -553,8 +554,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text(
-                                        formatTimeInMillis(
-                                            firstMessage!.timestamp),
+                                        formatTimeInMillis(firstMessage != null
+                                            ? firstMessage.timestamp
+                                            : 0),
                                         style: TextStyle(
                                             fontSize: 10, color: Colors.grey),
                                       ),
@@ -572,7 +574,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                           //SizedBox(width: 5),
                                           Expanded(
                                             child: Text(
-                                              '${firstMessage.displayName}: ${firstMessage.text}',
+                                              '${firstMessage != null ? firstMessage.displayName : ''}: ${firstMessage != null ? firstMessage.text : ''}',
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
                                             ),
@@ -690,7 +692,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         return StatefulBuilder(builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: mediaQuery.size.height * 0.9,
+              height: mediaQuery.size.height * 0.75,
               padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
               child: Stack(
                 children: [

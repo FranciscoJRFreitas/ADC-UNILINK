@@ -24,6 +24,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +42,28 @@ public class ChatResources {
 
     public ChatResources() {
     }
+
+@POST
+@Path("/create-multiple")
+@Consumes(MediaType.APPLICATION_JSON)
+public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders headers) {
+    for (Group group : groups) {
+        Response response = createGroup(group, headers);
+        // no caso the algum grupo não tenha sucesso a ser criado 
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            return response;
+        }
+        //se teve sucesso a criar o grupo adicionar os participantes 
+        List<String> participants = group.participants;
+        for (String participant : participants) {
+           
+             inviteToGroup(group.DisplayName, participant ,headers);
+        }
+    }
+    
+    return Response.ok("{}").build();
+}
+
 
     @POST
     @Path("/create")
