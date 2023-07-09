@@ -9,13 +9,12 @@ import 'package:provider/provider.dart';
 
 class EditLanguagePage extends StatefulWidget {
   final VoidCallback? onDialogClosed;
-  final bool loggedIn;
   const EditLanguagePage(
-      {Key? key, this.onDialogClosed, required this.loggedIn})
+      {Key? key, this.onDialogClosed})
       : super(key: key);
 
   @override
-  _EditLanguagePageState createState() => _EditLanguagePageState(loggedIn);
+  _EditLanguagePageState createState() => _EditLanguagePageState();
 }
 
 class _EditLanguagePageState extends State<EditLanguagePage> {
@@ -26,12 +25,6 @@ class _EditLanguagePageState extends State<EditLanguagePage> {
     width: 24,
     fit: BoxFit.cover,
   );
-
-  bool _loggedIn = false;
-
-  _EditLanguagePageState(loggedIn) {
-    _loggedIn = loggedIn;
-  }
 
   @override
   void initState() {
@@ -114,7 +107,6 @@ class _EditLanguagePageState extends State<EditLanguagePage> {
                         onChanged: (dynamic newValue) {
                           setState(() {
                             _language = newValue;
-                            changeLanguage(_language);
                             updateIcon();
                           });
                         },
@@ -127,7 +119,7 @@ class _EditLanguagePageState extends State<EditLanguagePage> {
                       buttonName: 'Save Changes',
                       onTap: () {
                         cacheFactory.set('language', _language);
-
+                        changeLanguage(_language);
                         Navigator.pop(context);
                         widget.onDialogClosed?.call();
                       },
