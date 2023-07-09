@@ -5,19 +5,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:unilink2023/data/cache_factory_provider.dart';
-import 'package:unilink2023/domain/UserNotifier.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
-
 import '../../../application/loadLocations.dart';
 import '../../../constants.dart';
+import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
-import '../../chat/presentation/chat_page.dart';
 import '../../navigation/main_screen_page.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -326,7 +322,7 @@ class _SchedulePageState extends State<SchedulePage> {
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                width: 300, // Set the desired width for the divider
+                width: 300,
                 child: Divider(
                   thickness: 1,
                   color: Style.lightBlue,
@@ -403,8 +399,15 @@ class _SchedulePageState extends State<SchedulePage> {
                 SizedBox(width: 10),
                 InkWell(
                   onTap: () {
-                    // Handle click on clock icon
-                    // Navigate to another page or perform desired action
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MainScreen(
+                                    index:
+                                    10,
+                                    location:
+                                    event.location)));
                   },
                   child:
                       Icon(Icons.directions, size: 20, color: Style.lightBlue),

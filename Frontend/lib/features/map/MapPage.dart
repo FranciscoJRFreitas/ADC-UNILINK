@@ -41,6 +41,7 @@ class _MyMapState extends State<MyMap> {
   _MyMapState(String? markerLocation) {
 
     if (markerLocation != null && markerLocation != "") {
+      print("MARKER LOCATION :" + markerLocation);
       myMarkerLocation = markerLocation;
       addEventMarker();
     }
@@ -269,6 +270,10 @@ class _MyMapState extends State<MyMap> {
 
   void updateMarkers() {
     markers.clear();
+
+    if (myMarkerLocation != null && myMarkerLocation != "") {
+      addEventMarker();
+    }
 
     if (selectedDropdownItems.contains("Buildings")) {
       markers.addAll(edMarkers);

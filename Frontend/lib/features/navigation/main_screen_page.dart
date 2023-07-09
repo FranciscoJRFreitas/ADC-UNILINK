@@ -41,7 +41,7 @@ class MainScreen extends StatefulWidget {
   MainScreen({this.index, this.date, this.location, this.selectedGroup});
 
   @override
-  _MainScreenState createState() => _MainScreenState(index, date, location);
+  _MainScreenState createState() => _MainScreenState(index, date, location, selectedGroup);
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
@@ -50,6 +50,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _bottomNavigationIndex = 0;
   DateTime scheduleDate = DateTime.now();
   String markerLocation = "";
+  String _selectedGroup = "";
   List<String> _title = [
     "News",
     "Search",
@@ -74,7 +75,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
-  _MainScreenState(int? index, DateTime? date, String? location) {
+  _MainScreenState(int? index, DateTime? date, String? location, String? selectedGroup) {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
@@ -87,6 +88,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
     if (date != null) scheduleDate = date;
     if (location != null) markerLocation = location;
+    if (selectedGroup != null) _selectedGroup = selectedGroup;
   }
 
   @override
@@ -121,7 +123,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         RemoveAccountPage(), //5
         ChatPage(
           user: _currentUser,
-          selectedGroup: widget.selectedGroup,
+          selectedGroup: _selectedGroup,
         ), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
@@ -129,7 +131,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             username: _currentUser.username,
             date: scheduleDate), //estudante //9
         MyMap(markerLocation: markerLocation), //10
-        ReportAnomalyPage(),
+        ReportAnomalyPage(user: _currentUser),
         BackOfficePage(),
         Placeholder(),
 
@@ -243,7 +245,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
   }
 
-  @override
   Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
@@ -380,6 +381,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             title: Text('Schedule'),
                             onTap: () {
                               setState(() {
+                                scheduleDate = DateTime.now();
                                 _selectedIndex = 9;
                               });
                               Navigator.pop(context);
@@ -471,6 +473,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
+                    _selectedGroup = "";
                     _selectedIndex = 6;
                     _bottomNavigationIndex = 3;
                   });
@@ -483,6 +486,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
+                    markerLocation = "";
                     _selectedIndex = 10;
                     _bottomNavigationIndex = 2;
                   });
@@ -569,6 +573,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 currentIndex: _bottomNavigationIndex,
                 onTap: (index) {
                   setState(() {
+                    _selectedGroup = "";
+                    markerLocation = "";
+                    scheduleDate = DateTime.now();
                     _bottomNavigationIndex = index;
                     _selectedIndex = index == 2
                         ? 10
