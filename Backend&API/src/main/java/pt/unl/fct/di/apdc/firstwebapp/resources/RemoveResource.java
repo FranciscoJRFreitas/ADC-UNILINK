@@ -87,6 +87,24 @@ public class RemoveResource {
 
                 txn.delete(targetUserKey, tokenKey);
                 txn.commit();
+                DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).child("Groups");
+                chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            String childKey = childSnapshot.getKey();
+                            ChatResources.leaveGroup(childKey, targetUsername);
+                        }
+                        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat");
+                        chatRef.child(targetUsername).removeValueAsync();
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle error
+                    }
+                });
                 LOG.info("User deleted: " + targetUsername);
                 return Response.ok("{}").build();
             }
@@ -101,7 +119,8 @@ public class RemoveResource {
                         String childKey = childSnapshot.getKey();
                         ChatResources.leaveGroup(childKey, targetUsername);
                     }
-                    FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).removeValueAsync();
+                    DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat");
+                    chatRef.child(targetUsername).removeValueAsync();
 
                 }
 
