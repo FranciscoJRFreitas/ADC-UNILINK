@@ -137,7 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 onDialogClosed: () {
                   setState(() {});
                 },
-                loggedIn: false,
               );
             },
           );
@@ -436,7 +435,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 onDialogClosed: () {
                   setState(() {});
                 },
-                loggedIn: false,
               );
             },
           );

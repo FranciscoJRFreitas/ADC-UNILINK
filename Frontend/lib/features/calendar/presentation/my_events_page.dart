@@ -12,6 +12,8 @@ import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/LocationPopUp.dart';
 
+import '../../../widgets/LocationPopUp.dart';
+
 class MyEventsPage extends StatefulWidget {
   final String username;
 

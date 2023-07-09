@@ -692,7 +692,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         return StatefulBuilder(builder: ((context, setState) {
           return SingleChildScrollView(
             child: Container(
-              height: mediaQuery.size.height * 0.9,
+              height: mediaQuery.size.height * 0.75,
               padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
               child: Stack(
                 children: [

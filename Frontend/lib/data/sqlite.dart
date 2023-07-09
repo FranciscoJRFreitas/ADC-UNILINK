@@ -31,7 +31,7 @@ class SqliteService {
             'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT, creationTime TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT)');
+            'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT, language TEXT)');
         await database.execute(
             'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
         await database.execute(
