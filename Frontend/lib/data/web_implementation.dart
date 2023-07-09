@@ -258,6 +258,19 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
+  void removeGroup(String groupId) {
+    _getGroupsList().then((groupsList) {
+      var groupToRemove =
+          groupsList.firstWhere((g) => g['id'] == groupId, orElse: () => null);
+
+      if (groupToRemove != null) {
+        groupsList.remove(groupToRemove);
+        _setGroupsList(groupsList);
+      }
+    });
+  }
+
+  @override
   void removeGroupsCache() {
     window.localStorage.remove('groups');
   }

@@ -164,6 +164,11 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
+  void removeGroup(String groupId) {
+    SqliteService().removeGroup(groupId);
+  }
+
+  @override
   void removeGroupsCache() {
     SqliteService().removeGroupsCache();
   }

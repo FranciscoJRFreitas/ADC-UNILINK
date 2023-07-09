@@ -1961,7 +1961,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     String userId,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    cacheFactory.deleteMessage(groupId, '-1'); //Deleting group from cache
+    cacheFactory.removeGroup(groupId);
+    cacheFactory.deleteMessage(groupId, '-1'); //Deleting group messages from cache
     final url =
         kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
     final tokenID = await cacheFactory.get('users', 'token');

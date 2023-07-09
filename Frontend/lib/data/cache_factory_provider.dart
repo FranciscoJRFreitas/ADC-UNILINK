@@ -75,6 +75,10 @@ import 'stub_cache_factory.dart'
             impl.addGroup(group);
         }
 
+        void removeGroup(String groupId){
+            impl.removeGroup(groupId);
+        }
+
         void removeGroupsCache() {
             impl.removeGroupsCache();
         }

@@ -21,5 +21,6 @@ abstract class CacheFactory {
   Future<List<Message>> getMessages(String groupId);
   Future<List<Group>> getGroups();
   void addGroup(Group group);
+  void removeGroup(String groupId);
   void removeGroupsCache();
 }

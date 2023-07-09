@@ -16,7 +16,6 @@ class SqliteService {
   SqliteService._internal();
 
   void initializeDB() async {
-
     String path = await getDatabasesPath();
     String dbPath = join(path, 'database.db');
 
@@ -48,7 +47,6 @@ class SqliteService {
           'currentPage': "0",
           'currentNews': "0",
         });
-
       },
       version: 1,
     );
@@ -414,6 +412,18 @@ class SqliteService {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     });
+  }
+
+  Future<void> removeGroup(String groupId) async {
+    // Get a reference to the database.
+    Database db = await getDatabase();
+
+    // Remove the group from the database.
+    await db.delete(
+      'groups',
+      where: 'id = ?',
+      whereArgs: [groupId],
+    );
   }
 
   Future<void> removeGroupsCache() async {
