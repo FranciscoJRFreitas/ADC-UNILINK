@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import '../../application/loadLocations.dart';
@@ -232,8 +233,57 @@ class _AnomaliesPageState extends State<AnomaliesPage>
                         SizedBox(width: 10),
                         InkWell(
                           onTap: () {
-                            // Handle click on clock icon
-                            // Navigate to another page or perform desired action
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.9,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.8,
+                                    child: Column(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: GoogleMap(
+                                            onMapCreated: (GoogleMapController
+                                                controller) {},
+                                            initialCameraPosition:
+                                                CameraPosition(
+                                              target: parseCoordinates(
+                                                  anomalyList[index]
+                                                      .coordinates),
+                                              zoom: 17,
+                                            ),
+                                            markers: {
+                                              Marker(
+                                                markerId:
+                                                    MarkerId('anomalyMarker'),
+                                                position: parseCoordinates(
+                                                    anomalyList[index]
+                                                        .coordinates),
+                                              ),
+                                            },
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text('Close'),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
                           },
                           child: Icon(Icons.directions,
                               size: 20, color: _statusColor),
@@ -491,6 +541,20 @@ class _AnomaliesPageState extends State<AnomaliesPage>
         ),
       ),
     ]);
+  }
+
+  LatLng parseCoordinates(String coordinates) {
+    // Parse the coordinates string and return a LatLng object
+    // This is just a placeholder, replace it with your actual logic
+    double latitude = 0.0;
+    double longitude = 0.0;
+    // Split the coordinates string and convert to double values
+    List<String> coords = coordinates.split(",");
+    if (coords.length == 2) {
+      latitude = double.tryParse(coords[0]) ?? 0.0;
+      longitude = double.tryParse(coords[1]) ?? 0.0;
+    }
+    return LatLng(latitude, longitude);
   }
 
   Color getStatusColor(String status) {
