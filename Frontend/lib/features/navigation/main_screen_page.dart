@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:unilink2023/features/BackOfficeHub/BackOfficePage.dart';
 import 'package:unilink2023/features/anomaly/anomalypage.dart';
+import 'package:unilink2023/features/calendar/presentation/my_events_page.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
@@ -19,6 +22,7 @@ import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/UserNotifier.dart';
 import '../../domain/Token.dart';
+import '../chat/domain/Group.dart';
 import '../userManagement/domain/User.dart';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
@@ -30,17 +34,23 @@ import 'package:flutter/services.dart';
 
 class MainScreen extends StatefulWidget {
   final int? index;
+  final DateTime? date;
+  final String? selectedGroup;
+  final String? location;
 
-  MainScreen({this.index});
+  MainScreen({this.index, this.date, this.location, this.selectedGroup});
 
   @override
-  _MainScreenState createState() => _MainScreenState(index);
+  _MainScreenState createState() => _MainScreenState(index, date, location, selectedGroup);
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late AnimationController _controller;
   int _selectedIndex = 0;
   int _bottomNavigationIndex = 0;
+  DateTime scheduleDate = DateTime.now();
+  String markerLocation = "";
+  String _selectedGroup = "";
   List<String> _title = [
     "News",
     "Search",
@@ -54,8 +64,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "Student",
     "Campus",
     "Anomaly",
+    "BackOffice Hub",
     "Teacher",
     "Director",
+    "Events",
   ];
   late List<double> scales = List.filled(_widgetOptions().length, 1);
   late User _currentUser;
@@ -63,7 +75,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
-  _MainScreenState(int? index) {
+  _MainScreenState(int? index, DateTime? date, String? location, String? selectedGroup) {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
@@ -74,6 +86,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ? 4
                   : 0;
     }
+    if (date != null) scheduleDate = date;
+    if (location != null) markerLocation = location;
+    if (selectedGroup != null) _selectedGroup = selectedGroup;
   }
 
   @override
@@ -106,16 +121,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         HomePage(), //3
         ChangePasswordPage(), //4
         RemoveAccountPage(), //5
-        ChatPage(user: _currentUser), //6
+        ChatPage(
+          user: _currentUser,
+          selectedGroup: _selectedGroup,
+        ), //6
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(
-          username: _currentUser.username,
-        ), //estudante //9
-        MyMap(), //10
-        ReportAnomalyPage(),
-        Placeholder(), //professor //11
+            username: _currentUser.username,
+            date: scheduleDate), //estudante //9
+        MyMap(markerLocation: markerLocation), //10
+        ReportAnomalyPage(user: _currentUser),
+        BackOfficePage(),
+        Placeholder(),
+
         Placeholder(), //diretor //12
+        MyEventsPage(username: _currentUser.username),
       ];
 
   Widget picture(BuildContext context) {
@@ -144,8 +165,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -224,7 +245,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
   }
 
-  @override
   Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
@@ -244,7 +264,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           iconTheme: IconThemeData(
             color: Theme.of(context).textTheme.bodyLarge!.color,
           ),
-          backgroundColor: Theme.of(context).primaryColor, //roleColor,
+          backgroundColor: Theme.of(context).primaryColor,
+          //roleColor,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
             _title[_selectedIndex],
@@ -360,7 +381,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             title: Text('Schedule'),
                             onTap: () {
                               setState(() {
+                                scheduleDate = DateTime.now();
                                 _selectedIndex = 9;
+                              });
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.event_note),
+                            title: Text('My Events'),
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = 15;
                               });
                               Navigator.pop(context);
                             },
@@ -441,6 +473,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
+                    _selectedGroup = "";
                     _selectedIndex = 6;
                     _bottomNavigationIndex = 3;
                   });
@@ -453,6 +486,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
+                    markerLocation = "";
                     _selectedIndex = 10;
                     _bottomNavigationIndex = 2;
                   });
@@ -460,12 +494,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.analytics),
+                leading: Icon(Icons.dangerous),
                 title: Text('Anomaly',
                     style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () {
                   setState(() {
                     _selectedIndex = 11;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.analytics),
+                title: Text('BackOffice Hub',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 12;
                   });
                   Navigator.pop(context);
                 },
@@ -528,6 +573,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 currentIndex: _bottomNavigationIndex,
                 onTap: (index) {
                   setState(() {
+                    _selectedGroup = "";
+                    markerLocation = "";
+                    scheduleDate = DateTime.now();
                     _bottomNavigationIndex = index;
                     _selectedIndex = index == 2
                         ? 10
@@ -647,7 +695,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (_selectedIndex < options.length) {
       return options[_selectedIndex];
     } else {
-      // You can return some placeholder widget here when _selectedIndex is out of range
       return Text('Selected index out of range! ${options}');
     }
   }
@@ -711,6 +758,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
       cacheFactory.removeMessagesCache();
+      cacheFactory.removeGroupsCache();
 
       String page = await cacheFactory.get("settings", "index");
       int index = 0;

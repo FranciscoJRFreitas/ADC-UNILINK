@@ -1,4 +1,5 @@
 import 'package:unilink2023/data/sqlite.dart';
+import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/features/chat/domain/Message.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
@@ -67,6 +68,8 @@ class CacheFactoryImpl implements CacheFactory {
       return await SqliteService().getNews();
     else if (table == 'chat')
       return await SqliteService().getMessages(value);
+    else if (table == 'groups')
+      return await SqliteService().getGroups();
     else
       return await SqliteService().getValue(table, value);
   }
@@ -140,6 +143,7 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void deleteMessage(String groupId, String id) {
+    if (id == '-1') SqliteService().deleteMessage(groupId);
     SqliteService().deleteMessage(id);
   }
 
@@ -150,8 +154,26 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   Future<List<Message>> getMessages(String groupId) async {
-    // TODO: implement getMessages
-    //printDb();
     return await SqliteService().getMessages(groupId);
+  }
+
+  @override
+  Future<List<Group>> getGroups() async {
+    return await SqliteService().getGroups();
+  }
+
+  @override
+  void addGroup(Group group) {
+    SqliteService().addGroup(group);
+  }
+
+  @override
+  void removeGroup(String groupId) {
+    SqliteService().removeGroup(groupId);
+  }
+
+  @override
+  void removeGroupsCache() {
+    SqliteService().removeGroupsCache();
   }
 }

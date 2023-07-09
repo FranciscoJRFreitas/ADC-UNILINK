@@ -1,48 +1,34 @@
-import 'dart:async';
-
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:unilink2023/application/loadLocations.dart';
+import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
+import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
+import 'package:unilink2023/features/navigation/main_screen_page.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
-import '../../../application/loadLocations.dart';
-import '../../../constants.dart';
-import '../../../widgets/LocationPopUp.dart';
-import '../../chat/presentation/chat_info_page.dart';
-import '../../navigation/main_screen_page.dart';
 
-class SchedulePage extends StatefulWidget {
+class MyEventsPage extends StatefulWidget {
   final String username;
-  final DateTime date;
 
-  SchedulePage({required this.username, required this.date});
+  MyEventsPage({required this.username});
 
   @override
-  _SchedulePageState createState() => _SchedulePageState(date);
+  _MyEventsPageState createState() => _MyEventsPageState();
 }
 
-class _SchedulePageState extends State<SchedulePage> {
+class _MyEventsPageState extends State<MyEventsPage> {
+  late List<Event> events = [];
+  late DatabaseReference myEventsRef;
+  List<EventType> eventTypes = EventType.values;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
-  List<EventType> eventTypes = EventType.values;
-  List<dynamic> schedule = [];
-  CalendarFormat format = CalendarFormat.week;
-  DateFormat customFormat = DateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'");
-  DateTime selectedDay = DateTime.now();
-  DateTime focusedDay = DateTime.now();
-  _SchedulePageState(date) {
-    selectedDay = DateTime(date.year, date.month, date.day);
-    focusedDay = date;
-  }
 
-  Map<DateTime, List<Event>> events = {};
   String _selectedEventType = 'Academic';
   LatLng? _selectedLocation = null;
   String selectLocationText = "Select Location";
@@ -50,10 +36,21 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     super.initState();
-    String formattedSelectedDateTime = customFormat.format(selectedDay);
-    selectedDay = customFormat.parse(formattedSelectedDateTime, true);
-    loadSchedule();
+    myEventsRef = FirebaseDatabase.instance
+        .ref()
+        .child('schedule')
+        .child(widget.username);
+    getEvents();
     getUserEvents();
+  }
+
+  void getEvents() {
+    myEventsRef.onChildAdded.listen((event) {
+      Event ev = Event.fromSnapshot(event.snapshot);
+      setState(() {
+        events.add(ev);
+      });
+    });
   }
 
   void getUserEvents() async {
@@ -66,7 +63,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
     await chatRef.once().then((event) {
       Map<dynamic, dynamic> newgroup =
-          event.snapshot.value as Map<dynamic, dynamic>;
+      event.snapshot.value as Map<dynamic, dynamic>;
       newgroup.forEach((key, value) {
         setState(() {
           groups.add(key);
@@ -76,12 +73,12 @@ class _SchedulePageState extends State<SchedulePage> {
 
     for (String groupId in groups) {
       DatabaseReference eventsRef =
-          await FirebaseDatabase.instance.ref().child('events').child(groupId);
+      await FirebaseDatabase.instance.ref().child('events').child(groupId);
 
       await eventsRef.once().then((userDataSnapshot) {
         if (userDataSnapshot.snapshot.value != null) {
           Map<dynamic, dynamic> newevents =
-              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+          userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
@@ -94,289 +91,100 @@ class _SchedulePageState extends State<SchedulePage> {
                 startTime: DateTime.parse(currEvent["startTime"]),
                 endTime: DateTime.parse(currEvent["endTime"]));
 
-            DateTime startDate = DateTime(
-              currentEvent.startTime.year,
-              currentEvent.startTime.month,
-              currentEvent.startTime.day,
-            );
-            DateTime endDate = DateTime(
-              currentEvent.endTime.year,
-              currentEvent.endTime.month,
-              currentEvent.endTime.day,
-            );
-
-            for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
-              DateTime currentDate = startDate.add(Duration(days: i));
-              String formattedCurrentDateTime =
-                  customFormat.format(currentDate);
-
-              DateTime parsedCurrentDateTime =
-                  customFormat.parse(formattedCurrentDateTime, true);
-
-              if (events.containsKey(parsedCurrentDateTime)) {
-                events[parsedCurrentDateTime]!.add(currentEvent);
-              } else {
-                events[parsedCurrentDateTime] = [currentEvent];
-              }
-            }
+              events.add(currentEvent);
           });
         }
       });
     }
 
-    _getPersonalEvents();
     setState(() {});
   }
-
-  void _getPersonalEvents() async {
-    DatabaseReference eventsRef = await FirebaseDatabase.instance
-        .ref()
-        .child('schedule')
-        .child(widget.username);
-
-    eventsRef.onChildAdded.listen((event) async {
-      setState(() {
-        Map<dynamic, dynamic> currEvent =
-            event.snapshot.value as Map<dynamic, dynamic>;
-        print("SNAPSHOT: " + event.snapshot.value.toString());
-        Event currentEvent = Event(
-          type: _parseEventType(currEvent["type"]),
-          title: currEvent["title"],
-          description: currEvent['description'],
-          location: currEvent['location'],
-          startTime: DateTime.parse(currEvent["startTime"]),
-          endTime: DateTime.parse(currEvent["endTime"]),
-        );
-
-        // Update events array with the new event
-        DateTime startDate = DateTime(
-          currentEvent.startTime.year,
-          currentEvent.startTime.month,
-          currentEvent.startTime.day,
-        );
-        DateTime endDate = DateTime(
-          currentEvent.endTime.year,
-          currentEvent.endTime.month,
-          currentEvent.endTime.day,
-        );
-
-        for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
-          DateTime currentDate = startDate.add(Duration(days: i));
-          String formattedCurrentDateTime = customFormat.format(currentDate);
-
-          DateTime parsedCurrentDateTime =
-              customFormat.parse(formattedCurrentDateTime, true);
-
-          if (events.containsKey(parsedCurrentDateTime)) {
-            events[parsedCurrentDateTime]!.add(currentEvent);
-          } else {
-            events[parsedCurrentDateTime] = [currentEvent];
-          }
-        }
-      });
-    });
-  }
-
-  EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
-  }
-
-  Future<void> loadSchedule() async {
-    String jsonString = await DefaultAssetBundle.of(context)
-        .loadString('assets/json/schedule.json');
-    setState(() {
-      schedule = jsonDecode(jsonString)['schedule'];
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: format == CalendarFormat.month
-          ? SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildTableCalendar(context),
-                  ..._scheduleWidget(context),
-                  _eventsWidget(context),
-                ],
-              ),
-            )
-          : Column(
+    return events.isEmpty ? noEventWidget() : Scaffold(
+      body: Container(
+        padding: EdgeInsets.all(8),
+        child: Expanded(
+          child: SingleChildScrollView(
+            child: Column(
               children: [
-                _buildTableCalendar(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ..._scheduleWidget(context),
-                        _eventsWidget(context),
-                      ],
-                    ),
-                  ),
-                ),
+                _eventsWidget(context),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _createEventPopUpDialog(context);
-        },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-        elevation: 6,
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildTableCalendar(BuildContext context) {
-    return TableCalendar(
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Week',
-        CalendarFormat.twoWeeks: 'Month',
-        CalendarFormat.week: '2 Weeks',
-      },
-      firstDay: DateTime(2000, 1, 1),
-      lastDay: DateTime(2030, 1, 1),
-      focusedDay: focusedDay,
-      calendarFormat: format,
-      onFormatChanged: (CalendarFormat _format) {
-        setState(() {
-          format = _format;
-        });
-      },
-      onDaySelected: (DateTime selectDay, DateTime focusDay) {
-        setState(() {
-          selectedDay = selectDay;
-          focusedDay = selectDay;
-        });
-      },
-      headerStyle: HeaderStyle(
-        formatButtonVisible:
-            true, // hides the format button, which is not needed here
-        titleCentered: true,
-      ),
-      calendarStyle: CalendarStyle(
-        // Other style properties...
-        selectedDecoration: BoxDecoration(
-          color: Colors.blue, // change to your desired color
-          shape: BoxShape.circle,
+          ),
         ),
       ),
-      selectedDayPredicate: (day) {
-        return isSameDay(selectedDay, day);
-      },
-      eventLoader: (day) {
-        return events[day] ?? [];
-      },
     );
-  }
-
-  List<Widget> _scheduleWidget(BuildContext context) {
-    return schedule.map<Widget>((daySchedule) {
-      if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
-        return Column(
-          children: [
-            SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '  Schedule',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                width: 300,
-                child: Divider(
-                  thickness: 1,
-                  color: Style.lightBlue,
-                ),
-              ),
-            ),
-            ...daySchedule['classes'].map<Widget>((classData) {
-              return ListTile(
-                title: Text(
-                  classData['name'],
-                ),
-                subtitle: Text(
-                  '${classData['startTime']} - ${classData['endTime']}',
-                ),
-              );
-            }).toList(),
-          ],
-        );
-      } else {
-        return Container();
-      }
-    }).toList();
   }
 
   Widget _eventsWidget(BuildContext context) {
-    Map<String, List<Event>> groupEvents =
-        {}; // New map to separate events by group
-    List<Event> personalEvents = [];
-
-    // Separate the events into the new containers
-    events[selectedDay]?.forEach((event) {
-      if (event.groupId != null) {
-        if (!groupEvents.containsKey(event.groupId)) {
-          groupEvents[event.groupId!] = [];
-        }
-        groupEvents[event.groupId]!.add(event);
-      } else {
-        personalEvents.add(event);
-      }
-    });
-
     return Column(
       children: [
-        if (personalEvents.isNotEmpty)
-          _buildSectionHeader("Personal Events", context, false),
-        ...personalEvents
-            .map((event) => _buildEventTile(event, context))
-            .toList(),
-        for (var groupId in groupEvents.keys) ...[
-          _buildSectionHeader(groupId, context, true),
-          ...groupEvents[groupId]!
-              .map((event) => _buildEventTile(event, context))
-              .toList(),
-        ],
+        _buildSectionHeader("Personal Events", context, false),
+        ...events.map((event) => _buildEventTile(event, context)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(
+      String groupId, BuildContext context, bool hasChatRedirect) {
+    return Column(
+      children: [
+        SizedBox(height: 20),
+        Row(
+          children: [
+            if (hasChatRedirect)
+              Row(
+                children: [
+                  Text(
+                    "  '$groupId' Events",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Tooltip(
+                    message: 'Go to $groupId',
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MainScreen(
+                                index: 6,
+                                selectedGroup: groupId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.chat,
+                            color: Theme.of(context).secondaryHeaderColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            if (!hasChatRedirect)
+              Text(
+                '  $groupId',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+          ],
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            width: 300,
+            child: Divider(
+              thickness: 1,
+              color: Style.lightBlue,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -399,15 +207,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 SizedBox(width: 10),
                 InkWell(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                MainScreen(
-                                    index:
-                                    10,
-                                    location:
-                                    event.location)));
+                    // Handle click on clock icon
+                    // Navigate to another page or perform desired action
                   },
                   child:
                       Icon(Icons.directions, size: 20, color: Style.lightBlue),
@@ -560,66 +361,66 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  Widget _buildSectionHeader(
-      String groupId, BuildContext context, bool hasChatRedirect) {
-    return Column(
-      children: [
-        SizedBox(height: 20),
-        Row(
+  static String _getEventTypeString(EventType eventType) {
+    switch (eventType) {
+      case EventType.academic:
+        return 'Academic';
+      case EventType.entertainment:
+        return 'Entertainment';
+      case EventType.faire:
+        return 'Faire';
+      case EventType.athletics:
+        return 'Athletics';
+      case EventType.competition:
+        return 'Competition';
+      case EventType.party:
+        return 'Party';
+      case EventType.ceremony:
+        return 'Ceremony';
+      case EventType.conference:
+        return 'Conference';
+      case EventType.lecture:
+        return 'Lecture';
+      case EventType.meeting:
+        return 'Meeting';
+      case EventType.workshop:
+        return 'Workshop';
+      case EventType.exhibit:
+        return 'Exhibit';
+    }
+  }
+
+  noEventWidget() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (hasChatRedirect)
-              Row(
-                children: [
-                  Text(
-                    "  '$groupId' Events",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Tooltip(
-                    message: 'Go to $groupId',
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MainScreen(
-                                index: 6,
-                                selectedGroup: groupId,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.chat,
-                            color: Theme.of(context).secondaryHeaderColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  _createEventPopUpDialog(context);
+                },
+                child: Icon(
+                  Icons.hourglass_empty,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
               ),
-            if (!hasChatRedirect)
-              Text(
-                '  $groupId',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don´t have any events scheduled!",
+              textAlign: TextAlign.center,
+            )
           ],
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            width: 300,
-            child: Divider(
-              thickness: 1,
-              color: Style.lightBlue,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -641,7 +442,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   LineComboBox(
                     selectedValue: _selectedEventType,
                     items:
-                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                    eventTypes.map((e) => _getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -758,22 +559,6 @@ class _SchedulePageState extends State<SchedulePage> {
         });
   }
 
-  List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {
-    if (dateTime1.day != dateTime2.day ||
-        dateTime1.month != dateTime2.month ||
-        dateTime1.year != dateTime2.year) {
-      return [
-        DateFormat('HH:mm of yyyy-MM-dd').format(dateTime1),
-        DateFormat('HH:mm of yyyy-MM-dd').format(dateTime2)
-      ];
-    } else {
-      return [
-        DateFormat('HH:mm').format(dateTime1),
-        DateFormat('HH:mm').format(dateTime2)
-      ];
-    }
-  }
-
   void _createPersonalEvent(Event event) {
     DatabaseReference eventsRef = FirebaseDatabase.instance
         .ref()
@@ -810,53 +595,40 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  String getDayOfWeek(DateTime date) {
-    switch (date.weekday) {
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        return '';
-    }
-  }
+  EventType _parseEventType(String? eventTypeString) {
+    if (eventTypeString != null) {
+      eventTypeString = eventTypeString.toLowerCase();
 
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
+      switch (eventTypeString) {
+        case 'academic':
+          return EventType.academic;
+        case 'entertainment':
+          return EventType.entertainment;
+        case 'faire':
+          return EventType.faire;
+        case 'athletics':
+          return EventType.athletics;
+        case 'competition':
+          return EventType.competition;
+        case 'party':
+          return EventType.party;
+        case 'ceremony':
+          return EventType.ceremony;
+        case 'conference':
+          return EventType.conference;
+        case 'lecture':
+          return EventType.lecture;
+        case 'meeting':
+          return EventType.meeting;
+        case 'workshop':
+          return EventType.workshop;
+        case 'exhibit':
+          return EventType.exhibit;
+      }
     }
+
+    return EventType.academic;
   }
 }
+
+

@@ -1,6 +1,7 @@
 import 'package:unilink2023/features/chat/domain/Message.dart';
 import 'package:unilink2023/features/news/domain/FeedItem.dart';
 
+import '../features/chat/domain/Group.dart';
 import '../features/userManagement/domain/User.dart';
 import 'stub_cache_factory.dart'
     if (dart.library.html) 'web_implementation.dart'
@@ -64,6 +65,22 @@ import 'stub_cache_factory.dart'
 
         void removeMessagesCache(){
             impl.removeMessagesCache();
+        }
+
+        Future<List<Group>> getGroups() {
+            return impl.getGroups();
+        }
+
+        void addGroup(Group group){
+            impl.addGroup(group);
+        }
+
+        void removeGroup(String groupId){
+            impl.removeGroup(groupId);
+        }
+
+        void removeGroupsCache() {
+            impl.removeGroupsCache();
         }
 
     }

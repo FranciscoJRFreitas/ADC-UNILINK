@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:unilink2023/features/chat/domain/Message.dart';
 
+import '../features/chat/domain/Group.dart';
 import '../features/news/domain/FeedItem.dart';
 import '../features/userManagement/domain/User.dart';
 
@@ -36,6 +37,8 @@ class SqliteService {
         await database.execute(
             'CREATE TABLE chat(id TEXT PRIMARY KEY, groupId TEXT, isSystemMessage TEXT, containsFile TEXT, text TEXT,'
             ' name TEXT, displayName TEXT, timestamp INTEGER, extension TEXT)');
+        await database.execute(
+            'CREATE TABLE groups(id TEXT PRIMARY KEY, displayName TEXT, description TEXT, numberOfMembers INTEGER)');
         await database.insert('settings', {
           'checkIntro': null,
           'checkLogin': null,
@@ -398,6 +401,56 @@ class SqliteService {
     Database db = await getDatabase();
     await db.transaction((txn) async {
       await txn.rawDelete('DELETE FROM chat');
+    });
+  }
+
+  Future<List<Group>> getGroups() async {
+    final db = await getDatabase();
+
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('groups');
+
+      return maps.map((map) {
+        return Group(
+          id: map['id'],
+          DisplayName: map['displayName'],
+          description: map['description'],
+          numberOfMembers: map['numberOfMembers'],
+        );
+      }).toList();
+    });
+  }
+
+  Future<void> addGroup(Group group) async {
+    // Get a reference to the database.
+    Database db = await getDatabase();
+    Map<String, dynamic> groupMap = group.toMap();
+
+    await db.transaction((txn) async {
+      await txn.insert(
+        'groups',
+        groupMap,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
+  Future<void> removeGroup(String groupId) async {
+    // Get a reference to the database.
+    Database db = await getDatabase();
+
+    // Remove the group from the database.
+    await db.delete(
+      'groups',
+      where: 'id = ?',
+      whereArgs: [groupId],
+    );
+  }
+
+  Future<void> removeGroupsCache() async {
+    Database db = await getDatabase();
+    await db.transaction((txn) async {
+      await txn.rawDelete('DELETE FROM groups');
     });
   }
 }

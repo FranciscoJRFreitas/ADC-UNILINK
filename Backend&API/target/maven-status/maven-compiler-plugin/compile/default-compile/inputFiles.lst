@@ -1,4 +1,5 @@
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\filters\AdditionalResponseHeadersFilter.java
+C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\EventData.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\ModifyAttributesData.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\UserRole.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\UserActivityState.java
@@ -13,6 +14,8 @@ C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\servlets\FirebaseInit.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\RegisterData.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\LoginData.java
+C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\EventResource.java
+C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\AnomalyData.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\ChangePasswordData.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ActivationResource.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\SearchUsersResource.java
@@ -27,4 +30,5 @@ C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\RolesLoader.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\RegisterResource.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\Group.java
+C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\AnomalyResources.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\servlets\MediaResourceServlet.java

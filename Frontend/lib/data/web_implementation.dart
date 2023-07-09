@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:html';
 import 'dart:io';
+import 'package:unilink2023/constants.dart';
+import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 
 import '../features/chat/domain/Message.dart';
@@ -8,7 +10,6 @@ import '../features/news/domain/FeedItem.dart';
 import 'cache_factory.dart';
 
 class CacheFactoryImpl implements CacheFactory {
-  final int cacheMessagesLimit = 12; // Define your cache limit here
   CacheFactoryImpl._();
 
   static final CacheFactoryImpl _instance = CacheFactoryImpl._();
@@ -137,6 +138,15 @@ class CacheFactoryImpl implements CacheFactory {
     }
   }
 
+  Future<List<dynamic>> _getGroupsList() async {
+    String? jsonString = await window.localStorage['groups'];
+    if (jsonString != null) {
+      return jsonDecode(jsonString);
+    } else {
+      return [];
+    }
+  }
+
   Future<List<dynamic>> _getNewsList() async {
     String? jsonString = window.localStorage['news'];
     if (jsonString != null) {
@@ -147,11 +157,15 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   void _setMessagesList(String groupId, List<dynamic> messagesList) async {
-    if (messagesList.length > cacheMessagesLimit) {
+    if (messagesList.length > kCacheMessageLimit) {
       messagesList =
-          messagesList.sublist(messagesList.length - cacheMessagesLimit);
+          messagesList.sublist(messagesList.length - kCacheMessageLimit);
     }
     window.localStorage[groupId] = jsonEncode(messagesList);
+  }
+
+  void _setGroupsList(List<dynamic> messagesList) async {
+    window.localStorage['groups'] = jsonEncode(messagesList);
   }
 
   void _setNewsList(List<dynamic> newsList) {
@@ -191,9 +205,11 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   @override
-  void removeMessagesCache() {
-    window.localStorage.remove('chat');
-    if (get('settings', 'lastMessage') != null) delete('lastMessage');
+  void removeMessagesCache() async {
+    List<Group> groups = await getGroups();
+    groups.forEach((element) {
+      window.localStorage.remove(element.id);
+    });
   }
 
   @override
@@ -206,9 +222,13 @@ class CacheFactoryImpl implements CacheFactory {
 
   @override
   void deleteMessage(String groupId, String id) async {
-    var messages = await _getMessagesList(groupId);
-    messages = messages.where((msg) => msg['id'] != id).toList();
-    _setMessagesList(groupId, messages);
+    if (id == '-1') {
+      _setMessagesList(groupId, []);
+    } else {
+      var messages = await _getMessagesList(groupId);
+      messages = messages.where((msg) => msg['id'] != id).toList();
+      _setMessagesList(groupId, messages);
+    }
   }
 
   @override
@@ -219,5 +239,39 @@ class CacheFactoryImpl implements CacheFactory {
       messages[messageIndex] = message.toMap();
     }
     _setMessagesList(groupId, messages);
+  }
+
+  @override
+  Future<List<Group>> getGroups() async {
+    List<dynamic>? jsonMessagesList = await _getGroupsList();
+    return jsonMessagesList
+        .map((jsonMessage) => Group.fromMap(jsonMessage))
+        .toList();
+  }
+
+  @override
+  void addGroup(Group group) {
+    _getGroupsList().then((groupsList) {
+      groupsList.add(group.toMap());
+      _setGroupsList(groupsList);
+    });
+  }
+
+  @override
+  void removeGroup(String groupId) {
+    _getGroupsList().then((groupsList) {
+      var groupToRemove =
+          groupsList.firstWhere((g) => g['id'] == groupId, orElse: () => null);
+
+      if (groupToRemove != null) {
+        groupsList.remove(groupToRemove);
+        _setGroupsList(groupsList);
+      }
+    });
+  }
+
+  @override
+  void removeGroupsCache() {
+    window.localStorage.remove('groups');
   }
 }

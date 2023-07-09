@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
@@ -44,8 +45,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   FilePickerResult? picked;
   late Stream<List<Message>> messageStream;
   final ScrollController _scrollController = ScrollController();
-  late int messageCap = 10;
-  late int cacheMessageCap = 12;
   late bool isLoading = false;
   late bool isAdmin = false;
   FocusNode messageFocusNode = FocusNode();
@@ -78,31 +77,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   void initMessages() async {
     messages = await cacheFactory.getMessages(widget.groupId);
 
-    if (messages.isEmpty) {
-      // Fetch messages from Firebase if the cache is empty
-      messagesRef
-          .orderByKey()
-          .limitToLast(cacheMessageCap)
-          .once()
-          .then((event) {
-        Map<dynamic, dynamic> valueMap =
-            event.snapshot.value as Map<dynamic, dynamic>;
-
-        valueMap.forEach((key, value) {
-          Message message = Message.fromMapKey(key, value);
-          cacheFactory.setMessages(widget.groupId, message);
-        });
-
-        setState(() {});
-      });
-    }
-
-    messagesRef.orderByKey().onChildAdded.listen((event) {
-      if (messages.length > cacheMessageCap) {
-        messages
-            .removeAt(0); // remove the oldest message if the limit is reached
+    // Listen for added messages
+    messagesRef
+        .orderByKey()
+        .limitToLast(kCacheMessageLimit)
+        .onChildAdded
+        .listen((event) {
+      if (messages.length > kCacheMessageLimit) {
+        messages.removeAt(0);
       }
-
       Message message = Message.fromSnapshot(event.snapshot);
       setState(() {
         bool repeated = messages.any((element) => element.id == message.id);
@@ -111,7 +94,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           cacheFactory.setMessages(widget.groupId, message);
         }
       });
-
     });
 
     // Listen for updated messages
@@ -158,7 +140,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         });
       }
     });
-    _scrollToBottom();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -209,7 +193,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 if (notification is ScrollEndNotification &&
                     _scrollController.position.pixels == 0) {
                   // Load older messages here
-                  isLoading = true;
                   loadOlderMessages();
                 }
                 return false;
@@ -344,16 +327,21 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     child: TextFormField(
                       controller: messageController,
                       focusNode: messageFocusNode,
-                      keyboardType: TextInputType.multiline,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      decoration: const InputDecoration(
+                      keyboardType: TextInputType.text,
+                      style: TextStyle(
+                          color: Theme.of(context).secondaryHeaderColor,
+                          fontSize: 16),
+                      decoration: InputDecoration(
                         hintText: "Send a message...",
-                        hintStyle: TextStyle(color: Colors.white, fontSize: 16),
+                        hintStyle: TextStyle(
+                            color: Theme.of(context).secondaryHeaderColor,
+                            fontSize: 16),
                         border: InputBorder.none,
                       ),
-                      minLines: 5, //Normal textInputField will be displayed
-                      maxLines:
-                          null, // when user presses enter it will adapt to it
+                      minLines: 1,
+                      //Normal textInputField will be displayed
+                      maxLines: 10,
+                      // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
                       },
@@ -506,7 +494,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 onNotification: (ScrollNotification notification) {
                   if (notification is ScrollEndNotification &&
                       _scrollController.position.pixels == 0) {
-                    isLoading = true;
                     loadOlderMessages();
                   }
                   return false;
@@ -549,8 +536,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                         child: IconButton(
                                           icon: Container(
                                             decoration: BoxDecoration(
-                                              shape: BoxShape
-                                                  .rectangle, // use circle if the icon is circular
+                                              shape: BoxShape.rectangle,
+                                              // use circle if the icon is circular
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black,
@@ -599,8 +586,8 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                                           child: IconButton(
                                             icon: Container(
                                               decoration: BoxDecoration(
-                                                shape: BoxShape
-                                                    .rectangle, // use circle if the icon is circular
+                                                shape: BoxShape.rectangle,
+                                                // use circle if the icon is circular
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: Colors.black,
@@ -638,17 +625,25 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     const SizedBox(
                       width: 12,
                     ),
-                    Expanded(
+                    Flexible(
                       child: TextFormField(
                         controller: messageController,
                         focusNode: messageFocusNode,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
+                        keyboardType: TextInputType.text,
+                        style: TextStyle(
+                            color: Theme.of(context).secondaryHeaderColor,
+                            fontSize: 16),
+                        decoration: InputDecoration(
                           hintText: "Send a message...",
-                          hintStyle:
-                              TextStyle(color: Colors.white, fontSize: 16),
+                          hintStyle: TextStyle(
+                              color: Theme.of(context).secondaryHeaderColor,
+                              fontSize: 16),
                           border: InputBorder.none,
                         ),
+                        minLines: 1,
+                        //Normal textInputField will be displayed
+                        maxLines: 4,
+                        // when user presses enter it will adapt to it
                         onFieldSubmitted: (String value) {
                           sendMessage(value);
                         },
@@ -840,7 +835,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     messagesRef
         .orderByChild('timestamp')
         .endAt(oldestMessageTimestamp - 1)
-        .limitToLast(messageCap)
+        .limitToLast(kFetchFBMesageLimit)
         .once()
         .then((msgSnapshot) {
       if (msgSnapshot.snapshot.value != null) {
@@ -860,7 +855,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
         // Add the older messages at the beginning of the messages list
         setState(() {
-          isScrollLocked = true;
           messages.insertAll(0, olderMessages);
         });
       }
@@ -869,7 +863,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
   chatMessages() {
     if (messages.isEmpty) {
-      return Container(); // Return an empty container if there are no messages
+      return SizedBox.shrink();
     }
 
     int? lastTimestamp = 0;
@@ -925,8 +919,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   id: message.id,
                   isAdmin: isAdmin,
                 ));
-
-          if (!isScrollLocked) _scrollToBottom();
 
           return Column(
             children: widgets,

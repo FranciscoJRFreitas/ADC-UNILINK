@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+//Logic and URLS
+const kExtractKeywordsUrl = 'https://yakeaux.oa.r.appspot.com/extract';
+const kBaseUrl = "https://unilink23.oa.r.appspot.com/";
+//const kBaseUrl = "http://localhost:8080/";
+const kCacheMessageLimit = 30; //messages per group
+const kFetchFBMesageLimit = 10;
+
 // Colors
 const kBackgroundColor = Color(0xff191720);
 const kWhiteBackgroundColor = Color.fromARGB(214, 216, 215, 224);
@@ -34,9 +41,7 @@ const kBodyText2 = TextStyle(
   color: Colors.white,
 );
 
-const kExtractKeywordsUrl = 'https://yakeaux.oa.r.appspot.com/extract';
-const kBaseUrl = "https://unilink23.oa.r.appspot.com/";
-//const kBaseUrl = "http://localhost:8080/";
+
 const Color primaryColor = Color.fromARGB(255, 76, 139, 171);
 const Color secondaryColor = Colors.green;
 const Color primaryColorDarker = Color.fromARGB(255, 43, 74, 89);

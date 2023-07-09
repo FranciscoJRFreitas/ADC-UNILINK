@@ -86,23 +86,50 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
+        Key userKey = datastore.newKeyFactory().setKind("User").newKey(group.adminID);
+        Entity admin = datastore.get(userKey);
+        if(admin == null){
+            return Response.status(Status.NOT_FOUND).entity("AdminId doesnt exist").build();
+        }
 
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat
 
+        // Check if the group already exists
+        newChatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Group already exists, return an error response
+                } else {
+                    // Group doesn't exist, proceed with creating it
+                    createNewGroup(group, newChatRef);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle any errors that occurred
+            }
+        });
+
+        return Response.ok("{}").build();
+    }
+
+    private void createNewGroup(Group group, DatabaseReference newChatRef) {
         // Set the data for the new chat
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
         newChatRef.child("description").setValueAsync(group.description);
 
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(newChatRef.getKey());
-        //when creating a group the creater becomes the admin
+        // When creating a group, the creator becomes the admin
         membersRef.child(group.adminID).setValueAsync(true); // Set the creator as a member
 
         DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(newChatRef.getKey());
         DatabaseReference newMessageRef = messagesRef.push(); // Generate a unique ID for the new message
 
         // Set the data for the new message
-        //when the group is created put a welcome message in the group
+        // When the group is created, put a welcome message in the group
         newMessageRef.child("containsFile").setValueAsync(false);
         newMessageRef.child("name").setValueAsync(group.adminID);
         newMessageRef.child("displayName").setValueAsync(group.adminID);
@@ -111,15 +138,14 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         newMessageRef.child("isSystemMessage").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
-        DatabaseReference newChatsForUserRef = chatsByUser.child(token.username);
+        DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);
 
         Map<String, Object> groupsUpdates = new HashMap<>();
         groupsUpdates.put(group.DisplayName, true);
 
         newChatsForUserRef.child("Groups").updateChildrenAsync(groupsUpdates);
-
-        return Response.ok("{}").build();
     }
+
 
     @DELETE
     @Path("/delete/{groupId}")
@@ -168,6 +194,8 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
                 }
 
                 // Delete the group and its associated data
+                DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
+                eventsRef.child(groupId).removeValueAsync();
                 deletedChatRef.removeValueAsync();
                 membersRef.removeValueAsync();
                 DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(groupId);
