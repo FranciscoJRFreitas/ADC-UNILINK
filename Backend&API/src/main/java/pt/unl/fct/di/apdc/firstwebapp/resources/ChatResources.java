@@ -171,6 +171,8 @@ public class ChatResources {
                 }
 
                 // Delete the group and its associated data
+                DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
+                eventsRef.child(groupId).removeValueAsync();
                 deletedChatRef.removeValueAsync();
                 membersRef.removeValueAsync();
                 DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(groupId);

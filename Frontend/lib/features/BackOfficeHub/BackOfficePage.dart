@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:unilink2023/features/BackOfficeHub/anomaliesBackOffice.dart';
 import 'package:unilink2023/features/BackOfficeHub/eventsBackOffice.dart';
+import 'package:unilink2023/features/BackOfficeHub/groupsBackOffice.dart';
 
 class BackOfficePage extends StatefulWidget {
   @override
@@ -33,9 +34,12 @@ class _BackOfficePageState extends State<BackOfficePage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                setState(() {
-                  _selectedButton = 'Group Management';
-                });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GroupPage(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 primary:
