@@ -15,7 +15,6 @@ class SqliteService {
   SqliteService._internal();
 
   void initializeDB() async {
-
     String path = await getDatabasesPath();
     String dbPath = join(path, 'database.db');
 
@@ -44,8 +43,8 @@ class SqliteService {
           'index': "News",
           'currentPage': "0",
           'currentNews': "0",
+          'language': null,
         });
-
       },
       version: 1,
     );
@@ -96,6 +95,13 @@ class SqliteService {
     });
   }
 
+  Future<void> updateLanguage(String value) async {
+    Database db = await getDatabase();
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET language = \'$value\'');
+    });
+  }
+
   Future<void> updateCurrentPage(String value) async {
     Database db = await getDatabase();
     await db.transaction((txn) async {
@@ -143,6 +149,19 @@ class SqliteService {
 
       if (maps.isNotEmpty && maps[0].containsKey('theme')) {
         return maps[0]['theme'];
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<String?> getLanguage() async {
+    Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
+
+      if (maps.isNotEmpty && maps[0].containsKey('language')) {
+        return maps[0]['language'];
       } else {
         return null;
       }

@@ -20,6 +20,7 @@ class MyMap extends StatefulWidget {
 class _MyMapState extends State<MyMap> {
   final loc.Location location = loc.Location();
   late loc.LocationData currentLocation;
+
   GoogleMapController? mapController;
   var latitude;
   var longitude;
@@ -43,7 +44,6 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> portMarkers = Set();
   Set<Marker> servMarkers = Set();
   Map<PolylineId, Polyline> polylines = {};
-  //Set<Marker> currentPositionMarkers = Set();
 
   double distance = 0.0;
 
@@ -89,32 +89,31 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
-  /*void updateCurrentPositionMarker(loc.LocationData newLocation) async {
-    final ImageConfiguration imageConfiguration = createLocalImageConfiguration(
-        context,
-        size: Size.square(48)); // adjust the size as needed
-    final BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
-        imageConfiguration, 'assets/images/locationArrow.png');
-
+  void updateCurrentPositionMarker(loc.LocationData newLocation) async {
+    final Uint8List gates = isDirections
+        ? await getImages('assets/icon/movingLocation.png', 100)
+        : await getImages('assets/icon/currentLocation.png', 100);
     setState(() {
-      currentPositionMarkers.clear();
-      currentPositionMarkers.add(
+      markers.removeWhere(
+          (m) => m.markerId.value == 'currentPos'); // Remove the old marker
+
+      // Add the updated marker
+      markers.add(
         Marker(
-          markerId: MarkerId('current_position'),
-          position: LatLng(newLocation.latitude!, newLocation.longitude!),
-          icon: customIcon,
-          infoWindow: InfoWindow(
-            title: 'Current Position',
-          ),
+          markerId: MarkerId('currentPos'),
+          icon: BitmapDescriptor.fromBytes(gates),
+          position:
+              LatLng(newLocation.latitude ?? 0.0, newLocation.longitude ?? 0.0),
+          infoWindow: InfoWindow(title: 'My Location'),
         ),
       );
-      markers.addAll(currentPositionMarkers);
     });
-  }*/
+  }
 
   getDirections(double? lat, double? long) async {
     //print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
     //print(distance);
+
     if (mapController != null && isLocked) {
       mapController!
           .moveCamera(CameraUpdate.newLatLngZoom(cameraposition, zoom));
@@ -159,6 +158,11 @@ class _MyMapState extends State<MyMap> {
       }
 
       if (isDirections) {
+        loc.LocationData locationData = loc.LocationData.fromMap({
+          'latitude': polylineCoordinates.first.latitude,
+          'longitude': polylineCoordinates.first.longitude,
+        });
+        updateCurrentPositionMarker(locationData);
         addPolyLine(lat, long, polylineCoordinates);
       } else
         setState(() {
@@ -222,7 +226,7 @@ class _MyMapState extends State<MyMap> {
     );
     polylines[id] = polyline;
     setState(() {});
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 10)); //alterar os tempos
     getDirections(destLat, destLong);
   }
 
@@ -664,41 +668,146 @@ class _MyMapState extends State<MyMap> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.4,
+          height: MediaQuery.of(context).size.height * 0.6,
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(title!, style: Theme.of(context).textTheme.headline6),
-                SizedBox(height: 10),
-                Text(snippet!, style: Theme.of(context).textTheme.bodyText1),
-                if (!kIsWeb)
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (isDirections) {
-                        setState(() {
-                          isDirections = false;
-                        });
-                        await Future.delayed(Duration(seconds: 1));
-                      }
-                      isDirections = true;
-                      getDirections(tappedMarker.position.latitude,
-                          tappedMarker.position.longitude);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Get Directions'),
-                  ),
-                ElevatedButton(
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: IconButton(
+                  icon: Icon(Icons.minimize),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Close'),
                 ),
-              ],
-            ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(height: 40),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        title!,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  if (!kIsWeb)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            if (isDirections) {
+                              setState(() {
+                                isDirections = false;
+                              });
+                              await Future.delayed(Duration(seconds: 1));
+                            }
+                            isDirections = true;
+                            getDirections(tappedMarker.position.latitude,
+                                tappedMarker.position.longitude);
+                            Navigator.of(context).pop();
+                          },
+                          icon: Icon(Icons.directions_walk, color: Colors.blue),
+                          label: Text('Get Directions',
+                              style: TextStyle(color: Colors.blue)),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.white, // Background color
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(20), // Border radius
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 18),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: snippet.length > 10 ? 8.0 : 2.0,
+                    ),
+                    child: Text(snippet!,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void showMarkerInfoWindowMobile2(
+      MarkerId markerId, String name, String desc) {
+    final Marker tappedMarker =
+        markers.firstWhere((marker) => marker.markerId == markerId);
+    final String title = name;
+    final String snippet = desc;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.3,
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Stack(
+            children: [
+              Positioned(
+                child: IconButton(
+                  icon: Icon(Icons.minimize),
+                  onPressed: () {
+                    Navigator.pop(context); // closes the modal
+                  },
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                      height: 40), // Add extra space at top for close button
+                  Text(
+                    title!,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Text(snippet!,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                  SizedBox(height: 20),
+                  if (!kIsWeb)
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        if (isDirections) {
+                          setState(() {
+                            isDirections = false;
+                          });
+                          await Future.delayed(Duration(seconds: 1));
+                        }
+                        isDirections = true;
+                        getDirections(tappedMarker.position.latitude,
+                            tappedMarker.position.longitude);
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.directions_walk),
+                      label: Text('Get Directions'),
+                    ),
+                ],
+              ),
+            ],
           ),
         );
       },
@@ -736,7 +845,10 @@ class _MyMapState extends State<MyMap> {
       if (mounted) {
         setState(() {
           currentLocation = _locationResult;
-          //updateCurrentPositionMarker(currentLocation);
+          if (!isDirections) {
+            updateCurrentPositionMarker(currentLocation);
+          }
+
           if (isFirst) {
             isFirst = false;
             distance = calculateDistance(
@@ -780,13 +892,12 @@ class _MyMapState extends State<MyMap> {
 
     List<LatLng> polygonPoints = [];
 
-    final Uint8List buildings =
-        await getImages('assets/icon/building.png', 130);
-    final Uint8List gates = await getImages('assets/icon/gates.png', 130);
-    final Uint8List parking = await getImages('assets/icon/Parking.png', 130);
-    final Uint8List service = await getImages('assets/icon/service.png', 130);
+    final Uint8List buildings = await getImages('assets/icon/building.png', 50);
+    final Uint8List gates = await getImages('assets/icon/gates.png', 50);
+    final Uint8List parking = await getImages('assets/icon/Parking.png', 50);
+    final Uint8List service = await getImages('assets/icon/service.png', 50);
     final Uint8List restaurant =
-        await getImages('assets/icon/restaurant.png', 130);
+        await getImages('assets/icon/restaurant.png', 100);
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
       double latitude = coordinates[1];
       double longitude = coordinates[0];
