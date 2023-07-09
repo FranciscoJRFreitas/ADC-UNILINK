@@ -878,7 +878,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
   chatMessages() {
     if (messages.isEmpty) {
-      return Container(); // Return an empty container if there are no messages
+      return SizedBox.shrink();
     }
 
     int? lastTimestamp = 0;

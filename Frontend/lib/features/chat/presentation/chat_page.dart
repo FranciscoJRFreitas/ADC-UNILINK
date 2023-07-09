@@ -42,7 +42,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  late Stream<List<Group>> groupsStream = Stream.empty();
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   late Group? _selectedGroup = null;
   final TextEditingController searchController = TextEditingController();
@@ -83,14 +82,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   void listenForGroups() async {
-
-    StreamController<List<Group>> streamController = StreamController();
-
     List<Group> groups = await cacheFactory.getGroups();
 
     groups.forEach((element) {
       bool exists = allGroups.any((e) => e.id == element.id);
-      if(!exists) {
+      if (!exists) {
         setState(() {
           allGroups.add(element);
           filteredGroups.add(element);
@@ -159,7 +155,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         }
 
         setState(() {});
-        streamController.add(groups);
       }
 
       if (widget.selectedGroup != null)
@@ -181,9 +176,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       });
     });
 
-    streamController.add(groups);
-
-    groupsStream = streamController.stream;
+    setState(() {});
   }
 
   Future<Uint8List?> downloadGroupPictureData(String groupId) async {
@@ -319,7 +312,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   Widget _buildLeftWidget(BuildContext context) {
-    // Your existing widget code, with modifications to onTap:
+    List<Group> groups = filteredGroups;
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -360,15 +353,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 ),
               ),
               Expanded(
-                child: StreamBuilder<List<Group>>(
-                  stream: groupsStream,
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<Group>> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (snapshot.hasData) {
-                      List<Group> groups = filteredGroups;
-                      return ListView(
+                child: groups.length == 0
+                    ? noGroupWidget()
+                    : ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
                           Message? firstMessage =
@@ -454,12 +441,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             ],
                           );
                         }).toList(),
-                      );
-                    } else {
-                      return noGroupWidget();
-                    }
-                  },
-                ),
+                      ),
               ),
             ],
           ),
@@ -481,6 +463,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   Widget _buildMobileLayout(BuildContext context) {
+    List<Group> groups = filteredGroups;
     if (_selectedGroup != null) {
       Future.delayed(Duration(milliseconds: 200), () {
         Navigator.of(context).pushReplacement(
@@ -531,15 +514,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<Group>>(
-              stream: groupsStream,
-              builder:
-                  (BuildContext context, AsyncSnapshot<List<Group>> snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (snapshot.hasData) {
-                  List<Group> groups = filteredGroups;
-                  return ListView(
+            child: groups.length == 0
+                ? noGroupWidget()
+                : ListView(
                     padding: EdgeInsets.only(top: 10, bottom: 80),
                     children: groups.map((group) {
                       Message? firstMessage = firstMessageOfGroups[group.id];
@@ -624,12 +601,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                         ],
                       );
                     }).toList(),
-                  );
-                } else {
-                  return noGroupWidget();
-                }
-              },
-            ),
+                  ),
           ),
         ],
       ),
@@ -894,7 +866,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               height: 20,
             ),
             const Text(
-              "You've not joined any groups, tap on the add icon to create a group or also search from top search button.",
+              "You've not joined any groups, tap on the add icon to create a group or also search from top search bar.",
               textAlign: TextAlign.center,
             )
           ],

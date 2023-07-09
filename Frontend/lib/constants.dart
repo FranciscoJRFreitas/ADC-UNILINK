@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 const kExtractKeywordsUrl = 'https://yakeaux.oa.r.appspot.com/extract';
 const kBaseUrl = "https://unilink23.oa.r.appspot.com/";
 //const kBaseUrl = "http://localhost:8080/";
-const kCacheMessageLimit = 12;
+const kCacheMessageLimit = 30; //messages per group
 const kFetchFBMesageLimit = 10;
 
 // Colors

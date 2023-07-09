@@ -655,7 +655,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (_selectedIndex < options.length) {
       return options[_selectedIndex];
     } else {
-      // You can return some placeholder widget here when _selectedIndex is out of range
       return Text('Selected index out of range! ${options}');
     }
   }
