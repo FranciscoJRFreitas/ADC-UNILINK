@@ -121,24 +121,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => MainScreen(
-                                          index: 9,
-                                          date: event.startTime,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Icon(
-                                    Icons.schedule,
-                                    size: 20,
-                                    color: Style.lightBlue,
-                                  ),
-                                ),
                                 if (event.location != "0") ...[
                                   SizedBox(width: 10),
                                   InkWell(
