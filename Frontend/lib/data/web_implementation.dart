@@ -254,4 +254,9 @@ class CacheFactoryImpl implements CacheFactory {
       _setGroupsList(groupsList);
     });
   }
+
+  @override
+  void removeGroupsCache() {
+    window.localStorage.remove('groups');
+  }
 }

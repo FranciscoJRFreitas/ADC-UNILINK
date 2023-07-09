@@ -415,4 +415,11 @@ class SqliteService {
       );
     });
   }
+
+  Future<void> removeGroupsCache() async {
+    Database db = await getDatabase();
+    await db.transaction((txn) async {
+      await txn.rawDelete('DELETE FROM groups');
+    });
+  }
 }

@@ -12,6 +12,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/data/cache_factory_provider.dart';
+import 'package:unilink2023/features/chat/domain/Group.dart';
 import 'package:unilink2023/domain/Token.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 import 'package:unilink2023/features/chat/presentation/chat_msg_page.dart';
@@ -41,7 +42,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  late Stream<List<Group>> groupsStream;
+  late Stream<List<Group>> groupsStream = Stream.empty();
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   late Group? _selectedGroup = null;
   final TextEditingController searchController = TextEditingController();
@@ -53,7 +54,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    if (mounted) groupsStream = listenForGroups();
+    if (mounted) listenForGroups();
     WidgetsBinding.instance?.addObserver(this);
   }
 
@@ -81,7 +82,18 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return formatter.format(date);
   }
 
-  Stream<List<Group>> listenForGroups() {
+  void listenForGroups() async {
+    StreamController<List<Group>> streamController = StreamController();
+
+    List<Group> groups = await cacheFactory.getGroups();
+
+    groups.forEach((element) {
+      setState(() {
+        allGroups.add(element);
+        filteredGroups.add(element);
+      });
+    });
+
     DatabaseReference chatRef = FirebaseDatabase.instance
         .ref()
         .child('chat')
@@ -93,9 +105,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         FirebaseDatabase.instance.ref().child('members');
     DatabaseReference messagesRef =
         FirebaseDatabase.instance.ref().child('messages');
-
-    StreamController<List<Group>> streamController = StreamController();
-    List<Group> groups = [];
 
     // Listen for initial data and subsequent child additions
     chatRef.onChildAdded.listen((event) async {
@@ -133,13 +142,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           description: description,
           numberOfMembers: numberOfMembers,
         );
-        groups.add(group);
 
-        if (mounted)
+        bool exists = groups.any((element) => element.id == group.id);
+        if (!exists) {
+          groups.add(group);
+          cacheFactory.addGroup(group);
           setState(() {
             allGroups.add(group);
             filteredGroups.add(group);
           });
+        }
 
         streamController.add(groups);
       }
@@ -163,7 +175,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       });
     });
 
-    return streamController.stream;
+    streamController.add(groups);
+
+    groupsStream = streamController.stream;
   }
 
   Future<Uint8List?> downloadGroupPictureData(String groupId) async {
@@ -305,7 +319,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         iconTheme: IconThemeData(
           color: kWhiteBackgroundColor,
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor, //roleColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        //roleColor,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: Text(
           "Groups",
@@ -911,6 +926,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       }),
     );
 
+    // if (response.statusCode == 200) {
+    //   showErrorSnackbar('Created a group successfully!', false);
+    //   //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
+    // } else {
+    //   showErrorSnackbar('Failed to create a group: ${response.body}', true);
+    // }
     groupNameController.clear();
     descriptionController.clear();
   }

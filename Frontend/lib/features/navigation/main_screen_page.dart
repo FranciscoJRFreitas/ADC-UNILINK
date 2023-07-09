@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/features/BackOfficeHub/BackOfficePage.dart';
 import 'package:unilink2023/features/anomaly/anomalypage.dart';
@@ -34,11 +35,12 @@ class MainScreen extends StatefulWidget {
   final int? index;
   final DateTime? date;
   final String? selectedGroup;
+  final String? location;
 
-  MainScreen({this.index, this.date, this.selectedGroup});
+  MainScreen({this.index, this.date, this.location, this.selectedGroup});
 
   @override
-  _MainScreenState createState() => _MainScreenState(index, date);
+  _MainScreenState createState() => _MainScreenState(index, date, location);
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
@@ -46,6 +48,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   int _bottomNavigationIndex = 0;
   DateTime scheduleDate = DateTime.now();
+  String markerLocation = "";
   List<String> _title = [
     "News",
     "Search",
@@ -69,7 +72,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
-  _MainScreenState(int? index, DateTime? date) {
+  _MainScreenState(int? index, DateTime? date, String? location) {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
@@ -81,6 +84,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   : 0;
     }
     if (date != null) scheduleDate = date;
+    if (location != null) markerLocation = location;
   }
 
   @override
@@ -120,9 +124,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(
-            username: _currentUser.username,
-            date: scheduleDate), //estudante //9
-        MyMap(), //10
+          username: _currentUser.username, date: scheduleDate
+        ), //estudante //9
+        MyMap(markerLocation: markerLocation), //10
         ReportAnomalyPage(),
         BackOfficePage(),
         Placeholder(), //professor //11
@@ -733,6 +737,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       FirebaseAuth.FirebaseAuth.instance.signOut();
       cacheFactory.removeLoginCache();
       cacheFactory.removeMessagesCache();
+      cacheFactory.removeGroupsCache();
 
       String page = await cacheFactory.get("settings", "index");
       int index = 0;

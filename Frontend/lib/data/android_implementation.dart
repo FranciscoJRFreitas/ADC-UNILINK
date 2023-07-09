@@ -162,4 +162,9 @@ class CacheFactoryImpl implements CacheFactory {
   void addGroup(Group group) {
     SqliteService().addGroup(group);
   }
+
+  @override
+  void removeGroupsCache() {
+    SqliteService().removeGroupsCache();
+  }
 }

@@ -592,8 +592,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                     SizedBox(width: 10),
                                                     InkWell(
                                                       onTap: () {
-                                                        // Handle click on clock icon
-                                                        // Navigate to another page or perform desired action
+                                                        Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                                                            MainScreen(index: 10, location: event.location)));
                                                       },
                                                       child: Icon(
                                                           Icons.directions,
@@ -2070,7 +2070,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                       ? [
                           ListTile(
                             title: Text(
-                              'Building',
+                              'Buildings',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall!
@@ -2082,7 +2082,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                           ),
                           ListTile(
                             title: Text(
-                              'Restaurant',
+                              'Restaurants',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall!
@@ -2094,7 +2094,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                           ),
                           ListTile(
                             title: Text(
-                              'Park',
+                              'Parking Lots',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall!
@@ -2106,7 +2106,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                           ),
                           ListTile(
                             title: Text(
-                              'Port',
+                              'Gates',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall!
@@ -2118,7 +2118,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                           ),
                           ListTile(
                             title: Text(
-                              'Service',
+                              'Services',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall!
