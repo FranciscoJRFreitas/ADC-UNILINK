@@ -13,6 +13,8 @@ import 'package:unilink2023/features/screen.dart';
 import '../../constants.dart';
 import 'package:http/http.dart' as http;
 
+import '../../widgets/LineComboBox.dart';
+
 class BackOfficePage extends StatefulWidget {
   @override
   _BackOfficePageState createState() => _BackOfficePageState();
@@ -55,8 +57,8 @@ class _BackOfficePageState extends State<BackOfficePage> {
                             children: [
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .primaryColor, // button's fill color
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
                                   foregroundColor: Colors.white,
                                   elevation: 2,
                                 ),
@@ -74,82 +76,105 @@ class _BackOfficePageState extends State<BackOfficePage> {
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Create User'),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            TextField(
-                                              controller: nameController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Name',
-                                              ),
+                                      return StatefulBuilder(
+                                        // Add this
+                                        builder: (BuildContext context,
+                                            StateSetter setState) {
+                                          // Add this
+                                          return AlertDialog(
+                                            title: Text('Create User'),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextField(
+                                                  controller: nameController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Name',
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      usernameController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Username',
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller: emailController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Email',
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      passwordController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Password',
+                                                  ),
+                                                  obscureText: true,
+                                                ),
+                                                LineComboBox(
+                                                  selectedValue: selectedRole,
+                                                  items: [
+                                                    'SU',
+                                                    'BACKOFFICE',
+                                                    'DIRECTOR',
+                                                    'PROF',
+                                                    'STUDENT'
+                                                  ],
+                                                  icon: Icons.category,
+                                                  onChanged: (newValue) {
+                                                    setState(() {
+                                                      selectedRole = newValue!;
+                                                    });
+                                                  },
+                                                ),
+                                              ],
                                             ),
-                                            TextField(
-                                              controller: usernameController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Username',
+                                            actions: [
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text('Cancel'),
                                               ),
-                                            ),
-                                            TextField(
-                                              controller: emailController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Email',
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  String name =
+                                                      nameController.text;
+                                                  String username =
+                                                      usernameController.text;
+                                                  String email =
+                                                      emailController.text;
+                                                  String password =
+                                                      passwordController.text;
+                                                  String role = selectedRole;
+                                                  // Call the registerUser function with the entered data
+                                                  registerUser(
+                                                      name,
+                                                      username,
+                                                      email,
+                                                      password,
+                                                      role,
+                                                      _showErrorSnackbar);
+                                                  // Handle create user logic with the entered data
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text('Create'),
                                               ),
-                                            ),
-                                            TextField(
-                                              controller: passwordController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Password',
-                                              ),
-                                              obscureText: true,
-                                            ),
-                                            _buildLocationField()
-                                          ],
-                                        ),
-                                        actions: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              String name = nameController.text;
-                                              String username =
-                                                  usernameController.text;
-                                              String email =
-                                                  emailController.text;
-                                              String password =
-                                                  passwordController.text;
-                                              String role = selectedRole;
-                                              // Call the registerUser function with the entered data
-                                              registerUser(
-                                                  name,
-                                                  username,
-                                                  email,
-                                                  password,
-                                                  role,
-                                                  _showErrorSnackbar);
-
-                                              // Handle create user logic with the entered data
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Create'),
-                                          ),
-                                        ],
-                                      );
+                                            ],
+                                          );
+                                        },
+                                      ); // Close StatefulBuilder
                                     },
                                   );
                                 },
                               ),
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .primaryColor, // button's fill color
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
                                   foregroundColor: Colors.white,
-
                                   elevation: 2,
                                 ),
                                 icon: Icon(Icons.person_remove),
@@ -311,41 +336,6 @@ class _BackOfficePageState extends State<BackOfficePage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLocationField() {
-    return DropdownButton<String>(
-      value: selectedRole,
-      onChanged: (String? newValue) {
-        if (newValue != null) {
-          setState(() {
-            selectedRole = newValue;
-          });
-        }
-      },
-      items: [
-        DropdownMenuItem<String>(
-          value: 'SU',
-          child: Text('SU'),
-        ),
-        DropdownMenuItem<String>(
-          value: 'BACKOFFICE',
-          child: Text('BACKOFFICE'),
-        ),
-        DropdownMenuItem<String>(
-          value: 'DIRECTOR',
-          child: Text('DIRECTOR'),
-        ),
-        DropdownMenuItem<String>(
-          value: 'PROF',
-          child: Text('PROF'),
-        ),
-        DropdownMenuItem<String>(
-          value: 'STUDENT',
-          child: Text('STUDENT'),
-        ),
-      ],
     );
   }
 
