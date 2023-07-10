@@ -12,6 +12,8 @@ import 'package:unilink2023/features/BackOfficeHub/groupsBackOffice.dart';
 import '../../constants.dart';
 import 'package:http/http.dart' as http;
 
+import '../userManagement/presentation/userAuth/remove_account_page.dart';
+
 class BackOfficePage extends StatefulWidget {
   @override
   _BackOfficePageState createState() => _BackOfficePageState();
@@ -148,57 +150,12 @@ class _BackOfficePageState extends State<BackOfficePage> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              TextEditingController usernameController =
-                                  TextEditingController();
-                              TextEditingController passwordController =
-                                  TextEditingController();
-
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Delete User'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TextField(
-                                          controller: usernameController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Target Username',
-                                          ),
-                                        ),
-                                        TextField(
-                                          controller: passwordController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Your Password',
-                                          ),
-                                          obscureText: true,
-                                        ),
-                                      ],
-                                    ),
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          String targetusername =
-                                              usernameController.text;
-                                          String password =
-                                              passwordController.text;
-
-                                          removeAccount(context, password,
-                                              targetusername);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Delete'),
-                                      ),
-                                    ],
-                                  );
-                                },
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      RemoveAccountPage(),
+                                ),
                               );
                             },
                             child: Text('Delete User'),

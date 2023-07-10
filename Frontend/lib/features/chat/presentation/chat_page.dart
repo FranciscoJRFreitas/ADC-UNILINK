@@ -351,7 +351,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               ),
               Expanded(
                 child: groups.length == 0
-                    ? noGroupWidget()
+                    ? searchController.text.trim().isEmpty
+                        ? noGroupWidget()
+                        : noSearchResult()
                     : ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
@@ -514,7 +516,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
           Expanded(
             child: groups.length == 0
-                ? noGroupWidget()
+                ? searchController.text.trim().isEmpty
+                    ? noGroupWidget()
+                    : noSearchResult()
                 : ListView(
                     padding: EdgeInsets.only(top: 10, bottom: 80),
                     children: groups.map((group) {
@@ -867,6 +871,32 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ),
             const Text(
               "You've not joined any groups, tap on the add icon to create a group or also search from top search bar.",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  noSearchResult() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              color: Colors.grey[700],
+              size: 75,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "There were no search results...",
               textAlign: TextAlign.center,
             )
           ],
