@@ -50,10 +50,11 @@ public class EventResource {
         }
 
             DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-        eventsRef.child(data.groupID).push(); // Generate a unique ID for the new chat
-
+         // Generate a unique ID for the new chat
+        String eventId = eventsRef.child(data.groupID).push().getKey();
             // Set the data for the new chat
         Map<String, Object> eventData = new HashMap<>();
+        eventData.put("id", eventId);
         eventData.put("creator", data.creator);
         eventData.put("type", data.type);
         eventData.put("title", data.title);
@@ -61,7 +62,7 @@ public class EventResource {
         eventData.put("startTime", data.startTime);
         eventData.put("endTime", data.endTime);
         eventData.put("location", data.location);
-        eventsRef.child(data.groupID).push().setValueAsync(eventData); // Generate a unique ID for the new chat
+        eventsRef.child(data.groupID).child(eventId).setValueAsync(eventData); // Generate a unique ID for the new chat
 
         Map<String, Object> responseData = new HashMap<>();
             responseData.put("event_title", data.title);

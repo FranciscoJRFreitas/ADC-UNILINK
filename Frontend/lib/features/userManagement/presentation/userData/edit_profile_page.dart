@@ -405,6 +405,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                             occupationController.text,
                             _showErrorSnackbar,
                           );
+
                         },
                         bgColor: Theme.of(context).dividerColor,
                         textColor: Colors.white,
