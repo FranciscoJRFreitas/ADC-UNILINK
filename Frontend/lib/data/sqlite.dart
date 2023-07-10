@@ -31,7 +31,7 @@ class SqliteService {
             'mobilePhone TEXT, occupation TEXT,token TEXT, password TEXT, creationTime TEXT)');
         await database.execute(
             'CREATE TABLE settings(checkIntro TEXT, checkLogin TEXT,'
-            'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT)');
+            'theme TEXT, `index` TEXT, currentPage TEXT, currentNews TEXT, language TEXT)');
         await database.execute(
             'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
         await database.execute(
@@ -46,6 +46,7 @@ class SqliteService {
           'index': "News",
           'currentPage': "0",
           'currentNews': "0",
+          'language': null,
         });
       },
       version: 1,
@@ -97,6 +98,13 @@ class SqliteService {
     });
   }
 
+  Future<void> updateLanguage(String value) async {
+    Database db = await getDatabase();
+    await db.transaction((txn) async {
+      await txn.rawUpdate('UPDATE settings SET language = \'$value\'');
+    });
+  }
+
   Future<void> updateCurrentPage(String value) async {
     Database db = await getDatabase();
     await db.transaction((txn) async {
@@ -144,6 +152,19 @@ class SqliteService {
 
       if (maps.isNotEmpty && maps[0].containsKey('theme')) {
         return maps[0]['theme'];
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<String?> getLanguage() async {
+    Database db = await getDatabase();
+    return await db.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('settings');
+
+      if (maps.isNotEmpty && maps[0].containsKey('language')) {
+        return maps[0]['language'];
       } else {
         return null;
       }

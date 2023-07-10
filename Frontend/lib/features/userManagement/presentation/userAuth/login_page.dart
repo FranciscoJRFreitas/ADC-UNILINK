@@ -16,6 +16,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import 'package:flutter/foundation.dart';
+import 'package:google_translator/google_translator.dart';
 
 import 'recover_password_page.dart';
 
@@ -107,14 +108,14 @@ class _LoginPageState extends State<LoginPage> {
                         Text(
                           "Welcome back,",
                           style: Theme.of(context).textTheme.titleLarge,
-                        ),
+                        ).translate("Bem-vindo,"),
                         SizedBox(
                           height: 10,
                         ),
                         Text(
                           "You've been missed!",
                           style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+                        ).translate("Sentimos a tua falta"),
                         SizedBox(
                           height: 30,
                         ),

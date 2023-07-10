@@ -66,6 +66,7 @@ class Event {
   factory Event.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
+      id:data['id'] as String,
       creator: data['creator'] as String,
       type: _parseEventType(data['type'] as String),
       title: data['title'] as String,
@@ -78,6 +79,7 @@ class Event {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'creator': creator,
       'type': _getEventTypeString(type),
       'title': title,

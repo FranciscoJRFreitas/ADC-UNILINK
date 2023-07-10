@@ -4,6 +4,7 @@ import 'package:unilink2023/features/intro/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
+import 'package:unilink2023/domain/LocaleProvider.dart';
 import 'application/firebase_messaging_service.dart';
 import 'data/cache_factory_provider.dart';
 import 'domain/MapNotifier.dart';
@@ -12,6 +13,11 @@ import 'domain/Notification.dart';
 import 'domain/UserNotifier.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
+import 'package:google_translator/google_translator.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+//import 'package:unilink2023/domain/cacheFactory.dart' as cache;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +37,8 @@ void main() async {
     cacheFactory.set('currentPage', "0");
   if (await cacheFactory.get("settings", "currentNews") == null)
     cacheFactory.set('currentNews', "0");
+  if (await cacheFactory.get("settings", "language") == null)
+    cacheFactory.set('language', "english");
 
   dynamic themeSetting = await cacheFactory.get('settings', 'theme');
 
@@ -54,6 +62,10 @@ void main() async {
           ),
           ChangeNotifierProvider(
             create: (context) => UserNotifier(),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => LocaleProvider(),
+            child: MyApp(),
           ),
           ChangeNotifierProvider(
             create: (context) => MapNotifier(),
@@ -91,12 +103,29 @@ class MyApp extends StatelessWidget {
     initState(context);
 
     final themeNotifier = Provider.of<ThemeNotifier>(context);
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'UniLink',
-      theme: themeNotifier.currentTheme,
-      home: SplashPage(),
+    final localeProvider = Provider.of<LocaleProvider>(context);
+    final String apiKey = "AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g";
+    final _userSelectedLocale = null;
+    return GoogleTranslatorInit(
+      apiKey,
+      translateFrom: Locale('en'),
+      translateTo: Locale('pt-PT'),
+      // automaticDetection: , In case you don't know the user language will want to traslate,
+      // cacheDuration: Duration(days: 13), The duration of the cache translation.
+      builder: () => MaterialApp(
+        locale: localeProvider.currentLocale,
+        debugShowCheckedModeBanner: false,
+        title: 'UniLink',
+        theme: themeNotifier.currentTheme,
+        home: SplashPage(),
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: localeProvider.supportedLocales,
+      ),
     );
   }
 }

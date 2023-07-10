@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/features/BackOfficeHub/BackOfficePage.dart';
 import 'package:unilink2023/features/anomaly/anomalypage.dart';
+import 'package:unilink2023/features/calendar/presentation/my_events_page.dart';
 import 'package:unilink2023/features/chat/presentation/chat_page.dart';
 import 'package:unilink2023/features/contacts/presentation/contacts_page.dart';
 import 'package:unilink2023/features/listUsers/list_users_page.dart';
@@ -40,7 +41,8 @@ class MainScreen extends StatefulWidget {
   MainScreen({this.index, this.date, this.location, this.selectedGroup});
 
   @override
-  _MainScreenState createState() => _MainScreenState(index, date, location, selectedGroup);
+  _MainScreenState createState() =>
+      _MainScreenState(index, date, location, selectedGroup);
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
@@ -66,6 +68,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     "BackOffice Hub",
     "Teacher",
     "Director",
+    "Events",
   ];
   late List<double> scales = List.filled(_widgetOptions().length, 1);
   late User _currentUser;
@@ -73,7 +76,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
-  _MainScreenState(int? index, DateTime? date, String? location, String? selectedGroup) {
+  _MainScreenState(
+      int? index, DateTime? date, String? location, String? selectedGroup) {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
@@ -126,13 +130,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ContactsPage(), //7
         SettingsPage(loggedIn: true), //8
         SchedulePage(
-          username: _currentUser.username, date: scheduleDate
-        ), //estudante //9
+            username: _currentUser.username,
+            date: scheduleDate), //estudante //9
         MyMap(markerLocation: markerLocation), //10
         ReportAnomalyPage(user: _currentUser),
         BackOfficePage(),
-        Placeholder(), //professor //11
+        Placeholder(),
+
         Placeholder(), //diretor //12
+        MyEventsPage(username: _currentUser.username),
       ];
 
   Widget picture(BuildContext context) {
@@ -161,8 +167,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -260,7 +266,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           iconTheme: IconThemeData(
             color: Theme.of(context).textTheme.bodyLarge!.color,
           ),
-          backgroundColor: Theme.of(context).primaryColor, //roleColor,
+          backgroundColor: Theme.of(context).primaryColor,
+          //roleColor,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
             _title[_selectedIndex],
@@ -382,6 +389,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               Navigator.pop(context);
                             },
                           ),
+                          ListTile(
+                            leading: Icon(Icons.event_note),
+                            title: Text('My Events'),
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = 15;
+                              });
+                              Navigator.pop(context);
+                            },
+                          ),
                         ])
                   : Container(),
               _currentUser.role == 'PROF' || _currentUser.role == 'SU'
@@ -489,17 +506,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.analytics),
-                title: Text('BackOffice Hub',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 12;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
+              if (_currentUser.role == "BACKOFFICE" ||
+                  _currentUser.role == "SU")
+                ListTile(
+                  leading: Icon(Icons.analytics),
+                  title: Text('BackOffice Hub',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 12;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
               SizedBox(height: 75),
               Divider(
                 // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.

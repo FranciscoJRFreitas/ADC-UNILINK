@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -250,7 +251,10 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _createEventPopUpDialog(context);
+          if(kIsWeb)
+            _createEventPopUpDialogWeb(context);
+          else
+            _createEventPopUpDialogMobile(context);
         },
         child: const Icon(
           Icons.add,
@@ -623,7 +627,7 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  _createEventPopUpDialog(BuildContext context) {
+  _createEventPopUpDialogWeb(BuildContext context) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -758,6 +762,183 @@ class _SchedulePageState extends State<SchedulePage> {
         });
   }
 
+  void _createEventPopUpDialogMobile(BuildContext context) {
+    LatLng? _selectedLocation = null;
+    String selectLocationText = "Select Location";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      builder: (context) => StatefulBuilder(
+        builder: ((context, setState) {
+          return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: SingleChildScrollView(
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        print("CLOSING");
+                        Navigator.pop(context);
+                        titleController.clear();
+                        descriptionController.clear();
+                        startController.clear();
+                        endController.clear();
+                      },
+                    ),
+                  ),
+                   Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height:
+                            40), // Add extra space at top for close button
+                        const Text(
+                          "Add an event",
+                          textAlign: TextAlign.left,
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            LineComboBox(
+                              selectedValue: _selectedEventType,
+                              items: eventTypes
+                                  .map((e) => _getEventTypeString(e))
+                                  .toList(),
+                              icon: Icons.type_specimen,
+                              onChanged: (dynamic newValue) {
+                                setState(() {
+                                  _selectedEventType = newValue;
+                                });
+                              },
+                            ),
+                            LineTextField(
+                              icon: Icons.title,
+                              lableText: 'Title *',
+                              controller: titleController,
+                              title: "",
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            LineTextField(
+                              icon: Icons.description,
+                              lableText: "Description",
+                              controller: descriptionController,
+                              title: "",
+                            ),
+                            LineComboBox(
+                              deleteIcon: Icons.clear,
+                              onPressed: () {
+                                setState(() {
+                                  selectLocationText = "Select Location";
+                                  _selectedLocation = null;
+                                });
+                              },
+                              selectedValue: selectLocationText,
+                              items: [
+                                selectLocationText,
+                                "From FCT place",
+                                "From maps"
+                              ],
+                              icon: Icons.place,
+                              onChanged: (newValue) async {
+                                if (newValue == "From FCT place" ||
+                                    newValue == "From maps") {
+                                  LatLng? selectedLocation =
+                                  await showDialog<LatLng>(
+                                    context: context,
+                                    builder: (context) => EventLocationPopUp(
+                                      context: context,
+                                      isMapSelected: newValue == "From maps",
+                                      location: _selectedLocation,
+                                    ),
+                                  );
+                                  if (selectedLocation != null) {
+                                    setState(() {
+                                      selectLocationText =
+                                      "1 Location Selected";
+                                      _selectedLocation = selectedLocation;
+                                    });
+                                  }
+                                }
+                              },
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            LineDateTimeField(
+                              icon: Icons.schedule,
+                              controller: startController,
+                              hintText: "Start Time *",
+                              firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            LineDateTimeField(
+                              icon: Icons.schedule,
+                              controller: endController,
+                              hintText: "End Time *",
+                              firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+                                    bool isNull = _selectedLocation == null;
+                                    _createPersonalEvent(Event(
+                                        creator: widget.username,
+                                        type: _parseEventType(_selectedEventType),
+                                        title: titleController.text,
+                                        description: descriptionController.text,
+                                        startTime: dateFormat.parse(startController.text),
+                                        endTime: dateFormat.parse(endController.text),
+                                        location: !isNull
+                                            ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
+                                            : '0'));
+                                    Navigator.of(context).pop();
+                                    titleController.clear();
+                                    descriptionController.clear();
+                                    startController.clear();
+                                    endController.clear();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black87),
+                                  child: const Text("CREATE"),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                ]),
+              ),
+          );
+        }),
+      ),
+    ).then((value) {
+      // This code will run when the modal is dismissed
+      titleController.clear();
+      descriptionController.clear();
+      startController.clear();
+      endController.clear();
+    });
+  }
+
   List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {
     if (dateTime1.day != dateTime2.day ||
         dateTime1.month != dateTime2.month ||
@@ -783,9 +964,10 @@ class _SchedulePageState extends State<SchedulePage> {
 
     // Generate a new ID for the event
     String? eventId = eventsRef.key;
-
+    Map<String, dynamic> eventMap = event.toJson();
+    eventMap.addAll({'id': eventId});
     // Add the event to the database
-    eventsRef.set(event.toJson()).then((_) {
+    eventsRef.set(eventMap).then((_) {
       titleController.clear();
       descriptionController.clear();
       startController.clear();

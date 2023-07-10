@@ -1,0 +1,16 @@
+{
+  "theme": "Theme",
+  "changeBetweenThemes": "Change between dark and light themes.",
+  "language":"Language",
+  "startingPage": "Starting Page",
+  "selectYourPage": "Select your preferable starting page.",
+  "notifications": "Notifications",
+  "dontMissUpdates": "Don't miss out on any updates!",
+  "changePassword": "Change Password",
+  "changePasswordSubtitle": "Change your password for a new one.",
+  "removeAccount": "Remove Account",
+  "deleteAccount": "Delete your current account.",
+  "about": "About",
+  "verifyTermsAndPrivacy": "Verify our terms and conditions and privacy policy."
+  
+}
