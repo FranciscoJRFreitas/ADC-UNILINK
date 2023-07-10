@@ -91,6 +91,9 @@ public class SearchUsersResource {
                 queries.add(buildQuery(UserRole.PROF, null));
                 queries.add(buildQuery(UserRole.STUDENT, null));
                 break;
+            case BACKOFFICE:
+                queries.add(buildQuery(null, null));
+                break;
             case SU:
                 queries.add(buildQuery(null, null));
                 break;

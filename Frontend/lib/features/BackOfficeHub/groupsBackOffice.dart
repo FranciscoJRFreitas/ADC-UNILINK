@@ -14,6 +14,8 @@ import '../../domain/ThemeNotifier.dart';
 import '../chat/domain/Group.dart';
 import '../navigation/main_screen_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class GroupPage extends StatefulWidget {
   @override
@@ -67,21 +69,81 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
+  void pickFile(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+
+      final url = kBaseUrl + "rest/chat/create-multiple";
+      final tokenID = await cacheFactory.get('users', 'token');
+      final storedUsername = await cacheFactory.get('users', 'username');
+      Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${json.encode(token.toJson())}'
+        },
+        body: file,
+      );
+
+      if (response.statusCode != 200) print("REQUEST ERROR");
+    } else {
+      // User canceled the picker
+      print("picker canceled");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: Text(
-          'Groups',
-          style: Theme.of(context).textTheme.bodyLarge,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+          title: Text(
+            'Groups',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          bottom: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.group), text: "Group List"),
+              Tab(icon: Icon(Icons.create), text: "Create Groups"),
+            ],
+          ),
+          backgroundColor: Theme.of(context).primaryColor,
         ),
-        backgroundColor: Theme.of(context).primaryColor,
+        body: TabBarView(
+          children: [
+            buildGroupList(),
+            Center(child: buildCreateGroup()),
+          ],
+        ),
       ),
-      body: Column(
+    );
+  }
+
+  Widget buildCreateGroup() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 100),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ElevatedButton(
+          SizedBox(width: 20),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+
+              // button's fill color
+              foregroundColor: Colors.white, // button's text color
+              elevation: 2, // button's elevation in its pressed state
+            ),
+            icon: Icon(Icons.add),
+            label: Text('Create Group'),
             onPressed: () {
               showDialog(
                 context: context,
@@ -143,10 +205,53 @@ class _GroupPageState extends State<GroupPage> {
                 },
               );
             },
-            child: Text('Create Group'),
           ),
-          Expanded(
-            child: buildGroupList(),
+          SizedBox(width: 20),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  Theme.of(context).primaryColor, // button's fill color
+              foregroundColor: Colors.white,
+              elevation: 2,
+            ),
+            icon: Icon(Icons.add),
+            label: Text('Create Groups from a file'),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Create Groups'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton(
+                          child: Text('Pick a file'),
+                          onPressed: () {
+                            pickFile(context);
+                          },
+                        ),
+                      ],
+                    ),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Create'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Process your file here
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
@@ -160,101 +265,96 @@ class _GroupPageState extends State<GroupPage> {
       );
     }
 
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(top: 10),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 433,
-          child: ListView.builder(
-            itemCount: groups.length,
-            itemBuilder: (context, index) {
-              Group group = groups[index];
-              return Material(
-                color: Colors.transparent,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle group onTap
-                  },
-                  child: Stack(
-                    children: <Widget>[
-                      Text(
-                        '${group.DisplayName}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Divider(
-                        color:
-                            Provider.of<ThemeNotifier>(context).currentTheme ==
-                                    kDarkTheme
-                                ? Colors.white60
-                                : Theme.of(context).primaryColor,
-                        thickness: 1,
-                      ),
-                      Container(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                          child: ListTile(
-                            title: Text(
-                              group.DisplayName,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(group.description),
-                                Text(
-                                    'Number of Members: ${group.numberOfMembers}'),
-                                Row(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        _showInviteDialog(
-                                            context, group.DisplayName);
-                                      },
-                                      child: Text('Invite'),
-                                    ),
-                                    SizedBox(width: 10),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        _showKickDialog(
-                                            context, group.DisplayName);
-                                      },
-                                      child: Text('Kick'),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Expanded(
+        child: ListView.builder(
+          itemCount: groups.length,
+          itemBuilder: (context, index) {
+            Group group = groups[index];
+            return Material(
+              color: Colors.transparent,
+              child: GestureDetector(
+                onTap: () {
+                  // Handle group onTap
+                },
+                child: Stack(
+                  children: <Widget>[
+                    Text(
+                      '${group.DisplayName}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Divider(
+                      color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                              kDarkTheme
+                          ? Colors.white60
+                          : Theme.of(context).primaryColor,
+                      thickness: 1,
+                    ),
+                    Container(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        child: ListTile(
+                          title: Text(
+                            group.DisplayName,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(group.description),
+                              Text(
+                                  'Number of Members: ${group.numberOfMembers}'),
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _showInviteDialog(
+                                          context, group.DisplayName);
+                                    },
+                                    child: Text('Invite'),
+                                  ),
+                                  SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _showKickDialog(
+                                          context, group.DisplayName);
+                                    },
+                                    child: Text('Kick'),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: 15,
-                        right: 10,
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(Icons.delete, color: Colors.blue),
-                            onPressed: () {
-                              _showDeleteConfirmation(
-                                  context, group.DisplayName);
-                            },
-                          ),
+                    ),
+                    Positioned(
+                      top: 15,
+                      right: 10,
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.delete, color: Colors.blue),
+                          onPressed: () {
+                            _showDeleteConfirmation(context, group.DisplayName);
+                          },
                         ),
                       ),
-                      Divider(
-                        color: Colors.black87,
-                        thickness: 1,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Divider(
+                      color: Colors.black87,
+                      thickness: 1,
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
