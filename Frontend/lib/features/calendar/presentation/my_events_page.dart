@@ -5,11 +5,12 @@ import 'package:intl/intl.dart';
 import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
-import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
+import 'package:unilink2023/features/calendar/presentation/event_details.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
+import 'package:unilink2023/widgets/LocationPopUp.dart';
 
 class MyEventsPage extends StatefulWidget {
   final String username;
@@ -49,6 +50,27 @@ class _MyEventsPageState extends State<MyEventsPage> {
       Event ev = Event.fromSnapshot(event.snapshot);
       setState(() {
         events.add(ev);
+        events.sort((a, b) => a.startTime.compareTo(b.startTime));
+      });
+    });
+
+    myEventsRef.onChildRemoved.listen((event) {
+      String eventId = event.snapshot.key as String;
+
+      setState(() {
+        events.removeWhere((event) => event.id == eventId);
+        events.sort((a, b) => a.startTime.compareTo(b.startTime));
+      });
+    });
+
+    myEventsRef.onChildChanged.listen((event) {
+      String eventId = event.snapshot.key as String;
+
+      setState(() {
+        Event ev = Event.fromSnapshot(event.snapshot);
+        events.removeWhere((element) => element.id == eventId);
+        events.add(ev);
+        events.sort((a, b) => a.startTime.compareTo(b.startTime));
       });
     });
   }
@@ -63,7 +85,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     await chatRef.once().then((event) {
       Map<dynamic, dynamic> newgroup =
-      event.snapshot.value as Map<dynamic, dynamic>;
+          event.snapshot.value as Map<dynamic, dynamic>;
       newgroup.forEach((key, value) {
         setState(() {
           groups.add(key);
@@ -73,12 +95,12 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     for (String groupId in groups) {
       DatabaseReference eventsRef =
-      await FirebaseDatabase.instance.ref().child('events').child(groupId);
+          await FirebaseDatabase.instance.ref().child('events').child(groupId);
 
       await eventsRef.once().then((userDataSnapshot) {
         if (userDataSnapshot.snapshot.value != null) {
           Map<dynamic, dynamic> newevents =
-          userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
@@ -91,30 +113,46 @@ class _MyEventsPageState extends State<MyEventsPage> {
                 startTime: DateTime.parse(currEvent["startTime"]),
                 endTime: DateTime.parse(currEvent["endTime"]));
 
-              events.add(currentEvent);
+            events.add(currentEvent);
           });
+          events.sort((a, b) => a.startTime.compareTo(b.startTime));
         }
       });
     }
 
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
-    return events.isEmpty ? noEventWidget() : Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(8),
-        child: Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _eventsWidget(context),
-              ],
+    return events.isEmpty
+        ? noEventWidget()
+        : Scaffold(
+            body: Container(
+              padding: EdgeInsets.all(8),
+              child: Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _eventsWidget(context),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                _createEventPopUpDialog(context);
+              },
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 30,
+              ),
+              elevation: 6,
+              backgroundColor: Theme.of(context).primaryColor,
+            ),
+          );
   }
 
   Widget _eventsWidget(BuildContext context) {
@@ -207,13 +245,53 @@ class _MyEventsPageState extends State<MyEventsPage> {
                 SizedBox(width: 10),
                 InkWell(
                   onTap: () {
-                    // Handle click on clock icon
-                    // Navigate to another page or perform desired action
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MainScreen(
+                                index: 10, location: event.location)));
                   },
                   child:
                       Icon(Icons.directions, size: 20, color: Style.lightBlue),
                 ),
-              ]
+              ],
+              if (event.groupId != null) ...[
+                SizedBox(width: 10),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MainScreen(
+                          index: 6,
+                          selectedGroup: event.groupId,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Icon(Icons.chat, size: 20, color: Style.lightBlue),
+                ),
+              ] else ...[
+                SizedBox(width: 10),
+                InkWell(
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return EventDetailsPage(event: event);
+                        });
+                  },
+                  child: Icon(Icons.edit, size: 20, color: Style.lightBlue),
+                ),
+                SizedBox(width: 10),
+                InkWell(
+                  onTap: () {
+                    _removeEventPopUpDialogWeb(context, event);
+                  },
+                  child: Icon(Icons.delete_forever,
+                      size: 20, color: Style.lightBlue),
+                ),
+              ],
             ],
           ),
           subtitle: Column(
@@ -391,35 +469,49 @@ class _MyEventsPageState extends State<MyEventsPage> {
   }
 
   noEventWidget() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () {
-                  _createEventPopUpDialog(context);
-                },
-                child: Icon(
-                  Icons.hourglass_empty,
-                  color: Colors.grey[700],
-                  size: 75,
+    return Scaffold(
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    _createEventPopUpDialog(context);
+                  },
+                  child: Icon(
+                    Icons.hourglass_empty,
+                    color: Colors.grey[700],
+                    size: 75,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              "You don´t have any events scheduled!",
-              textAlign: TextAlign.center,
-            )
-          ],
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                "You don´t have any events scheduled!",
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _createEventPopUpDialog(context);
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+        elevation: 6,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
     );
   }
@@ -442,7 +534,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
                   LineComboBox(
                     selectedValue: _selectedEventType,
                     items:
-                    eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -568,9 +660,11 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     // Generate a new ID for the event
     String? eventId = eventsRef.key;
+    Map<String, dynamic> eventMap = event.toJson();
+    eventMap.addAll({'id': eventId});
 
     // Add the event to the database
-    eventsRef.set(event.toJson()).then((_) {
+    eventsRef.set(eventMap).then((_) {
       titleController.clear();
       descriptionController.clear();
       startController.clear();
@@ -629,6 +723,65 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     return EventType.academic;
   }
+
+  _removeEventPopUpDialogWeb(BuildContext context, Event e) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: const Text(
+                "Remove an event",
+                textAlign: TextAlign.left,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Are you sure you want remove this event? This action is irreversible.",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  )
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        deleteEvent(e);
+                        Future.delayed(Duration(milliseconds: 100), () {
+                          Navigator.pop(context);
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).primaryColor),
+                      child: const Text("CONFIRM"),
+                    ),
+                    SizedBox(width: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).primaryColor),
+                      child: const Text("CANCEL"),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }));
+        });
+  }
+
+  void deleteEvent(Event e) async {
+    DatabaseReference eventsRef = FirebaseDatabase.instance
+        .ref()
+        .child('schedule')
+        .child(widget.username)
+        .child(e.id!);
+    await eventsRef.remove();
+  }
 }
-
-

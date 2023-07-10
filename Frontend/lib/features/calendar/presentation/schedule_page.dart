@@ -783,9 +783,10 @@ class _SchedulePageState extends State<SchedulePage> {
 
     // Generate a new ID for the event
     String? eventId = eventsRef.key;
-
+    Map<String, dynamic> eventMap = event.toJson();
+    eventMap.addAll({'id': eventId});
     // Add the event to the database
-    eventsRef.set(event.toJson()).then((_) {
+    eventsRef.set(eventMap).then((_) {
       titleController.clear();
       descriptionController.clear();
       startController.clear();
