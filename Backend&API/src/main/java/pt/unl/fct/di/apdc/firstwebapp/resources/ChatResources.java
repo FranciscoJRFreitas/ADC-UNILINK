@@ -332,9 +332,8 @@ public class ChatResources {
 
         DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
-
-        DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-        eventsRef.child(groupId).removeValueAsync();
+        //DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
+        //eventsRef.child(groupId).removeValueAsync();
 
         groupsRef.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

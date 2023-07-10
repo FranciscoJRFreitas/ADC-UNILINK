@@ -12,6 +12,7 @@ pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\ModifyAttributesData.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource$1.class
 pt\unl\fct\di\apdc\firstwebapp\util\EventData.class
+pt\unl\fct\di\apdc\firstwebapp\util\RecoverPwdHTMLLoader.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ListUsersResource$1.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChatResources$1.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChatResources.class
@@ -26,7 +27,9 @@ pt\unl\fct\di\apdc\firstwebapp\resources\ChangePasswordResource.class
 pt\unl\fct\di\apdc\firstwebapp\resources\RegisterResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\InviteToken.class
 pt\unl\fct\di\apdc\firstwebapp\resources\AnomalyResources.class
+pt\unl\fct\di\apdc\firstwebapp\resources\RemoveResource$2.class
 pt\unl\fct\di\apdc\firstwebapp\resources\ChatResources$4.class
+pt\unl\fct\di\apdc\firstwebapp\resources\RecoverPasswordResource.class
 pt\unl\fct\di\apdc\firstwebapp\util\VerifyAction.class
 pt\unl\fct\di\apdc\firstwebapp\servlets\FirebaseInit.class
 pt\unl\fct\di\apdc\firstwebapp\resources\LoginResource.class

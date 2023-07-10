@@ -3,6 +3,9 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.Transaction;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserRecord;
 import com.google.firebase.database.*;
 import com.google.firebase.internal.NonNull;
 import com.google.gson.Gson;
@@ -17,8 +20,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
-import pt.unl.fct.di.apdc.firstwebapp.resources.ChatResources;
 
+import pt.unl.fct.di.apdc.firstwebapp.resources.ChatResources;
 
 
 @Path("/remove")
@@ -54,7 +57,7 @@ public class RemoveResource {
                 return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + token.username).build();
             }
 
-            if(originalToken == null) {
+            if (originalToken == null) {
                 txn.rollback();
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Login is required for this action!").build();
             }
@@ -87,21 +90,66 @@ public class RemoveResource {
 
                 txn.delete(targetUserKey, tokenKey);
                 txn.commit();
+                DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).child("Groups");
+                DatabaseReference scheduleRef = FirebaseDatabase.getInstance().getReference("schedule");
+                scheduleRef.child(targetUsername).removeValueAsync();
+
+                groupsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            String childKey = childSnapshot.getKey();
+                            ChatResources.leaveGroup(childKey, targetUsername);
+                        }
+                        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat");
+                        chatRef.child(targetUsername).removeValueAsync();
+
+                        try {
+                            UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(targetUser.getString("user_email"));
+                            String uid = userRecord.getUid();
+                            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                            usersRef.child(uid).removeValueAsync();
+                            FirebaseAuth.getInstance().deleteUser(uid);
+                        } catch (FirebaseAuthException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle error
+                    }
+
+                });
                 LOG.info("User deleted: " + targetUsername);
                 return Response.ok("{}").build();
             }
 
             txn.delete(userKey, tokenKey);
             txn.commit();
-            DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).child("Groups");
+            DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(token.username).child("Groups");
+            DatabaseReference scheduleRef = FirebaseDatabase.getInstance().getReference("schedule");
+            scheduleRef.child(token.username).removeValueAsync();
+            String email = user.getString("user_email");
             chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                         String childKey = childSnapshot.getKey();
-                        ChatResources.leaveGroup(childKey, targetUsername);
+                        ChatResources.leaveGroup(childKey, token.username);
                     }
-                    FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).removeValueAsync();
+                    DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat");
+                    chatRef.child(token.username).removeValueAsync();
+
+                    try {
+                        UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(user.getString("user_email"));
+                        String uid = userRecord.getUid();
+                        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                        usersRef.child(uid).removeValueAsync();
+                        FirebaseAuth.getInstance().deleteUser(uid);
+                    } catch (FirebaseAuthException e) {
+                        throw new RuntimeException(e);
+                    }
 
                 }
 

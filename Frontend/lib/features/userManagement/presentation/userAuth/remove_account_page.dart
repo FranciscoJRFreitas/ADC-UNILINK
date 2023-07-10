@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:unilink2023/features/screen.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +12,8 @@ import '../../../../constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../navigation/not_logged_in_page.dart';
+
 class RemoveAccountPage extends StatefulWidget {
   RemoveAccountPage();
 
@@ -21,10 +25,11 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController targetUsernameController = TextEditingController();
   bool passwordVisibility = true;
-  BuildContext? pageContext;
   String? _currentRole;
   String? _currentUsername;
+  bool isDisposed = false;
 
+  @override
   void initState() {
     super.initState();
     getUser();
@@ -37,8 +42,13 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   }
 
   @override
+  void dispose() {
+    isDisposed = true;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    this.pageContext = context;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -49,9 +59,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           icon: SvgPicture.asset(
             'assets/images/back_arrow.svg',
             width: 40,
@@ -64,144 +72,127 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            SizedBox(
-              height: 20,
-            ),
-            if (_currentRole != 'STUDENT') ...[
-              MyTextField(
-                small: true,
-                controller: targetUsernameController,
-                hintText: "Target username (leave empty for your account)",
-                inputType: TextInputType.name,
-              ),
-            ],
-            MyPasswordField(
-              controller: passwordController,
-              hintText: "Your Password *",
-              isPasswordVisible: passwordVisibility,
-              onTap: () {
-                setState(() {
-                  passwordVisibility = !passwordVisibility;
-                });
-              },
-            ),
-            SizedBox(height: 16),
-            MyTextButton(
-              buttonName: 'Remove Account',
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 12),
-                      contentPadding: EdgeInsets.fromLTRB(24, 0, 24, 16),
-                      title: Text(
-                        'Confirm Remove Account',
-                        style: TextStyle(color: Colors.black87, fontSize: 18),
-                      ),
-                      content: Text(
-                        'Are you sure you want to remove this account? This action is irreversible!',
-                        style: TextStyle(color: Colors.black87, fontSize: 16),
-                      ),
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      actionsPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text(
-                            'Cancel',
-                            style:
-                                TextStyle(color: Colors.black87, fontSize: 16),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                          ),
-                          child: Text(
-                            'Remove',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                          onPressed: () async {
-                            Navigator.of(context).pop();
-                            /*await removeAccount(
-                              context,
-                              widget.user.username,
-                              passwordController.text,
-                              targetUsernameController.text,
-                            ).then((Map<String, dynamic> message) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(message['content']),
-                                  backgroundColor: message['color'],
-                                ),
-                              );
-                              if (message['redirect']) {
-                                Future.delayed(Duration(milliseconds: 500), () {
-                                  Navigator.pushAndRemoveUntil(
-                                    pageContext!,
-                                    MaterialPageRoute(
-                                        builder: (context) => WelcomePage()),
-                                    (route) => false,
-                                  );
-                                });
-                              }
-                            });*/
-                            onRemoveButtonPressed(context);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              bgColor: Colors.white,
-              textColor: Colors.black87,
-              height: 60,
-            ),
+            SizedBox(height: 20),
+            ..._buildUserInputFields(),
+            _buildRemoveAccountButton(context),
           ],
         ),
       ),
     );
   }
 
-  void onRemoveButtonPressed(BuildContext context) async {
-    Navigator.of(context).pop();
-    Map<String, dynamic> message = await removeAccount(
-      context,
-      _currentUsername!,
-      passwordController.text,
-      targetUsernameController.text,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message['content']),
-        backgroundColor: message['color'],
-      ),
-    );
-    if (message['redirect']) {
-      Navigator.of(context)
-          .popUntil((route) => route.settings.name == 'WelcomePage');
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => WelcomePage(),
+  List<Widget> _buildUserInputFields() {
+    if (_currentRole == 'STUDENT') {
+      return [
+        MyPasswordField(
+          controller: passwordController,
+          hintText: "Your Password *",
+          isPasswordVisible: passwordVisibility,
+          onTap: () => setState(() {
+            passwordVisibility = !passwordVisibility;
+          }),
+        )
+      ];
+    } else {
+      return [
+        MyTextField(
+          small: true,
+          controller: targetUsernameController,
+          hintText: "Target username (leave empty for your account)",
+          inputType: TextInputType.name,
         ),
-      );
+        MyPasswordField(
+          controller: passwordController,
+          hintText: "Your Password *",
+          isPasswordVisible: passwordVisibility,
+          onTap: () => setState(() {
+            passwordVisibility = !passwordVisibility;
+          }),
+        )
+      ];
     }
   }
 
-  Future<Map<String, dynamic>> removeAccount(
+  Widget _buildRemoveAccountButton(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: 16),
+        MyTextButton(
+          buttonName: 'Remove Account',
+          onTap: () {
+            if (passwordController.text.isEmpty) {
+              _showSnackbar("Please, enter a password.", Colors.red);
+              return;
+            }
+            _confirmRemoveAccountDialog(context);
+          },
+          bgColor: Colors.white,
+          textColor: Colors.black87,
+          height: 60,
+        ),
+      ],
+    );
+  }
+
+  void _showSnackbar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: TextStyle(color: Colors.white)),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
+  void _confirmRemoveAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 12),
+          contentPadding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+          title: Text('Confirm Remove Account',
+              style: TextStyle(color: Colors.black87, fontSize: 18)),
+          content: Text(
+            'Are you sure you want to remove this account? This action is irreversible!',
+            style: TextStyle(color: Colors.black87, fontSize: 16),
+          ),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel',
+                  style: TextStyle(color: Colors.black87, fontSize: 16)),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: Text('Remove',
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
+              onPressed: () async {
+                await removeAccount(
+                  context,
+                  _currentUsername!,
+                  passwordController.text.trim(),
+                  targetUsernameController.text,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> removeAccount(
     BuildContext context,
     String username,
     String password,
@@ -215,6 +206,29 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
 
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        removeUserDataFromFireBase(
+            user, targetUsername.isEmpty ? username : targetUsername);
+      }
+    } catch (e) {
+      if (!isDisposed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "Could not remove user. There was an error while removing subscriptions from the Firebase: $e",
+                style: TextStyle(
+                  color: Colors.white,
+                )),
+            backgroundColor: Colors.red,
+          ),
+        );
+        Navigator.pop(context);
+        return;
+      }
+    }
+
     final response = await http.delete(
       Uri.parse(url),
       headers: {
@@ -224,36 +238,76 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     );
 
     if (response.statusCode == 200) {
-      if (targetUsername.isEmpty)
-        FirebaseStorage.instance
-            .ref()
-            .child('ProfilePictures/$username')
-            .delete()
-            .onError((error, stackTrace) => null);
-      else
+      if (targetUsername.isEmpty) {
+        cacheFactory.removeLoginCache();
+        cacheFactory.removeMessagesCache();
+        cacheFactory.removeGroupsCache();
+        try {
+          FirebaseStorage.instance
+              .ref()
+              .child('ProfilePictures/$username')
+              .delete()
+              .onError((error, stackTrace) => null);
+        } catch (e) {
+          if (!isDisposed) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    "There was an error while removing the account from the Firebase: $e",
+                    style: TextStyle(
+                      color: Colors.white,
+                    )),
+                backgroundColor: Colors.red,
+              ),
+            );
+            Navigator.pop(context);
+            return;
+          }
+        }
+      } else
         FirebaseStorage.instance
             .ref()
             .child('ProfilePictures/$targetUsername')
             .delete()
             .onError((error, stackTrace) => null);
 
-      if (this.mounted) {
-        return {
-          'content': 'Account removed successfully.',
-          'color': Colors.green,
-          'redirect': targetUsername.isEmpty || targetUsername == storedUsername
-        };
+      if (!isDisposed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Account removed successfully.',
+                style: TextStyle(
+                  color: Colors.white,
+                )),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => WelcomePage()),
+          (Route<dynamic> route) => false,
+        );
+        return;
       }
     } else {
-      if (this.mounted) {
-        return {
-          'content': response.body,
-          'color': Colors.red,
-          'redirect': false
-        };
+      if (!isDisposed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.body,
+                style: TextStyle(
+                  color: Colors.white,
+                )),
+            backgroundColor: Colors.red,
+          ),
+        );
+        Navigator.pop(context);
+        return;
       }
     }
-    return {'content': '', 'color': Colors.grey, 'redirect': false};
+    if (!isDisposed) {
+      Navigator.pop(context);
+      return;
+    }
   }
 
   void showSnackBar(String message, Color backgroundColor) {
@@ -263,5 +317,38 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
         backgroundColor: backgroundColor,
       ),
     );
+  }
+
+  void removeUserDataFromFireBase(User user, String username) async {
+
+    DatabaseReference userRef =
+        FirebaseDatabase.instance.ref().child('chat').child(username);
+    DatabaseReference userGroupsRef = userRef.child('Groups');
+
+    // Retrieve user's group IDs from the database
+    DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+    DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+    // Unsubscribe from all the groups
+    if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+      /*Map<dynamic, dynamic> userGroups =
+              userGroupsSnapshot.value as Map<dynamic, dynamic>;
+          for (String groupId in userGroups.keys) {
+            if (!kIsWeb) //PROVISIONAL
+              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+          }*/
+    }
+
+
+    //WARNING:
+    //cant remove from users because user.getIdToken() can be from user that is deleting...
+    /*FirebaseDatabase.instance
+        .ref()
+        .child('users')
+        .child(await user.getIdToken())
+        .remove();*/
+
+    //remove from schedule
   }
 }

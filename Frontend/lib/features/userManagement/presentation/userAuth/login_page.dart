@@ -17,6 +17,8 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import 'package:flutter/foundation.dart';
 
+import 'recover_password_page.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -60,7 +62,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // Function to display the snackbar
   void _showErrorSnackbar(String message, bool Error, bool show) {
     if (!show) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -226,6 +227,44 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                             ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Forgot your password?  ",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) =>
+                                                RecoverPasswordPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'Reset Password',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(
+                                                color: Colors.blue.shade400,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                        ),
+                                      )),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
@@ -374,11 +413,11 @@ Future<int> login(
       // Handle unexpected error
       if (response.statusCode == 500) {
         showErrorSnackbar(
-            'There was a mistake on our side.Please try later.', true, true);
-      } else if (response.statusCode == 403) {
-        showErrorSnackbar('Wrong Password!', true, true);
-      } else if (response.statusCode == 404) {
-        showErrorSnackbar('Incorrect Info!', true, true);
+            'There was a mistake on our side. Please try later.', true, true);
+      } else if (response.statusCode == 403 || response.statusCode == 404) {
+        showErrorSnackbar('Invalid login credentials! Please try again.', true, true);
+      } else if(response.statusCode == 417) {
+        showErrorSnackbar("Email verification needed! Please verify your email inbox and activate your account.", true, true);
       }
     }
 
