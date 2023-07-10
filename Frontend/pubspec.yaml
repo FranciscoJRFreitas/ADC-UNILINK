@@ -25,8 +25,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
+  flutter_localizations:
+    sdk: flutter
+    
   http: ^0.13.5
-  intl: ^0.18.1
+  intl: any
   introduction_screen: ^3.1.8
   lottie: ^2.3.2
   provider: ^6.0.5
@@ -68,6 +72,10 @@ dependencies:
   flutter_polyline_points: any
   permission_handler: ^10.3.0
   cached_network_image: ^3.2.0
+  google_translator: ^1.0.0
+  country_flags: ^2.1.0
+  circle_flags: ^0.0.3
+  
 
 flutter_icons:
   android: "launcher_icon"
@@ -86,7 +94,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter.
 flutter:
-
+  generate: true 
   uses-material-design: true
   assets:
     - assets/images/
@@ -94,12 +102,17 @@ flutter:
     - assets/videos/
     - assets/json/
     - assets/json/map/
-    - assets/icon/ICON_UNILINK-03.png
-    - assets/icon/building.png
-    - assets\icon\Parking.png
-    - assets\icon\service.png
-    - assets\icon\gates.png
-    - assets/icon/restaurant.png
+    - assets/icon/
+    #- assets/icon/ICON_UNILINK-03.png
+    #- assets/icon/building.png
+    #- assets\icon\Parking.png
+    #- assets\icon\service.png
+    #- assets\icon\gates.png
+    #- assets/icon/restaurant.png
+    #- assets/icon/restaurant2.png
+    #- assets/icon/movingLocation.png
+    #- assets/icon/portuguese_flag.png
+    #- assets/icon/english_flag.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

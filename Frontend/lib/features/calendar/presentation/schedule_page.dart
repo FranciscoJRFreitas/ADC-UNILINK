@@ -629,7 +629,8 @@ class _SchedulePageState extends State<SchedulePage> {
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AlertDialog(
+            return SingleChildScrollView(
+                child: AlertDialog(
               backgroundColor: Theme.of(context).canvasColor,
               title: const Text(
                 "Add an event",
@@ -753,7 +754,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   child: const Text("CANCEL"),
                 ),
               ],
-            );
+                ));
           }));
         });
   }

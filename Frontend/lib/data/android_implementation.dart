@@ -36,6 +36,8 @@ class CacheFactoryImpl implements CacheFactory {
       await SqliteService().updateCurrentPage(value);
     else if (property == 'currentNews')
       await SqliteService().updateCurrentNews(value);
+    else if (property == 'language')
+      await SqliteService().updateLanguage(value);
   }
 
   @override
@@ -54,6 +56,8 @@ class CacheFactoryImpl implements CacheFactory {
       return await SqliteService().getPassword();
     else if (value == 'theme')
       return await SqliteService().getTheme();
+    else if (value == 'language')
+      return await SqliteService().getLanguage();
     else if (value == 'token')
       return await SqliteService().getToken();
     else if (value == 'user')

@@ -1,0 +1,15 @@
+{
+  "theme": "Tema",
+  "changeBetweenThemes": "Alterne entre temas claros e escuros.",
+  "language":"Idioma",
+  "startingPage": "Página inicial",
+  "selectYourPage": "Selecione a sua página preferida.",
+  "notifications": "Notificações",
+  "dontMissUpdates": "Não perca nenhuma atualização!",
+  "changePassword": "Alterar senha",
+  "changePasswordSubtitle": "Mude sua senha por uma nova.",
+  "removeAccount": "Remover conta",
+  "deleteAccount": "Excluir sua conta atual.",
+  "about": "Sobre",
+  "verifyTermsAndPrivacy": "Verifique nossos termos e condições e política de privacidade."
+}

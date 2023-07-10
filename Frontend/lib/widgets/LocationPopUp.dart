@@ -78,12 +78,15 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                       width: 10,
                     )
                   ],
-                  Text(
-                    "Select a FCT Location",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge!
-                        .copyWith(fontSize: 30),
+                  Flexible( // Add the Flexible widget here
+                    child: Text(
+                      "Select a FCT Location",
+                      textAlign: TextAlign.left,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontSize: 30),
+                    ),
                   ),
                 ],
               ),
