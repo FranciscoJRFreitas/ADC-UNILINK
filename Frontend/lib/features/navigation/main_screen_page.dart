@@ -129,7 +129,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           selectedGroup: _selectedGroup,
         ), //6
         ContactsPage(), //7
-        SettingsPage(loggedIn: true), //8
+        SettingsPage(
+            loggedIn: true,
+            isBackOffice: _currentUser.role == 'BACKOFFICE'), //8
         SchedulePage(
             username: _currentUser.username,
             date: scheduleDate), //estudante //9
@@ -253,7 +255,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _currentUser = userProvider.currentUser!;
     if (isFirst) {
       isFirst = false;
-      _selectedIndex = _currentUser.role != 'BACKOFFICE' ? 0 : 12;
+      _selectedIndex = _currentUser.role != 'BACKOFFICE' ? widget.index! : 12;
     }
     Color roleColor = _currentUser.getRoleColor(_currentUser.role);
 

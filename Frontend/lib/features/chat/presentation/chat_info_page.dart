@@ -578,43 +578,74 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                     ),
                                                   ),
                                                   SizedBox(width: 10),
-                                                  InkWell(
-                                                    onTap: () {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  MainScreen(
-                                                                      index: 9,
-                                                                      date: event
-                                                                          .startTime)));
-                                                    },
-                                                    child: Icon(Icons.schedule,
-                                                        size: 20,
-                                                        color: Style.lightBlue),
-                                                  ),
-                                                  if (event.location !=
-                                                      "0") ...[
-                                                    SizedBox(width: 10),
-                                                    InkWell(
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder: (context) =>
-                                                                    MainScreen(
+                                                  Expanded(
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: [
+                                                        InkWell(
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder: (context) => MainScreen(
                                                                         index:
-                                                                            10,
-                                                                        location:
-                                                                            event.location)));
-                                                      },
-                                                      child: Icon(
-                                                          Icons.directions,
-                                                          size: 20,
-                                                          color:
-                                                              Style.lightBlue),
+                                                                            9,
+                                                                        date: event
+                                                                            .startTime)));
+                                                          },
+                                                          child: Icon(
+                                                              Icons.schedule,
+                                                              size: 20,
+                                                              color: Style
+                                                                  .lightBlue),
+                                                        ),
+                                                        if (event.location !=
+                                                            "0") ...[
+                                                          SizedBox(width: 10),
+                                                          InkWell(
+                                                            onTap: () {
+                                                              Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder: (context) => MainScreen(
+                                                                          index:
+                                                                              10,
+                                                                          location:
+                                                                              event.location)));
+                                                            },
+                                                            child: Icon(
+                                                                Icons
+                                                                    .directions,
+                                                                size: 20,
+                                                                color: Style
+                                                                    .lightBlue),
+                                                          ),
+                                                        ],
+                                                        if (isAdmin) ...[
+                                                          SizedBox(width: 10),
+                                                          InkWell(
+                                                            onTap: () {
+                                                              if (kIsWeb)
+                                                                _removeEventPopUpDialogWeb(
+                                                                    context,
+                                                                    event.id!);
+                                                              else
+                                                                _removeEventPopUpDialogMobile(
+                                                                    context,
+                                                                    event.id!);
+                                                            },
+                                                            child: Icon(
+                                                              Icons.delete,
+                                                              color: Colors
+                                                                  .lightBlue,
+                                                              size: 20,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ],
                                                     ),
-                                                  ]
+                                                  )
                                                 ],
                                               ),
                                               subtitle: Column(
@@ -824,29 +855,29 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                             ),
                                           ),
                                         ),
-                                        if (isAdmin) ...[
-                                          Positioned(
-                                            top: 15,
-                                            right: 10,
-                                            child: Container(
-                                              width: 24,
-                                              height: 24,
-                                              child: IconButton(
-                                                padding: EdgeInsets.zero,
-                                                icon: Icon(Icons.delete,
-                                                    color: Colors.blue),
-                                                onPressed: () {
-                                                  if (kIsWeb)
-                                                    _removeEventPopUpDialogWeb(
-                                                        context, event.id!);
-                                                  else
-                                                    _removeEventPopUpDialogMobile(
-                                                        context, event.id!);
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        // if (isAdmin) ...[
+                                        //   Positioned(
+                                        //     top: 15,
+                                        //     right: 10,
+                                        //     child: Container(
+                                        //       width: 24,
+                                        //       height: 24,
+                                        //       child: IconButton(
+                                        //         padding: EdgeInsets.zero,
+                                        //         icon: Icon(Icons.delete,
+                                        //             color: Colors.blue),
+                                        //         onPressed: () {
+                                        //           if (kIsWeb)
+                                        //             _removeEventPopUpDialogWeb(
+                                        //                 context, event.id!);
+                                        //           else
+                                        //             _removeEventPopUpDialogMobile(
+                                        //                 context, event.id!);
+                                        //         },
+                                        //       ),
+                                        //     ),
+                                        //   ),
+                                        // ],
                                         Divider(
                                           color: Colors.black87,
                                           thickness: 1,
@@ -1443,159 +1474,154 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return Container(
-              height: MediaQuery.of(context).size.height * 0.85,
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child:
-                  SingleChildScrollView(
-                    child: Stack(
-                      children: [
-                      Positioned(
-                      right: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          titleController.clear();
-                          descriptionController.clear();
-                          startController.clear();
-                          endController.clear();
-                        },
-                      ),
+            height: MediaQuery.of(context).size.height * 0.85,
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SingleChildScrollView(
+              child: Stack(children: [
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      titleController.clear();
+                      descriptionController.clear();
+                      startController.clear();
+                      endController.clear();
+                    },
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 40),
+                    // Add extra space at top for close button
+                    const Text(
+                      "Add an event",
+                      textAlign: TextAlign.left,
                     ),
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(
-                            height:
-                                40), // Add extra space at top for close button
-                        const Text(
-                          "Add an event",
-                          textAlign: TextAlign.left,
+                        LineComboBox(
+                          selectedValue: _selectedEventType,
+                          items: eventTypes
+                              .map((e) => _getEventTypeString(e))
+                              .toList(),
+                          icon: Icons.type_specimen,
+                          onChanged: (dynamic newValue) {
+                            setState(() {
+                              _selectedEventType = newValue;
+                            });
+                          },
                         ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            LineComboBox(
-                              selectedValue: _selectedEventType,
-                              items: eventTypes
-                                  .map((e) => _getEventTypeString(e))
-                                  .toList(),
-                              icon: Icons.type_specimen,
-                              onChanged: (dynamic newValue) {
-                                setState(() {
-                                  _selectedEventType = newValue;
-                                });
-                              },
-                            ),
-                            LineTextField(
-                              icon: Icons.title,
-                              lableText: 'Title *',
-                              controller: titleController,
-                              title: "",
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            LineTextField(
-                              icon: Icons.description,
-                              lableText: "Description",
-                              controller: descriptionController,
-                              title: "",
-                            ),
-                            LineComboBox(
-                              deleteIcon: Icons.clear,
-                              onPressed: () {
-                                setState(() {
-                                  selectLocationText = "Select Location";
-                                  _selectedLocation = null;
-                                });
-                              },
-                              selectedValue: selectLocationText,
-                              items: [
-                                selectLocationText,
-                                "From FCT place",
-                                "From maps"
-                              ],
-                              icon: Icons.place,
-                              onChanged: (newValue) async {
-                                if (newValue == "From FCT place" ||
-                                    newValue == "From maps") {
-                                  LatLng? selectedLocation =
-                                      await showDialog<LatLng>(
-                                    context: context,
-                                    builder: (context) => EventLocationPopUp(
-                                      context: context,
-                                      isMapSelected: newValue == "From maps",
-                                      location: _selectedLocation,
-                                    ),
-                                  );
-                                  if (selectedLocation != null) {
-                                    setState(() {
-                                      selectLocationText =
-                                          "1 Location Selected";
-                                      _selectedLocation = selectedLocation;
-                                    });
-                                  }
-                                }
-                              },
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: startController,
-                              hintText: "Start Time *",
-                              firstDate:
-                                  DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: endController,
-                              hintText: "End Time *",
-                              firstDate:
-                                  DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    createEvent(
-                                        context,
-                                        _selectedEventType,
-                                        titleController.text,
-                                        descriptionController.text,
-                                        startController.text,
-                                        endController.text,
-                                        widget.groupId,
-                                        _selectedLocation,
-                                        _showErrorSnackbar);
-                                    Navigator.of(context).pop();
-                                    titleController.clear();
-                                    descriptionController.clear();
-                                    startController.clear();
-                                    endController.clear();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.black87),
-                                  child: const Text("CREATE"),
+                        LineTextField(
+                          icon: Icons.title,
+                          lableText: 'Title *',
+                          controller: titleController,
+                          title: "",
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        LineTextField(
+                          icon: Icons.description,
+                          lableText: "Description",
+                          controller: descriptionController,
+                          title: "",
+                        ),
+                        LineComboBox(
+                          deleteIcon: Icons.clear,
+                          onPressed: () {
+                            setState(() {
+                              selectLocationText = "Select Location";
+                              _selectedLocation = null;
+                            });
+                          },
+                          selectedValue: selectLocationText,
+                          items: [
+                            selectLocationText,
+                            "From FCT place",
+                            "From maps"
+                          ],
+                          icon: Icons.place,
+                          onChanged: (newValue) async {
+                            if (newValue == "From FCT place" ||
+                                newValue == "From maps") {
+                              LatLng? selectedLocation =
+                                  await showDialog<LatLng>(
+                                context: context,
+                                builder: (context) => EventLocationPopUp(
+                                  context: context,
+                                  isMapSelected: newValue == "From maps",
+                                  location: _selectedLocation,
                                 ),
-                              ],
+                              );
+                              if (selectedLocation != null) {
+                                setState(() {
+                                  selectLocationText = "1 Location Selected";
+                                  _selectedLocation = selectedLocation;
+                                });
+                              }
+                            }
+                          },
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        LineDateTimeField(
+                          icon: Icons.schedule,
+                          controller: startController,
+                          hintText: "Start Time *",
+                          firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        LineDateTimeField(
+                          icon: Icons.schedule,
+                          controller: endController,
+                          hintText: "End Time *",
+                          firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                createEvent(
+                                    context,
+                                    _selectedEventType,
+                                    titleController.text,
+                                    descriptionController.text,
+                                    startController.text,
+                                    endController.text,
+                                    widget.groupId,
+                                    _selectedLocation,
+                                    _showErrorSnackbar);
+                                Navigator.of(context).pop();
+                                titleController.clear();
+                                descriptionController.clear();
+                                startController.clear();
+                                endController.clear();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black87),
+                              child: const Text("CREATE"),
                             ),
                           ],
                         ),
                       ],
                     ),
-
-                ]),
-              ),
+                  ],
+                ),
+              ]),
+            ),
           );
         }),
       ),

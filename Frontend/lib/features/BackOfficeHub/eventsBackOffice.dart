@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/Token.dart';
+import 'package:unilink2023/features/map/MapPage.dart';
 
 import '../../application/loadLocations.dart';
 import '../../constants.dart';
@@ -118,20 +120,73 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                 ),
                               ),
                               SizedBox(width: 10),
-                              if (event.location != "0") ...[
+                              if (events[index].location != "0") ...[
                                 SizedBox(width: 10),
                                 InkWell(
                                   onTap: () {
-                                    // Handle click on location icon
-                                    // Navigate to another page or perform desired action
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          content: Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.9,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.8,
+                                            child: Column(
+                                              children: <Widget>[
+                                                Expanded(
+                                                  child: GoogleMap(
+                                                    onMapCreated:
+                                                        (GoogleMapController
+                                                            controller) {},
+                                                    initialCameraPosition:
+                                                        CameraPosition(
+                                                      target: parseCoordinates(
+                                                          events[index]
+                                                              .location!),
+                                                      zoom: 17,
+                                                    ),
+                                                    markers: {
+                                                      Marker(
+                                                        markerId: MarkerId(
+                                                            'anomalyMarker'),
+                                                        position:
+                                                            parseCoordinates(
+                                                                events[index]
+                                                                    .location!),
+                                                      ),
+                                                    },
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child: Text('Close'),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
                                   },
-                                  child: Icon(
-                                    Icons.directions,
-                                    size: 20,
-                                    color: Style.lightBlue,
-                                  ),
+                                  child: Icon(Icons.directions),
                                 ),
-                              ],
+                              ]
                             ],
                           ),
                           subtitle: Column(
@@ -467,6 +522,20 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         backgroundColor: Error ? Colors.red : Colors.blue.shade900,
       ),
     );
+  }
+
+  LatLng parseCoordinates(String coordinates) {
+    // Parse the coordinates string and return a LatLng object
+    // This is just a placeholder, replace it with your actual logic
+    double latitude = 0.0;
+    double longitude = 0.0;
+    // Split the coordinates string and convert to double values
+    List<String> coords = coordinates.split(",");
+    if (coords.length == 2) {
+      latitude = double.tryParse(coords[0]) ?? 0.0;
+      longitude = double.tryParse(coords[1]) ?? 0.0;
+    }
+    return LatLng(latitude, longitude);
   }
 
   static String _getEventTypeString(EventType eventType) {
