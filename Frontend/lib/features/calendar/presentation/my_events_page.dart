@@ -27,7 +27,6 @@ class MyEventsPage extends StatefulWidget {
 
 class _MyEventsPageState extends State<MyEventsPage>
     with SingleTickerProviderStateMixin {
-
   late List<Event> personalEvents = [];
   late List<Event> personalFilteredEvents = [];
 
@@ -40,7 +39,8 @@ class _MyEventsPageState extends State<MyEventsPage>
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
-  final TextEditingController searchPersonalController = TextEditingController();
+  final TextEditingController searchPersonalController =
+      TextEditingController();
   final TextEditingController searchGroupsController = TextEditingController();
 
   String _selectedEventType = 'Academic';
@@ -77,7 +77,6 @@ class _MyEventsPageState extends State<MyEventsPage>
       setState(() {
         personalEvents.add(ev);
         personalFilteredEvents.add(ev);
-
       });
     });
 
@@ -142,6 +141,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                 endTime: DateTime.parse(currEvent["endTime"]));
 
             groupEvents.add(currentEvent);
+            groupFilteredEvents.add(currentEvent);
           });
           groupEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
         }
@@ -225,7 +225,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                                   child: TextField(
                                     controller: searchGroupsController,
                                     onChanged: (query) {
-                                      filterGroups(query);
+                                      filterGroupsEvents(query);
                                     },
                                     decoration: InputDecoration(
                                       labelText: 'Search',
@@ -328,14 +328,42 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     false,
                                     MediaQuery.of(context).size.width,
                                   ),
-                                  if (personalFilteredEvents.isEmpty)
+                                  if (personalFilteredEvents.isEmpty) ...[
+                                    Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        controller: searchPersonalController,
+                                        onChanged: (query) {
+                                          filterGroups(query);
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: 'Search',
+                                          labelStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                                  color: Theme.of(context)
+                                                      .secondaryHeaderColor),
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                     Container(
                                       height:
                                           MediaQuery.of(context).size.height /
                                               2,
-                                      child: Center(child: noEventWidget(false)),
+                                      child:
+                                          Center(child: noEventWidget(false)),
                                     )
-                                  else
+                                  ] else
                                     Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: TextField(
@@ -385,20 +413,13 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     false,
                                     MediaQuery.of(context).size.width,
                                   ),
-                                  if (groupEvents.isEmpty)
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height /
-                                              2,
-                                      child: Center(child: noEventWidget(true)),
-                                    )
-                                  else
+                                  if (groupEvents.isEmpty) ...[
                                     Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: TextField(
                                         controller: searchGroupsController,
                                         onChanged: (query) {
-                                          filterGroups(query);
+                                          filterGroupsEvents(query);
                                         },
                                         decoration: InputDecoration(
                                           labelText: 'Search',
@@ -406,8 +427,8 @@ class _MyEventsPageState extends State<MyEventsPage>
                                               .textTheme
                                               .bodyLarge!
                                               .copyWith(
-                                              color: Theme.of(context)
-                                                  .secondaryHeaderColor),
+                                                  color: Theme.of(context)
+                                                      .secondaryHeaderColor),
                                           prefixIcon: Icon(
                                             Icons.search,
                                             color: Theme.of(context)
@@ -415,12 +436,46 @@ class _MyEventsPageState extends State<MyEventsPage>
                                           ),
                                           border: OutlineInputBorder(
                                             borderRadius:
-                                            BorderRadius.circular(10.0),
+                                                BorderRadius.circular(10.0),
                                           ),
                                         ),
                                       ),
                                     ),
-                                    _groupEventWidget(context),
+                                    Container(
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              2,
+                                      child: Center(child: noEventWidget(true)),
+                                    )
+                                  ] else
+                                    Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        controller: searchGroupsController,
+                                        onChanged: (query) {
+                                          filterGroupsEvents(query);
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: 'Search',
+                                          labelStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                                  color: Theme.of(context)
+                                                      .secondaryHeaderColor),
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  _groupEventWidget(context),
                                 ],
                               ),
                             ),
@@ -438,7 +493,7 @@ class _MyEventsPageState extends State<MyEventsPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _createEventPopUpDialog(context);
+          _createEventPopUpDialogMobile(context);
         },
         child: const Icon(
           Icons.add,
@@ -454,7 +509,9 @@ class _MyEventsPageState extends State<MyEventsPage>
   Widget _groupEventWidget(BuildContext context) {
     return Column(
       children: [
-        ...groupEvents.map((event) => _buildEventTile(event, context)).toList(),
+        ...groupFilteredEvents
+            .map((event) => _buildEventTile(event, context))
+            .toList(),
       ],
     );
   }
@@ -600,8 +657,18 @@ class _MyEventsPageState extends State<MyEventsPage>
                       size: 20, color: Style.lightBlue),
                 ),
               ],
-              // SizedBox(width: 30),
-              // getDateIcon(event, context),
+              SizedBox(width: 10),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              MainScreen(index: 9, date: event.startTime)));
+                },
+                child: Icon(Icons.perm_contact_calendar,
+                    size: 20, color: Style.lightBlue),
+              ),
             ],
           ),
           subtitle: Column(
@@ -822,8 +889,7 @@ class _MyEventsPageState extends State<MyEventsPage>
     }
   }
 
-
-  noEventWidget(bool isGroupEvents)  {
+  noEventWidget(bool isGroupEvents) {
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -954,21 +1020,19 @@ class _MyEventsPageState extends State<MyEventsPage>
               actions: [
                 ElevatedButton(
                   onPressed: () async {
-                    {
-                      DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
-                      bool isNull = _selectedLocation == null;
-                      _createPersonalEvent(Event(
-                          creator: widget.username,
-                          type: _parseEventType(_selectedEventType),
-                          title: titleController.text,
-                          description: descriptionController.text,
-                          startTime: dateFormat.parse(startController.text),
-                          endTime: dateFormat.parse(endController.text),
-                          location: !isNull
-                              ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
-                              : '0'));
-                      Navigator.of(context).pop();
-                    }
+                    DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+                    bool isNull = _selectedLocation == null;
+                    _createPersonalEvent(Event(
+                        creator: widget.username,
+                        type: _parseEventType(_selectedEventType),
+                        title: titleController.text,
+                        description: descriptionController.text,
+                        startTime: dateFormat.parse(startController.text),
+                        endTime: dateFormat.parse(endController.text),
+                        location: !isNull
+                            ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
+                            : '0'));
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
@@ -1150,6 +1214,30 @@ class _MyEventsPageState extends State<MyEventsPage>
     });
   }
 
+  void filterGroupsEvents(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        groupFilteredEvents =
+            groupEvents; // Reset to all groups if query is empty
+      } else {
+        groupFilteredEvents = groupEvents.where((event) {
+          final title = event.title.toLowerCase();
+          print("Title: " + title);
+          final description = event.description.toLowerCase();
+          print("Description: " + description);
+          final searchLower = query.toLowerCase();
+          print("Query: " + searchLower);
+
+          return query.isNotEmpty &&
+              (isMatch(title, searchLower) ||
+                  isMatch(description, searchLower) ||
+                  title.contains(searchLower) ||
+                  description.contains(searchLower));
+        }).toList();
+      }
+    });
+  }
+
   /*Levenshtein algorithm*/
   bool isMatch(String text, String query) {
     if (text == query) {
@@ -1202,5 +1290,177 @@ class _MyEventsPageState extends State<MyEventsPage>
     }
 
     return previousRow[query.length];
+  }
+
+  void _createEventPopUpDialogMobile(BuildContext context) {
+    LatLng? _selectedLocation = null;
+    String selectLocationText = "Select Location";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      builder: (context) => StatefulBuilder(
+        builder: ((context, setState) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.85,
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SingleChildScrollView(
+              child: Stack(children: [
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      titleController.clear();
+                      descriptionController.clear();
+                      startController.clear();
+                      endController.clear();
+                    },
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 40),
+                    // Add extra space at top for close button
+                    const Text(
+                      "Add an event",
+                      textAlign: TextAlign.left,
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LineComboBox(
+                          selectedValue: _selectedEventType,
+                          items: eventTypes
+                              .map((e) => _getEventTypeString(e))
+                              .toList(),
+                          icon: Icons.type_specimen,
+                          onChanged: (dynamic newValue) {
+                            setState(() {
+                              _selectedEventType = newValue;
+                            });
+                          },
+                        ),
+                        LineTextField(
+                          icon: Icons.title,
+                          lableText: 'Title *',
+                          controller: titleController,
+                          title: "",
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        LineTextField(
+                          icon: Icons.description,
+                          lableText: "Description",
+                          controller: descriptionController,
+                          title: "",
+                        ),
+                        LineComboBox(
+                          deleteIcon: Icons.clear,
+                          onPressed: () {
+                            setState(() {
+                              selectLocationText = "Select Location";
+                              _selectedLocation = null;
+                            });
+                          },
+                          selectedValue: selectLocationText,
+                          items: [
+                            selectLocationText,
+                            "From FCT place",
+                            "From maps"
+                          ],
+                          icon: Icons.place,
+                          onChanged: (newValue) async {
+                            if (newValue == "From FCT place" ||
+                                newValue == "From maps") {
+                              LatLng? selectedLocation =
+                                  await showDialog<LatLng>(
+                                context: context,
+                                builder: (context) => EventLocationPopUp(
+                                  context: context,
+                                  isMapSelected: newValue == "From maps",
+                                  location: _selectedLocation,
+                                ),
+                              );
+                              if (selectedLocation != null) {
+                                setState(() {
+                                  selectLocationText = "1 Location Selected";
+                                  _selectedLocation = selectedLocation;
+                                });
+                              }
+                            }
+                          },
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        LineDateTimeField(
+                          icon: Icons.schedule,
+                          controller: startController,
+                          hintText: "Start Time *",
+                          firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        LineDateTimeField(
+                          icon: Icons.schedule,
+                          controller: endController,
+                          hintText: "End Time *",
+                          firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                DateFormat dateFormat =
+                                    DateFormat('yyyy-MM-dd HH:mm');
+                                bool isNull = _selectedLocation == null;
+                                _createPersonalEvent(Event(
+                                    creator: widget.username,
+                                    type: _parseEventType(_selectedEventType),
+                                    title: titleController.text,
+                                    description: descriptionController.text,
+                                    startTime:
+                                        dateFormat.parse(startController.text),
+                                    endTime:
+                                        dateFormat.parse(endController.text),
+                                    location: !isNull
+                                        ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
+                                        : '0'));
+                                Navigator.of(context).pop();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black87),
+                              child: const Text("CREATE"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ]),
+            ),
+          );
+        }),
+      ),
+    ).then((value) {
+      // This code will run when the modal is dismissed
+      titleController.clear();
+      descriptionController.clear();
+      startController.clear();
+      endController.clear();
+    });
   }
 }
