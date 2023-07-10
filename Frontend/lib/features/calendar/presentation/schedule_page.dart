@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import '../../../application/loadLocations.dart';
 import '../../../constants.dart';
+import '../../../data/cache_factory_provider.dart';
 import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
@@ -47,6 +50,7 @@ class _SchedulePageState extends State<SchedulePage> {
   String _selectedEventType = 'Academic';
   LatLng? _selectedLocation = null;
   String selectLocationText = "Select Location";
+  PlatformFile file = PlatformFile(name: "", size: 0);
 
   @override
   void initState() {
@@ -127,6 +131,28 @@ class _SchedulePageState extends State<SchedulePage> {
 
     _getPersonalEvents();
     setState(() {});
+  }
+
+  void pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+
+    if (result != null) {
+      file = result.files.single;
+    } else {
+      print("picker canceled");
+    }
+  }
+
+  void uploadSchedule() async {
+
+    Reference storageReference = FirebaseStorage.instance.ref().child(
+        'Schedules/' + await cacheFactory.get('users', 'username'));
+
+    await storageReference.putData(file.bytes!);
+
   }
 
   void _getPersonalEvents() async {
@@ -214,11 +240,19 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Future<void> loadSchedule() async {
-    String jsonString = await DefaultAssetBundle.of(context)
-        .loadString('assets/json/schedule.json');
-    setState(() {
-      schedule = jsonDecode(jsonString)['schedule'];
-    });
+    Reference storageReference = FirebaseStorage.instance.ref().child(
+        'Schedules/' + await cacheFactory.get('users', 'username'));
+
+    Uint8List? scheduleFile = await storageReference.getData();
+
+    if (scheduleFile != null) {
+      String jsonString = utf8.decode(scheduleFile);
+      setState(() {
+        schedule = jsonDecode(jsonString)['schedule'];
+      });
+    } else {
+      print('Failed to download schedule file.');
+    }
   }
 
   @override
@@ -229,20 +263,24 @@ class _SchedulePageState extends State<SchedulePage> {
               child: Column(
                 children: [
                   _buildTableCalendar(context),
+                  buttonAddCalendar(context),
                   ..._scheduleWidget(context),
                   _eventsWidget(context),
+
                 ],
               ),
             )
           : Column(
               children: [
                 _buildTableCalendar(context),
+                buttonAddCalendar(context),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
                         ..._scheduleWidget(context),
                         _eventsWidget(context),
+
                       ],
                     ),
                   ),
@@ -264,6 +302,55 @@ class _SchedulePageState extends State<SchedulePage> {
         elevation: 6,
         backgroundColor: Theme.of(context).primaryColor,
       ),
+    );
+  }
+
+  Widget buttonAddCalendar(BuildContext context) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).primaryColor, // button's fill color
+        foregroundColor: Colors.white,
+        elevation: 2,
+      ),
+      icon: Icon(Icons.add),
+      label: Text('Create Groups from a file'),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Create Groups'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    child: Text('Pick a file'),
+                    onPressed: () {
+                      pickFile();
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  child: Text('Create'),
+                  onPressed: () {
+                    uploadSchedule();
+                    Navigator.of(context).pop();
+                    // Process your file here
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
