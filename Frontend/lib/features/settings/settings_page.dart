@@ -15,8 +15,9 @@ import 'package:circle_flags/circle_flags.dart';
 
 class SettingsPage extends StatefulWidget {
   final bool loggedIn;
+  final bool isBackOffice;
 
-  SettingsPage({required this.loggedIn});
+  SettingsPage({required this.loggedIn, required this.isBackOffice});
 
   @override
   _SettingsPageState createState() => _SettingsPageState(loggedIn);
@@ -114,7 +115,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         Text(
                           (snapshot.data == 'Português' ||
                                   snapshot.data == 'English')
-                              ? snapshot.data : 'English',
+                              ? snapshot.data
+                              : 'English',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
@@ -140,80 +142,82 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
-      Option(
-        icon: Icon(Icons.waving_hand,
-            color: Theme.of(context).secondaryHeaderColor, size: 30.0),
-        title: localizations.startingPage,
-        subtitle: localizations.selectYourPage,
-        rightWidget: Padding(
-          padding: EdgeInsets.only(right: 20.0),
-          child: Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween, // Distribute space evenly
-            children: [
-              FutureBuilder(
-                future: cacheFactory.get('settings', 'index'),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else {
-                    IconData iconData;
-                    switch (snapshot.data) {
-                      case 'News':
-                        iconData = Icons.newspaper;
-                        break;
-                      case 'Profile':
-                        iconData = Icons.person;
-                        break;
-                      case 'Schedule':
-                        iconData = Icons.schedule;
-                        break;
-                      case 'Chat':
-                        iconData = Icons.chat;
-                        break;
-                      case 'Contacts':
-                        iconData = Icons.call;
-                        break;
-                      case 'Campus':
-                        iconData = Icons.map;
-                        break;
-                      default:
-                        iconData = Icons.pages;
+      if (!widget.isBackOffice)
+        Option(
+          icon: Icon(Icons.waving_hand,
+              color: Theme.of(context).secondaryHeaderColor, size: 30.0),
+          title: localizations.startingPage,
+          subtitle: localizations.selectYourPage,
+          rightWidget: Padding(
+            padding: EdgeInsets.only(right: 20.0),
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween, // Distribute space evenly
+              children: [
+                FutureBuilder(
+                  future: cacheFactory.get('settings', 'index'),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else {
+                      IconData iconData;
+                      switch (snapshot.data) {
+                        case 'News':
+                          iconData = Icons.newspaper;
+                          break;
+                        case 'Profile':
+                          iconData = Icons.person;
+                          break;
+                        case 'Schedule':
+                          iconData = Icons.schedule;
+                          break;
+                        case 'Chat':
+                          iconData = Icons.chat;
+                          break;
+                        case 'Contacts':
+                          iconData = Icons.call;
+                          break;
+                        case 'Campus':
+                          iconData = Icons.map;
+                          break;
+                        default:
+                          iconData = Icons.pages;
+                      }
+                      return Row(
+                        children: [
+                          Icon(iconData,
+                              color: Theme.of(context).secondaryHeaderColor),
+                          SizedBox(
+                              width:
+                                  5.0), // Add space between the icon and text
+                          Text(
+                            snapshot.data,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      );
                     }
-                    return Row(
-                      children: [
-                        Icon(iconData,
-                            color: Theme.of(context).secondaryHeaderColor),
-                        SizedBox(
-                            width: 5.0), // Add space between the icon and text
-                        Text(
-                          snapshot.data,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-              SizedBox(), // Add an empty SizedBox to ensure proper alignment
-            ],
+                  },
+                ),
+                SizedBox(), // Add an empty SizedBox to ensure proper alignment
+              ],
+            ),
           ),
+          onTap: () async {
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return EditStartingPage(
+                  onDialogClosed: () {
+                    setState(() {});
+                  },
+                  loggedIn: true,
+                );
+              },
+            );
+          },
         ),
-        onTap: () async {
-          await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return EditStartingPage(
-                onDialogClosed: () {
-                  setState(() {});
-                },
-                loggedIn: true,
-              );
-            },
-          );
-        },
-      ),
       if (!kIsWeb)
         Option(
             icon: Icon(Icons.notifications,
@@ -409,8 +413,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             width: 5.0), // Add space between the flag and text
                         Text(
                           (snapshot.data == 'Português' ||
-                              snapshot.data == 'English')
-                              ? snapshot.data : 'English',
+                                  snapshot.data == 'English')
+                              ? snapshot.data
+                              : 'English',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),

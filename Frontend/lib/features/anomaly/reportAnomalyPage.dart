@@ -197,8 +197,12 @@ class ReportAnomalyTabState extends State<ReportAnomalyTab> {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${json.encode(token.toJson())}'
       },
-      body: jsonEncode(
-          {'title': title, 'description': description, 'coordinates': coord, 'sender': widget.user.username}),
+      body: jsonEncode({
+        'title': title,
+        'description': description,
+        'coordinates': coord,
+        'sender': widget.user.username
+      }),
     );
     if (response.statusCode == 200) {
       Navigator.of(context).pop();
