@@ -379,8 +379,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           style: Theme.of(context).textTheme.bodyLarge),
                       children: [
                           ListTile(
-                            leading: Icon(Icons.schedule),
-                            title: Text('Schedule'),
+                            leading: Icon(Icons.perm_contact_calendar),
+                            title: Text('Calendar'),
                             onTap: () {
                               setState(() {
                                 scheduleDate = DateTime.now();
