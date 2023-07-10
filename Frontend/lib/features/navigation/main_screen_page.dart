@@ -41,7 +41,8 @@ class MainScreen extends StatefulWidget {
   MainScreen({this.index, this.date, this.location, this.selectedGroup});
 
   @override
-  _MainScreenState createState() => _MainScreenState(index, date, location, selectedGroup);
+  _MainScreenState createState() =>
+      _MainScreenState(index, date, location, selectedGroup);
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
@@ -75,7 +76,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
 
-  _MainScreenState(int? index, DateTime? date, String? location, String? selectedGroup) {
+  _MainScreenState(
+      int? index, DateTime? date, String? location, String? selectedGroup) {
     if (index != null) {
       _selectedIndex = index;
       _bottomNavigationIndex = index == 10
@@ -504,17 +506,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.analytics),
-                title: Text('BackOffice Hub',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 12;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
+              if (_currentUser.role == "BACKOFFICE" ||
+                  _currentUser.role == "SU")
+                ListTile(
+                  leading: Icon(Icons.analytics),
+                  title: Text('BackOffice Hub',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 12;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
               SizedBox(height: 75),
               Divider(
                 // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.

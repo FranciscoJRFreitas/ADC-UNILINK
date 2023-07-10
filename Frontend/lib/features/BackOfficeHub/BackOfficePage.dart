@@ -93,6 +93,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
                                           },
                                           items: <String>[
                                             'SU',
+                                            'BACKOFFICE',
                                             'DIRECTOR',
                                             'PROF',
                                             'STUDENT'

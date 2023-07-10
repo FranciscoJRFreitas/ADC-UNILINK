@@ -1,9 +1,14 @@
 {
   "roles": {
     "SU": {
+      "level": 5,
+      "modify_permissions": ["SU", "BACKOFFICE","DIRECTOR", "PROF", "STUDENT"],
+      "remove_permissions": ["SU", "BACKOFFICE","DIRECTOR", "PROF", "STUDENT"]
+    },
+    "BACKOFFICE": {
       "level": 4,
-      "modify_permissions": ["SU", "DIRECTOR", "PROF", "STUDENT"],
-      "remove_permissions": ["SU", "DIRECTOR", "PROF", "STUDENT"]
+      "modify_permissions": ["DIRECTOR", "PROF", "STUDENT"],
+      "remove_permissions": ["DIRECTOR", "PROF", "STUDENT"]
     },
     "DIRECTOR": {
       "level": 3,
