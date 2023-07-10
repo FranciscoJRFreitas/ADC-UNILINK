@@ -157,6 +157,8 @@ class _MyEventsPageState extends State<MyEventsPage>
   }
 
   Widget _buildWebLayout(BuildContext context) {
+    personalFilteredEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+    groupFilteredEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
     return Scaffold(
       body: Row(
         children: [
@@ -167,38 +169,36 @@ class _MyEventsPageState extends State<MyEventsPage>
               children: [
                 _buildSectionHeader("Personal Events", context, false,
                     MediaQuery.of(context).size.width / 2 - 0.5),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: searchPersonalController,
+                    onChanged: (query) {
+                      filterGroups(query);
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Search',
+                      labelStyle: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(
+                              color: Theme.of(context).secondaryHeaderColor),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Theme.of(context).secondaryHeaderColor,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                  ),
+                ),
                 personalFilteredEvents.isEmpty
                     ? Expanded(child: noEventWidget(false))
                     : Expanded(
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: TextField(
-                                  controller: searchPersonalController,
-                                  onChanged: (query) {
-                                    filterGroups(query);
-                                  },
-                                  decoration: InputDecoration(
-                                    labelText: 'Search',
-                                    labelStyle: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .copyWith(
-                                            color: Theme.of(context)
-                                                .secondaryHeaderColor),
-                                    prefixIcon: Icon(
-                                      Icons.search,
-                                      color: Theme.of(context)
-                                          .secondaryHeaderColor,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                  ),
-                                ),
-                              ),
                               _eventsWidget(context),
                             ],
                           ),
@@ -214,39 +214,36 @@ class _MyEventsPageState extends State<MyEventsPage>
                 children: [
                   _buildSectionHeader("Group Events", context, false,
                       MediaQuery.of(context).size.width / 2 - 0.5),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: searchGroupsController,
+                      onChanged: (query) {
+                        filterGroupsEvents(query);
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Search',
+                        labelStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(
+                                color: Theme.of(context).secondaryHeaderColor),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).secondaryHeaderColor,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                  ),
                   groupEvents.isEmpty
                       ? Expanded(child: noEventWidget(true))
                       : Expanded(
                           child: SingleChildScrollView(
                             child: Column(
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: TextField(
-                                    controller: searchGroupsController,
-                                    onChanged: (query) {
-                                      filterGroupsEvents(query);
-                                    },
-                                    decoration: InputDecoration(
-                                      labelText: 'Search',
-                                      labelStyle: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .copyWith(
-                                              color: Theme.of(context)
-                                                  .secondaryHeaderColor),
-                                      prefixIcon: Icon(
-                                        Icons.search,
-                                        color: Theme.of(context)
-                                            .secondaryHeaderColor,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
-                                    ),
-                                  ),
-                                ),
                                 _groupEventWidget(context),
                               ],
                             ),
@@ -273,6 +270,7 @@ class _MyEventsPageState extends State<MyEventsPage>
 
   Widget _buildMobileLayout(BuildContext context) {
     personalFilteredEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+    groupFilteredEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
     return Scaffold(
       body: Column(
         children: [
@@ -596,78 +594,94 @@ class _MyEventsPageState extends State<MyEventsPage>
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         child: ListTile(
-          title: Row(
+          title: Column(
             children: [
-              getDateIcon(event, context),
-              SizedBox(width: 10),
-              InkWell(
-                child: Text(
-                  event.title,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              if (event.location != "0") ...[
-                SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MainScreen(
-                                index: 10, location: event.location)));
-                  },
-                  child:
-                      Icon(Icons.directions, size: 20, color: Style.lightBlue),
-                ),
-              ],
-              if (event.groupId != null) ...[
-                SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MainScreen(
-                          index: 6,
-                          selectedGroup: event.groupId,
+              Row(
+                children: [
+                  getDateIcon(event, context),
+                  SizedBox(width: 10),
+                  InkWell(
+                    child: Text(
+                      event.title,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                      child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (event.location != "0") ...[
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MainScreen(
+                                        index: 10, location: event.location)));
+                          },
+                          child: Icon(Icons.directions,
+                              size: 20, color: Style.lightBlue),
                         ),
+                      ],
+                      SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MainScreen(
+                                      index: 9, date: event.startTime)));
+                        },
+                        child: Icon(Icons.perm_contact_calendar,
+                            size: 20, color: Style.lightBlue),
                       ),
-                    );
-                  },
-                  child: Icon(Icons.chat, size: 20, color: Style.lightBlue),
-                ),
-              ] else ...[
-                SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return EventDetailsPage(event: event);
-                        });
-                  },
-                  child: Icon(Icons.edit, size: 20, color: Style.lightBlue),
-                ),
-                SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    _removeEventPopUpDialogWeb(context, event);
-                  },
-                  child: Icon(Icons.delete_forever,
-                      size: 20, color: Style.lightBlue),
-                ),
-              ],
-              SizedBox(width: 10),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              MainScreen(index: 9, date: event.startTime)));
-                },
-                child: Icon(Icons.perm_contact_calendar,
-                    size: 20, color: Style.lightBlue),
+                      if (event.groupId != null) ...[
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MainScreen(
+                                  index: 6,
+                                  selectedGroup: event.groupId,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Icon(Icons.chat,
+                              size: 20, color: Style.lightBlue),
+                        ),
+                      ] else ...[
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return EventDetailsPage(event: event);
+                                });
+                          },
+                          child: Icon(Icons.edit,
+                              size: 20, color: Style.lightBlue),
+                        ),
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            _removeEventPopUpDialogWeb(context, event);
+                          },
+                          child: Icon(Icons.delete_forever,
+                              size: 20, color: Style.lightBlue),
+                        ),
+                      ],
+                    ],
+                  ))
+                ],
+              ),
+              Divider(
+                color: Style.lightBlue,
+                thickness: 1,
               ),
             ],
           ),
