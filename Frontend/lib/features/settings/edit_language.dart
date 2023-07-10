@@ -18,11 +18,11 @@ class EditLanguagePage extends StatefulWidget {
 }
 
 class _EditLanguagePageState extends State<EditLanguagePage> {
-  String _language = "english";
+  String _language = "English";
   Widget flagWidget = Image.asset(
-    'assets/icon/portuguese_flag.png',
-    height: 24,
-    width: 24,
+    'assets/icon/english_flag.png',
+    height: 5,
+    width: 5,
     fit: BoxFit.cover,
   );
 
@@ -35,30 +35,30 @@ class _EditLanguagePageState extends State<EditLanguagePage> {
   Future<void> getSettings() async {
     _language = await cacheFactory.get('settings', 'language');
     setState(() {});
-    if (_language != 'english' && _language != 'portugues')
-      _language = "english";
+    if (_language != 'English' && _language != 'Português')
+      _language = "English";
     updateIcon();
   }
 
   void updateIcon() {
-    if (_language == "portugues")
+    if (_language == "Português")
       flagWidget = Image.asset(
         'assets/icon/portuguese_flag.png',
-        height: 10,
-        width: 10,
+        height: 5,
+        width: 5,
         fit: BoxFit.cover,
       );
-    if (_language == "english")
+    if (_language == "English")
       flagWidget = Image.asset(
         'assets/icon/english_flag.png',
-        height: 10,
-        width: 10,
+        height: 5,
+        width: 5,
         fit: BoxFit.cover,
       );
   }
 
   void changeLanguage(String language) {
-    var locale = language == 'portugues' ? Locale('pt') : Locale('en');
+    var locale = language == 'Português' ? Locale('pt') : Locale('en');
     Provider.of<LocaleProvider>(context, listen: false).currentLocale = locale;
   }
 
@@ -161,8 +161,8 @@ class _EditLanguagePageState extends State<EditLanguagePage> {
 
   List<String> itemList() {
     return [
-      'english',
-      'portugues',
+      'English',
+      'Português',
     ];
   }
 }
