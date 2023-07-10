@@ -63,6 +63,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           widget.groupId + " events",
           style: Theme.of(context).textTheme.bodyLarge,
@@ -80,269 +81,263 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
       );
     }
 
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(top: 10),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 433,
-          child: ListView.builder(
-            itemCount: events.length,
-            itemBuilder: (context, index) {
-              Event event = events[index];
-              return Material(
-                color: Colors.transparent,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle event onTap
-                  },
-                  child: Stack(
-                    children: <Widget>[
-                      Divider(
-                        color:
-                            Provider.of<ThemeNotifier>(context).currentTheme ==
-                                    kDarkTheme
-                                ? Colors.white60
-                                : Theme.of(context).primaryColor,
-                        thickness: 1,
-                      ),
-                      Container(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                          child: ListTile(
-                            title: Row(
-                              children: [
-                                InkWell(
-                                  child: Text(
-                                    event.title,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Expanded(
+        child: ListView.builder(
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            Event event = events[index];
+            return Material(
+              color: Colors.transparent,
+              child: GestureDetector(
+                onTap: () {
+                  // Handle event onTap
+                },
+                child: Stack(
+                  children: <Widget>[
+                    Divider(
+                      color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                              kDarkTheme
+                          ? Colors.white60
+                          : Theme.of(context).primaryColor,
+                      thickness: 1,
+                    ),
+                    Container(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        child: ListTile(
+                          title: Row(
+                            children: [
+                              InkWell(
+                                child: Text(
+                                  event.title,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
+                              ),
+                              SizedBox(width: 10),
+                              if (event.location != "0") ...[
                                 SizedBox(width: 10),
-                                if (event.location != "0") ...[
-                                  SizedBox(width: 10),
-                                  InkWell(
-                                    onTap: () {
-                                      // Handle click on location icon
-                                      // Navigate to another page or perform desired action
-                                    },
-                                    child: Icon(
-                                      Icons.directions,
-                                      size: 20,
-                                      color: Style.lightBlue,
-                                    ),
+                                InkWell(
+                                  onTap: () {
+                                    // Handle click on location icon
+                                    // Navigate to another page or perform desired action
+                                  },
+                                  child: Icon(
+                                    Icons.directions,
+                                    size: 20,
+                                    color: Style.lightBlue,
                                   ),
-                                ],
+                                ),
                               ],
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.type_specimen,
-                                      size: 20,
-                                      color: Style.lightBlue,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Type: ',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium!
-                                              .copyWith(fontSize: 14),
-                                        ),
-                                        Text(
-                                          _getEventTypeString(event.type),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.description,
-                                      size: 20,
-                                      color: Style.lightBlue,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      'Description: ',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(fontSize: 14),
-                                    ),
-                                    Flexible(
-                                      child: Text(
-                                        event.description,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                if (event.location != '0') ...[
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.type_specimen,
+                                    size: 20,
+                                    color: Style.lightBlue,
+                                  ),
+                                  SizedBox(width: 5),
                                   Row(
                                     children: [
-                                      Icon(
-                                        Icons.place,
-                                        size: 20,
-                                        color: Style.lightBlue,
-                                      ),
-                                      SizedBox(width: 5),
                                       Text(
-                                        'Location: ',
+                                        'Type: ',
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleMedium!
                                             .copyWith(fontSize: 14),
                                       ),
-                                      FutureBuilder<String>(
-                                        future: getPlaceInLocations(
-                                            event.location!),
-                                        builder: (BuildContext context,
-                                            AsyncSnapshot<String> snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return SizedBox.shrink();
-                                          } else {
-                                            if (snapshot.hasError)
-                                              return Text(
-                                                  'Error: ${snapshot.error}');
-                                            else
-                                              return snapshot.data == ""
-                                                  ? Text(
-                                                      "Custom Location",
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyMedium,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    )
-                                                  : Text(
-                                                      snapshot.data!,
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyMedium,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    );
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 8),
-                                ],
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.schedule,
-                                      size: 20,
-                                      color: Style.lightBlue,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      'Start: ',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(fontSize: 14),
-                                    ),
-                                    Flexible(
-                                      child: Text(
-                                        '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
+                                      Text(
+                                        _getEventTypeString(event.type),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyMedium,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.description,
+                                    size: 20,
+                                    color: Style.lightBlue,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Description: ',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontSize: 14),
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      event.description,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              if (event.location != '0') ...[
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.place,
+                                      size: 20,
+                                      color: Style.lightBlue,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'Location: ',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(fontSize: 14),
+                                    ),
+                                    FutureBuilder<String>(
+                                      future:
+                                          getPlaceInLocations(event.location!),
+                                      builder: (BuildContext context,
+                                          AsyncSnapshot<String> snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return SizedBox.shrink();
+                                        } else {
+                                          if (snapshot.hasError)
+                                            return Text(
+                                                'Error: ${snapshot.error}');
+                                          else
+                                            return snapshot.data == ""
+                                                ? Text(
+                                                    "Custom Location",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  )
+                                                : Text(
+                                                    snapshot.data!,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  );
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),
                                 SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.schedule,
-                                      size: 20,
-                                      color: Style.lightBlue,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      'End: ',
+                              ],
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.schedule,
+                                    size: 20,
+                                    color: Style.lightBlue,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Start: ',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontSize: 14),
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
                                       style: Theme.of(context)
                                           .textTheme
-                                          .titleMedium!
-                                          .copyWith(fontSize: 14),
+                                          .bodyMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    Flexible(
-                                      child: Text(
-                                        '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.schedule,
+                                    size: 20,
+                                    color: Style.lightBlue,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'End: ',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontSize: 14),
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: 15,
-                        right: 10,
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(Icons.delete, color: Colors.blue),
-                            onPressed: () {
-                              if (kIsWeb)
-                                _removeEventPopUpDialogWeb(context, event.id!);
-                              else
-                                _removeEventPopUpDialogMobile(
-                                    context, event.id!);
-                            },
-                          ),
+                    ),
+                    Positioned(
+                      top: 15,
+                      right: 10,
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.delete, color: Colors.blue),
+                          onPressed: () {
+                            if (kIsWeb)
+                              _removeEventPopUpDialogWeb(context, event.id!);
+                            else
+                              _removeEventPopUpDialogMobile(context, event.id!);
+                          },
                         ),
                       ),
-                      Divider(
-                        color: Colors.black87,
-                        thickness: 1,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Divider(
+                      color: Colors.black87,
+                      thickness: 1,
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
