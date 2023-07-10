@@ -27,16 +27,21 @@ class MyEventsPage extends StatefulWidget {
 
 class _MyEventsPageState extends State<MyEventsPage>
     with SingleTickerProviderStateMixin {
+
   late List<Event> personalEvents = [];
   late List<Event> personalFilteredEvents = [];
+
   late List<Event> groupEvents = [];
+  late List<Event> groupFilteredEvents = [];
+
   late DatabaseReference myEventsRef;
   List<EventType> eventTypes = EventType.values;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
-  final TextEditingController searchController = TextEditingController();
+  final TextEditingController searchPersonalController = TextEditingController();
+  final TextEditingController searchGroupsController = TextEditingController();
 
   String _selectedEventType = 'Academic';
   LatLng? _selectedLocation = null;
@@ -58,6 +63,12 @@ class _MyEventsPageState extends State<MyEventsPage>
   void dispose() {
     super.dispose();
     _tabController?.dispose();
+    searchPersonalController.dispose();
+    searchGroupsController.dispose();
+    titleController.dispose();
+    descriptionController.dispose();
+    startController.dispose();
+    endController.dispose();
   }
 
   void getEvents() {
@@ -65,7 +76,8 @@ class _MyEventsPageState extends State<MyEventsPage>
       Event ev = Event.fromSnapshot(event.snapshot);
       setState(() {
         personalEvents.add(ev);
-        personalEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+        personalFilteredEvents.add(ev);
+
       });
     });
 
@@ -73,8 +85,8 @@ class _MyEventsPageState extends State<MyEventsPage>
       String eventId = event.snapshot.key as String;
 
       setState(() {
+        personalFilteredEvents.removeWhere((element) => element.id == eventId);
         personalEvents.removeWhere((event) => event.id == eventId);
-        personalEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       });
     });
 
@@ -84,8 +96,9 @@ class _MyEventsPageState extends State<MyEventsPage>
       setState(() {
         Event ev = Event.fromSnapshot(event.snapshot);
         personalEvents.removeWhere((element) => element.id == eventId);
+        personalFilteredEvents.removeWhere((element) => element.id == eventId);
+        personalFilteredEvents.add(ev);
         personalEvents.add(ev);
-        personalEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       });
     });
   }
@@ -154,8 +167,8 @@ class _MyEventsPageState extends State<MyEventsPage>
               children: [
                 _buildSectionHeader("Personal Events", context, false,
                     MediaQuery.of(context).size.width / 2 - 0.5),
-                personalEvents.isEmpty
-                    ? Expanded(child: noEventWidget())
+                personalFilteredEvents.isEmpty
+                    ? Expanded(child: noEventWidget(false))
                     : Expanded(
                         child: SingleChildScrollView(
                           child: Column(
@@ -163,7 +176,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                               Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: TextField(
-                                  controller: searchController,
+                                  controller: searchPersonalController,
                                   onChanged: (query) {
                                     filterGroups(query);
                                   },
@@ -202,7 +215,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                   _buildSectionHeader("Group Events", context, false,
                       MediaQuery.of(context).size.width / 2 - 0.5),
                   groupEvents.isEmpty
-                      ? Expanded(child: noEventWidget())
+                      ? Expanded(child: noEventWidget(true))
                       : Expanded(
                           child: SingleChildScrollView(
                             child: Column(
@@ -210,7 +223,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                                 Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: TextField(
-                                    controller: searchController,
+                                    controller: searchGroupsController,
                                     onChanged: (query) {
                                       filterGroups(query);
                                     },
@@ -259,6 +272,7 @@ class _MyEventsPageState extends State<MyEventsPage>
   }
 
   Widget _buildMobileLayout(BuildContext context) {
+    personalFilteredEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
     return Scaffold(
       body: Column(
         children: [
@@ -314,18 +328,18 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     false,
                                     MediaQuery.of(context).size.width,
                                   ),
-                                  if (personalEvents.isEmpty)
+                                  if (personalFilteredEvents.isEmpty)
                                     Container(
                                       height:
                                           MediaQuery.of(context).size.height /
                                               2,
-                                      child: Center(child: noEventWidget()),
+                                      child: Center(child: noEventWidget(false)),
                                     )
                                   else
                                     Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: TextField(
-                                        controller: searchController,
+                                        controller: searchPersonalController,
                                         onChanged: (query) {
                                           filterGroups(query);
                                         },
@@ -376,13 +390,13 @@ class _MyEventsPageState extends State<MyEventsPage>
                                       height:
                                           MediaQuery.of(context).size.height /
                                               2,
-                                      child: Center(child: noEventWidget()),
+                                      child: Center(child: noEventWidget(true)),
                                     )
                                   else
                                     Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: TextField(
-                                        controller: searchController,
+                                        controller: searchGroupsController,
                                         onChanged: (query) {
                                           filterGroups(query);
                                         },
@@ -448,7 +462,7 @@ class _MyEventsPageState extends State<MyEventsPage>
   Widget _eventsWidget(BuildContext context) {
     return Column(
       children: [
-        ...personalEvents
+        ...personalFilteredEvents
             .map((event) => _buildEventTile(event, context))
             .toList(),
       ],
@@ -808,7 +822,8 @@ class _MyEventsPageState extends State<MyEventsPage>
     }
   }
 
-  noEventWidget() {
+
+  noEventWidget(bool isGroupEvents)  {
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -820,7 +835,7 @@ class _MyEventsPageState extends State<MyEventsPage>
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () {
-                  _createEventPopUpDialog(context);
+                  if (!isGroupEvents) _createEventPopUpDialog(context);
                 },
                 child: Icon(
                   Icons.hourglass_empty,
@@ -1119,8 +1134,11 @@ class _MyEventsPageState extends State<MyEventsPage>
       } else {
         personalFilteredEvents = personalEvents.where((event) {
           final title = event.title.toLowerCase();
+          print("Title: " + title);
           final description = event.description.toLowerCase();
+          print("Description: " + description);
           final searchLower = query.toLowerCase();
+          print("Query: " + searchLower);
 
           return query.isNotEmpty &&
               (isMatch(title, searchLower) ||

@@ -1,29 +1,15 @@
-import 'dart:typed_data';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:provider/provider.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LocationPopUp.dart';
 import '../../../../constants.dart';
-import '../../../../data/cache_factory_provider.dart';
-import '../../../../domain/UserNotifier.dart';
-import '../../../../domain/Token.dart';
 import '../../../../widgets/LineComboBox.dart';
-import '../../../../widgets/LineDateField.dart';
-import '../../../../widgets/ToggleButton.dart';
 import '../../../../widgets/widget.dart';
 import '../../../../widgets/LineTextField.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class EventDetailsPage extends StatefulWidget {
   final Event event;
@@ -36,8 +22,6 @@ class EventDetailsPage extends StatefulWidget {
 
 class _EventDetailsPage extends State<EventDetailsPage> {
   late Event event;
-
-  //final TextEditingController passwordController = TextEditingController();
   late TextEditingController titleController;
   late String _selectedTypeController;
   late TextEditingController descriptionController;
