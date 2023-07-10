@@ -335,19 +335,6 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         return Response.ok().build();
     }
 
-    public static void deleteFolder(String folderPath) {
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-        String bucketName = "unilink23.appspot.com";
-        Bucket bucket = storage.get(bucketName);
-
-        // List the blobs in the folder
-        Page<Blob> blobs = bucket.list(Storage.BlobListOption.prefix(folderPath));
-        for (Blob blob : blobs.iterateAll()) {
-            blob.delete();
-            System.out.println("Deleted blob: " + blob.getName());
-        }
-    }
-
     public static void leaveGroup(String groupId, String userId) {
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
@@ -356,24 +343,15 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
 
         DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
-        //DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-        //eventsRef.child(groupId).removeValueAsync();
 
         groupsRef.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
-                    String groupPicturesPath = "GroupPictures/" + groupId;
-                    String groupAttachmentsPath = "GroupAttachments/" + groupId;
 
                     messagesRef.child(groupId).removeValueAsync();
                     groupsRef.child(groupId).removeValueAsync();
 
-                    LOG.info("Deleting folder: " + groupPicturesPath);
-                    deleteFolder(groupPicturesPath);
-
-                    LOG.info("Deleting folder: " + groupAttachmentsPath);
-                    deleteFolder(groupAttachmentsPath);
                 }
             }
 
