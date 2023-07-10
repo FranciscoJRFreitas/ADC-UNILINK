@@ -24,6 +24,7 @@ class GroupPage extends StatefulWidget {
 
 class _GroupPageState extends State<GroupPage> {
   List<Group> groups = []; // Replace with your group list
+  PlatformFile file = PlatformFile(name: "", size: 0);
 
   @override
   void initState() {
@@ -69,29 +70,36 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
-  void pickFile(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+  void createGroupsFromFile() async {
+    final url = kBaseUrl + "rest/chat/create-multiple";
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    // Convert the file bytes to a string and parse it as JSON
+    String fileContents = utf8.decode(file.bytes!);
+    var fileJson = json.decode(fileContents);
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${json.encode(token.toJson())}',
+      },
+      body: jsonEncode(fileJson),
+    );
+    if (response.statusCode != 200) print("REQUEST ERROR");
+  }
+
+  void pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
 
     if (result != null) {
-      File file = File(result.files.single.path!);
-
-      final url = kBaseUrl + "rest/chat/create-multiple";
-      final tokenID = await cacheFactory.get('users', 'token');
-      final storedUsername = await cacheFactory.get('users', 'username');
-      Token token = new Token(tokenID: tokenID, username: storedUsername);
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${json.encode(token.toJson())}'
-        },
-        body: file,
-      );
-
-      if (response.statusCode != 200) print("REQUEST ERROR");
+      file = result.files.single;
     } else {
-      // User canceled the picker
       print("picker canceled");
     }
   }
@@ -228,7 +236,7 @@ class _GroupPageState extends State<GroupPage> {
                         ElevatedButton(
                           child: Text('Pick a file'),
                           onPressed: () {
-                            pickFile(context);
+                            pickFile();
                           },
                         ),
                       ],
@@ -243,6 +251,7 @@ class _GroupPageState extends State<GroupPage> {
                       ElevatedButton(
                         child: Text('Create'),
                         onPressed: () {
+                          createGroupsFromFile();
                           Navigator.of(context).pop();
                           // Process your file here
                         },
