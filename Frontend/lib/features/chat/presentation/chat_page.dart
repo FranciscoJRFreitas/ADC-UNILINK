@@ -448,7 +448,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: widget.user.role != 'STUDENT' ? FloatingActionButton(
         onPressed: () {
           popUpDialogWeb(context);
         },
@@ -459,7 +459,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           color: Colors.white,
           size: 30,
         ),
-      ),
+      ) : null,
     );
   }
 
@@ -609,7 +609,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+        floatingActionButton: widget.user.role != 'STUDENT' ? FloatingActionButton(
         onPressed: () {
           popUpDialogMobile(context);
         },
@@ -620,7 +620,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           color: Colors.white,
           size: 30,
         ),
-      ),
+      ) : null,
     );
   }
 
@@ -849,7 +849,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MouseRegion(
+            widget.user.role != 'STUDENT' ? MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () {
@@ -865,13 +865,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   size: 75,
                 ),
               ),
-            ),
+            ) : Icon(Icons.sentiment_very_dissatisfied, size: 100),
             const SizedBox(
               height: 20,
             ),
-            const Text(
+            widget.user.role != 'STUDENT' ? Text(
               "You've not joined any groups, tap on the add icon to create a group or also search from top search bar.",
               textAlign: TextAlign.center,
+            ) : Text(
+              "You've not joined any groups.",
+              style: TextStyle(fontSize: 23), // Set the desired font size
             )
           ],
         ),
