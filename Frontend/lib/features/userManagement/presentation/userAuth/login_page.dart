@@ -107,14 +107,14 @@ class _LoginPageState extends State<LoginPage> {
                         Text(
                           "Welcome back,",
                           style: Theme.of(context).textTheme.titleLarge,
-                        ).translate("Bem-vindo,"),
+                        ),
                         SizedBox(
                           height: 10,
                         ),
                         Text(
                           "You've been missed!",
                           style: Theme.of(context).textTheme.bodyLarge,
-                        ).translate("Sentimos a tua falta"),
+                        ),
                         SizedBox(
                           height: 30,
                         ),

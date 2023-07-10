@@ -40,13 +40,11 @@ class _MyMapState extends State<MyMap> {
   String myMarkerLocation = "";
 
   _MyMapState(String? markerLocation) {
-
     if (markerLocation != null && markerLocation != "") {
       print("MARKER LOCATION :" + markerLocation);
       myMarkerLocation = markerLocation;
       addEventMarker();
     }
-
   }
 
   PolylinePoints polylinePoints = PolylinePoints();
@@ -104,7 +102,6 @@ class _MyMapState extends State<MyMap> {
         _mapStyle = string;
       });
     });
-
   }
 
   void addEventMarker() async {
@@ -114,17 +111,16 @@ class _MyMapState extends State<MyMap> {
     LatLng location = LatLng(latitude, longitude);
     String name = await getPlaceInLocations(myMarkerLocation);
     if (name == '') name = "Custom Location";
-    markers.add(Marker(markerId: MarkerId(name), position: location,
-            onTap: () {
-                if (kIsWeb) {
-                  showMarkerInfoWindow(MarkerId(name), name,
-                       '');
-                } else {
-                  showMarkerInfoWindowMobile(MarkerId(name), name,
-                       '');
-                }
-              }
-            ));
+    markers.add(Marker(
+        markerId: MarkerId(name),
+        position: location,
+        onTap: () {
+          if (kIsWeb) {
+            showMarkerInfoWindow(MarkerId(name), name, '');
+          } else {
+            showMarkerInfoWindowMobile(MarkerId(name), name, '');
+          }
+        }));
   }
 
   void updateCurrentPositionMarker(loc.LocationData newLocation) async {
@@ -935,7 +931,7 @@ class _MyMapState extends State<MyMap> {
     final Uint8List parking = await getImages('assets/icon/Parking.png', 50);
     final Uint8List service = await getImages('assets/icon/service.png', 50);
     final Uint8List restaurant =
-        await getImages('assets/icon/restaurant.png', 100);
+        await getImages('assets/icon/restaurant.png', 50);
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
       double latitude = coordinates[1];
       double longitude = coordinates[0];
