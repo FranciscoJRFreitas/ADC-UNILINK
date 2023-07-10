@@ -211,7 +211,6 @@ class _AnomaliesPageState extends State<AnomaliesPage>
         ],
       ),
       Expanded(
-        // Wrap ListView.builder in an Expanded widget
         child: ListView.builder(
           itemCount: anomalyList.length,
           itemBuilder: (context, index) {

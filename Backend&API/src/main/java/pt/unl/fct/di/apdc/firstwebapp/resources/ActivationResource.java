@@ -20,7 +20,6 @@ public class ActivationResource {
     @GET
     @Path("/")
     public Response activateAccount(@QueryParam("token") String token) {
-        KeyFactory keyFactory = datastore.newKeyFactory().setKind("User");
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("User")
                 .setFilter(StructuredQuery.PropertyFilter.eq("user_activation_token", token))
@@ -50,7 +49,7 @@ public class ActivationResource {
                     "<head>" +
                     "<meta charset='UTF-8'>" +
                     "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-                    "<meta http-equiv='Refresh' content='5;url=https://example.com'>" +
+                    "<meta http-equiv='Refresh' content='5;url=https://unilink23.oa.r.appspot.com/'>" +
                     "<title>Account Activation</title>" +
                     "<style>" +
                     "body {" +
@@ -90,7 +89,7 @@ public class ActivationResource {
                     "<div class='card'>" +
                     "<h2>Account activated successfully!</h2>" +
                     "<p>You will be redirected to login in 5 seconds.</p>" +
-                    "<p>If not, click <a href='https://example.com'>here</a>.</p>" +
+                    "<p>If not, click <a href='https://unilink23.oa.r.appspot.com/'>here</a>.</p>" +
                     "</div>" +
                     "</body></html>";
 
@@ -141,7 +140,7 @@ public class ActivationResource {
                     "<body>" +
                     "<div class='card'>" +
                     "    <h2>Account already active!</h2>" +
-                    "    <p>To proceed with login, click <a href='https://example.com'>here</a>.</p>" +
+                    "    <p>To proceed with login, click <a href='https://unilink23.oa.r.appspot.com/'>here</a>.</p>" +
                     "    <p>If this is the first time you click the activation link,</p>" +
                     "    <p>please contact the support team.</p>" +
                     "</div>" +

@@ -69,7 +69,7 @@ class _LineComboBoxFlagState extends State<LineComboBoxFlag> {
                           .map<DropdownMenuItem<String>>((String item) {
                         return DropdownMenuItem<String>(
                           value: item,
-                          child: Text(item),
+                          child: Text("   " + item),
                         );
                       }).toList(),
                     ),

@@ -67,7 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
         icon: Icon(Icons.translate,
             color: Theme.of(context).secondaryHeaderColor, size: 30.0),
         title: localizations.language,
-        subtitle: "",
+        subtitle: localizations.selectLanguage,
         rightWidget: Padding(
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
@@ -82,7 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   } else {
                     Widget flagWidget;
                     switch (snapshot.data) {
-                      case 'portugues':
+                      case 'Português':
                         flagWidget = flagWidget = Image.asset(
                           'assets/icon/portuguese_flag.png',
                           height: 24,
@@ -90,7 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           fit: BoxFit.cover,
                         );
                         break;
-                      case 'english':
+                      case 'English':
                         flagWidget = Image.asset(
                           'assets/icon/english_flag.png',
                           height: 24,
@@ -112,11 +112,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         SizedBox(
                             width: 5.0), // Add space between the flag and text
                         Text(
-                          (snapshot.data == 'portugues' ||
-                                  snapshot.data == 'english')
-                              ? snapshot.data[0].toUpperCase() +
-                                  snapshot.data.substring(1)
-                              : 'English',
+                          (snapshot.data == 'Português' ||
+                                  snapshot.data == 'English')
+                              ? snapshot.data : 'English',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
@@ -365,7 +363,7 @@ class _SettingsPageState extends State<SettingsPage> {
         icon: Icon(Icons.translate,
             color: Theme.of(context).secondaryHeaderColor, size: 30.0),
         title: localizations.language,
-        subtitle: "",
+        subtitle: localizations.selectLanguage,
         rightWidget: Padding(
           padding: EdgeInsets.only(right: 20.0),
           child: Row(
@@ -380,7 +378,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   } else {
                     Widget flagWidget;
                     switch (snapshot.data) {
-                      case 'portugues':
+                      case 'Português':
                         flagWidget = flagWidget = Image.asset(
                           'assets/icon/portuguese_flag.png',
                           height: 24,
@@ -388,7 +386,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           fit: BoxFit.cover,
                         );
                         break;
-                      case 'english':
+                      case 'English':
                         flagWidget = Image.asset(
                           'assets/icon/english_flag.png',
                           height: 24,
@@ -410,11 +408,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         SizedBox(
                             width: 5.0), // Add space between the flag and text
                         Text(
-                          (snapshot.data == 'portugues' ||
-                                  snapshot.data == 'english')
-                              ? snapshot.data[0].toUpperCase() +
-                                  snapshot.data.substring(1)
-                              : 'English',
+                          (snapshot.data == 'Português' ||
+                              snapshot.data == 'English')
+                              ? snapshot.data : 'English',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
