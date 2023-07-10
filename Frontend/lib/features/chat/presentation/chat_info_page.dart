@@ -522,7 +522,10 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                         padding:
                             EdgeInsets.only(top: 10), //VALOR A ALTERAR OU NAO),
                         child: SizedBox(
-                          height: kIsWeb ? MediaQuery.of(context).size.height - 435 : MediaQuery.of(context).size.height * 0.4, //VALOR A ALTERAR
+                          height: kIsWeb
+                              ? MediaQuery.of(context).size.height - 435
+                              : MediaQuery.of(context).size.height *
+                                  0.4, //VALOR A ALTERAR
                           child: ListView.builder(
                               itemCount: events.length,
                               itemBuilder: (context, index) {
@@ -564,6 +567,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                             child: ListTile(
                                               title: Row(
                                                 children: [
+                                                  getDateIcon(event, context),
+                                                  SizedBox(width: 10),
                                                   InkWell(
                                                     child: Text(
                                                       event.title,
@@ -1184,13 +1189,13 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                     _showErrorSnackbar);
 
                 Future.delayed(Duration(milliseconds: 100), () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  CupertinoPageRoute(
-                    builder: (context) => MainScreen(index: 6),
-                  ),
-                );
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => MainScreen(index: 6),
+                    ),
+                  );
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -1244,9 +1249,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
-                              height:
-                                  40), // Add extra space at top for close button
+                          SizedBox(height: 40),
+                          // Add extra space at top for close button
                           Text(
                             "Leave Group",
                             textAlign: TextAlign.left,
@@ -1263,13 +1267,13 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                   widget.username, _showErrorSnackbar);
 
                               Future.delayed(Duration(milliseconds: 100), () {
-                              Navigator.pop(context);
-                              Navigator.pushReplacement(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => MainScreen(index: 6),
-                                ),
-                              );
+                                Navigator.pop(context);
+                                Navigator.pushReplacement(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => MainScreen(index: 6),
+                                  ),
+                                );
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -1398,7 +1402,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                           startController.text,
                           endController.text,
                           widget.groupId,
-                          _selectedLocation, //add Location controller
+                          _selectedLocation,
+                          //add Location controller
                           _showErrorSnackbar);
                       Navigator.of(context).pop();
                     }
@@ -1455,131 +1460,133 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   ),
                   SingleChildScrollView(
                     child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                          height:
-                              40), // Add extra space at top for close button
-                      const Text(
-                        "Add an event",
-                        textAlign: TextAlign.left,
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LineComboBox(
-                            selectedValue: _selectedEventType,
-                            items: eventTypes
-                                .map((e) => _getEventTypeString(e))
-                                .toList(),
-                            icon: Icons.type_specimen,
-                            onChanged: (dynamic newValue) {
-                              setState(() {
-                                _selectedEventType = newValue;
-                              });
-                            },
-                          ),
-                          LineTextField(
-                            icon: Icons.title,
-                            lableText: 'Title *',
-                            controller: titleController,
-                            title: "",
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          LineTextField(
-                            icon: Icons.description,
-                            lableText: "Description",
-                            controller: descriptionController,
-                            title: "",
-                          ),
-                          LineComboBox(
-                            deleteIcon: Icons.clear,
-                            onPressed: () {
-                              setState(() {
-                                selectLocationText = "Select Location";
-                                _selectedLocation = null;
-                              });
-                            },
-                            selectedValue: selectLocationText,
-                            items: [
-                              selectLocationText,
-                              "From FCT place",
-                              "From maps"
-                            ],
-                            icon: Icons.place,
-                            onChanged: (newValue) async {
-                              if (newValue == "From FCT place" ||
-                                  newValue == "From maps") {
-                                LatLng? selectedLocation =
-                                    await showDialog<LatLng>(
-                                  context: context,
-                                  builder: (context) => EventLocationPopUp(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height:
+                                40), // Add extra space at top for close button
+                        const Text(
+                          "Add an event",
+                          textAlign: TextAlign.left,
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            LineComboBox(
+                              selectedValue: _selectedEventType,
+                              items: eventTypes
+                                  .map((e) => _getEventTypeString(e))
+                                  .toList(),
+                              icon: Icons.type_specimen,
+                              onChanged: (dynamic newValue) {
+                                setState(() {
+                                  _selectedEventType = newValue;
+                                });
+                              },
+                            ),
+                            LineTextField(
+                              icon: Icons.title,
+                              lableText: 'Title *',
+                              controller: titleController,
+                              title: "",
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            LineTextField(
+                              icon: Icons.description,
+                              lableText: "Description",
+                              controller: descriptionController,
+                              title: "",
+                            ),
+                            LineComboBox(
+                              deleteIcon: Icons.clear,
+                              onPressed: () {
+                                setState(() {
+                                  selectLocationText = "Select Location";
+                                  _selectedLocation = null;
+                                });
+                              },
+                              selectedValue: selectLocationText,
+                              items: [
+                                selectLocationText,
+                                "From FCT place",
+                                "From maps"
+                              ],
+                              icon: Icons.place,
+                              onChanged: (newValue) async {
+                                if (newValue == "From FCT place" ||
+                                    newValue == "From maps") {
+                                  LatLng? selectedLocation =
+                                      await showDialog<LatLng>(
                                     context: context,
-                                    isMapSelected: newValue == "From maps",
-                                    location: _selectedLocation,
-                                  ),
-                                );
-                                if (selectedLocation != null) {
-                                  setState(() {
-                                    selectLocationText = "1 Location Selected";
-                                    _selectedLocation = selectedLocation;
-                                  });
+                                    builder: (context) => EventLocationPopUp(
+                                      context: context,
+                                      isMapSelected: newValue == "From maps",
+                                      location: _selectedLocation,
+                                    ),
+                                  );
+                                  if (selectedLocation != null) {
+                                    setState(() {
+                                      selectLocationText =
+                                          "1 Location Selected";
+                                      _selectedLocation = selectedLocation;
+                                    });
+                                  }
                                 }
-                              }
-                            },
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          LineDateTimeField(
-                            icon: Icons.schedule,
-                            controller: startController,
-                            hintText: "Start Time *",
-                            firstDate:
-                                DateTime.now().subtract(Duration(days: 30)),
-                            lastDate: DateTime.now().add(Duration(days: 365)),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          LineDateTimeField(
-                            icon: Icons.schedule,
-                            controller: endController,
-                            hintText: "End Time *",
-                            firstDate:
-                                DateTime.now().subtract(Duration(days: 30)),
-                            lastDate: DateTime.now().add(Duration(days: 365)),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () async {
-                                  createEvent(
-                                      context,
-                                      _selectedEventType,
-                                      titleController.text,
-                                      descriptionController.text,
-                                      startController.text,
-                                      endController.text,
-                                      widget.groupId,
-                                      _selectedLocation,
-                                      _showErrorSnackbar);
-                                  Navigator.of(context).pop();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black87),
-                                child: const Text("CREATE"),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  ) ],
+                              },
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            LineDateTimeField(
+                              icon: Icons.schedule,
+                              controller: startController,
+                              hintText: "Start Time *",
+                              firstDate:
+                                  DateTime.now().subtract(Duration(days: 30)),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            LineDateTimeField(
+                              icon: Icons.schedule,
+                              controller: endController,
+                              hintText: "End Time *",
+                              firstDate:
+                                  DateTime.now().subtract(Duration(days: 30)),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    createEvent(
+                                        context,
+                                        _selectedEventType,
+                                        titleController.text,
+                                        descriptionController.text,
+                                        startController.text,
+                                        endController.text,
+                                        widget.groupId,
+                                        _selectedLocation,
+                                        _showErrorSnackbar);
+                                    Navigator.of(context).pop();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black87),
+                                  child: const Text("CREATE"),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                ],
               ),
             ),
           );
@@ -1668,8 +1675,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                        height: 40), // Add extra space at top for close button
+                    SizedBox(height: 40),
+                    // Add extra space at top for close button
                     const Text(
                       "Remove an event",
                       textAlign: TextAlign.left,
@@ -1830,6 +1837,50 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         ],
       ),
     );
+  }
+
+  Widget getDateIcon(Event event, BuildContext context) {
+    DateTime currentDate = DateTime.now();
+    DateTime startDate = event.startTime;
+    DateTime endDate = event.endTime;
+
+    int prev = currentDate.difference(startDate).inMilliseconds;
+    int after = endDate.difference(currentDate).inMilliseconds;
+
+    return prev > 0
+        ? after > 0
+            ? Tooltip(
+                message: 'Ongoing Event',
+                child: MouseRegion(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      Icons.hourglass_top,
+                      color: Colors.yellow,
+                    ),
+                  ),
+                ),
+              )
+            : Tooltip(
+                message: 'Past Event',
+                child: MouseRegion(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              )
+        : Tooltip(
+            message: 'Upcoming Event',
+            child: MouseRegion(
+              child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(Icons.more_time, color: Colors.blueGrey)),
+            ),
+          );
   }
 
   Future<void> inviteGroup(

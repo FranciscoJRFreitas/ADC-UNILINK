@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:unilink2023/application/loadLocations.dart';
@@ -11,9 +15,6 @@ import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/LocationPopUp.dart';
-import 'package:unilink2023/widgets/LocationPopUp.dart';
-
-import '../../../widgets/LocationPopUp.dart';
 
 class MyEventsPage extends StatefulWidget {
   final String username;
@@ -24,18 +25,23 @@ class MyEventsPage extends StatefulWidget {
   _MyEventsPageState createState() => _MyEventsPageState();
 }
 
-class _MyEventsPageState extends State<MyEventsPage> {
-  late List<Event> events = [];
+class _MyEventsPageState extends State<MyEventsPage>
+    with SingleTickerProviderStateMixin {
+  late List<Event> personalEvents = [];
+  late List<Event> personalFilteredEvents = [];
+  late List<Event> groupEvents = [];
   late DatabaseReference myEventsRef;
   List<EventType> eventTypes = EventType.values;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
   String _selectedEventType = 'Academic';
   LatLng? _selectedLocation = null;
   String selectLocationText = "Select Location";
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -46,14 +52,20 @@ class _MyEventsPageState extends State<MyEventsPage> {
         .child(widget.username);
     getEvents();
     getUserEvents();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  void dispose() {
+    super.dispose();
+    _tabController?.dispose();
   }
 
   void getEvents() {
     myEventsRef.onChildAdded.listen((event) {
       Event ev = Event.fromSnapshot(event.snapshot);
       setState(() {
-        events.add(ev);
-        events.sort((a, b) => a.startTime.compareTo(b.startTime));
+        personalEvents.add(ev);
+        personalEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       });
     });
 
@@ -61,8 +73,8 @@ class _MyEventsPageState extends State<MyEventsPage> {
       String eventId = event.snapshot.key as String;
 
       setState(() {
-        events.removeWhere((event) => event.id == eventId);
-        events.sort((a, b) => a.startTime.compareTo(b.startTime));
+        personalEvents.removeWhere((event) => event.id == eventId);
+        personalEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       });
     });
 
@@ -71,9 +83,9 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
       setState(() {
         Event ev = Event.fromSnapshot(event.snapshot);
-        events.removeWhere((element) => element.id == eventId);
-        events.add(ev);
-        events.sort((a, b) => a.startTime.compareTo(b.startTime));
+        personalEvents.removeWhere((element) => element.id == eventId);
+        personalEvents.add(ev);
+        personalEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       });
     });
   }
@@ -116,9 +128,9 @@ class _MyEventsPageState extends State<MyEventsPage> {
                 startTime: DateTime.parse(currEvent["startTime"]),
                 endTime: DateTime.parse(currEvent["endTime"]));
 
-            events.add(currentEvent);
+            groupEvents.add(currentEvent);
           });
-          events.sort((a, b) => a.startTime.compareTo(b.startTime));
+          groupEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
         }
       });
     }
@@ -128,47 +140,323 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return events.isEmpty
-        ? noEventWidget()
-        : Scaffold(
-            body: Container(
+    return kIsWeb ? _buildWebLayout(context) : _buildMobileLayout(context);
+  }
+
+  Widget _buildWebLayout(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width / 2 - 0.5,
+            padding: EdgeInsets.all(8),
+            child: Column(
+              children: [
+                _buildSectionHeader("Personal Events", context, false,
+                    MediaQuery.of(context).size.width / 2 - 0.5),
+                personalEvents.isEmpty
+                    ? Expanded(child: noEventWidget())
+                    : Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: TextField(
+                                  controller: searchController,
+                                  onChanged: (query) {
+                                    filterGroups(query);
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: 'Search',
+                                    labelStyle: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor),
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color: Theme.of(context)
+                                          .secondaryHeaderColor,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              _eventsWidget(context),
+                            ],
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+          Container(
+              width: MediaQuery.of(context).size.width / 2 - 0.5,
               padding: EdgeInsets.all(8),
-              child: Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _eventsWidget(context),
-                    ],
-                  ),
+              child: Column(
+                children: [
+                  _buildSectionHeader("Group Events", context, false,
+                      MediaQuery.of(context).size.width / 2 - 0.5),
+                  groupEvents.isEmpty
+                      ? Expanded(child: noEventWidget())
+                      : Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    controller: searchController,
+                                    onChanged: (query) {
+                                      filterGroups(query);
+                                    },
+                                    decoration: InputDecoration(
+                                      labelText: 'Search',
+                                      labelStyle: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .secondaryHeaderColor),
+                                      prefixIcon: Icon(
+                                        Icons.search,
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                _groupEventWidget(context),
+                              ],
+                            ),
+                          ),
+                        ),
+                ],
+              )),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _createEventPopUpDialog(context);
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+        elevation: 6,
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Container(
+            child: TabBar(
+              controller: _tabController,
+              dividerColor: Style.lightBlue,
+              indicatorColor: Style.lightBlue,
+              labelStyle: Theme.of(context)
+                  .textTheme
+                  .bodyMedium!
+                  .copyWith(color: Theme.of(context).secondaryHeaderColor),
+              labelColor: Theme.of(context).secondaryHeaderColor,
+              overlayColor: MaterialStateProperty.all(
+                Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withRed(Theme.of(context).scaffoldBackgroundColor.red - 20)
+                    .withBlue(
+                        Theme.of(context).scaffoldBackgroundColor.blue - 20)
+                    .withGreen(
+                        Theme.of(context).scaffoldBackgroundColor.green - 20),
+              ),
+              tabs: [
+                Tab(
+                  icon: Icon(Icons.event, color: Style.lightBlue),
                 ),
+                Tab(
+                  icon: Icon(Icons.event_note_outlined, color: Style.lightBlue),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: DefaultTabController(
+              length: 2,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return TabBarView(
+                    controller: _tabController,
+                    children: [
+                      SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              padding: EdgeInsets.all(8),
+                              child: Column(
+                                children: [
+                                  _buildSectionHeader(
+                                    "Personal Events",
+                                    context,
+                                    false,
+                                    MediaQuery.of(context).size.width,
+                                  ),
+                                  if (personalEvents.isEmpty)
+                                    Container(
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              2,
+                                      child: Center(child: noEventWidget()),
+                                    )
+                                  else
+                                    Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        controller: searchController,
+                                        onChanged: (query) {
+                                          filterGroups(query);
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: 'Search',
+                                          labelStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                                  color: Theme.of(context)
+                                                      .secondaryHeaderColor),
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  _eventsWidget(context),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              padding: EdgeInsets.all(8),
+                              child: Column(
+                                children: [
+                                  _buildSectionHeader(
+                                    "Group Events",
+                                    context,
+                                    false,
+                                    MediaQuery.of(context).size.width,
+                                  ),
+                                  if (groupEvents.isEmpty)
+                                    Container(
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              2,
+                                      child: Center(child: noEventWidget()),
+                                    )
+                                  else
+                                    Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        controller: searchController,
+                                        onChanged: (query) {
+                                          filterGroups(query);
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: 'Search',
+                                          labelStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                              color: Theme.of(context)
+                                                  .secondaryHeaderColor),
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(10.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    _groupEventWidget(context),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Your members code here
+                    ],
+                  );
+                },
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                _createEventPopUpDialog(context);
-              },
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 30,
-              ),
-              elevation: 6,
-              backgroundColor: Theme.of(context).primaryColor,
-            ),
-          );
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _createEventPopUpDialog(context);
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+        elevation: 6,
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
+  }
+
+  Widget _groupEventWidget(BuildContext context) {
+    return Column(
+      children: [
+        ...groupEvents.map((event) => _buildEventTile(event, context)).toList(),
+      ],
+    );
   }
 
   Widget _eventsWidget(BuildContext context) {
     return Column(
       children: [
-        _buildSectionHeader("Personal Events", context, false),
-        ...events.map((event) => _buildEventTile(event, context)).toList(),
+        ...personalEvents
+            .map((event) => _buildEventTile(event, context))
+            .toList(),
       ],
     );
   }
 
-  Widget _buildSectionHeader(
-      String groupId, BuildContext context, bool hasChatRedirect) {
+  Widget _buildSectionHeader(String groupId, BuildContext context,
+      bool hasChatRedirect, double? size) {
     return Column(
       children: [
         SizedBox(height: 20),
@@ -215,11 +503,12 @@ class _MyEventsPageState extends State<MyEventsPage> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
           ],
+          mainAxisAlignment: MainAxisAlignment.center,
         ),
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.center,
           child: Container(
-            width: 300,
+            width: size,
             child: Divider(
               thickness: 1,
               color: Style.lightBlue,
@@ -238,6 +527,8 @@ class _MyEventsPageState extends State<MyEventsPage> {
         child: ListTile(
           title: Row(
             children: [
+              getDateIcon(event, context),
+              SizedBox(width: 10),
               InkWell(
                 child: Text(
                   event.title,
@@ -295,6 +586,8 @@ class _MyEventsPageState extends State<MyEventsPage> {
                       size: 20, color: Style.lightBlue),
                 ),
               ],
+              // SizedBox(width: 30),
+              // getDateIcon(event, context),
             ],
           ),
           subtitle: Column(
@@ -442,6 +735,50 @@ class _MyEventsPageState extends State<MyEventsPage> {
     );
   }
 
+  Widget getDateIcon(Event event, BuildContext context) {
+    DateTime currentDate = DateTime.now();
+    DateTime startDate = event.startTime;
+    DateTime endDate = event.endTime;
+
+    int prev = currentDate.difference(startDate).inMilliseconds;
+    int after = endDate.difference(currentDate).inMilliseconds;
+
+    return prev > 0
+        ? after > 0
+            ? Tooltip(
+                message: 'Ongoing Event',
+                child: MouseRegion(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.hourglass_top,
+                      color: Colors.yellow,
+                    ),
+                  ),
+                ),
+              )
+            : Tooltip(
+                message: 'Past Event',
+                child: MouseRegion(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              )
+        : Tooltip(
+            message: 'Upcoming Event',
+            child: MouseRegion(
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.more_time, color: Colors.blueGrey)),
+            ),
+          );
+  }
+
   static String _getEventTypeString(EventType eventType) {
     switch (eventType) {
       case EventType.academic:
@@ -472,49 +809,35 @@ class _MyEventsPageState extends State<MyEventsPage> {
   }
 
   noEventWidget() {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    _createEventPopUpDialog(context);
-                  },
-                  child: Icon(
-                    Icons.hourglass_empty,
-                    color: Colors.grey[700],
-                    size: 75,
-                  ),
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  _createEventPopUpDialog(context);
+                },
+                child: Icon(
+                  Icons.hourglass_empty,
+                  color: Colors.grey[700],
+                  size: 75,
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Text(
-                "You don´t have any events scheduled!",
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don´t have any events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _createEventPopUpDialog(context);
-        },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-        elevation: 6,
-        backgroundColor: Theme.of(context).primaryColor,
       ),
     );
   }
@@ -786,5 +1109,80 @@ class _MyEventsPageState extends State<MyEventsPage> {
         .child(widget.username)
         .child(e.id!);
     await eventsRef.remove();
+  }
+
+  void filterGroups(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        personalFilteredEvents =
+            personalEvents; // Reset to all groups if query is empty
+      } else {
+        personalFilteredEvents = personalEvents.where((event) {
+          final title = event.title.toLowerCase();
+          final description = event.description.toLowerCase();
+          final searchLower = query.toLowerCase();
+
+          return query.isNotEmpty &&
+              (isMatch(title, searchLower) ||
+                  isMatch(description, searchLower) ||
+                  title.contains(searchLower) ||
+                  description.contains(searchLower));
+        }).toList();
+      }
+    });
+  }
+
+  /*Levenshtein algorithm*/
+  bool isMatch(String text, String query) {
+    if (text == query) {
+      return true; // Exact match
+    }
+
+    if ((text.length - query.length).abs() > 2) {
+      return false; // Length difference exceeds tolerance
+    }
+
+    for (int i = 0; i < text.length; i++) {
+      int differences = levenshteinDistance(text.substring(i), query);
+      if (differences <= 2) {
+        return true; // Match found within tolerance
+      }
+    }
+
+    return false; // No match found
+  }
+
+  int levenshteinDistance(String text, String query) {
+    if (text.isEmpty) {
+      return query.length;
+    }
+    if (query.isEmpty) {
+      return text.length;
+    }
+
+    List<int> previousRow = List<int>.filled(query.length + 1, 0);
+    List<int> currentRow = List<int>.filled(query.length + 1, 0);
+
+    for (int i = 0; i <= query.length; i++) {
+      previousRow[i] = i;
+    }
+
+    for (int i = 0; i < text.length; i++) {
+      currentRow[0] = i + 1;
+
+      for (int j = 0; j < query.length; j++) {
+        int insertions = previousRow[j + 1] + 1;
+        int deletions = currentRow[j] + 1;
+        int substitutions = previousRow[j] + (text[i] != query[j] ? 1 : 0);
+
+        currentRow[j + 1] = min(insertions, min(deletions, substitutions));
+      }
+
+      List<int> tempRow = previousRow;
+      previousRow = currentRow;
+      currentRow = tempRow;
+    }
+
+    return previousRow[query.length];
   }
 }
