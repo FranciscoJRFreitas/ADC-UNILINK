@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Account Recovery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 450px;
+            max-width: 500px;
+        }
+        h2 {
+            color: #2ABD5B;
+            font-size: 2.0em;
+            margin-bottom: 40px;
+        }
+        p {
+            line-height: 1.1;
+            font-family: "Times New Roman",serif;
+            font-size: 1.1em;
+        }
+        a {
+            color: #0080FF;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            var pwd = document.getElementById('password');
+            var confirmPassword = document.getElementById('confirmPassword');
+            var submitButton = document.getElementById('submit');
+            var resetForm = document.getElementById('resetForm');
+            var regex = new RegExp('^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$');
+            confirmPassword.onkeyup = function () {
+                submitButton.disabled = pwd.value != confirmPassword.value;
+            }
+            pwd.onkeyup = function () {
+                submitButton.disabled = pwd.value != confirmPassword.value;
+            }
+            resetForm.onsubmit = function () {
+                if (!regex.test(pwd.value)) {
+                    alert('Invalid password format.\n Password must have: At least one digit;\n At least one lowercase letter;\n At least one uppercase letter;\n At least one special character;\n No whitespaces;\n Be at least 8 characters long.');
+                    return false;
+                } else {
+                    alert('Password updated!');
+                    return true;
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<div class='card'>
+    <h2>Password Reset</h2>
+    <form id='resetForm' action='https://unilink23.oa.r.appspot.com/rest/recoverPwd/resetPassword/' method='post'>
+        <input type='hidden' name='token' value='{TOKEN}'>
+        <input type='password' id='password' name='password' placeholder='New password' required>
+        <input type='password' id='confirmPassword' name='confirmPassword' placeholder='Confirm new password' required>
+        <input type='submit' id='submit' value='Reset Password' disabled>
+    </form>
+</div>
+</body>
+</html>

@@ -1442,24 +1442,28 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       backgroundColor: Style.darkBlue,
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
-          return SingleChildScrollView(
-            child: Container(
+          return Container(
               height: MediaQuery.of(context).size.height * 0.85,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: 0,
-                    child: IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.pop(context); // closes the modal
-                      },
-                    ),
-                  ),
+              child:
                   SingleChildScrollView(
-                    child: Column(
+                    child: Stack(
+                      children: [
+                      Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          titleController.clear();
+                          descriptionController.clear();
+                          startController.clear();
+                          endController.clear();
+                        },
+                      ),
+                    ),
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
@@ -1574,6 +1578,10 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                         _selectedLocation,
                                         _showErrorSnackbar);
                                     Navigator.of(context).pop();
+                                    titleController.clear();
+                                    descriptionController.clear();
+                                    startController.clear();
+                                    endController.clear();
                                   },
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.black87),
@@ -1585,14 +1593,19 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                         ),
                       ],
                     ),
-                  )
-                ],
+
+                ]),
               ),
-            ),
           );
         }),
       ),
-    );
+    ).then((value) {
+      // This code will run when the modal is dismissed
+      titleController.clear();
+      descriptionController.clear();
+      startController.clear();
+      endController.clear();
+    });
   }
 
   _removeEventPopUpDialogWeb(BuildContext context, String eventId) {

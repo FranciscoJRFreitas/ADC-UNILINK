@@ -2,6 +2,7 @@
   "theme": "Theme",
   "changeBetweenThemes": "Change between dark and light themes.",
   "language":"Language",
+  "selectLanguage": "Choose the App's Language.",
   "startingPage": "Starting Page",
   "selectYourPage": "Select your preferable starting page.",
   "notifications": "Notifications",

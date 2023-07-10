@@ -18,6 +18,10 @@ import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import 'package:flutter/foundation.dart';
 import 'package:google_translator/google_translator.dart';
 
+import 'recover_password_page.dart';
+
+late int loginFailed;
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -30,10 +34,12 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailUsernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
+  
 
   @override
   void initState() {
     super.initState();
+    loginFailed = 0;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _emailFocusNode.requestFocus();
@@ -58,10 +64,10 @@ class _LoginPageState extends State<LoginPage> {
     passwordController.dispose();
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
+    loginFailed = 0;
     super.dispose();
   }
 
-  // Function to display the snackbar
   void _showErrorSnackbar(String message, bool Error, bool show) {
     if (!show) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -227,6 +233,44 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                             ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Forgot your password?  ",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) =>
+                                                RecoverPasswordPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'Reset Password',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(
+                                                color: Colors.blue.shade400,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                        ),
+                                      )),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
@@ -251,142 +295,157 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 Future<int> login(
-  BuildContext context,
-  String username,
-  String password,
-  void Function(String, bool, bool) showErrorSnackbar,
-) async {
-  final url = kBaseUrl + "rest/login/";
+    BuildContext context,
+    String username,
+    String password,
+    void Function(String, bool, bool) showErrorSnackbar,
+  ) async {
+    final url = kBaseUrl + "rest/login/";
 
-  http.Client client = http.Client();
-  http.Response response;
-  debugPrint(username + " " + password);
-  if (username == '' && password == '') {
-    showErrorSnackbar("Fill in your credentials.", true, true);
-    return -1;
-  } else {
-    try {
-      response = await client.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-        }),
-      );
-    } on http.ClientException {
-      showErrorSnackbar(
-          "Connection failed. Please try again later.", true, true);
+    http.Client client = http.Client();
+    http.Response response;
+    debugPrint(username + " " + password);
+    if (username == '' && password == '') {
+      showErrorSnackbar("Fill in your credentials.", true, true);
       return -1;
-    }
-
-    if (response.statusCode == 200) {
-      // Handle successful login
-      String authTokenHeader = response.headers['authorization'] ?? '';
-      List<String> token =
-          authTokenHeader.substring("Bearer ".length).trim().split("|");
-
-      // Compute the processing on a separate isolate
-      Map<String, dynamic> responseBody =
-          await compute(parseResponse, response.body);
-
-      User user = User(
-        displayName: responseBody['displayName'],
-        username: responseBody['username'],
-        email: responseBody['email'],
-        role: responseBody['role'],
-        educationLevel: responseBody['educationLevel'],
-        birthDate: responseBody['birthDate'],
-        profileVisibility: responseBody['profileVisibility'],
-        state: responseBody['state'],
-        mobilePhone: responseBody['mobilePhone'],
-        occupation: responseBody['occupation'],
-        creationTime: DateFormat('dd/MM/yyyy').format(
-            DateTime.fromMillisecondsSinceEpoch(
-                responseBody['creationTime']['seconds'] * 1000)),
-      );
+    } else {
       try {
-        FirebaseAuth.UserCredential userCredential =
-            await FirebaseAuth.FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: user.email,
-          password: password,
+        response = await client.post(
+          Uri.parse(url),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'username': username,
+            'password': password,
+          }),
         );
+      } on http.ClientException {
+        showErrorSnackbar(
+            "Connection failed. Please try again later.", true, true);
+        return -1;
+      }
 
-        final FirebaseAuth.User? _currentUser = userCredential.user;
+      if (response.statusCode == 200) {
+        // Handle successful login
+        String authTokenHeader = response.headers['authorization'] ?? '';
+        List<String> token =
+            authTokenHeader.substring("Bearer ".length).trim().split("|");
 
-        if (_currentUser != null) {
-          DatabaseReference userRef =
-              FirebaseDatabase.instance.ref().child('chat').child(username);
-          DatabaseReference userGroupsRef = userRef.child('Groups');
+        // Compute the processing on a separate isolate
+        Map<String, dynamic> responseBody =
+            await compute(parseResponse, response.body);
 
-          /* // Store the token in the database
+        User user = User(
+          displayName: responseBody['displayName'],
+          username: responseBody['username'],
+          email: responseBody['email'],
+          role: responseBody['role'],
+          educationLevel: responseBody['educationLevel'],
+          birthDate: responseBody['birthDate'],
+          profileVisibility: responseBody['profileVisibility'],
+          state: responseBody['state'],
+          mobilePhone: responseBody['mobilePhone'],
+          occupation: responseBody['occupation'],
+          creationTime: DateFormat('dd/MM/yyyy').format(
+              DateTime.fromMillisecondsSinceEpoch(
+                  responseBody['creationTime']['seconds'] * 1000)),
+        );
+        try {
+          FirebaseAuth.UserCredential userCredential = await FirebaseAuth
+              .FirebaseAuth.instance
+              .signInWithEmailAndPassword(
+            email: user.email,
+            password: password,
+          );
+
+          final FirebaseAuth.User? _currentUser = userCredential.user;
+
+          if (_currentUser != null) {
+            DatabaseReference userRef =
+                FirebaseDatabase.instance.ref().child('chat').child(username);
+            DatabaseReference userGroupsRef = userRef.child('Groups');
+
+            /* // Store the token in the database
         await userRef
             .child('token')
             .set(await FirebaseMessaging.instance.getToken()); */
 
-          // Retrieve user's group IDs from the database
-          DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+            // Retrieve user's group IDs from the database
+            DatabaseEvent userGroupsEvent = await userGroupsRef.once();
 
-          // Retrieve the DataSnapshot from the Event
-          DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+            // Retrieve the DataSnapshot from the Event
+            DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
 
-          // Subscribe to all the groups
-          if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
-            Map<dynamic, dynamic> userGroups =
-                userGroupsSnapshot.value as Map<dynamic, dynamic>;
-            for (String groupId in userGroups.keys) {
-              if (!kIsWeb)
-                await FirebaseMessaging.instance.subscribeToTopic(groupId);
+            // Subscribe to all the groups
+            if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+              Map<dynamic, dynamic> userGroups =
+                  userGroupsSnapshot.value as Map<dynamic, dynamic>;
+              for (String groupId in userGroups.keys) {
+                if (!kIsWeb)
+                  await FirebaseMessaging.instance.subscribeToTopic(groupId);
+              }
             }
           }
+        } catch (e) {
+          // Failed to authenticate user
+          print('Failed to authenticate user: $e');
         }
-      } catch (e) {
-        // Failed to authenticate user
-        print('Failed to authenticate user: $e');
+
+        cacheFactory.setUser(user, token[0], password);
+
+        cacheFactory.set('checkLogin', 'true');
+
+        await Provider.of<UserNotifier>(context, listen: false)
+            .updateUser(user);
+        await Provider.of<UserNotifier>(context, listen: false).downloadData();
+
+        String page = await cacheFactory.get("settings", "index");
+        int index = 0;
+
+        if (page == "News") index = 0;
+        if (page == "Profile") index = 3;
+        if (page == "Schedule") index = 9;
+        if (page == "Chat") index = 6;
+        if (page == "Contacts") index = 7;
+        if (page == "Campus") index = 10;
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen(index: index)),
+          (Route<dynamic> route) => false,
+        );
+
+        showErrorSnackbar("Login Successful!", false, true);
+      } else {
+        // Handle unexpected error
+        if (response.statusCode == 500) {
+          showErrorSnackbar(
+              'There was a mistake on our side. Please try later.', true, true);
+        } else if (response.statusCode == 403 || response.statusCode == 404) {
+          loginFailed++;
+          showErrorSnackbar(
+              'Invalid login credentials! Please try again.', true, true);
+        } else if (response.statusCode == 417) {
+          showErrorSnackbar(
+              "Email verification needed! Please verify your email inbox and activate your account.",
+              true,
+              true);
+        }
+        if (loginFailed > 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecoverPasswordPage(),
+            ),
+          );
+        }
       }
 
-      cacheFactory.setUser(user, token[0], password);
-
-      cacheFactory.set('checkLogin', 'true');
-
-      await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
-      await Provider.of<UserNotifier>(context, listen: false).downloadData();
-
-      String page = await cacheFactory.get("settings", "index");
-      int index = 0;
-
-      if (page == "News") index = 0;
-      if (page == "Profile") index = 3;
-      if (page == "Schedule") index = 9;
-      if (page == "Chat") index = 6;
-      if (page == "Contacts") index = 7;
-      if (page == "Campus") index = 10;
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen(index: index)),
-        (Route<dynamic> route) => false,
-      );
-
-      showErrorSnackbar("Login Successful!", false, true);
-    } else {
-      // Handle unexpected error
-      if (response.statusCode == 500) {
-        showErrorSnackbar(
-            'There was a mistake on our side.Please try later.', true, true);
-      } else if (response.statusCode == 403) {
-        showErrorSnackbar('Wrong Password!', true, true);
-      } else if (response.statusCode == 404) {
-        showErrorSnackbar('Incorrect Info!', true, true);
-      }
+      return response.statusCode;
     }
-
-    return response.statusCode;
   }
-}
 
-Map<String, dynamic> parseResponse(String responseBody) {
-  return jsonDecode(responseBody);
-}
+  Map<String, dynamic> parseResponse(String responseBody) {
+    return jsonDecode(responseBody);
+  }

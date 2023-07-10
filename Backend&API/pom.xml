@@ -162,6 +162,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*.json</include>
+                    <include>**/*.html</include>
                 </includes>
             </resource>
         </resources>
