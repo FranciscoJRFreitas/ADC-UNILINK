@@ -221,9 +221,9 @@ class _EditProfilePage extends State<EditProfilePage> {
               ),
             );
           } else {
-            return const Icon(
+            return Icon(
               Icons.account_circle,
-              color: Colors.green,
+              color: Theme.of(context).primaryColor,
               size: 125,
             );
           }
@@ -240,6 +240,12 @@ class _EditProfilePage extends State<EditProfilePage> {
           Container(
             width: 125,
             height: 125,
+            decoration: BoxDecoration(
+                // Add this
+                color: Colors.white,
+                borderRadius:
+                    BorderRadius.circular(62.5) // , your desired color here
+                ),
             child: picture(context),
           ),
           Positioned(

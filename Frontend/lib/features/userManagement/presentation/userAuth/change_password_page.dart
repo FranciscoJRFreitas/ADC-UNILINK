@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:unilink2023/features/userManagement/domain/User.dart';
 import '../../../../data/cache_factory_provider.dart';
 import '../../../../domain/Token.dart';
+import '../../../../domain/UserNotifier.dart';
 import '../../../../widgets/widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -163,7 +166,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       );
 
       if (response.statusCode == 200) {
-        //Navigator.pop(context);
+        User user = await Provider.of<UserNotifier>(context, listen: false).currentUser!;
+        cacheFactory.setUser(user, tokenID, newPassword);
+        await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Password changed successfully."),

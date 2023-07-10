@@ -23,296 +23,367 @@ class _BackOfficePageState extends State<BackOfficePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('User Management'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              TextEditingController nameController =
-                                  TextEditingController();
-                              TextEditingController usernameController =
-                                  TextEditingController();
-                              TextEditingController emailController =
-                                  TextEditingController();
-                              TextEditingController passwordController =
-                                  TextEditingController();
-                              String selectedRole = 'SU';
-
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Create User'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TextField(
-                                          controller: nameController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Name',
-                                          ),
-                                        ),
-                                        TextField(
-                                          controller: usernameController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Username',
-                                          ),
-                                        ),
-                                        TextField(
-                                          controller: emailController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Email',
-                                          ),
-                                        ),
-                                        TextField(
-                                          controller: passwordController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Password',
-                                          ),
-                                          obscureText: true,
-                                        ),
-                                        DropdownButton<String>(
-                                          value: selectedRole,
-                                          onChanged: (String? newValue) {
-                                            if (newValue != null) {
-                                              setState(() {
-                                                selectedRole = newValue;
-                                              });
-                                            }
-                                          },
-                                          items: <String>[
-                                            'SU',
-                                            'DIRECTOR',
-                                            'PROF',
-                                            'STUDENT'
-                                          ].map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                              return DropdownMenuItem<String>(
-                                                value: value,
-                                                child: Text(value),
-                                              );
-                                            },
-                                          ).toList(),
-                                        ),
-                                        // Add other fields here
-                                      ],
-                                    ),
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          String name = nameController.text;
-                                          String username =
-                                              usernameController.text;
-                                          String email = emailController.text;
-                                          String password =
-                                              passwordController.text;
-                                          String role = selectedRole;
-                                          // Call the registerUser function with the entered data
-                                          registerUser(
-                                              name,
-                                              username,
-                                              email,
-                                              password,
-                                              role,
-                                              _showErrorSnackbar);
-
-                                          // Handle create user logic with the entered data
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Create'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Text('Create User'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              TextEditingController usernameController =
-                                  TextEditingController();
-                              TextEditingController passwordController =
-                                  TextEditingController();
-
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Delete User'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TextField(
-                                          controller: usernameController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Target Username',
-                                          ),
-                                        ),
-                                        TextField(
-                                          controller: passwordController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Your Password',
-                                          ),
-                                          obscureText: true,
-                                        ),
-                                      ],
-                                    ),
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          String targetusername =
-                                              usernameController.text;
-                                          String password =
-                                              passwordController.text;
-
-                                          removeAccount(context, password,
-                                              targetusername);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Delete'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Text('Delete User'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-              child: Text('User Management'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GroupPage(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                width: 300, // adjust these values as needed
+                height: 100,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).primaryColor, // button's fill color
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    padding: EdgeInsets.all(20),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                primary:
-                    _selectedButton == 'Group Management' ? Colors.green : null,
-              ),
-              child: Text('Group Management'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    String groupId =
-                        ''; // Variable to store the entered group ID
-
-                    return AlertDialog(
-                      title: Text('Enter Group ID'),
-                      content: TextField(
-                        onChanged: (value) {
-                          groupId = value;
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Group ID',
-                        ),
-                      ),
-                      actions: <Widget>[
-                        ElevatedButton(
-                          child: Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ElevatedButton(
-                          child: Text('OK'),
-                          onPressed: () async {
-                            Navigator.of(context).pop();
-
-                            final database = FirebaseDatabase.instance.ref();
-                            DatabaseEvent snapshot = await database
-                                .child('events')
-                                .child(groupId)
-                                .once();
-
-                            if (snapshot.snapshot.value != null) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      GroupEventsPage(groupId: groupId),
+                  icon: Icon(Icons.manage_accounts),
+                  label: Text('User Management'),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('User Management'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context)
+                                      .primaryColor, // button's fill color
+                                  foregroundColor: Colors.white,
+                                  elevation: 2,
                                 ),
-                              );
-                            } else {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('No Events Found'),
-                                    content: Text(
-                                        'There are no events available for the entered group ID.'),
-                                    actions: <Widget>[
-                                      ElevatedButton(
-                                        child: Text('OK'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
+                                icon: Icon(Icons.person_add),
+                                label: Text('Create User'),
+                                onPressed: () {
+                                  TextEditingController nameController =
+                                      TextEditingController();
+                                  TextEditingController usernameController =
+                                      TextEditingController();
+                                  TextEditingController emailController =
+                                      TextEditingController();
+                                  TextEditingController passwordController =
+                                      TextEditingController();
+                                  String selectedRole = 'SU';
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Create User'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            TextField(
+                                              controller: nameController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Name',
+                                              ),
+                                            ),
+                                            TextField(
+                                              controller: usernameController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Username',
+                                              ),
+                                            ),
+                                            TextField(
+                                              controller: emailController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Email',
+                                              ),
+                                            ),
+                                            TextField(
+                                              controller: passwordController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Password',
+                                              ),
+                                              obscureText: true,
+                                            ),
+                                            DropdownButton<String>(
+                                              value: selectedRole,
+                                              onChanged: (String? newValue) {
+                                                if (newValue != null) {
+                                                  setState(() {
+                                                    selectedRole = newValue;
+                                                  });
+                                                }
+                                              },
+                                              items: <String>[
+                                                'SU',
+                                                'BACKOFFICE',
+                                                'DIRECTOR',
+                                                'PROF',
+                                                'STUDENT'
+                                              ].map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                                  return DropdownMenuItem<
+                                                      String>(
+                                                    value: value,
+                                                    child: Text(value),
+                                                  );
+                                                },
+                                              ).toList(),
+                                            ),
+                                            // Add other fields here
+                                          ],
+                                        ),
+                                        actions: [
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Cancel'),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              String name = nameController.text;
+                                              String username =
+                                                  usernameController.text;
+                                              String email =
+                                                  emailController.text;
+                                              String password =
+                                                  passwordController.text;
+                                              String role = selectedRole;
+                                              // Call the registerUser function with the entered data
+                                              registerUser(
+                                                  name,
+                                                  username,
+                                                  email,
+                                                  password,
+                                                  role,
+                                                  _showErrorSnackbar);
+
+                                              // Handle create user logic with the entered data
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Create'),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            }
-                          },
-                        ),
-                      ],
+                              ),
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context)
+                                      .primaryColor, // button's fill color
+                                  foregroundColor: Colors.white,
+
+                                  elevation: 2,
+                                ),
+                                icon: Icon(Icons.person_remove),
+                                label: Text('Delete User'),
+                                onPressed: () {
+                                  TextEditingController usernameController =
+                                      TextEditingController();
+                                  TextEditingController passwordController =
+                                      TextEditingController();
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Delete User'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            TextField(
+                                              controller: usernameController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Target Username',
+                                              ),
+                                            ),
+                                            TextField(
+                                              controller: passwordController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Your Password',
+                                              ),
+                                              obscureText: true,
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Cancel'),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              String targetusername =
+                                                  usernameController.text;
+                                              String password =
+                                                  passwordController.text;
+
+                                              removeAccount(context, password,
+                                                  targetusername);
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Delete'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
-                );
-              },
-              child: Text('Event Management'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => AnomaliesPage()),
-                  );
-                });
-              },
-              child: Text('Anomalies'),
-            ),
-          ],
-        ),
+                ),
+              ),
+              Container(
+                width: 300, // adjust these values as needed
+                height: 100,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).primaryColor, // button's fill color
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.all(20),
+                    elevation: 2,
+                  ),
+                  icon: Icon(Icons.groups),
+                  label: Text('Group Management'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GroupPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                width: 300, // adjust these values as needed
+                height: 100,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).primaryColor, // button's fill color
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.all(20),
+                    elevation: 2,
+                  ),
+                  icon: Icon(Icons.edit_calendar),
+                  label: Text('Event Management'),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        String groupId =
+                            ''; // Variable to store the entered group ID
+
+                        return AlertDialog(
+                          title: Text('Enter Group ID'),
+                          content: TextField(
+                            onChanged: (value) {
+                              groupId = value;
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Group ID',
+                            ),
+                          ),
+                          actions: <Widget>[
+                            ElevatedButton(
+                              child: Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            ElevatedButton(
+                              child: Text('OK'),
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+
+                                final database =
+                                    FirebaseDatabase.instance.ref();
+                                DatabaseEvent snapshot = await database
+                                    .child('events')
+                                    .child(groupId)
+                                    .once();
+
+                                if (snapshot.snapshot.value != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          GroupEventsPage(groupId: groupId),
+                                    ),
+                                  );
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('No Events Found'),
+                                        content: Text(
+                                            'There are no events available for the entered group ID.'),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                            child: Text('OK'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              Container(
+                width: 300, // adjust these values as needed
+                height: 100,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).primaryColor, // button's fill color
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.all(20),
+                    elevation: 2,
+                  ),
+                  icon: Icon(Icons.report),
+                  label: Text('Anomalies'),
+                  onPressed: () {
+                    setState(() {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => AnomaliesPage()),
+                      );
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,7 @@
   "theme": "Tema",
   "changeBetweenThemes": "Alterne entre temas claros e escuros.",
   "language":"Idioma",
+  "selectLanguage": "Selecione o idioma da aplicação.",
   "startingPage": "Página inicial",
   "selectYourPage": "Selecione a sua página preferida.",
   "notifications": "Notificações",
