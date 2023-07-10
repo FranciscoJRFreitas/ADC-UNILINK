@@ -100,6 +100,11 @@ public class ListUsersResource {
                                                 PropertyFilter.eq("user_role", UserRole.PROF.toString())))
                         .build();
                 break;
+            case BACKOFFICE:
+                query = Query.newEntityQueryBuilder()
+                        .setKind("User")
+                        .build();
+                break;
             case SU:
                 query = Query.newEntityQueryBuilder()
                         .setKind("User")

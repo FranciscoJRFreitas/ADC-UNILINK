@@ -74,9 +74,25 @@ class _GroupPageState extends State<GroupPage> {
 
     if (result != null) {
       File file = File(result.files.single.path!);
-      // use this file
+
+      final url = kBaseUrl + "rest/chat/create-multiple";
+      final tokenID = await cacheFactory.get('users', 'token');
+      final storedUsername = await cacheFactory.get('users', 'username');
+      Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${json.encode(token.toJson())}'
+        },
+        body: file,
+      );
+
+      if (response.statusCode != 200) print("REQUEST ERROR");
     } else {
       // User canceled the picker
+      print("picker canceled");
     }
   }
 
