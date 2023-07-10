@@ -72,6 +72,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   ];
   late List<double> scales = List.filled(_widgetOptions().length, 1);
   late User _currentUser;
+  late bool isFirst = true;
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
@@ -250,7 +251,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
-
+    if (isFirst) {
+      isFirst = false;
+      _selectedIndex = _currentUser.role != 'BACKOFFICE' ? 0 : 12;
+    }
     Color roleColor = _currentUser.getRoleColor(_currentUser.role);
 
     return Container(
@@ -360,16 +364,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              ListTile(
-                leading: Icon(Icons.person),
-                title: Text('Profile'),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 3;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
+              if (_currentUser.role != 'BACKOFFICE')
+                ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Profile'),
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 3;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
               _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
                   ? ExpansionTile(
                       leading: Icon(
@@ -458,30 +463,32 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       },
                     )
                   ]),
-              ListTile(
-                leading: Icon(Icons.newspaper),
-                title: Text('News'),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 0;
-                    _bottomNavigationIndex = 0;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.chat),
-                title:
-                    Text('Chat', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedGroup = "";
-                    _selectedIndex = 6;
-                    _bottomNavigationIndex = 3;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
+              if (_currentUser.role != 'BACKOFFICE')
+                ListTile(
+                  leading: Icon(Icons.newspaper),
+                  title: Text('News'),
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 0;
+                      _bottomNavigationIndex = 0;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              if (_currentUser.role != 'BACKOFFICE')
+                ListTile(
+                  leading: Icon(Icons.chat),
+                  title: Text('Chat',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  onTap: () {
+                    setState(() {
+                      _selectedGroup = "";
+                      _selectedIndex = 6;
+                      _bottomNavigationIndex = 3;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
               ListTile(
                 leading: Icon(Icons.map),
                 title: Text('Campus',
@@ -495,17 +502,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.dangerous),
-                title: Text('Anomaly',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = 11;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
+              if (_currentUser.role != 'BACKOFFICE')
+                ListTile(
+                  leading: Icon(Icons.dangerous),
+                  title: Text('Anomaly',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 11;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
               if (_currentUser.role == "BACKOFFICE" ||
                   _currentUser.role == "SU")
                 ListTile(
