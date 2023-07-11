@@ -40,10 +40,12 @@ class _DayCalendarPageState extends State<DayCalendarPage>
 
   @override
   void initState() {
+
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     loadSchedule();
     getUserEvents();
+
   }
 
   @override
@@ -171,7 +173,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
       setState(() {
         Map<dynamic, dynamic> currEvent =
             event.snapshot.value as Map<dynamic, dynamic>;
-        print("SNAPSHOT: " + event.snapshot.value.toString());
+
         Event currentEvent = Event(
           type: _parseEventType(currEvent["type"]),
           title: currEvent["title"],
@@ -219,6 +221,9 @@ class _DayCalendarPageState extends State<DayCalendarPage>
           }
         }
       });
+    });
+    setState(() {
+
     });
   }
 
@@ -368,6 +373,8 @@ class _DayCalendarPageState extends State<DayCalendarPage>
                                     false,
                                     MediaQuery.of(context).size.width,
                                   ),
+                                  if(schedule.isEmpty)
+                                    noEventWidget(false),
                                   ..._scheduleWidget(context),
                                 ],
                               ),
@@ -488,13 +495,14 @@ class _DayCalendarPageState extends State<DayCalendarPage>
 
   Widget _personalEventsWidget(BuildContext context) {
     List<Event> personalEvents = [];
+
     events[widget.date]?.forEach((event) {
       if (event.groupId == null) {
         personalEvents.add(event);
       }
     });
 
-    return ListView.builder(
+    return personalEvents.isEmpty ? noEventWidget(false) : ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemCount: personalEvents.length,
@@ -515,7 +523,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
       }
     });
 
-    return ListView.builder(
+    return groupEvents.isEmpty ? noEventWidget(false) : ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemCount: groupEvents.length,
@@ -894,6 +902,42 @@ class _DayCalendarPageState extends State<DayCalendarPage>
           ),
         ),
       ],
+    );
+  }
+  noEventWidget(bool isGroupEvents) {
+    return Center(
+      child: Container(
+        height:
+        MediaQuery.of(context).size.height /
+            2,
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+
+                },
+                child: Icon(
+                  Icons.hourglass_empty,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don't have any events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
     );
   }
 }

@@ -255,7 +255,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
             txn.commit();
             String userEmail = user.getString("user_email");
 
-            sendInviteEmail(userEmail, Invtoken.tokenID);
+            sendInviteEmail(userEmail, Invtoken.tokenID, groupId);
 
             return Response.ok().build();
         } finally {
@@ -386,7 +386,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
 
 
 
-    private void sendInviteEmail(String email, String Token) {
+    private void sendInviteEmail(String email, String Token, String groupId) {
         String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";
         String subject = "You received an invite";
@@ -443,7 +443,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
                 "        If the button above does not work, you can copy and paste the following link into your browser:<br>" +
                 "        <a target='_blank' href='" + invitationLink + "'>" + invitationLink + "</a><br><br>" +
                 "        Best regards,<br>" +
-                "        Sender" +
+                ""       + groupId +
                 "    </p>" +
                 "</div>" +
                 "</body>" +
