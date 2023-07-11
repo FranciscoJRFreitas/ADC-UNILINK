@@ -20,17 +20,17 @@ import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
 
-class SchedulePage extends StatefulWidget {
+class CalendarPage extends StatefulWidget {
   final String username;
   final DateTime date;
 
-  SchedulePage({required this.username, required this.date});
+  CalendarPage({required this.username, required this.date});
 
   @override
-  _SchedulePageState createState() => _SchedulePageState(date);
+  _CalendarPageState createState() => _CalendarPageState(date);
 }
 
-class _SchedulePageState extends State<SchedulePage> {
+class _CalendarPageState extends State<CalendarPage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
@@ -41,7 +41,7 @@ class _SchedulePageState extends State<SchedulePage> {
   DateFormat customFormat = DateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'");
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-  _SchedulePageState(date) {
+  _CalendarPageState(date) {
     selectedDay = DateTime(date.year, date.month, date.day);
     focusedDay = date;
   }
@@ -147,12 +147,11 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   void uploadSchedule() async {
-
-    Reference storageReference = FirebaseStorage.instance.ref().child(
-        'Schedules/' + await cacheFactory.get('users', 'username'));
+    Reference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('Schedules/' + await cacheFactory.get('users', 'username'));
 
     await storageReference.putData(file.bytes!);
-
   }
 
   void _getPersonalEvents() async {
@@ -240,8 +239,9 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Future<void> loadSchedule() async {
-    Reference storageReference = FirebaseStorage.instance.ref().child(
-        'Schedules/' + await cacheFactory.get('users', 'username'));
+    Reference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('Schedules/' + await cacheFactory.get('users', 'username'));
 
     Uint8List? scheduleFile = await storageReference.getData();
 
@@ -266,7 +266,6 @@ class _SchedulePageState extends State<SchedulePage> {
                   buttonAddCalendar(context),
                   ..._scheduleWidget(context),
                   _eventsWidget(context),
-
                 ],
               ),
             )
@@ -280,7 +279,6 @@ class _SchedulePageState extends State<SchedulePage> {
                       children: [
                         ..._scheduleWidget(context),
                         _eventsWidget(context),
-
                       ],
                     ),
                   ),
@@ -288,8 +286,9 @@ class _SchedulePageState extends State<SchedulePage> {
               ],
             ),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Create a Personal Event",
         onPressed: () {
-          if(kIsWeb)
+          if (kIsWeb)
             _createEventPopUpDialogWeb(context);
           else
             _createEventPopUpDialogMobile(context);
@@ -493,15 +492,14 @@ class _SchedulePageState extends State<SchedulePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                MainScreen(
-                                    index:
-                                    10,
-                                    location:
-                                    event.location)));
+                            builder: (context) => MainScreen(
+                                index: 10, location: event.location)));
                   },
-                  child:
-                      Icon(Icons.directions, size: 20, color: Style.lightBlue),
+                  child: Tooltip(
+                    message: "View in Maps",
+                    child: Icon(Icons.directions,
+                        size: 20, color: Style.lightBlue),
+                  ),
                 ),
               ]
             ],
@@ -683,9 +681,12 @@ class _SchedulePageState extends State<SchedulePage> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.chat,
-                            color: Theme.of(context).secondaryHeaderColor,
+                          child: Tooltip(
+                            message: "View Group Chat",
+                            child: Icon(
+                              Icons.chat,
+                              color: Theme.of(context).secondaryHeaderColor,
+                            ),
                           ),
                         ),
                       ),
@@ -860,160 +861,160 @@ class _SchedulePageState extends State<SchedulePage> {
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
           return Container(
-              height: MediaQuery.of(context).size.height * 0.85,
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: SingleChildScrollView(
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: 0,
-                    child: IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        print("CLOSING");
-                        Navigator.pop(context);
-                        titleController.clear();
-                        descriptionController.clear();
-                        startController.clear();
-                        endController.clear();
-                      },
-                    ),
+            height: MediaQuery.of(context).size.height * 0.85,
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SingleChildScrollView(
+              child: Stack(children: [
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      print("CLOSING");
+                      Navigator.pop(context);
+                      titleController.clear();
+                      descriptionController.clear();
+                      startController.clear();
+                      endController.clear();
+                    },
                   ),
-                   Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                        height: 40), // Add extra space at top for close button
+                    const Text(
+                      "Add an event",
+                      textAlign: TextAlign.left,
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(
-                            height:
-                            40), // Add extra space at top for close button
-                        const Text(
-                          "Add an event",
-                          textAlign: TextAlign.left,
+                        LineComboBox(
+                          selectedValue: _selectedEventType,
+                          items: eventTypes
+                              .map((e) => _getEventTypeString(e))
+                              .toList(),
+                          icon: Icons.type_specimen,
+                          onChanged: (dynamic newValue) {
+                            setState(() {
+                              _selectedEventType = newValue;
+                            });
+                          },
                         ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            LineComboBox(
-                              selectedValue: _selectedEventType,
-                              items: eventTypes
-                                  .map((e) => _getEventTypeString(e))
-                                  .toList(),
-                              icon: Icons.type_specimen,
-                              onChanged: (dynamic newValue) {
-                                setState(() {
-                                  _selectedEventType = newValue;
-                                });
-                              },
-                            ),
-                            LineTextField(
-                              icon: Icons.title,
-                              lableText: 'Title *',
-                              controller: titleController,
-                              title: "",
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            LineTextField(
-                              icon: Icons.description,
-                              lableText: "Description",
-                              controller: descriptionController,
-                              title: "",
-                            ),
-                            LineComboBox(
-                              deleteIcon: Icons.clear,
-                              onPressed: () {
-                                setState(() {
-                                  selectLocationText = "Select Location";
-                                  _selectedLocation = null;
-                                });
-                              },
-                              selectedValue: selectLocationText,
-                              items: [
-                                selectLocationText,
-                                "From FCT place",
-                                "From maps"
-                              ],
-                              icon: Icons.place,
-                              onChanged: (newValue) async {
-                                if (newValue == "From FCT place" ||
-                                    newValue == "From maps") {
-                                  LatLng? selectedLocation =
+                        LineTextField(
+                          icon: Icons.title,
+                          lableText: 'Title *',
+                          controller: titleController,
+                          title: "",
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        LineTextField(
+                          icon: Icons.description,
+                          lableText: "Description",
+                          controller: descriptionController,
+                          title: "",
+                        ),
+                        LineComboBox(
+                          deleteIcon: Icons.clear,
+                          onPressed: () {
+                            setState(() {
+                              selectLocationText = "Select Location";
+                              _selectedLocation = null;
+                            });
+                          },
+                          selectedValue: selectLocationText,
+                          items: [
+                            selectLocationText,
+                            "From FCT place",
+                            "From maps"
+                          ],
+                          icon: Icons.place,
+                          onChanged: (newValue) async {
+                            if (newValue == "From FCT place" ||
+                                newValue == "From maps") {
+                              LatLng? selectedLocation =
                                   await showDialog<LatLng>(
-                                    context: context,
-                                    builder: (context) => EventLocationPopUp(
-                                      context: context,
-                                      isMapSelected: newValue == "From maps",
-                                      location: _selectedLocation,
-                                    ),
-                                  );
-                                  if (selectedLocation != null) {
-                                    setState(() {
-                                      selectLocationText =
-                                      "1 Location Selected";
-                                      _selectedLocation = selectedLocation;
-                                    });
-                                  }
-                                }
-                              },
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: startController,
-                              hintText: "Start Time *",
-                              firstDate:
-                              DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            LineDateTimeField(
-                              icon: Icons.schedule,
-                              controller: endController,
-                              hintText: "End Time *",
-                              firstDate:
-                              DateTime.now().subtract(Duration(days: 30)),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
-                                    bool isNull = _selectedLocation == null;
-                                    _createPersonalEvent(Event(
-                                        creator: widget.username,
-                                        type: _parseEventType(_selectedEventType),
-                                        title: titleController.text,
-                                        description: descriptionController.text,
-                                        startTime: dateFormat.parse(startController.text),
-                                        endTime: dateFormat.parse(endController.text),
-                                        location: !isNull
-                                            ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
-                                            : '0'));
-                                    Navigator.of(context).pop();
-                                    titleController.clear();
-                                    descriptionController.clear();
-                                    startController.clear();
-                                    endController.clear();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.black87),
-                                  child: const Text("CREATE"),
+                                context: context,
+                                builder: (context) => EventLocationPopUp(
+                                  context: context,
+                                  isMapSelected: newValue == "From maps",
+                                  location: _selectedLocation,
                                 ),
-                              ],
+                              );
+                              if (selectedLocation != null) {
+                                setState(() {
+                                  selectLocationText = "1 Location Selected";
+                                  _selectedLocation = selectedLocation;
+                                });
+                              }
+                            }
+                          },
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        LineDateTimeField(
+                          icon: Icons.schedule,
+                          controller: startController,
+                          hintText: "Start Time *",
+                          firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        LineDateTimeField(
+                          icon: Icons.schedule,
+                          controller: endController,
+                          hintText: "End Time *",
+                          firstDate:
+                              DateTime.now().subtract(Duration(days: 30)),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                DateFormat dateFormat =
+                                    DateFormat('yyyy-MM-dd HH:mm');
+                                bool isNull = _selectedLocation == null;
+                                _createPersonalEvent(Event(
+                                    creator: widget.username,
+                                    type: _parseEventType(_selectedEventType),
+                                    title: titleController.text,
+                                    description: descriptionController.text,
+                                    startTime:
+                                        dateFormat.parse(startController.text),
+                                    endTime:
+                                        dateFormat.parse(endController.text),
+                                    location: !isNull
+                                        ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
+                                        : '0'));
+                                Navigator.of(context).pop();
+                                titleController.clear();
+                                descriptionController.clear();
+                                startController.clear();
+                                endController.clear();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black87),
+                              child: const Text("CREATE"),
                             ),
                           ],
                         ),
                       ],
                     ),
-                ]),
-              ),
+                  ],
+                ),
+              ]),
+            ),
           );
         }),
       ),

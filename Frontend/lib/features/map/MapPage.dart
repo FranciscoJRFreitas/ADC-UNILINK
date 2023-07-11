@@ -75,7 +75,9 @@ class _MyMapState extends State<MyMap> {
   @override
   void initState() {
     super.initState();
-    cameraposition = center;
+    cameraposition = myMarkerLocation.isNotEmpty
+        ? parseCoordinates(myMarkerLocation)
+        : center;
     WidgetsBinding.instance.addPostFrameCallback((_) => initializeAsync());
     rootBundle.loadString('assets/json/map_style.json').then((string) {
       _mapStyle = string;
@@ -101,6 +103,20 @@ class _MyMapState extends State<MyMap> {
         _mapStyle = string;
       });
     });
+  }
+
+  LatLng parseCoordinates(String coordinates) {
+    // Parse the coordinates string and return a LatLng object
+    // This is just a placeholder, replace it with your actual logic
+    double latitude = 0.0;
+    double longitude = 0.0;
+    // Split the coordinates string and convert to double values
+    List<String> coords = coordinates.split(",");
+    if (coords.length == 2) {
+      latitude = double.tryParse(coords[0]) ?? 0.0;
+      longitude = double.tryParse(coords[1]) ?? 0.0;
+    }
+    return LatLng(latitude, longitude);
   }
 
   void addEventMarker() async {

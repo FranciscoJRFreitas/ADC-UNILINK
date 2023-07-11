@@ -894,6 +894,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               isSystemMessage: true,
               groupId: widget.groupId,
               id: message.id,
+              isEdited : false,
             ));
           }
 
@@ -908,6 +909,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   isAdmin: isAdmin,
                   fileExtension: message.extension!,
                   message: message.text,
+                  isEdited: message.isEdited,
                 )
               : MessageTile(
                   message: message.text,
@@ -919,6 +921,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   groupId: widget.groupId,
                   id: message.id,
                   isAdmin: isAdmin,
+                  isEdited: message.isEdited,
                 ));
 
           return Column(
@@ -1159,6 +1162,7 @@ class DisplayPictureScreen extends StatelessWidget {
     return Scaffold(
       body: Image.file(File(imagePath)),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Send a Message",
         onPressed: () {
           sendPicture(imagePath);
         },
@@ -1230,6 +1234,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Send a photo",
         // Provide an onPressed callback.
         onPressed: () async {
           // Take the Picture in a try / catch block. If anything goes wrong,
