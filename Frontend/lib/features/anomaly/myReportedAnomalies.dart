@@ -44,21 +44,21 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-            children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 16.0), // Adjust the padding value as needed
-                      child: Text(
-                        'You have reported ${anomaliesList.length} ${anomaliesList.length == 1 ? 'anomaly' : 'anomalies'}!',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                  ),
-                ],
+        body: Column(children: [
+      Row(
+        children: [
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left: 16.0), // Adjust the padding value as needed
+              child: Text(
+                'You have reported ${anomaliesList.length} ${anomaliesList.length == 1 ? 'anomaly' : 'anomalies'}!',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
+            ),
+          ),
+        ],
+      ),
       Expanded(
         // Wrap ListView.builder in an Expanded widget
         child: ListView.builder(
@@ -104,8 +104,11 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
                             },
                           );
                         },
-                        child: Icon(Icons.description,
-                            size: 20, color: _statusColor),
+                        child: Tooltip(
+                          message: "Inspect description",
+                          child: Icon(Icons.description,
+                              size: 20, color: _statusColor),
+                        ),
                       ),
                       if (anomaliesList[index].coordinates != "0") ...[
                         SizedBox(width: 10),
@@ -163,8 +166,11 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
                               },
                             );
                           },
-                          child: Icon(Icons.directions,
-                              size: 20, color: _statusColor),
+                          child: Tooltip(
+                            message: "View in Maps",
+                            child: Icon(Icons.directions,
+                                size: 20, color: _statusColor),
+                          ),
                         ),
                       ]
                     ],

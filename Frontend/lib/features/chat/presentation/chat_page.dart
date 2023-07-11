@@ -351,7 +351,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               ),
               Expanded(
                 child: groups.length == 0
-                    ? noGroupWidget()
+                    ? searchController.text.trim().isEmpty
+                        ? noGroupWidget()
+                        : noSearchResult()
                     : ListView(
                         padding: EdgeInsets.only(top: 10, bottom: 80),
                         children: groups.map((group) {
@@ -446,18 +448,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          popUpDialogWeb(context);
-        },
-        elevation: 50,
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-      ),
+      floatingActionButton: widget.user.role != 'STUDENT'
+          ? FloatingActionButton(
+              tooltip: "Create a Group",
+              onPressed: () {
+                popUpDialogWeb(context);
+              },
+              elevation: 50,
+              backgroundColor: Theme.of(context).primaryColor,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 30,
+              ),
+            )
+          : null,
     );
   }
 
@@ -514,7 +519,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
           Expanded(
             child: groups.length == 0
-                ? noGroupWidget()
+                ? searchController.text.trim().isEmpty
+                    ? noGroupWidget()
+                    : noSearchResult()
                 : ListView(
                     padding: EdgeInsets.only(top: 10, bottom: 80),
                     children: groups.map((group) {
@@ -605,18 +612,24 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          popUpDialogMobile(context);
-        },
-        elevation: 50,
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-      ),
+      floatingActionButton: widget.user.role != 'STUDENT'
+          ? FloatingActionButton(
+              tooltip: "Create a Group",
+              onPressed: () {
+                popUpDialogMobile(context);
+              },
+              elevation: 50,
+              backgroundColor: Theme.of(context).primaryColor,
+              child: Tooltip(
+                message: "Create a Group",
+                child: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -629,7 +642,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               title: Text(
-                "Create a group",
+                "Create a Group",
                 textAlign: TextAlign.left,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
@@ -702,7 +715,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Text(
-                          "Create a group",
+                          "Create a Group",
                           textAlign: TextAlign.left,
                         ),
                       ),
@@ -845,28 +858,67 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () {
-                  if (kIsWeb) {
-                    popUpDialogWeb(context);
-                  } else {
-                    popUpDialogMobile(context);
-                  }
-                },
-                child: Icon(
-                  Icons.add_circle,
-                  color: Colors.grey[700],
-                  size: 75,
-                ),
-              ),
+            widget.user.role != 'STUDENT'
+                ? MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (kIsWeb) {
+                          popUpDialogWeb(context);
+                        } else {
+                          popUpDialogMobile(context);
+                        }
+                      },
+                      child: Tooltip(
+                        message: "Create a Group",
+                        child: Icon(
+                          Icons.add_circle,
+                          color: Colors.grey[700],
+                          size: 75,
+                        ),
+                      ),
+                    ),
+                  )
+                : Tooltip(
+                    message: "As a student you can only be invited to groups",
+                    child: Icon(Icons.sentiment_very_dissatisfied, size: 100),
+                  ),
+            const SizedBox(
+              height: 20,
+            ),
+            widget.user.role != 'STUDENT'
+                ? Text(
+                    "You've not joined any groups, tap on the add icon to create a group or also search from top search bar.",
+                    textAlign: TextAlign.center,
+                  )
+                : Text(
+                    "You've not joined any groups.",
+                    style: TextStyle(fontSize: 23), // Set the desired font size
+                  )
+          ],
+        ),
+      ),
+    );
+  }
+
+  noSearchResult() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              color: Colors.grey[700],
+              size: 75,
             ),
             const SizedBox(
               height: 20,
             ),
             const Text(
-              "You've not joined any groups, tap on the add icon to create a group or also search from top search bar.",
+              "There were no search results...",
               textAlign: TextAlign.center,
             )
           ],
@@ -904,12 +956,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       }),
     );
 
-    // if (response.statusCode == 200) {
-    //   showErrorSnackbar('Created a group successfully!', false);
-    //   //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
-    // } else {
-    //   showErrorSnackbar('Failed to create a group: ${response.body}', true);
-    // }
+    if (response.statusCode == 200) {
+      showErrorSnackbar('Created a group successfully!', false);
+      //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
+    } else {
+      showErrorSnackbar('This group already exists. Ask the admin to send you an invite!', true);
+    }
     groupNameController.clear();
     descriptionController.clear();
   }

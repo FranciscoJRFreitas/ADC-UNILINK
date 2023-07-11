@@ -36,7 +36,7 @@ class SqliteService {
             'CREATE TABLE news(pageUrl TEXT, tags TEXT, content TEXT, title TEXT, date TEXT, imageUrl TEXT)');
         await database.execute(
             'CREATE TABLE chat(id TEXT PRIMARY KEY, groupId TEXT, isSystemMessage TEXT, containsFile TEXT, text TEXT,'
-            ' name TEXT, displayName TEXT, timestamp INTEGER, extension TEXT)');
+            ' name TEXT, displayName TEXT, timestamp INTEGER, extension TEXT, isEdited Text)');
         await database.execute(
             'CREATE TABLE groups(id TEXT PRIMARY KEY, displayName TEXT, description TEXT, numberOfMembers INTEGER)');
         await database.insert('settings', {
@@ -344,6 +344,7 @@ class SqliteService {
         return Message(
           isSystemMessage: map['isSystemMessage'] == '1' ? true : false,
           containsFile: map['containsFile'] == '1' ? true : false,
+          isEdited: map['isEdited'] == '1' ? true : false,
           id: map['id'],
           text: map['text'],
           name: map['name'],

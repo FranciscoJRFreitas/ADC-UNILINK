@@ -8,9 +8,12 @@ import 'package:unilink2023/domain/Token.dart';
 import 'package:unilink2023/features/BackOfficeHub/anomaliesBackOffice.dart';
 import 'package:unilink2023/features/BackOfficeHub/eventsBackOffice.dart';
 import 'package:unilink2023/features/BackOfficeHub/groupsBackOffice.dart';
+import 'package:unilink2023/features/screen.dart';
 
 import '../../constants.dart';
 import 'package:http/http.dart' as http;
+
+import '../../widgets/LineComboBox.dart';
 
 class BackOfficePage extends StatefulWidget {
   @override
@@ -18,7 +21,7 @@ class BackOfficePage extends StatefulWidget {
 }
 
 class _BackOfficePageState extends State<BackOfficePage> {
-  String _selectedButton = '';
+  late String selectedRole = 'SU';
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +57,8 @@ class _BackOfficePageState extends State<BackOfficePage> {
                             children: [
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .primaryColor, // button's fill color
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
                                   foregroundColor: Colors.white,
                                   elevation: 2,
                                 ),
@@ -70,168 +73,118 @@ class _BackOfficePageState extends State<BackOfficePage> {
                                       TextEditingController();
                                   TextEditingController passwordController =
                                       TextEditingController();
-                                  String selectedRole = 'SU';
-
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Create User'),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            TextField(
-                                              controller: nameController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Name',
-                                              ),
+                                      return StatefulBuilder(
+                                        // Add this
+                                        builder: (BuildContext context,
+                                            StateSetter setState) {
+                                          // Add this
+                                          return AlertDialog(
+                                            title: Text('Create User'),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextField(
+                                                  controller: nameController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Name',
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      usernameController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Username',
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller: emailController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Email',
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      passwordController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Password',
+                                                  ),
+                                                  obscureText: true,
+                                                ),
+                                                LineComboBox(
+                                                  selectedValue: selectedRole,
+                                                  items: [
+                                                    'SU',
+                                                    'BACKOFFICE',
+                                                    'DIRECTOR',
+                                                    'PROF',
+                                                    'STUDENT'
+                                                  ],
+                                                  icon: Icons.category,
+                                                  onChanged: (newValue) {
+                                                    setState(() {
+                                                      selectedRole = newValue!;
+                                                    });
+                                                  },
+                                                ),
+                                              ],
                                             ),
-                                            TextField(
-                                              controller: usernameController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Username',
-                                              ),
-                                            ),
-                                            TextField(
-                                              controller: emailController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Email',
-                                              ),
-                                            ),
-                                            TextField(
-                                              controller: passwordController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Password',
-                                              ),
-                                              obscureText: true,
-                                            ),
-                                            DropdownButton<String>(
-                                              value: selectedRole,
-                                              onChanged: (String? newValue) {
-                                                if (newValue != null) {
-                                                  setState(() {
-                                                    selectedRole = newValue;
-                                                  });
-                                                }
-                                              },
-                                              items: <String>[
-                                                'SU',
-                                                'BACKOFFICE',
-                                                'DIRECTOR',
-                                                'PROF',
-                                                'STUDENT'
-                                              ].map<DropdownMenuItem<String>>(
-                                                (String value) {
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    value: value,
-                                                    child: Text(value),
-                                                  );
+                                            actions: [
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
                                                 },
-                                              ).toList(),
-                                            ),
-                                            // Add other fields here
-                                          ],
-                                        ),
-                                        actions: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              String name = nameController.text;
-                                              String username =
-                                                  usernameController.text;
-                                              String email =
-                                                  emailController.text;
-                                              String password =
-                                                  passwordController.text;
-                                              String role = selectedRole;
-                                              // Call the registerUser function with the entered data
-                                              registerUser(
-                                                  name,
-                                                  username,
-                                                  email,
-                                                  password,
-                                                  role,
-                                                  _showErrorSnackbar);
-
-                                              // Handle create user logic with the entered data
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Create'),
-                                          ),
-                                        ],
-                                      );
+                                                child: Text('Cancel'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  String name =
+                                                      nameController.text;
+                                                  String username =
+                                                      usernameController.text;
+                                                  String email =
+                                                      emailController.text;
+                                                  String password =
+                                                      passwordController.text;
+                                                  String role = selectedRole;
+                                                  // Call the registerUser function with the entered data
+                                                  registerUser(
+                                                      name,
+                                                      username,
+                                                      email,
+                                                      password,
+                                                      role,
+                                                      _showErrorSnackbar);
+                                                  // Handle create user logic with the entered data
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text('Create'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ); // Close StatefulBuilder
                                     },
                                   );
                                 },
                               ),
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .primaryColor, // button's fill color
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
                                   foregroundColor: Colors.white,
-
                                   elevation: 2,
                                 ),
                                 icon: Icon(Icons.person_remove),
                                 label: Text('Delete User'),
                                 onPressed: () {
-                                  TextEditingController usernameController =
-                                      TextEditingController();
-                                  TextEditingController passwordController =
-                                      TextEditingController();
-
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Delete User'),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            TextField(
-                                              controller: usernameController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Target Username',
-                                              ),
-                                            ),
-                                            TextField(
-                                              controller: passwordController,
-                                              decoration: InputDecoration(
-                                                hintText: 'Your Password',
-                                              ),
-                                              obscureText: true,
-                                            ),
-                                          ],
-                                        ),
-                                        actions: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              String targetusername =
-                                                  usernameController.text;
-                                              String password =
-                                                  passwordController.text;
-
-                                              removeAccount(context, password,
-                                                  targetusername);
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Delete'),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RemoveAccountPage(),
+                                    ),
                                   );
                                 },
                               ),
@@ -289,9 +242,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        String groupId =
-                            ''; // Variable to store the entered group ID
-
+                        String groupId = '';
                         return AlertDialog(
                           title: Text('Enter Group ID'),
                           content: TextField(
@@ -415,41 +366,6 @@ class _BackOfficePageState extends State<BackOfficePage> {
       showErrorSnackbar('Registration successful!.', false);
     } else {
       showErrorSnackbar('Failed to register user: ${response.body}', true);
-    }
-  }
-
-  Future<void> removeAccount(
-    BuildContext context,
-    String password,
-    String targetUsername,
-  ) async {
-    final url =
-        kBaseUrl + 'rest/remove/?targetUsername=$targetUsername&pwd=$password';
-
-    final tokenID = await cacheFactory.get('users', 'token');
-    final storedUsername = await cacheFactory.get('users', 'username');
-
-    Token token = new Token(tokenID: tokenID, username: storedUsername);
-
-    final response = await http.delete(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${json.encode(token.toJson())}',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      FirebaseStorage.instance
-          .ref()
-          .child('ProfilePictures/$targetUsername')
-          .delete()
-          .onError((error, stackTrace) => null);
-
-      _showErrorSnackbar('Removed successfully!', false);
-    } else {
-      _showErrorSnackbar(
-          'Failed to remove the account: ${response.body}', true);
     }
   }
 

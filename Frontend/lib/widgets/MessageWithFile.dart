@@ -171,6 +171,7 @@ class _MessageWithFileState extends State<MessageWithFile> {
                     .child('messages')
                     .child(widget.groupId);
                 messageRef.child(widget.id).child("message").set(editedText);
+                messageRef.child(widget.id).child("isEdited").set(true);
 
                 Navigator.pop(context); // Close the dialog
               },

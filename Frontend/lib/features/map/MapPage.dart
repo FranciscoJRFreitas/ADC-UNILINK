@@ -576,7 +576,10 @@ class _MyMapState extends State<MyMap> {
       if (mounted) {
         setState(() {
           currentLocation = _locationResult;
-          //updateCurrentPositionMarker(currentLocation);
+          if (!isDirections) {
+            updateCurrentPositionMarker(currentLocation);
+          }
+
           if (isFirst) {
             isFirst = false;
             distance = calculateDistance(
@@ -764,5 +767,26 @@ class _MyMapState extends State<MyMap> {
     }
 
     setState(() {});
+  }
+
+  void updateCurrentPositionMarker(loc.LocationData newLocation) async {
+    final Uint8List gates = isDirections
+        ? await getImages('assets/icon/movingLocation.png', 100)
+        : await getImages('assets/icon/currentLocation.png', 100);
+    setState(() {
+      markers.removeWhere(
+          (m) => m.markerId.value == 'currentPos'); // Remove the old marker
+
+      // Add the updated marker
+      markers.add(
+        Marker(
+          markerId: MarkerId('currentPos'),
+          icon: BitmapDescriptor.fromBytes(gates),
+          position:
+              LatLng(newLocation.latitude ?? 0.0, newLocation.longitude ?? 0.0),
+          infoWindow: InfoWindow(title: 'My Location'),
+        ),
+      );
+    });
   }
 }

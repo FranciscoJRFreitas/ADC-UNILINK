@@ -16,7 +16,13 @@ class NotLoggedInScreen extends StatefulWidget {
 
 class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
   int _selectedIndex = 0;
-  List<String> _title = ["News", "Contacts", "Settings", "Campus", "Get Started"];
+  List<String> _title = [
+    "News",
+    "Contacts",
+    "Settings",
+    "Campus",
+    "Get Started"
+  ];
 
   _NotLoggedInScreenState(int? index) {
     if (index != null) _selectedIndex = index;
@@ -32,6 +38,7 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
         ContactsPage(),
         SettingsPage(
           loggedIn: false,
+          isBackOffice: false,
         ),
         MyMap(),
         WelcomePage(),
@@ -97,7 +104,8 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
             ),
             ListTile(
               leading: Icon(Icons.map),
-              title: Text('Campus', style: Theme.of(context).textTheme.bodyLarge),
+              title:
+                  Text('Campus', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () {
                 setState(() {
                   _selectedIndex = 3;

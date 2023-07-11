@@ -26,6 +26,8 @@ import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response.Status;
@@ -43,32 +45,38 @@ public class ChatResources {
     public ChatResources() {
     }
 
-@POST
-@Path("/create-multiple")
-@Consumes(MediaType.APPLICATION_JSON)
-public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders headers) {
-    for (Group group : groups) {
-        Response response = createGroup(group, headers);
-        // no caso the algum grupo não tenha sucesso a ser criado 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            return response;
-        }
-        //se teve sucesso a criar o grupo adicionar os participantes 
-        List<String> participants = group.participants;
-        for (String participant : participants) {
-           
-             inviteToGroup(group.DisplayName, participant ,headers);
-        }
-    }
-    
-    return Response.ok("{}").build();
-}
+    @POST
+    @Path("/create-multiple")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public CompletionStage<Response> createMultipleGroups(List<Group> groups, @Context HttpHeaders headers) {
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+                groups.stream()
+                        .map(group -> createGroup(group, headers)
+                                .thenCompose(response -> {
+                                    if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                                        return CompletableFuture.completedFuture(response);
+                                    }
+                                    //se teve sucesso a criar o grupo adicionar os participantes
+                                    List<String> participants = group.participants;
+                                    for (String participant : participants) {
+                                        inviteToGroup(group.DisplayName, participant, headers);
+                                    }
+                                    return CompletableFuture.completedFuture(response);
+                                })
+                                .exceptionally(ex -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred.").build())
+                        )
+                        .toArray(CompletableFuture[]::new)
+        );
 
+        return allFutures.thenApply(v -> Response.ok("{}").build());
+    }
 
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createGroup(Group group, @Context HttpHeaders headers) {
+    public CompletionStage<Response> createGroup(Group group, @Context HttpHeaders headers) {
+
+        CompletableFuture<Response> future = new CompletableFuture<>();
 
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
@@ -80,16 +88,16 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         Entity originalToken = datastore.get(tokenKey);
 
         if (originalToken == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
+            future.complete(Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in.").build());
         }
 
         if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
+            future.complete(Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build());
         }
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(group.adminID);
         Entity admin = datastore.get(userKey);
-        if(admin == null){
-            return Response.status(Status.NOT_FOUND).entity("AdminId doesnt exist").build();
+        if (admin == null) {
+            future.complete(Response.status(Response.Status.NOT_FOUND).entity("AdminId doesnt exist.").build());
         }
 
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
@@ -100,10 +108,10 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    // Group already exists, return an error response
+                    future.complete(Response.status(Response.Status.BAD_REQUEST).build());
                 } else {
-                    // Group doesn't exist, proceed with creating it
                     createNewGroup(group, newChatRef);
+                    future.complete(Response.ok("{}").build());
                 }
             }
 
@@ -113,7 +121,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
             }
         });
 
-        return Response.ok("{}").build();
+        return future;
     }
 
     private void createNewGroup(Group group, DatabaseReference newChatRef) {
@@ -136,6 +144,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         newMessageRef.child("message").setValueAsync("Welcome to " + group.DisplayName + "!");
         newMessageRef.child("timestamp").setValueAsync(System.currentTimeMillis());
         newMessageRef.child("isSystemMessage").setValueAsync(true);
+        newMessageRef.child("isEdited").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
         DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);
@@ -212,8 +221,6 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
     }
 
 
-
-
     @POST
     @Path("/invite")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -238,7 +245,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(userId);
         Entity user = datastore.get(userKey);
 
-        if(user == null){
+        if (user == null) {
             return Response.status(Status.NOT_FOUND).entity("User not found.").build();
         }
 
@@ -334,19 +341,6 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         return Response.ok().build();
     }
 
-    public static void deleteFolder(String folderPath) {
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-        String bucketName = "unilink23.appspot.com";
-        Bucket bucket = storage.get(bucketName);
-
-        // List the blobs in the folder
-        Page<Blob> blobs = bucket.list(Storage.BlobListOption.prefix(folderPath));
-        for (Blob blob : blobs.iterateAll()) {
-            blob.delete();
-            System.out.println("Deleted blob: " + blob.getName());
-        }
-    }
-
     public static void leaveGroup(String groupId, String userId) {
         DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
@@ -355,24 +349,15 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
 
         DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
         DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
-        //DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-        //eventsRef.child(groupId).removeValueAsync();
 
         groupsRef.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
-                    String groupPicturesPath = "GroupPictures/" + groupId;
-                    String groupAttachmentsPath = "GroupAttachments/" + groupId;
 
                     messagesRef.child(groupId).removeValueAsync();
                     groupsRef.child(groupId).removeValueAsync();
 
-                    LOG.info("Deleting folder: " + groupPicturesPath);
-                    deleteFolder(groupPicturesPath);
-
-                    LOG.info("Deleting folder: " + groupAttachmentsPath);
-                    deleteFolder(groupAttachmentsPath);
                 }
             }
 
@@ -382,7 +367,6 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
             }
         });
     }
-
 
 
     private void sendInviteEmail(String email, String Token) {
