@@ -99,12 +99,13 @@ class _IntroPageState extends State<IntroPage> {
             PageViewModel(
               image: Center(
                 child: Image.asset(
-                  'assets/images/jumpIn_slider.png',
+                  'assets/images/map_slider.png',
                   height: 200,
                 ),
               ),
-              body: "What are you waiting for ?",
-              title: "Jump in!",
+              body:
+                  "Navigate the campus effortlessly, locate places and receive dynamic directions with our Maps feature.",
+              title: "Maps",
             ),
             if (!kIsWeb)
               PageViewModel(
@@ -112,7 +113,8 @@ class _IntroPageState extends State<IntroPage> {
                 body:
                     "To receive updates and important information, please enable floating notifications.",
                 image: Center(
-                  child: Icon(Icons.notifications, size: 100),
+                  child: Icon(Icons.notifications,
+                      size: 100, color: Color(0xFF5857a2)),
                 ),
                 footer: Center(
                   // Wrap the Container inside a Center widget
@@ -134,6 +136,16 @@ class _IntroPageState extends State<IntroPage> {
                   ),
                 ),
               ),
+            PageViewModel(
+              image: Center(
+                child: Image.asset(
+                  'assets/images/jumpIn_slider.png',
+                  height: 200,
+                ),
+              ),
+              body: "What are you waiting for ?",
+              title: "Jump in!",
+            ),
           ],
         ),
       ),
