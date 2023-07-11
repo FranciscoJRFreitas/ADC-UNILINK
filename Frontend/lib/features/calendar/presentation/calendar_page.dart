@@ -19,6 +19,7 @@ import '../../../data/cache_factory_provider.dart';
 import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class CalendarPage extends StatefulWidget {
   final String username;
@@ -263,7 +264,8 @@ class _CalendarPageState extends State<CalendarPage> {
               child: Column(
                 children: [
                   _buildTableCalendar(context),
-                  buttonAddCalendar(context),
+
+                  //buttonAddCalendar(context),
                   ..._scheduleWidget(context),
                   _eventsWidget(context),
                 ],
@@ -272,7 +274,6 @@ class _CalendarPageState extends State<CalendarPage> {
           : Column(
               children: [
                 _buildTableCalendar(context),
-                buttonAddCalendar(context),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -285,9 +286,9 @@ class _CalendarPageState extends State<CalendarPage> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: "Create a Personal Event",
+      /*floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if (kIsWeb)
           if (kIsWeb)
             _createEventPopUpDialogWeb(context);
           else
@@ -300,32 +301,57 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
         elevation: 6,
         backgroundColor: Theme.of(context).primaryColor,
+      ),*/
+      floatingActionButton: SpeedDial(
+        // both default to 16
+        childMargin: EdgeInsets.only(right: 10),
+        spacing: 10.0,
+        animatedIcon: AnimatedIcons.menu_close,
+        animatedIconTheme: IconThemeData(size: 22.0),
+        // this is ignored if animatedIcon is non null
+        // child: Icon(Icons.add),
+        visible: true,
+        // If true user is forced to close dial manually
+        // by tapping main button and overlay is not rendered.
+        closeManually: false,
+        curve: Curves.bounceIn,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        onOpen: () => print('OPENING DIAL'),
+        onClose: () => print('DIAL CLOSED'),
+        tooltip: 'Functionalities',
+        heroTag: 'speed-dial-hero-tag',
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 80.0,
+        shape: CircleBorder(),
+        children: [
+          buttonAddCalendar(context),
+          buttonAddEvent(context),
+          // Add other SpeedDialChild widgets if needed
+        ],
       ),
     );
   }
 
-  Widget buttonAddCalendar(BuildContext context) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).primaryColor, // button's fill color
-        foregroundColor: Colors.white,
-        elevation: 2,
-      ),
-      icon: Icon(Icons.add),
-      label: Text('Create Groups from a file'),
-      onPressed: () {
+  SpeedDialChild buttonAddCalendar(BuildContext context) {
+    return SpeedDialChild(
+      child: Icon(Icons.edit_calendar),
+      backgroundColor: Theme.of(context).primaryColor,
+      label: 'Add Calendar ',
+      onTap: () {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Create Groups'),
+              title: Text('Add Calendar'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ElevatedButton(
                     child: Text('Pick a file'),
                     onPressed: () {
-                      pickFile();
+                      //pickFile(context);
                     },
                   ),
                 ],
@@ -340,7 +366,6 @@ class _CalendarPageState extends State<CalendarPage> {
                 ElevatedButton(
                   child: Text('Create'),
                   onPressed: () {
-                    uploadSchedule();
                     Navigator.of(context).pop();
                     // Process your file here
                   },
@@ -349,6 +374,20 @@ class _CalendarPageState extends State<CalendarPage> {
             );
           },
         );
+      },
+    );
+  }
+
+  SpeedDialChild buttonAddEvent(BuildContext context) {
+    return SpeedDialChild(
+      child: Icon(Icons.event),
+      backgroundColor: Theme.of(context).primaryColor,
+      label: 'Add Event ',
+      onTap: () {
+        if (kIsWeb)
+          _createEventPopUpDialogWeb(context);
+        else
+          _createEventPopUpDialogMobile(context);
       },
     );
   }

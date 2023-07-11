@@ -75,6 +75,7 @@ dependencies:
   google_translator: ^1.0.0
   country_flags: ^2.1.0
   circle_flags: ^0.0.3
+  flutter_speed_dial: ^7.0.0
   
 
 flutter_icons:

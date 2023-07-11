@@ -12,6 +12,7 @@ import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
+import 'package:unilink2023/widgets/AutoCompleteDropdown.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import '../../../constants.dart';
@@ -395,7 +396,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 child: TextButton.icon(
                                   icon: Icon(
                                     Icons.exit_to_app_rounded,
-                                    color: Theme.of(context).secondaryHeaderColor,
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
                                     size: 16,
                                   ),
                                   label: Text(
@@ -404,8 +406,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                         .textTheme
                                         .bodyMedium!
                                         .copyWith(
-                                        color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor),
                                   ),
                                   onPressed: () {
                                     if (kIsWeb)
@@ -424,7 +426,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 child: TextButton.icon(
                                   icon: Icon(
                                     Icons.delete,
-                                    color: Theme.of(context).secondaryHeaderColor,
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
                                     size: 16,
                                   ),
                                   label: Text(
@@ -433,8 +436,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                         .textTheme
                                         .bodyMedium!
                                         .copyWith(
-                                        color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor),
                                   ),
                                   onPressed: () {
                                     if (kIsWeb)
@@ -982,8 +985,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       child: SizedBox(
                         height: kIsWeb
                             ? MediaQuery.of(context).size.height - 435
-                            : MediaQuery.of(context).size.height *
-                            0.4,
+                            : MediaQuery.of(context).size.height * 0.4,
                         child: ListView.builder(
                             itemCount: members.length,
                             itemBuilder: (context, index) {
@@ -1067,12 +1069,14 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   }
 
   popUpDialogWeb(BuildContext context) {
+    List<String> options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Olaolaoloa'];
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AlertDialog(
+            return AutocompleteDropdown(options: options);
+            /*return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               title: Text(
                 "Send an Invite",
@@ -1131,7 +1135,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   child: const Text("CANCEL"),
                 ),
               ],
-            );
+            );*/
           }));
         });
   }
