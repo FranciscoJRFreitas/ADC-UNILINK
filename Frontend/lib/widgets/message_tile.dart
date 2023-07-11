@@ -116,25 +116,26 @@ class _MessageTileState extends State<MessageTile> {
 
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Edit Message', style: Theme.of(context).textTheme.titleMedium),
+          title: Text('Edit Message',
+              style: Theme.of(context).textTheme.titleMedium),
           content: TextField(
             style: Theme.of(context).textTheme.bodyLarge,
             onChanged: (value) {
               editedText = value; // Update the edited text
             },
-            controller:
-                TextEditingController(text: editedText),
+            controller: TextEditingController(text: editedText),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
               focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey)),
               enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
+                  borderSide:
+                      BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
               errorBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.red, width: 2.0)),
               focusedErrorBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.red, width: 2.0)),
-            ),// Set initial value
+            ), // Set initial value
           ),
           actions: [
             TextButton(
@@ -168,8 +169,10 @@ class _MessageTileState extends State<MessageTile> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Confirm Delete', style: Theme.of(context).textTheme.titleMedium),
-          content: Text('Are you sure you want to delete this message?', style: Theme.of(context).textTheme.bodyLarge),
+          title: Text('Confirm Delete',
+              style: Theme.of(context).textTheme.titleMedium),
+          content: Text('Are you sure you want to delete this message?',
+              style: Theme.of(context).textTheme.bodyLarge),
           actions: [
             TextButton(
               onPressed: () {
@@ -201,14 +204,20 @@ class _MessageTileState extends State<MessageTile> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text('Details', style: Theme.of(context).textTheme.titleMedium),
+          title:
+              Text('Details', style: Theme.of(context).textTheme.titleMedium),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Username: ${widget.sender}", style: Theme.of(context).textTheme.bodyLarge),
+              Text("Username: ${widget.sender}",
+                  style: Theme.of(context).textTheme.bodyLarge),
               SizedBox(height: 12), // Add some spacing between lines
-              Text( formatDateInMillis(widget.time) + ", " + formatTimeInMillis(widget.time), style: Theme.of(context).textTheme.bodyLarge),
+              Text(
+                  formatDateInMillis(widget.time) +
+                      ", " +
+                      formatTimeInMillis(widget.time),
+                  style: Theme.of(context).textTheme.bodyLarge),
             ],
           ),
           actions: [
@@ -322,20 +331,29 @@ class _MessageTileState extends State<MessageTile> {
                             const SizedBox(
                               width: 20,
                             ),
-                            if(widget.isEdited)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Text(
-                                  "Edited",
-                                  style: TextStyle(fontSize: 10, color: Colors.grey),),),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 2),
-                              child: Text(
-                                formatTimeInMillis(widget.time),
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.grey),
-                              ),
-                            ),
+                            Wrap(
+                              alignment: WrapAlignment.end,
+                              crossAxisAlignment: WrapCrossAlignment.end,
+                              children: [
+                                if (widget.isEdited)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      "Edited",
+                                      style: TextStyle(
+                                          fontSize: 10, color: Colors.grey),
+                                    ),
+                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 2),
+                                  child: Text(
+                                    formatTimeInMillis(widget.time),
+                                    style: TextStyle(
+                                        fontSize: 10, color: Colors.grey),
+                                  ),
+                                ),
+                              ],
+                            )
                           ],
                         ),
                       ],
@@ -358,5 +376,4 @@ class _MessageTileState extends State<MessageTile> {
     var formatter = DateFormat('HH:mm');
     return formatter.format(date);
   }
-
 }

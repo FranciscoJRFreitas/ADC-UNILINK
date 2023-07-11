@@ -337,7 +337,7 @@ class _MessageWithFileState extends State<MessageWithFile> {
                 height: 8,
               ),
               Wrap(
-                alignment: WrapAlignment.start,
+                alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.end,
                 children: [
                   Column(children: [
@@ -347,6 +347,9 @@ class _MessageWithFileState extends State<MessageWithFile> {
                       messageImageWidget(context)
                     else
                       profilePicture(context),
+                    SizedBox(
+                      height: 8,
+                    ),
                     Text(
                       widget.message,
                       textAlign: TextAlign.center,
@@ -356,12 +359,14 @@ class _MessageWithFileState extends State<MessageWithFile> {
                   const SizedBox(
                     width: 20,
                   ),
-                  if(widget.isEdited)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                      formatTimeInMillis(widget.time),
-                      style: TextStyle(fontSize: 10, color: Colors.grey),),),
+                  if (widget.isEdited)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                        "Edited",
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(left: 2),
                     child: Text(
