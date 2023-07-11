@@ -520,41 +520,78 @@ class _MyMapState extends State<MyMap> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.4,
+          height: MediaQuery.of(context).size.height * 0.6,
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(title!, style: Theme.of(context).textTheme.headline6),
-                SizedBox(height: 10),
-                Text(snippet!, style: Theme.of(context).textTheme.bodyText1),
-                if (!kIsWeb)
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (isDirections) {
-                        setState(() {
-                          isDirections = false;
-                        });
-                        await Future.delayed(Duration(seconds: 1));
-                      }
-                      isDirections = true;
-                      getDirections(tappedMarker.position.latitude,
-                          tappedMarker.position.longitude);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Get Directions'),
-                  ),
-                ElevatedButton(
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: IconButton(
+                  icon: Icon(Icons.minimize),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Close'),
                 ),
-              ],
-            ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(height: 40),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        title!,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  if (!kIsWeb)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            if (isDirections) {
+                              setState(() {
+                                isDirections = false;
+                                polylines = {};
+                              });
+                              await Future.delayed(Duration(seconds: 1));
+                            }
+                            isDirections = true;
+                            getDirections(tappedMarker.position.latitude,
+                                tappedMarker.position.longitude);
+                            Navigator.of(context).pop();
+                          },
+                          icon: Icon(Icons.directions_walk, color: Colors.blue),
+                          label: Text('Get Directions',
+                              style: TextStyle(color: Colors.blue)),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.white, // Background color
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(20), // Border radius
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 18),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: snippet.length > 10 ? 8.0 : 2.0,
+                    ),
+                    child: Text(snippet!,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       },
