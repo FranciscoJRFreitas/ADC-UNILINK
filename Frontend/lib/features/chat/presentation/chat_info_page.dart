@@ -19,16 +19,13 @@ import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
-
 import '../../../data/cache_factory_provider.dart';
 import '../../../domain/Token.dart';
 import '../../../widgets/LineDateTimeField.dart';
-
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
-
 import '../../../widgets/LocationPopUp.dart';
-import '../../calendar/presentation/calendar_day_page.dart';
+
 
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
@@ -589,20 +586,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 return Material(
                                   color: Colors.transparent,
                                   child: GestureDetector(
-                                    onTap: () {
-                                      // if (widget.username != member.username) {
-                                      //   Navigator.of(context).push(
-                                      //     MaterialPageRoute(
-                                      //       builder: (context) => ChatMemberInfo(
-                                      //         isAdmin: isAdmin,
-                                      //         sessionUsername: widget.username,
-                                      //         groupId: widget.groupId,
-                                      //         member: member,
-                                      //       ),
-                                      //     ),
-                                      //   );
-                                      // }
-                                    },
+                                    onTap: () {},
                                     child: Stack(
                                       children: <Widget>[
                                         Divider(
@@ -640,28 +624,14 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                       children: [
                                                         InkWell(
                                                           onTap: () {
-                                                            if (kIsWeb) {
-                                                              Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder: (context) => MainScreen(
-                                                                          index:
-                                                                              9,
-                                                                          date:
-                                                                              event.startTime)));
-                                                            } else {
-                                                              Navigator.push(
+                                                            Navigator.push(
                                                                 context,
                                                                 MaterialPageRoute(
-                                                                  builder: (context) => DayCalendarPage(
-                                                                      username:
-                                                                          widget
-                                                                              .username,
-                                                                      date: event
-                                                                          .startTime),
-                                                                ),
-                                                              );
-                                                            }
+                                                                    builder: (context) => MainScreen(
+                                                                        index:
+                                                                            9,
+                                                                        date: event
+                                                                            .startTime)));
                                                           },
                                                           child: Tooltip(
                                                             message:
