@@ -147,7 +147,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       });
     });
     _tabController = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   void _showErrorSnackbar(String message, bool Error) {
@@ -165,7 +165,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   void dispose() {
     super.dispose();
     _tabController?.dispose();
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
