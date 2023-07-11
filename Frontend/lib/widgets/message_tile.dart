@@ -13,6 +13,7 @@ class MessageTile extends StatefulWidget {
   final bool isAdmin;
   final bool sentByMe;
   final bool isSystemMessage;
+  final bool isEdited;
 
   const MessageTile({
     Key? key,
@@ -25,6 +26,7 @@ class MessageTile extends StatefulWidget {
     required this.isAdmin,
     required this.sentByMe,
     this.isSystemMessage = false,
+    required this.isEdited,
   }) : super(key: key);
 
   @override
@@ -317,12 +319,21 @@ class _MessageTileState extends State<MessageTile> {
                                 textAlign: TextAlign.start,
                                 style: const TextStyle(
                                     fontSize: 16, color: Colors.white)),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            if(widget.isEdited)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  "Edited",
+                                  style: TextStyle(fontSize: 10, color: Colors.grey),),),
                             Padding(
-                              padding: const EdgeInsets.only(left: 10),
+                              padding: const EdgeInsets.only(left: 2),
                               child: Text(
                                 formatTimeInMillis(widget.time),
                                 style: TextStyle(
-                                    fontSize: 10, color: Colors.white),
+                                    fontSize: 10, color: Colors.grey),
                               ),
                             ),
                           ],
