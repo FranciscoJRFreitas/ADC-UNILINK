@@ -11,6 +11,7 @@ import '../../application/loadLocations.dart';
 import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/ThemeNotifier.dart';
+import '../../widgets/AutoCompleteDropdown.dart';
 import '../../widgets/LineTextField.dart';
 import '../chat/domain/Group.dart';
 import '../navigation/main_screen_page.dart';
@@ -320,7 +321,10 @@ class _GroupPageState extends State<GroupPage> {
                               children: [
                                 ElevatedButton(
                                   onPressed: () {
-                                    _showInviteDialog(context, group.DisplayName);
+                                    if (kIsWeb)
+                                      popUpDialogWeb(context, group.DisplayName);
+                                    else
+                                      popUpDialogMobile(context, group.DisplayName);
                                   },
                                   child: Text('Invite'),
                                 ),
@@ -393,6 +397,31 @@ class _GroupPageState extends State<GroupPage> {
       },
     );
   }
+
+  popUpDialogWeb(BuildContext context, String groupId) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
+            return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar);
+          }));
+        });
+  }
+
+  void popUpDialogMobile(BuildContext context, String groupId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      builder: (context) => StatefulBuilder(
+        builder: ((context, setState) {
+          return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar);
+        }),
+      ),
+    );
+  }
+
 
   void _showInviteDialog(BuildContext context, String groupId) {
     showDialog(

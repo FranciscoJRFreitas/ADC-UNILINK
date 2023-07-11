@@ -16,6 +16,8 @@ import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/LocationPopUp.dart';
 
+import 'calendar_day_page.dart';
+
 class MyEventsPage extends StatefulWidget {
   final String username;
 
@@ -60,6 +62,7 @@ class _MyEventsPageState extends State<MyEventsPage>
     _tabController = TabController(length: 2, vsync: this);
   }
 
+  @override
   void dispose() {
     super.dispose();
     _tabController?.dispose();
@@ -179,7 +182,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                     decoration: InputDecoration(
                       labelText: 'Search',
                       hintText:
-                          'You can search for names, types and descriptions!',
+                          'You can search for titles, types and descriptions!',
                       hintStyle: Theme.of(context)
                           .textTheme
                           .bodyLarge!
@@ -234,7 +237,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                       decoration: InputDecoration(
                         labelText: 'Search',
                         hintText:
-                            'You can search for names, types and descriptions!',
+                            'You can search for titles, groups, types and descriptions!',
                         hintStyle: Theme.of(context)
                             .textTheme
                             .bodyLarge!
@@ -358,7 +361,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         decoration: InputDecoration(
                                           labelText: 'Search',
                                           hintText:
-                                              'You can search for names, types and descriptions!',
+                                              'You can search for titles, types and descriptions!',
                                           hintStyle: Theme.of(context)
                                               .textTheme
                                               .bodyMedium!,
@@ -402,7 +405,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         decoration: InputDecoration(
                                           labelText: 'Search',
                                           hintText:
-                                              'You can search for names, types and descriptions!',
+                                              'You can search for titles, types and descriptions!',
                                           hintStyle: Theme.of(context)
                                               .textTheme
                                               .bodyMedium!,
@@ -457,7 +460,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         decoration: InputDecoration(
                                           labelText: 'Search',
                                           hintText:
-                                              'You can search for names, types and descriptions!',
+                                              'You can search for titles, groups, types and descriptions!',
                                           hintStyle: Theme.of(context)
                                               .textTheme
                                               .bodyMedium!,
@@ -501,7 +504,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         decoration: InputDecoration(
                                           labelText: 'Search',
                                           hintText:
-                                              'You can search for names, types and descriptions!',
+                                              'You can search for titles, groups, types and descriptions!',
                                           hintStyle: Theme.of(context)
                                               .textTheme
                                               .bodyMedium!,
@@ -589,7 +592,10 @@ class _MyEventsPageState extends State<MyEventsPage>
               .map((event) => _buildEventTile(event, context))
               .toList(),
         ],
-        if (groupFilteredEvents.isEmpty) Center(child: noSearchResult(),),
+        if (groupFilteredEvents.isEmpty)
+          Center(
+            child: noSearchResult(),
+          ),
       ],
     );
   }
@@ -712,11 +718,22 @@ class _MyEventsPageState extends State<MyEventsPage>
                       SizedBox(width: 10),
                       InkWell(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MainScreen(
-                                      index: 9, date: event.startTime)));
+                          if (kIsWeb) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MainScreen(
+                                        index: 9, date: event.startTime)));
+                          } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DayCalendarPage(
+                                      username: widget.username,
+                                      date: event.startTime),
+                                ),
+                              );
+                          }
                         },
                         child: Tooltip(
                           message: "View in Calendar",
@@ -738,8 +755,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                               ),
                             );
                           },
-                          child: Icon(Icons.chat,
-                              size: 20, color: Style.lightBlue),
+                          child: Tooltip(
+                            message: "View Group Chat",
+                            child: Icon(Icons.chat,
+                                size: 20, color: Style.lightBlue),
+                          ),
                         ),
                       ] else ...[
                         SizedBox(width: 10),
@@ -751,8 +771,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                   return EventDetailsPage(event: event);
                                 });
                           },
-                          child: Icon(Icons.edit,
-                              size: 20, color: Style.lightBlue),
+                          child: Tooltip(
+                            message: "Edit Event",
+                            child: Icon(Icons.edit,
+                                size: 20, color: Style.lightBlue),
+                          ),
                         ),
                         SizedBox(width: 10),
                         InkWell(
@@ -779,6 +802,32 @@ class _MyEventsPageState extends State<MyEventsPage>
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (event.groupId != null) ...[
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.group, size: 20, color: Style.lightBlue),
+                    SizedBox(width: 5),
+                    Row(
+                      children: [
+                        Text(
+                          'Group: ',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(fontSize: 14),
+                        ),
+                        Text(
+                          event.groupId!,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
               SizedBox(height: 8),
               Row(
                 children: [
@@ -1329,17 +1378,20 @@ class _MyEventsPageState extends State<MyEventsPage>
       } else {
         groupFilteredEvents = groupEvents.where((event) {
           final title = event.title.toLowerCase();
-          print("Title: " + title);
           final description = event.description.toLowerCase();
-          print("Description: " + description);
+          final type = _getEventTypeString(event.type);
+          final groupId = event.groupId!;
           final searchLower = query.toLowerCase();
-          print("Query: " + searchLower);
 
           return query.isNotEmpty &&
               (isMatch(title, searchLower) ||
                   isMatch(description, searchLower) ||
+                  isMatch(type, searchLower) ||
+                  isMatch(groupId, searchLower) ||
                   title.contains(searchLower) ||
-                  description.contains(searchLower));
+                  description.contains(searchLower) ||
+                  type.contains(searchLower) ||
+                  groupId.contains(searchLower));
         }).toList();
       }
     });

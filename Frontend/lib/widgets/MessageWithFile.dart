@@ -337,7 +337,7 @@ class _MessageWithFileState extends State<MessageWithFile> {
                 height: 8,
               ),
               Wrap(
-                alignment: WrapAlignment.end,
+                alignment: WrapAlignment.start,
                 crossAxisAlignment: WrapCrossAlignment.end,
                 children: [
                   Column(children: [
