@@ -1084,73 +1084,12 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   }
 
   popUpDialogWeb(BuildContext context) {
-    List<String> options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Olaolaoloa'];
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AutocompleteDropdown(options: options);
-            /*return AlertDialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: Text(
-                "Send an Invite",
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.left,
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    controller: userNameController,
-                    decoration: InputDecoration(
-                      hintText: "Enter a valid username",
-                      hintStyle: Theme.of(context)
-                          .textTheme
-                          .bodySmall!
-                          .copyWith(color: Colors.grey, fontSize: 16),
-                      contentPadding: EdgeInsets.fromLTRB(0, 10, 20, 10),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Color.fromARGB(92, 161, 161, 161))),
-                      errorBorder: UnderlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.red, width: 2.0)),
-                      focusedErrorBorder: UnderlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.red, width: 2.0)),
-                    ), // Set initial value
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () async {
-                    {
-                      inviteGroup(context, widget.groupId,
-                          userNameController.text, _showErrorSnackbar);
-                      userNameController.clear();
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).primaryColor),
-                  child: const Text("INVITE"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    userNameController.clear();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).primaryColor),
-                  child: const Text("CANCEL"),
-                ),
-              ],
-            );*/
+            return AutocompleteDropdown(groupId: widget.groupId, showError: _showErrorSnackbar);
           }));
         });
   }
@@ -1162,92 +1101,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       backgroundColor: Style.darkBlue,
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
-          return SingleChildScrollView(
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.6,
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: 0,
-                    child: IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.pop(context); // closes the modal
-                      },
-                    ),
-                  ),
-                  // padding to account for button
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding:
-                            EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              "Send an Invite",
-                              style: Theme.of(context).textTheme.titleMedium,
-                              textAlign: TextAlign.left,
-                            ),
-                            TextField(
-                              style: Theme.of(context).textTheme.bodyLarge,
-                              controller: userNameController,
-                              decoration: InputDecoration(
-                                hintText: "Enter a valid username",
-                                hintStyle: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall!
-                                    .copyWith(color: Colors.grey),
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(0, 10, 20, 10),
-                                focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey)),
-                                enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color:
-                                            Color.fromARGB(92, 161, 161, 161))),
-                                errorBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.red, width: 2.0)),
-                                focusedErrorBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.red, width: 2.0)),
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    inviteGroup(
-                                      context,
-                                      widget.groupId,
-                                      userNameController.text,
-                                      _showErrorSnackbar,
-                                    );
-                                    userNameController.clear();
-                                    Navigator.of(context).pop();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black87,
-                                  ),
-                                  child: const Text("INVITE"),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
+          return AutocompleteDropdown(groupId: widget.groupId, showError: _showErrorSnackbar);
         }),
       ),
     );
@@ -2115,7 +1969,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   }
 
   Future<void> inviteGroup(
-    BuildContext context,
     String groupId,
     String userId,
     void Function(String, bool) showErrorSnackbar,
