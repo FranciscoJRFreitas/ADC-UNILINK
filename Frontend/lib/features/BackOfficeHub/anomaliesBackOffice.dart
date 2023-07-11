@@ -723,19 +723,30 @@ class _AnomaliesPageState extends State<AnomaliesPage>
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Anomaly Status Changed'),
-            content: Text('Anomaly status changed successfully.'),
+            // title: Text('Anomaly status changed successfully.',
+            // style: Theme.of(context).textTheme.titleMedium),
+            content: Padding(
+              padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+              child: Text(
+                'Anomaly status changed successfully.',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
             actions: <Widget>[
-              TextButton(
-                child: Text('OK'),
+              ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).primaryColor,
+                ),
+                child: const Text("OK"),
               ),
             ],
           );
         },
       );
+
     } else {
       Navigator.of(context).pop();
       showErrorSnackbar(

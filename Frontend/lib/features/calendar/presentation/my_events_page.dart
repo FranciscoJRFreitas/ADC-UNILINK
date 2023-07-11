@@ -725,14 +725,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     builder: (context) => MainScreen(
                                         index: 9, date: event.startTime)));
                           } else {
-                              Navigator.push(
+                            Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DayCalendarPage(
-                                      username: widget.username,
-                                      date: event.startTime),
-                                ),
-                              );
+                                    builder: (context) => MainScreen(
+                                        index: 9, date: event.startTime)));
                           }
                         },
                         child: Tooltip(

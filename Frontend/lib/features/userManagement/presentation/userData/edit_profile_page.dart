@@ -320,7 +320,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                           controller: displayNameController,
                           padding: EdgeInsets.fromLTRB(20, 10, 20, 10)),
                     ),
-                    SizedBox(height: 5),
+                    SizedBox(height: 15),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: LineTextField(
@@ -388,7 +388,7 @@ class _EditProfilePage extends State<EditProfilePage> {
                         },
                       ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 5),
                     Container(
                       padding: EdgeInsets.fromLTRB(offset, 20, offset, 0),
                       child: MyTextButton(

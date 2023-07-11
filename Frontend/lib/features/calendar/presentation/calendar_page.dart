@@ -44,6 +44,7 @@ class _CalendarPageState extends State<CalendarPage> {
   DateFormat customFormat = DateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'");
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
+
   _CalendarPageState(date) {
     selectedDay = DateTime(date.year, date.month, date.day);
     focusedDay = date;
@@ -386,13 +387,15 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: format == CalendarFormat.month
                       ? 200
                       : format == CalendarFormat.twoWeeks
-                      ? MediaQuery.of(context).size.height * 0.57
-                      : MediaQuery.of(context).size.height * 0.64,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: _scheduleWidget(context),
-                    ),
-                  ),
+                          ? MediaQuery.of(context).size.height * 0.57
+                          : MediaQuery.of(context).size.height * 0.64,
+                  child: schedule.isEmpty
+                      ? noEventWidget(false)
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: _scheduleWidget(context),
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -410,8 +413,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: format == CalendarFormat.month
                       ? 200
                       : format == CalendarFormat.twoWeeks
-                      ? MediaQuery.of(context).size.height * 0.57
-                      : MediaQuery.of(context).size.height * 0.64,
+                          ? MediaQuery.of(context).size.height * 0.57
+                          : MediaQuery.of(context).size.height * 0.64,
                   child: SingleChildScrollView(
                     child: Column(children: [
                       _personalEventsWidget(context),
@@ -434,8 +437,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: format == CalendarFormat.month
                       ? 200
                       : format == CalendarFormat.twoWeeks
-                      ? MediaQuery.of(context).size.height * 0.55
-                      : MediaQuery.of(context).size.height * 0.62,
+                          ? MediaQuery.of(context).size.height * 0.57
+                          : MediaQuery.of(context).size.height * 0.64,
                   child: SingleChildScrollView(
                     child: Column(children: [
                       _groupEventsWidget(context),
@@ -610,14 +613,16 @@ class _CalendarPageState extends State<CalendarPage> {
       }
     });
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: personalEvents.length,
-      itemBuilder: (context, index) {
-        return _buildEventTile(personalEvents[index], context);
-      },
-    );
+    return personalEvents.isEmpty
+        ? noEventWidget(false)
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: personalEvents.length,
+            itemBuilder: (context, index) {
+              return _buildEventTile(personalEvents[index], context);
+            },
+          );
   }
 
   Widget _groupEventsWidget(BuildContext context) {
@@ -631,19 +636,21 @@ class _CalendarPageState extends State<CalendarPage> {
       }
     });
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: groupEvents.length,
-      itemBuilder: (context, index) {
-        String groupId = groupEvents.keys.elementAt(index);
-        return Column(
-          children: groupEvents[groupId]!
-              .map((event) => _buildEventTile(event, context))
-              .toList(),
-        );
-      },
-    );
+    return groupEvents.isEmpty
+        ? noEventWidget(false)
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: groupEvents.length,
+            itemBuilder: (context, index) {
+              String groupId = groupEvents.keys.elementAt(index);
+              return Column(
+                children: groupEvents[groupId]!
+                    .map((event) => _buildEventTile(event, context))
+                    .toList(),
+              );
+            },
+          );
   }
 
   Widget _buildEventTile(Event event, BuildContext context) {
@@ -1181,8 +1188,8 @@ class _CalendarPageState extends State<CalendarPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                        height: 40), // Add extra space at top for close button
+                    SizedBox(height: 40),
+                    // Add extra space at top for close button
                     const Text(
                       "Add an event",
                       textAlign: TextAlign.left,
@@ -1374,6 +1381,39 @@ class _CalendarPageState extends State<CalendarPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
+  }
+
+  noEventWidget(bool isGroupEvents) {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height / 2,
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {},
+                child: Icon(
+                  Icons.hourglass_empty,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don't have any events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
       ),
     );
   }
