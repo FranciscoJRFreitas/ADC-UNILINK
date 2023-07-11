@@ -361,30 +361,7 @@ Future<int> login(
         final FirebaseAuth.User? _currentUser = userCredential.user;
 
         if (_currentUser != null) {
-          DatabaseReference userRef =
-              FirebaseDatabase.instance.ref().child('chat').child(username);
-          DatabaseReference userGroupsRef = userRef.child('Groups');
-
-          /* // Store the token in the database
-        await userRef
-            .child('token')
-            .set(await FirebaseMessaging.instance.getToken()); */
-
-          // Retrieve user's group IDs from the database
-          DatabaseEvent userGroupsEvent = await userGroupsRef.once();
-
-          // Retrieve the DataSnapshot from the Event
-          DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
-
-          // Subscribe to all the groups
-          if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
-            Map<dynamic, dynamic> userGroups =
-                userGroupsSnapshot.value as Map<dynamic, dynamic>;
-            for (String groupId in userGroups.keys) {
-              if (!kIsWeb)
-                await FirebaseMessaging.instance.subscribeToTopic(groupId);
-            }
-          }
+          if (!kIsWeb) _subscribeTopic(_currentUser, username);
         }
       } catch (e) {
         // Failed to authenticate user
@@ -442,6 +419,37 @@ Future<int> login(
     }
 
     return response.statusCode;
+  }
+}
+
+void _subscribeTopic(FirebaseAuth.User _currentUser, String username) async {
+  //Unsubscribing to all groups to update all user subscriptions
+  DatabaseReference groupsRef = FirebaseDatabase.instance.ref().child('groups');
+
+  DatabaseEvent allGroupsEvent = await groupsRef.once();
+  DataSnapshot allGroupsSnapshot = allGroupsEvent.snapshot;
+
+  if (allGroupsSnapshot.value is Map<dynamic, dynamic>) {
+    Map<dynamic, dynamic> userGroups =
+        allGroupsSnapshot.value as Map<dynamic, dynamic>;
+    for (String groupId in userGroups.keys) {
+      await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+    }
+  }
+
+  DatabaseReference userRef =
+      FirebaseDatabase.instance.ref().child('chat').child(username);
+  DatabaseReference userGroupsRef = userRef.child('Groups');
+
+  DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+  DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+  if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+    Map<dynamic, dynamic> userGroups =
+        userGroupsSnapshot.value as Map<dynamic, dynamic>;
+    for (String groupId in userGroups.keys) {
+      await FirebaseMessaging.instance.subscribeToTopic(groupId);
+    }
   }
 }
 

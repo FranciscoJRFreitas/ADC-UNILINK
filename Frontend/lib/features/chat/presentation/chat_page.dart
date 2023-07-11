@@ -957,9 +957,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
     if (response.statusCode == 200) {
       showErrorSnackbar('Created a group successfully!', false);
-      //if (!kIsWeb) _firebaseMessaging.subscribeToTopic(groupName);
+      final FirebaseAuth.User? _currentUser =
+          FirebaseAuth.FirebaseAuth.instance.currentUser;
+      if (_currentUser != null) {
+        if (!kIsWeb)
+          await FirebaseMessaging.instance.subscribeToTopic(groupName);
+      }
     } else {
-      showErrorSnackbar('This group already exists. Ask the admin to send you an invite!', true);
+      showErrorSnackbar(
+          'This group already exists. Ask the admin to send you an invite!',
+          true);
     }
     groupNameController.clear();
     descriptionController.clear();

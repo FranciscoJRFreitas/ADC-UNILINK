@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebaseAuth;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +18,9 @@ import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
 import 'package:unilink2023/widgets/CombinedButton.dart';
 import 'package:unilink2023/widgets/MessageWithFile.dart';
 import '../../../constants.dart';
-import '../../userManagement/domain/User.dart';
+import '../../intro/welcome_page.dart';
+import '../../navigation/main_screen_page.dart';
+import '../../userManagement/domain/User.dart' as domainUser;
 import '../../../widgets/message_tile.dart';
 import '../domain/Message.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -25,7 +29,7 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
-  final User user;
+  final domainUser.User user;
 
   final TextEditingController emailUsernameController = TextEditingController();
 
@@ -142,6 +146,35 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     });
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
+    });
+
+    DatabaseReference userRef = FirebaseDatabase.instance
+        .ref()
+        .child('chat')
+        .child(widget.user.username);
+    DatabaseReference userGroupsRef = userRef.child('Groups');
+    userGroupsRef.onChildRemoved.listen((event) async {
+      // Get the groupId of the removed child
+      String removedGroupId = event.snapshot.key as String;
+
+      if (removedGroupId == widget.groupId) {
+        cacheFactory.removeGroup(widget.groupId);
+        cacheFactory.deleteMessage(widget.groupId, '-1');
+        final firebaseAuth.User? _currentUser =
+            FirebaseAuth.instance.currentUser;
+        if (_currentUser != null) {
+          if (!kIsWeb)
+            await FirebaseMessaging.instance
+                .unsubscribeFromTopic(widget.groupId);
+        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(index: 6),
+          ),
+        );
+        _showErrorSnackbar("You no longer belong to group ${widget.groupId}!", true);
+      }
     });
   }
 
@@ -958,6 +991,18 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             dateTimeA.month != dateTimeB.month ||
             dateTimeA.day != dateTimeB.day
         : false;
+  }
+
+  void _showErrorSnackbar(String message, bool Error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
+      ),
+    );
   }
 
   sendMessage(String content) async {

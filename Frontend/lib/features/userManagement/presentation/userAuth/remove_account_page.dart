@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:unilink2023/features/screen.dart';
 import 'package:flutter/material.dart';
 
@@ -209,6 +211,21 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        if (!kIsWeb) {
+          DatabaseReference groupsRef =
+              FirebaseDatabase.instance.ref().child('groups');
+
+          DatabaseEvent allGroupsEvent = await groupsRef.once();
+          DataSnapshot allGroupsSnapshot = allGroupsEvent.snapshot;
+
+          if (allGroupsSnapshot.value is Map<dynamic, dynamic>) {
+            Map<dynamic, dynamic> userGroups =
+                allGroupsSnapshot.value as Map<dynamic, dynamic>;
+            for (String groupId in userGroups.keys) {
+              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+            }
+          }
+        }
         removeUserDataFromFireBase(
             user, targetUsername.isEmpty ? username : targetUsername);
       }
@@ -320,7 +337,6 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
   }
 
   void removeUserDataFromFireBase(User user, String username) async {
-
     DatabaseReference userRef =
         FirebaseDatabase.instance.ref().child('chat').child(username);
     DatabaseReference userGroupsRef = userRef.child('Groups');
@@ -339,7 +355,6 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
               await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
           }*/
     }
-
 
     //WARNING:
     //cant remove from users because user.getIdToken() can be from user that is deleting...

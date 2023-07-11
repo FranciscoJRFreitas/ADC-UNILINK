@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -1089,7 +1091,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AutocompleteDropdown(groupId: widget.groupId, showError: _showErrorSnackbar);
+            return AutocompleteDropdown(
+                groupId: widget.groupId, showError: _showErrorSnackbar);
           }));
         });
   }
@@ -1101,7 +1104,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       backgroundColor: Style.darkBlue,
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
-          return AutocompleteDropdown(groupId: widget.groupId, showError: _showErrorSnackbar);
+          return AutocompleteDropdown(
+              groupId: widget.groupId, showError: _showErrorSnackbar);
         }),
       ),
     );
@@ -2120,6 +2124,11 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
         await imageRef.delete();
         showErrorSnackbar('Left group!', false);
+      }
+      final User? _currentUser = FirebaseAuth.instance.currentUser;
+      if (_currentUser != null) {
+        if (!kIsWeb)
+          await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
       }
     } else {
       showErrorSnackbar('Error Leaving group!', true);

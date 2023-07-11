@@ -22,17 +22,13 @@ class _SplashPageState extends State<SplashPage>
   late AnimationController _controller;
   @override
   void initState() {
-    const int msMobile = 2500;
-    const int msWeb = 3500;
-    const bool testing = true;
-    // set this to true when testing
     _controller = AnimationController(
       duration: const Duration(milliseconds: 5000),
       vsync: this,
     );
     super.initState();
     Timer(
-      Duration(milliseconds: testing ? 0 : (kIsWeb ? msWeb : msMobile)),
+      Duration(milliseconds: (kIsWeb ? 0 : 2500)),
       () async {
         var loginB = await cacheFactory.get('settings', 'checkLogin');
         var introB = await cacheFactory.get('settings', 'checkIntro');
@@ -91,7 +87,7 @@ class _SplashPageState extends State<SplashPage>
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 4, 62, 129),
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Center(
@@ -107,7 +103,7 @@ class _SplashPageState extends State<SplashPage>
                               kDarkTheme
                           ? 'assets/icon/ICON_UNILINK-03.png'
                           : 'assets/icon/ICON_UNILINK-03.png',*/
-                  'assets/icon/ICON_UNILINK-03.png',
+                  'assets/icon/3dgifmaker67696.gif',
                   width: 300,
                   height: 300,
                   //fit: BoxFit.cover,

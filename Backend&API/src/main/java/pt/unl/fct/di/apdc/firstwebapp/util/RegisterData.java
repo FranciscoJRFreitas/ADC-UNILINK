@@ -71,8 +71,11 @@ public class RegisterData {
             return "Invalid tax identification number format.";
         } else if (StringUtils.isNotEmpty(this.postalCode) && !this.postalCode.matches("^\\d{4}-\\d{3}$")) {
             return "Invalid postal code format.";
+        } else if (this.username.matches(".*[.#$\\[\\]].*")) {
+            return "Username must not contain the following symbols: '.', '#', '$', '[', or ']'.";
         } else {
             return "OK";
         }
     }
+
 }
