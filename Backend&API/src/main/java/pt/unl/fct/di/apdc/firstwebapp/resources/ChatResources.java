@@ -444,7 +444,7 @@ public class ChatResources {
                 "    <p class='email-text'>To accept the invitation to join this group, please click the button below.</p>" +
                 "    <a target='_blank' href='" + invitationLink + "' class='email-button'>Accept Invitation</a>" +
                 "    <p class='email-text'>" +
-                "        If the button above does not work, you can copy and paste the following link into your browser:<br>" +
+                "        If the button above does not work, you can copy and paste the following link directly into your browser:<br>" +
                 "        <a target='_blank' href='" + invitationLink + "'>" + invitationLink + "</a><br><br>" +
                 "        Best regards,<br>" +
                 "        Sender" +
