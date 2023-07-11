@@ -36,6 +36,9 @@ class ReportAnomalyTabState extends State<ReportAnomalyTab> {
             key: _formKey,
             child: Column(
               children: [
+                SizedBox(
+                  height: 10,
+                ),
                 _buildAnomalyTitleField(),
                 SizedBox(height: 16.0),
                 _buildAnomalyDescriptionField(),

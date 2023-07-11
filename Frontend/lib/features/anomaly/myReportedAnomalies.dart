@@ -45,6 +45,9 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(children: [
+      SizedBox(
+        height: 10,
+      ),
       Row(
         children: [
           Flexible(
