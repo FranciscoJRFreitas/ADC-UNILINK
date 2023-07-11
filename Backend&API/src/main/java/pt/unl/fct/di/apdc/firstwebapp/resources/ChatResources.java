@@ -49,18 +49,18 @@ public class ChatResources {
 public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders headers) {
     for (Group group : groups) {
         Response response = createGroup(group, headers);
-        // no caso the algum grupo não tenha sucesso a ser criado 
+        // no caso the algum grupo não tenha sucesso a ser criado
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             return response;
         }
-        //se teve sucesso a criar o grupo adicionar os participantes 
+        //se teve sucesso a criar o grupo adicionar os participantes
         List<String> participants = group.participants;
         for (String participant : participants) {
-           
+
              inviteToGroup(group.DisplayName, participant ,headers);
         }
     }
-    
+
     return Response.ok("{}").build();
 }
 
@@ -136,6 +136,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         newMessageRef.child("message").setValueAsync("Welcome to " + group.DisplayName + "!");
         newMessageRef.child("timestamp").setValueAsync(System.currentTimeMillis());
         newMessageRef.child("isSystemMessage").setValueAsync(true);
+        newMessageRef.child("isEdited").setValueAsync(false);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
         DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);

@@ -105,7 +105,6 @@ class MyApp extends StatelessWidget {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     final localeProvider = Provider.of<LocaleProvider>(context);
     final String apiKey = "AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g";
-    final _userSelectedLocale = null;
     return GoogleTranslatorInit(
       apiKey,
       translateFrom: Locale('en'),

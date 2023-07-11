@@ -349,6 +349,14 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                     leavePopUpDialogMobile(context);
                   },
                 ),
+                if (isAdmin)
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    tooltip: 'Delete Group',
+                    onPressed: () {
+                      deletePopUpDialogMobile(context);
+                    },
+                  ),
               ],
             ),
             body: _buildLayout(context));
@@ -396,6 +404,33 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                             leavePopUpDialogWeb(context);
                           else
                             leavePopUpDialogMobile(context);
+                        },
+                        style: TextButton.styleFrom(
+                          minimumSize: Size(50, 50),
+                        ),
+                      ),
+                    ),
+                  if (kIsWeb && isAdmin)
+                    Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: TextButton.icon(
+                        icon: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).secondaryHeaderColor,
+                          size: 16,
+                        ),
+                        label: Text('Delete',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                    color: Theme.of(context)
+                                        .secondaryHeaderColor)),
+                        onPressed: () {
+                          if (kIsWeb)
+                            deletePopUpDialogWeb(context);
+                          else
+                            deletePopUpDialogMobile(context);
                         },
                         style: TextButton.styleFrom(
                           minimumSize: Size(50, 50),
@@ -568,7 +603,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                               title: Row(
                                                 children: [
                                                   getDateIcon(event, context),
-                                                  SizedBox(width: 10),
                                                   InkWell(
                                                     child: Text(
                                                       event.title,
@@ -594,11 +628,16 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                         date: event
                                                                             .startTime)));
                                                           },
-                                                          child: Icon(
-                                                              Icons.schedule,
-                                                              size: 20,
-                                                              color: Style
-                                                                  .lightBlue),
+                                                          child: Tooltip(
+                                                            message:
+                                                                "View in Calendar",
+                                                            child: Icon(
+                                                                Icons
+                                                                    .perm_contact_calendar,
+                                                                size: 20,
+                                                                color: Style
+                                                                    .lightBlue),
+                                                          ),
                                                         ),
                                                         if (event.location !=
                                                             "0") ...[
@@ -614,12 +653,16 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                           location:
                                                                               event.location)));
                                                             },
-                                                            child: Icon(
-                                                                Icons
-                                                                    .directions,
-                                                                size: 20,
-                                                                color: Style
-                                                                    .lightBlue),
+                                                            child: Tooltip(
+                                                              message:
+                                                                  "View in Maps",
+                                                              child: Icon(
+                                                                  Icons
+                                                                      .directions,
+                                                                  size: 20,
+                                                                  color: Style
+                                                                      .lightBlue),
+                                                            ),
                                                           ),
                                                         ],
                                                         if (isAdmin) ...[
@@ -635,11 +678,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                     context,
                                                                     event.id!);
                                                             },
-                                                            child: Icon(
-                                                              Icons.delete,
-                                                              color: Colors
-                                                                  .lightBlue,
-                                                              size: 20,
+                                                            child: Tooltip(
+                                                              message:
+                                                                  "Remove Event",
+                                                              child: Icon(
+                                                                Icons.delete,
+                                                                color: Colors
+                                                                    .lightBlue,
+                                                                size: 20,
+                                                              ),
                                                             ),
                                                           ),
                                                         ],
@@ -1186,6 +1233,138 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   ),
                 ],
               ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  //leave group
+  deletePopUpDialogWeb(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            "Delete Group",
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.left,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Are you sure you want to delete this group?",
+                  style: Theme.of(context).textTheme.bodyLarge),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                deleteGroup(context, widget.groupId, widget.username,
+                    _showErrorSnackbar);
+
+                Future.delayed(Duration(milliseconds: 100), () {
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => MainScreen(index: 6),
+                    ),
+                  );
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).primaryColor,
+              ),
+              child: const Text("CONFIRM"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).primaryColor,
+              ),
+              child: const Text("CANCEL"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void deletePopUpDialogMobile(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => StatefulBuilder(
+        builder: ((context, setState) {
+          return Container(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            height: MediaQuery.of(context).size.height * 0.30,
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.0),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            Navigator.pop(context); // closes the modal
+                          },
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 40),
+                          // Add extra space at top for close button
+                          Text(
+                            "Delete Group",
+                            textAlign: TextAlign.left,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Are you sure you want to delete this group?",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () async {
+                              deleteGroup(context, widget.groupId,
+                                  widget.username, _showErrorSnackbar);
+
+                              Future.delayed(Duration(milliseconds: 100), () {
+                                Navigator.pop(context);
+                                Navigator.pushReplacement(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => MainScreen(index: 6),
+                                  ),
+                                );
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                            ),
+                            child: const Text("CONFIRM"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
         }),
@@ -2065,11 +2244,64 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     });
 
     if (response.statusCode == 200) {
-      showErrorSnackbar('Left group!', false);
+      final databaseRef =
+          FirebaseDatabase.instance.ref().child('groups').child(groupId);
+      // Check if the group exists in the Realtime Database
+      final DatabaseEvent snapshot = await databaseRef.once();
+      if (snapshot.snapshot.value == null) {
+        deleteFolder("GroupAttachements/${groupId}");
+
+        final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
+        await imageRef.delete();
+        showErrorSnackbar('Left group!', false);
+      }
     } else {
       showErrorSnackbar('Error Leaving group!', true);
     }
   }
+
+  Future<void> deleteGroup(
+    BuildContext context,
+    String groupId,
+    String userId,
+    void Function(String, bool) showErrorSnackbar,
+  ) async {
+    cacheFactory.removeGroup(groupId);
+    cacheFactory.deleteMessage(
+        groupId, '-1'); //Deleting group messages from cache
+    final url = kBaseUrl + "rest/chat/delete/${groupId}";
+    final tokenID = await cacheFactory.get('users', 'token');
+    Token token = new Token(tokenID: tokenID, username: userId);
+
+    final response = await http.delete(Uri.parse(url), headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${json.encode(token.toJson())}'
+    });
+
+    if (response.statusCode == 200) {
+      deleteFolder("GroupAttachements/${groupId}");
+
+      final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
+      await imageRef.delete();
+
+      showErrorSnackbar('deleted group!', false);
+    } else {
+      showErrorSnackbar('Error deleting group!', true);
+    }
+  }
+}
+
+Future<void> deleteFolder(String folderPath) async {
+  final storage = FirebaseStorage.instance;
+  final ListResult result = await storage.ref(folderPath).listAll();
+
+  // Delete each file within the folder
+  for (final Reference ref in result.items) {
+    await ref.delete();
+  }
+
+  // Delete the empty folder
+  await storage.ref(folderPath).delete();
 }
 
 class MembersData {

@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 class Message {
   final bool containsFile;
   final bool isSystemMessage;
+  final bool isEdited;
   final String? extension;
   final String id;
   final String text;
@@ -19,11 +20,13 @@ class Message {
     required this.displayName,
     required this.timestamp,
     this.extension,
+    required this.isEdited,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'isSystemMessage': isSystemMessage,
+      'isEdited': isEdited,
       'id': id,
       'containsFile': containsFile,
       'text': text,
@@ -44,6 +47,7 @@ class Message {
       displayName: map['displayName'],
       timestamp: map['timestamp'],
       extension: map['extension'],
+      isEdited: map['isEdited'],
     );
   }
 
@@ -60,6 +64,7 @@ class Message {
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,
+            isEdited: data['isEdited'] as bool,
           )
         : Message(
             id: snapshot.key!,
@@ -69,6 +74,7 @@ class Message {
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,
+            isEdited: data['isEdited'] as bool,
           );
   }
 
@@ -84,6 +90,7 @@ class Message {
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,
+            isEdited: data['isEdited'] as bool,
           )
         : Message(
             id: key,
@@ -93,6 +100,7 @@ class Message {
             timestamp: data['timestamp'] as int,
             containsFile: data['containsFile'] as bool,
             isSystemMessage: data['isSystemMessage'] as bool,
+            isEdited: data['isEdited'] as bool,
           );
   }
 }

@@ -313,8 +313,11 @@ class _AnomaliesPageState extends State<AnomaliesPage>
                               },
                             );
                           },
-                          child: Icon(Icons.directions,
-                              size: 20, color: _statusColor),
+                          child: Tooltip(
+                            message: "View in Maps",
+                            child: Icon(Icons.directions,
+                                size: 20, color: _statusColor),
+                          ),
                         ),
                       ]
                     ],

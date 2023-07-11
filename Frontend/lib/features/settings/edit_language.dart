@@ -3,7 +3,6 @@ import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/widgets/LineComboBoxFlag.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:country_flags/country_flags.dart';
 import 'package:unilink2023/domain/LocaleProvider.dart';
 import 'package:provider/provider.dart';
 
