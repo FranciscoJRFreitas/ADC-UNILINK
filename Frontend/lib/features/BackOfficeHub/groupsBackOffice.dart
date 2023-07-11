@@ -11,6 +11,7 @@ import '../../application/loadLocations.dart';
 import '../../constants.dart';
 import '../../data/cache_factory_provider.dart';
 import '../../domain/ThemeNotifier.dart';
+import '../../widgets/LineTextField.dart';
 import '../chat/domain/Group.dart';
 import '../navigation/main_screen_page.dart';
 import 'package:http/http.dart' as http;
@@ -36,19 +37,34 @@ class _GroupPageState extends State<GroupPage> {
     DatabaseReference groupsRef =
         FirebaseDatabase.instance.ref().child('groups');
 
-    groupsRef.onChildAdded.listen((event) {
+    groupsRef.onChildAdded.listen((event1) {
       setState(() {
         Map<dynamic, dynamic> groupData =
-            event.snapshot.value as Map<dynamic, dynamic>;
-        Group currentGroup = Group(
-            id: event.snapshot.key!,
-            DisplayName: groupData["DisplayName"],
-            description: groupData["description"],
-            numberOfMembers: groupData.values.length);
-        groups.add(currentGroup);
-      });
-    });
+        event1.snapshot.value as Map<dynamic, dynamic>;
+        //print(groupData["DisplayName"]);
+        DatabaseReference membersRef =
+        FirebaseDatabase.instance.ref().child('members').child(
+            groupData["DisplayName"]);
 
+        membersRef.once().then((event2) {
+          setState(() {
+            Map<dynamic, dynamic>? membersData = event2.snapshot.value as Map<dynamic, dynamic>?;
+
+            int numberOfMembers = membersData?.length ?? 0;
+
+            //print(numberOfMembers);
+            Group currentGroup = Group(
+              id: event1.snapshot.key!,
+              DisplayName: groupData["DisplayName"],
+              description: groupData["description"],
+              numberOfMembers: numberOfMembers,
+            );
+            groups.add(currentGroup);
+            print(groups);
+          });
+          });
+        });
+      });
     groupsRef.onChildRemoved.listen((event) {
       String groupId = event.snapshot.key as String;
 
@@ -138,7 +154,7 @@ class _GroupPageState extends State<GroupPage> {
   Widget buildCreateGroup() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 100),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(width: 20),
@@ -156,56 +172,44 @@ class _GroupPageState extends State<GroupPage> {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  String groupName = '';
-                  String description = '';
-                  String adminId = '';
+                  TextEditingController groupName = TextEditingController();
+                  TextEditingController description = TextEditingController();
+                  TextEditingController adminId = TextEditingController();
 
                   return AlertDialog(
-                    title: Text('Create Group'),
+                    title: Text('Create Group', style: TextStyle(fontSize: 30)),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        TextField(
-                          onChanged: (value) {
-                            groupName = value;
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Group Name',
-                          ),
+                        LineTextField(
+                          controller: groupName,
+                          title: 'Group Name',
                         ),
                         SizedBox(height: 10),
-                        TextField(
-                          onChanged: (value) {
-                            description = value;
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Description',
-                          ),
+                        LineTextField(
+                          controller: description,
+                          title: 'Description',
                         ),
                         SizedBox(height: 10),
-                        TextField(
-                          onChanged: (value) {
-                            adminId = value;
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Admin ID',
+                        LineTextField(
+                          controller: adminId,
+                          title: 'Admin ID',
                           ),
-                        ),
                       ],
                     ),
                     actions: <Widget>[
                       ElevatedButton(
-                        child: Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      ElevatedButton(
                         child: Text('Create'),
                         onPressed: () {
                           Navigator.of(context).pop();
-                          createGroup(context, groupName, description, adminId,
+                          createGroup(context, groupName.text, description.text, adminId.text,
                               _showErrorSnackbar);
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
                         },
                       ),
                     ],
@@ -214,7 +218,7 @@ class _GroupPageState extends State<GroupPage> {
               );
             },
           ),
-          SizedBox(width: 20),
+          SizedBox(height: 30),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor:
@@ -229,7 +233,7 @@ class _GroupPageState extends State<GroupPage> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Create Groups'),
+                    title: Text('Create Groups', style: TextStyle(fontSize: 30)),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -243,17 +247,17 @@ class _GroupPageState extends State<GroupPage> {
                     ),
                     actions: <Widget>[
                       ElevatedButton(
-                        child: Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      ElevatedButton(
                         child: Text('Create'),
                         onPressed: () {
                           createGroupsFromFile();
                           Navigator.of(context).pop();
                           // Process your file here
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
                         },
                       ),
                     ],
@@ -276,117 +280,111 @@ class _GroupPageState extends State<GroupPage> {
 
     return Padding(
       padding: EdgeInsets.only(top: 10),
-      child: Expanded(
-        child: ListView.builder(
-          itemCount: groups.length,
-          itemBuilder: (context, index) {
-            Group group = groups[index];
-            return Material(
-              color: Colors.transparent,
-              child: GestureDetector(
-                onTap: () {
-                  // Handle group onTap
-                },
-                child: Stack(
-                  children: <Widget>[
-                    Text(
-                      '${group.DisplayName}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Divider(
-                      color: Provider.of<ThemeNotifier>(context).currentTheme ==
-                              kDarkTheme
-                          ? Colors.white60
-                          : Theme.of(context).primaryColor,
-                      thickness: 1,
-                    ),
-                    Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        child: ListTile(
-                          title: Text(
-                            group.DisplayName,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(group.description),
-                              Text(
-                                  'Number of Members: ${group.numberOfMembers}'),
-                              Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _showInviteDialog(
-                                          context, group.DisplayName);
-                                    },
-                                    child: Text('Invite'),
-                                  ),
-                                  SizedBox(width: 10),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _showKickDialog(
-                                          context, group.DisplayName);
-                                    },
-                                    child: Text('Kick'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+      child: ListView.builder(
+        itemCount: groups.length,
+        itemBuilder: (context, index) {
+          Group group = groups[index];
+          return Material(
+            color: Colors.transparent,
+            child: GestureDetector(
+              onTap: () {
+                // Handle group onTap
+              },
+              child: Stack(
+                children: <Widget>[
+                  Text(
+                    '${group.DisplayName}',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Divider(
+                    color: Provider.of<ThemeNotifier>(context).currentTheme == kDarkTheme
+                        ? Colors.white60
+                        : Theme.of(context).primaryColor,
+                    thickness: 1,
+                  ),
+                  Container(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                      child: ListTile(
+                        title: Text(
+                          group.DisplayName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(group.description),
+                            Text('Number of Members: ${group.numberOfMembers}'),
+                            Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _showInviteDialog(context, group.DisplayName);
+                                  },
+                                  child: Text('Invite'),
+                                ),
+                                SizedBox(width: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _showKickDialog(context, group.DisplayName);
+                                  },
+                                  child: Text('Kick'),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    Positioned(
-                      top: 15,
-                      right: 10,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.delete, color: Colors.blue),
-                          onPressed: () {
-                            _showDeleteConfirmation(context, group.DisplayName);
-                          },
-                        ),
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 10,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: Icon(Icons.delete, color: Colors.blue),
+                        onPressed: () {
+                          _showDeleteConfirmation(context, group.DisplayName);
+                        },
                       ),
                     ),
-                    Divider(
-                      color: Colors.black87,
-                      thickness: 1,
-                    ),
-                  ],
-                ),
+                  ),
+                  Divider(
+                    color: Colors.black87,
+                    thickness: 1,
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
+
 
   void _showDeleteConfirmation(BuildContext context, String groupId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Group'),
-          content: Text('Are you sure you want to delete this group?'),
+          title: Text('Delete Group', style: TextStyle(fontSize: 30)),
+          content: Text('Are you sure you want to delete this group?', style: Theme.of(context).textTheme.bodyLarge),
           actions: <Widget>[
-            ElevatedButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
             ElevatedButton(
               child: Text('Delete'),
               onPressed: () {
                 deleteGroup(context, groupId, _showErrorSnackbar);
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Cancel'),
+              onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
@@ -400,29 +398,25 @@ class _GroupPageState extends State<GroupPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        String userId = '';
+        TextEditingController userId = TextEditingController();
 
         return AlertDialog(
-          title: Text('Invite User'),
-          content: TextField(
-            onChanged: (value) {
-              userId = value;
-            },
-            decoration: InputDecoration(
-              hintText: 'User ID',
-            ),
+          title: Text('Invite User', style: TextStyle(fontSize: 30)),
+          content: LineTextField(
+            controller: userId,
+            title: 'User ID',
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text('Cancel'),
+              child: Text('Invite'),
               onPressed: () {
+                inviteGroup(context, groupId, userId.text, _showErrorSnackbar);
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Invite'),
+              child: Text('Cancel'),
               onPressed: () {
-                inviteGroup(context, groupId, userId, _showErrorSnackbar);
                 Navigator.of(context).pop();
               },
             ),
@@ -436,29 +430,25 @@ class _GroupPageState extends State<GroupPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        String userId = '';
+        TextEditingController userId = TextEditingController();
 
         return AlertDialog(
-          title: Text('Kick User'),
-          content: TextField(
-            onChanged: (value) {
-              userId = value;
-            },
-            decoration: InputDecoration(
-              hintText: 'User ID',
-            ),
+          title: Text('Kick User', style: TextStyle(fontSize: 30)),
+          content: LineTextField(
+            controller: userId,
+            title: 'User ID',
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text('Cancel'),
+              child: Text('Kick'),
               onPressed: () {
+                kickGroup(context, groupId, userId.text, _showErrorSnackbar);
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Kick'),
+              child: Text('Cancel'),
               onPressed: () {
-                kickGroup(context, groupId, userId, _showErrorSnackbar);
                 Navigator.of(context).pop();
               },
             ),
