@@ -344,6 +344,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                       // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
+                        setState(() {});
                       },
                     ),
                   ),
