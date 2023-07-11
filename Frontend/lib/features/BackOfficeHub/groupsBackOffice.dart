@@ -27,6 +27,7 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   List<Group> groups = []; // Replace with your group list
   PlatformFile file = PlatformFile(name: "", size: 0);
+  Map<String, List<String>> groupMembers = {};
 
   @override
   void initState() {
@@ -51,9 +52,14 @@ class _GroupPageState extends State<GroupPage> {
           setState(() {
             Map<dynamic, dynamic>? membersData = event2.snapshot.value as Map<dynamic, dynamic>?;
 
+            if (membersData != null) {
+              List<String> memberKeys = membersData.keys.map((key) => key.toString()).toList();
+              groupMembers.putIfAbsent(groupData["DisplayName"], () => memberKeys);
+            }
+
+            print(groupMembers.values);
             int numberOfMembers = membersData?.length ?? 0;
 
-            //print(numberOfMembers);
             Group currentGroup = Group(
               id: event1.snapshot.key!,
               DisplayName: groupData["DisplayName"],
@@ -61,7 +67,6 @@ class _GroupPageState extends State<GroupPage> {
               numberOfMembers: numberOfMembers,
             );
             groups.add(currentGroup);
-            print(groups);
           });
           });
         });
@@ -322,16 +327,19 @@ class _GroupPageState extends State<GroupPage> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (kIsWeb)
-                                      popUpDialogWeb(context, group.DisplayName);
+                                      invitePopupDialogWeb(context, group.DisplayName);
                                     else
-                                      popUpDialogMobile(context, group.DisplayName);
+                                      invitePopupDialogMobile(context, group.DisplayName);
                                   },
                                   child: Text('Invite'),
                                 ),
                                 SizedBox(width: 10),
                                 ElevatedButton(
                                   onPressed: () {
-                                    _showKickDialog(context, group.DisplayName);
+                                    if (kIsWeb)
+                                      kickPopupDialogWeb(context, group.DisplayName);
+                                    else
+                                      kickPopupDialogMobile(context, group.DisplayName);
                                   },
                                   child: Text('Kick'),
                                 ),
@@ -398,7 +406,7 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
-  popUpDialogWeb(BuildContext context, String groupId) {
+  invitePopupDialogWeb(BuildContext context, String groupId) {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -409,7 +417,7 @@ class _GroupPageState extends State<GroupPage> {
         });
   }
 
-  void popUpDialogMobile(BuildContext context, String groupId) {
+  void invitePopupDialogMobile(BuildContext context, String groupId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -422,38 +430,30 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
-
-  void _showInviteDialog(BuildContext context, String groupId) {
+  kickPopupDialogWeb(BuildContext context, String groupId) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        TextEditingController userId = TextEditingController();
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: ((context, setState) {
+            return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar, users: groupMembers[groupId], kick: true);
+          }));
+        });
+  }
 
-        return AlertDialog(
-          title: Text('Invite User', style: TextStyle(fontSize: 30)),
-          content: LineTextField(
-            controller: userId,
-            title: 'User ID',
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: Text('Invite'),
-              onPressed: () {
-                inviteGroup(context, groupId, userId.text, _showErrorSnackbar);
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+  void kickPopupDialogMobile(BuildContext context, String groupId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Style.darkBlue,
+      builder: (context) => StatefulBuilder(
+        builder: ((context, setState) {
+          return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar, users: groupMembers[groupId], kick: true);
+        }),
+      ),
     );
   }
+
 
   void _showKickDialog(BuildContext context, String groupId) {
     showDialog(
