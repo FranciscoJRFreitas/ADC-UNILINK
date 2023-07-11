@@ -184,7 +184,10 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                       },
                                     );
                                   },
-                                  child: Icon(Icons.directions),
+                                  child: Tooltip(
+                                    message: "View in Maps",
+                                    child: Icon(Icons.directions),
+                                  ),
                                 ),
                               ]
                             ],
@@ -374,7 +377,10 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                         height: 24,
                         child: IconButton(
                           padding: EdgeInsets.zero,
-                          icon: Icon(Icons.delete, color: Colors.blue),
+                          icon: Tooltip(
+                            message: "Remove Event",
+                            child: Icon(Icons.delete, color: Colors.blue),
+                          ),
                           onPressed: () {
                             if (kIsWeb)
                               _removeEventPopUpDialogWeb(context, event.id!);
