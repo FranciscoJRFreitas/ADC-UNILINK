@@ -603,7 +603,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                               title: Row(
                                                 children: [
                                                   getDateIcon(event, context),
-                                                  SizedBox(width: 10),
                                                   InkWell(
                                                     child: Text(
                                                       event.title,

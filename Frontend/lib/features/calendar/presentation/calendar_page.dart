@@ -681,9 +681,12 @@ class _CalendarPageState extends State<CalendarPage> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.chat,
-                            color: Theme.of(context).secondaryHeaderColor,
+                          child: Tooltip(
+                            message: "View Group Chat",
+                            child: Icon(
+                              Icons.chat,
+                              color: Theme.of(context).secondaryHeaderColor,
+                            ),
                           ),
                         ),
                       ),

@@ -16,7 +16,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import 'package:flutter/foundation.dart';
-import 'package:google_translator/google_translator.dart';
 
 import 'recover_password_page.dart';
 

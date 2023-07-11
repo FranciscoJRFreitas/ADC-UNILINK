@@ -178,6 +178,13 @@ class _MyEventsPageState extends State<MyEventsPage>
                     },
                     decoration: InputDecoration(
                       labelText: 'Search',
+                      hintText:
+                          'You can search for names, types and descriptions!',
+                      hintStyle: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(
+                              color: Theme.of(context).secondaryHeaderColor),
                       labelStyle: Theme.of(context)
                           .textTheme
                           .bodyLarge!
@@ -226,6 +233,13 @@ class _MyEventsPageState extends State<MyEventsPage>
                       },
                       decoration: InputDecoration(
                         labelText: 'Search',
+                        hintText:
+                            'You can search for names, types and descriptions!',
+                        hintStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(
+                                color: Theme.of(context).secondaryHeaderColor),
                         labelStyle: Theme.of(context)
                             .textTheme
                             .bodyLarge!
@@ -344,7 +358,10 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         decoration: InputDecoration(
                                           labelText: 'Search',
                                           hintText:
-                                              'You can filter for types and descriptions!',
+                                              'You can search for names, types and descriptions!',
+                                          hintStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!,
                                           labelStyle: Theme.of(context)
                                               .textTheme
                                               .bodyLarge!
@@ -384,6 +401,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         },
                                         decoration: InputDecoration(
                                           labelText: 'Search',
+                                          hintText:
+                                              'You can search for names, types and descriptions!',
+                                          hintStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!,
                                           labelStyle: Theme.of(context)
                                               .textTheme
                                               .bodyLarge!
@@ -434,6 +456,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         },
                                         decoration: InputDecoration(
                                           labelText: 'Search',
+                                          hintText:
+                                              'You can search for names, types and descriptions!',
+                                          hintStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!,
                                           labelStyle: Theme.of(context)
                                               .textTheme
                                               .bodyLarge!
@@ -473,6 +500,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         },
                                         decoration: InputDecoration(
                                           labelText: 'Search',
+                                          hintText:
+                                              'You can search for names, types and descriptions!',
+                                          hintStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!,
                                           labelStyle: Theme.of(context)
                                               .textTheme
                                               .bodyLarge!
@@ -552,9 +584,12 @@ class _MyEventsPageState extends State<MyEventsPage>
   Widget _groupEventWidget(BuildContext context) {
     return Column(
       children: [
-        ...groupFilteredEvents
-            .map((event) => _buildEventTile(event, context))
-            .toList(),
+        if (groupFilteredEvents.isNotEmpty) ...[
+          ...groupFilteredEvents
+              .map((event) => _buildEventTile(event, context))
+              .toList(),
+        ],
+        if (groupFilteredEvents.isEmpty) Center(child: noSearchResult(),),
       ],
     );
   }
@@ -601,9 +636,12 @@ class _MyEventsPageState extends State<MyEventsPage>
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.chat,
-                            color: Theme.of(context).secondaryHeaderColor,
+                          child: Tooltip(
+                            message: "Views Group Chat",
+                            child: Icon(
+                              Icons.chat,
+                              color: Theme.of(context).secondaryHeaderColor,
+                            ),
                           ),
                         ),
                       ),
@@ -981,7 +1019,7 @@ class _MyEventsPageState extends State<MyEventsPage>
               height: 20,
             ),
             const Text(
-              "You don´t have any events scheduled!",
+              "You don't have any events scheduled!",
               textAlign: TextAlign.center,
             )
           ],
