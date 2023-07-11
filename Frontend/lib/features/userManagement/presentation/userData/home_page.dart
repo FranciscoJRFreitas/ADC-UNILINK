@@ -203,6 +203,11 @@ class _HomePageState extends State<HomePage> {
               icon: Icons.alternate_email,
             ),
             InfoItem(
+              title: 'Student Number',
+              value: _currentUser.studentNumber,
+              icon: Icons.numbers,
+            ),
+            InfoItem(
               title: 'Email',
               value: _currentUser.email,
               icon: Icons.mail,
