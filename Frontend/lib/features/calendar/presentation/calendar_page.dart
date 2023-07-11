@@ -646,55 +646,6 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget buttonAddCalendar(BuildContext context) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).primaryColor, // button's fill color
-        foregroundColor: Colors.white,
-        elevation: 2,
-      ),
-      icon: Icon(Icons.add),
-      label: Text('Create Groups from a file'),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Create Groups'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton(
-                    child: Text('Pick a file'),
-                    onPressed: () {
-                      pickFile();
-                    },
-                  ),
-                ],
-              ),
-              actions: <Widget>[
-                ElevatedButton(
-                  child: Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ElevatedButton(
-                  child: Text('Create'),
-                  onPressed: () {
-                    uploadSchedule();
-                    Navigator.of(context).pop();
-                    // Process your file here
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   Widget _buildEventTile(Event event, BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
