@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -725,24 +726,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           FirebaseAuth.FirebaseAuth.instance.currentUser;
 
       if (_currentUser != null) {
-        DatabaseReference userRef =
-            FirebaseDatabase.instance.ref().child('chat').child(username);
-        DatabaseReference userGroupsRef = userRef.child('Groups');
-
-        // Retrieve user's group IDs from the database
-        DatabaseEvent userGroupsEvent = await userGroupsRef.once();
-
-        DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
-
-        // Unsubscribe from all the groups
-        if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
-          /*Map<dynamic, dynamic> userGroups =
-              userGroupsSnapshot.value as Map<dynamic, dynamic>;
-          for (String groupId in userGroups.keys) {
-            if (!kIsWeb) //PROVISIONAL
-              await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
-          }*/
-        }
+        if (!kIsWeb) _unSubscribeTopic(_currentUser, username);
       }
 
       FirebaseAuth.FirebaseAuth.instance.signOut();
@@ -766,6 +750,24 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       showErrorSnackbar('${response.body}', false);
     } else {
       showErrorSnackbar('${response.body}', true);
+    }
+  }
+
+  void _unSubscribeTopic(FirebaseAuth.User currentUser, String username) async {
+    DatabaseReference userRef =
+        FirebaseDatabase.instance.ref().child('chat').child(username);
+    DatabaseReference userGroupsRef = userRef.child('Groups');
+
+    DatabaseEvent userGroupsEvent = await userGroupsRef.once();
+
+    DataSnapshot userGroupsSnapshot = userGroupsEvent.snapshot;
+
+    if (userGroupsSnapshot.value is Map<dynamic, dynamic>) {
+      Map<dynamic, dynamic> userGroups =
+          userGroupsSnapshot.value as Map<dynamic, dynamic>;
+      for (String groupId in userGroups.keys) {
+        await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+      }
     }
   }
 }

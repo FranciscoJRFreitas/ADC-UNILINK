@@ -447,7 +447,7 @@ public class ChatResources {
                 "        If the button above does not work, you can copy and paste the following link directly into your browser:<br>" +
                 "        <a target='_blank' href='" + invitationLink + "'>" + invitationLink + "</a><br><br>" +
                 "        Best regards,<br>" +
-                "        Sender" +
+                "        UniLink" +
                 "    </p>" +
                 "</div>" +
                 "</body>" +
