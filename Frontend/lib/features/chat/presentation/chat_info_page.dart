@@ -378,65 +378,80 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   profilePicture(context),
                   SizedBox(width: 16),
                   Expanded(
-                    child: Text(
-                      widget.groupId,
-                      style: Theme.of(context).textTheme.titleLarge,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ' ' + widget.groupId,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        Row(
+                          children: [
+                            if (kIsWeb)
+                              Padding(
+                                padding: EdgeInsets.only(left: 10),
+                                child: TextButton.icon(
+                                  icon: Icon(
+                                    Icons.exit_to_app_rounded,
+                                    color: Theme.of(context).secondaryHeaderColor,
+                                    size: 16,
+                                  ),
+                                  label: Text(
+                                    'Leave',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                        color:
+                                        Theme.of(context).secondaryHeaderColor),
+                                  ),
+                                  onPressed: () {
+                                    if (kIsWeb)
+                                      leavePopUpDialogWeb(context);
+                                    else
+                                      leavePopUpDialogMobile(context);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    minimumSize: Size(50, 50),
+                                  ),
+                                ),
+                              ),
+                            if (kIsWeb && isAdmin)
+                              Padding(
+                                padding: EdgeInsets.only(left: 10),
+                                child: TextButton.icon(
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Theme.of(context).secondaryHeaderColor,
+                                    size: 16,
+                                  ),
+                                  label: Text(
+                                    'Delete',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                        color:
+                                        Theme.of(context).secondaryHeaderColor),
+                                  ),
+                                  onPressed: () {
+                                    if (kIsWeb)
+                                      deletePopUpDialogWeb(context);
+                                    else
+                                      deletePopUpDialogMobile(context);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    minimumSize: Size(50, 50),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  if (kIsWeb)
-                    Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: TextButton.icon(
-                        icon: Icon(
-                          Icons.exit_to_app_rounded,
-                          color: Theme.of(context).secondaryHeaderColor,
-                          size: 16,
-                        ),
-                        label: Text('Leave',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                    color: Theme.of(context)
-                                        .secondaryHeaderColor)),
-                        onPressed: () {
-                          if (kIsWeb)
-                            leavePopUpDialogWeb(context);
-                          else
-                            leavePopUpDialogMobile(context);
-                        },
-                        style: TextButton.styleFrom(
-                          minimumSize: Size(50, 50),
-                        ),
-                      ),
-                    ),
-                  if (kIsWeb && isAdmin)
-                    Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: TextButton.icon(
-                        icon: Icon(
-                          Icons.delete,
-                          color: Theme.of(context).secondaryHeaderColor,
-                          size: 16,
-                        ),
-                        label: Text('Delete',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                    color: Theme.of(context)
-                                        .secondaryHeaderColor)),
-                        onPressed: () {
-                          if (kIsWeb)
-                            deletePopUpDialogWeb(context);
-                          else
-                            deletePopUpDialogMobile(context);
-                        },
-                        style: TextButton.styleFrom(
-                          minimumSize: Size(50, 50),
-                        ),
-                      ),
-                    ),
                 ],
               ),
               SizedBox(height: 10),
@@ -444,7 +459,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                 thickness: 3,
                 color: Style.lightBlue,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 5),
               Row(
                 children: [
                   Text(
@@ -902,29 +917,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                             ),
                                           ),
                                         ),
-                                        // if (isAdmin) ...[
-                                        //   Positioned(
-                                        //     top: 15,
-                                        //     right: 10,
-                                        //     child: Container(
-                                        //       width: 24,
-                                        //       height: 24,
-                                        //       child: IconButton(
-                                        //         padding: EdgeInsets.zero,
-                                        //         icon: Icon(Icons.delete,
-                                        //             color: Colors.blue),
-                                        //         onPressed: () {
-                                        //           if (kIsWeb)
-                                        //             _removeEventPopUpDialogWeb(
-                                        //                 context, event.id!);
-                                        //           else
-                                        //             _removeEventPopUpDialogMobile(
-                                        //                 context, event.id!);
-                                        //         },
-                                        //       ),
-                                        //     ),
-                                        //   ),
-                                        // ],
                                         Divider(
                                           color: Colors.black87,
                                           thickness: 1,
@@ -983,13 +975,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                         ),
                     ],
                   ),
-                  SizedBox(height: 10),
                   SingleChildScrollView(
-                    padding: EdgeInsets.all(16),
+                    //padding: EdgeInsets.all(16),
                     child: Container(
                       padding: EdgeInsets.only(top: 10),
                       child: SizedBox(
-                        height: MediaQuery.of(context).size.height - 553,
+                        height: kIsWeb
+                            ? MediaQuery.of(context).size.height - 435
+                            : MediaQuery.of(context).size.height *
+                            0.4,
                         child: ListView.builder(
                             itemCount: members.length,
                             itemBuilder: (context, index) {
