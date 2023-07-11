@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../../../application/loadLocations.dart';
@@ -40,12 +39,10 @@ class _DayCalendarPageState extends State<DayCalendarPage>
 
   @override
   void initState() {
-
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     loadSchedule();
     getUserEvents();
-
   }
 
   @override
@@ -155,14 +152,6 @@ class _DayCalendarPageState extends State<DayCalendarPage>
     }
   }
 
-  void uploadSchedule() async {
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('Schedules/' + await cacheFactory.get('users', 'username'));
-
-    await storageReference.putData(file.bytes!);
-  }
-
   void _getPersonalEvents() async {
     DatabaseReference eventsRef = await FirebaseDatabase.instance
         .ref()
@@ -222,9 +211,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
         }
       });
     });
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   EventType _parseEventType(String? eventTypeString) {
@@ -373,8 +360,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
                                     false,
                                     MediaQuery.of(context).size.width,
                                   ),
-                                  if(schedule.isEmpty)
-                                    noEventWidget(false),
+                                  if (schedule.isEmpty) noScheduleWidget(),
                                   ..._scheduleWidget(context),
                                 ],
                               ),
@@ -451,31 +437,12 @@ class _DayCalendarPageState extends State<DayCalendarPage>
         return ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: daySchedule['classes'].length + 3,
+          itemCount: daySchedule['classes'].length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
               return SizedBox(height: 20);
-            } else if (index == 1) {
-              return Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '  Schedule',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              );
-            } else if (index == 2) {
-              return Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  width: 300,
-                  child: Divider(
-                    thickness: 1,
-                    color: Style.lightBlue,
-                  ),
-                ),
-              );
             } else {
-              var classData = daySchedule['classes'][index - 3];
+              var classData = daySchedule['classes'][index - 1];
               return ListTile(
                 title: Text(
                   classData['name'],
@@ -502,14 +469,16 @@ class _DayCalendarPageState extends State<DayCalendarPage>
       }
     });
 
-    return personalEvents.isEmpty ? noEventWidget(false) : ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: personalEvents.length,
-      itemBuilder: (context, index) {
-        return _buildEventTile(personalEvents[index], context);
-      },
-    );
+    return personalEvents.isEmpty
+        ? noPersonalEventsWidget()
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: personalEvents.length,
+            itemBuilder: (context, index) {
+              return _buildEventTile(personalEvents[index], context);
+            },
+          );
   }
 
   Widget _groupEventsWidget(BuildContext context) {
@@ -523,19 +492,21 @@ class _DayCalendarPageState extends State<DayCalendarPage>
       }
     });
 
-    return groupEvents.isEmpty ? noEventWidget(false) : ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: groupEvents.length,
-      itemBuilder: (context, index) {
-        String groupId = groupEvents.keys.elementAt(index);
-        return Column(
-          children: groupEvents[groupId]!
-              .map((event) => _buildEventTile(event, context))
-              .toList(),
-        );
-      },
-    );
+    return groupEvents.isEmpty
+        ? noEventWidget()
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: groupEvents.length,
+            itemBuilder: (context, index) {
+              String groupId = groupEvents.keys.elementAt(index);
+              return Column(
+                children: groupEvents[groupId]!
+                    .map((event) => _buildEventTile(event, context))
+                    .toList(),
+              );
+            },
+          );
   }
 
   Widget _buildEventTile(Event event, BuildContext context) {
@@ -904,12 +875,11 @@ class _DayCalendarPageState extends State<DayCalendarPage>
       ],
     );
   }
-  noEventWidget(bool isGroupEvents) {
+
+  noEventWidget() {
     return Center(
       child: Container(
-        height:
-        MediaQuery.of(context).size.height /
-            2,
+        height: MediaQuery.of(context).size.height / 2,
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -918,9 +888,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () {
-
-                },
+                onTap: () {},
                 child: Icon(
                   Icons.hourglass_empty,
                   color: Colors.grey[700],
@@ -933,6 +901,72 @@ class _DayCalendarPageState extends State<DayCalendarPage>
             ),
             const Text(
               "You don't have any events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  noPersonalEventsWidget() {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height / 2,
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {},
+                child: Icon(
+                  Icons.person_off_rounded,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don't have any personal events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  noScheduleWidget() {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height / 2,
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {},
+                child: Icon(
+                  Icons.event_busy,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don't have an uploaded schedule!",
               textAlign: TextAlign.center,
             )
           ],
