@@ -43,26 +43,26 @@ public class ChatResources {
     public ChatResources() {
     }
 
-@POST
-@Path("/create-multiple")
-@Consumes(MediaType.APPLICATION_JSON)
-public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders headers) {
-    for (Group group : groups) {
-        Response response = createGroup(group, headers);
-        // no caso the algum grupo não tenha sucesso a ser criado
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            return response;
-        }
-        //se teve sucesso a criar o grupo adicionar os participantes
-        List<String> participants = group.participants;
-        for (String participant : participants) {
+    @POST
+    @Path("/create-multiple")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders headers) {
+        for (Group group : groups) {
+            Response response = createGroup(group, headers);
+            // no caso the algum grupo não tenha sucesso a ser criado
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                return response;
+            }
+            //se teve sucesso a criar o grupo adicionar os participantes
+            List<String> participants = group.participants;
+            for (String participant : participants) {
 
-             inviteToGroup(group.DisplayName, participant ,headers);
+                inviteToGroup(group.DisplayName, participant, headers);
+            }
         }
+
+        return Response.ok("{}").build();
     }
-
-    return Response.ok("{}").build();
-}
 
 
     @POST
@@ -88,7 +88,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         }
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(group.adminID);
         Entity admin = datastore.get(userKey);
-        if(admin == null){
+        if (admin == null) {
             return Response.status(Status.NOT_FOUND).entity("AdminId doesnt exist").build();
         }
 
@@ -213,8 +213,6 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
     }
 
 
-
-
     @POST
     @Path("/invite")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -239,7 +237,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         Key userKey = datastore.newKeyFactory().setKind("User").newKey(userId);
         Entity user = datastore.get(userKey);
 
-        if(user == null){
+        if (user == null) {
             return Response.status(Status.NOT_FOUND).entity("User not found.").build();
         }
 
@@ -254,8 +252,9 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
             txn.put(invtoken);
             txn.commit();
             String userEmail = user.getString("user_email");
+            String userDisplayName = user.getString("user_displayName");
 
-            sendInviteEmail(userEmail, Invtoken.tokenID);
+            sendInviteEmail(groupId, userDisplayName, userEmail, Invtoken.tokenID);
 
             return Response.ok().build();
         } finally {
@@ -385,11 +384,10 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
     }
 
 
-
-    private void sendInviteEmail(String email, String Token) {
+    private void sendInviteEmail(String groupId, String userDisplayName, String email, String Token) {
         String from = "fj.freitas@campus.fct.unl.pt";
         String fromName = "UniLink";
-        String subject = "You received an invite";
+        String subject = "Invited for a group!";
         String invitationLink = "https://unilink23.oa.r.appspot.com/rest/chat/join?token=" + Token;
         String htmlContent = "<!DOCTYPE html>" +
                 "<html>" +
@@ -409,6 +407,12 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
                 ".email-container a {" +
                 "    color: #ffffff;" +
                 "}" +
+                ".email-text a{" +
+                "      font-size: 1em;" +
+                "      color: #005890;" +
+                "      margin: 20px 0;" +
+                "      text-align: left;" +
+                "    }" +
                 ".email-header {" +
                 "    font-size: 1.5em;" +
                 "    font-weight: bold;" +
@@ -435,12 +439,12 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
                 "<body>" +
                 "<div class='email-container'>" +
                 "    <h1 class='email-header'>You received an invitation!</h1>" +
-                "    <p class='email-text'>Dear User,<br><br>" +
-                "    You have received an invitation to join a group.</p>" +
-                "    <p class='email-text'>To accept the invitation, please click the button below.</p>" +
+                "    <p class='email-text'>Dear " + userDisplayName + ",<br><br>" +
+                "    You have received an invitation to join " + groupId + ".</p>" +
+                "    <p class='email-text'>To accept the invitation to join this group, please click the button below.</p>" +
                 "    <a target='_blank' href='" + invitationLink + "' class='email-button'>Accept Invitation</a>" +
                 "    <p class='email-text'>" +
-                "        If the button above does not work, you can copy and paste the following link into your browser:<br>" +
+                "        If the button above does not work, you can copy and paste the following link directly into your browser:<br>" +
                 "        <a target='_blank' href='" + invitationLink + "'>" + invitationLink + "</a><br><br>" +
                 "        Best regards,<br>" +
                 "        Sender" +
