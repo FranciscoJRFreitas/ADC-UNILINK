@@ -8,6 +8,7 @@ import 'package:unilink2023/features/userManagement/presentation/userData/edit_p
 import 'package:unilink2023/widgets/my_text_button.dart';
 import '../../../../constants.dart';
 import '../../../../domain/UserNotifier.dart';
+import '../../../../widgets/InfoItem.dart';
 import '../../domain/User.dart';
 
 class HomePage extends StatefulWidget {
@@ -252,33 +253,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-//Widget editBuild(BuildContext context) {
-//return
-//}
 }
 
-class InfoItem extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
 
-  InfoItem({required this.title, required this.value, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: Theme.of(context).primaryIconTheme.color,
-      ),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-      subtitle: Text(
-        value,
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-    );
-  }
-}

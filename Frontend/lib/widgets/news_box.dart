@@ -1,8 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import 'package:unilink2023/constants.dart';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 
 class CustomCard extends StatefulWidget {
   final String? imageUrl;
@@ -113,12 +117,13 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                   child: // Check if imageWidth is not null
-                      Image.network(
-                    widget.imageUrl ?? 'N/A',
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    height: 200,
-                  ),
+                      //     Image.network(
+                      //   widget.imageUrl ?? 'N/A',
+                      //   width: double.infinity,
+                      //   fit: BoxFit.cover,
+                      //   height: 200,
+                      // ),
+                      profilePicture(context),
                 ),
                 Container(
                   padding: const EdgeInsets.all(8.0),
@@ -130,7 +135,9 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium!
-                            .copyWith(fontSize: max(min(fontSize, maxFontSize), minFontSize)),
+                            .copyWith(
+                                fontSize: max(
+                                    min(fontSize, maxFontSize), minFontSize)),
                       ),
                       if (widget.date != null)
                         Text(
@@ -202,10 +209,9 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
                         widget.content ?? 'N/A',
                         overflow: TextOverflow.ellipsis,
                         maxLines: 4,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(fontSize: max(min(fontSize - 3, maxFontSize - 3), minFontSize - 3)),
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            fontSize: max(min(fontSize - 3, maxFontSize - 3),
+                                minFontSize - 3)),
                       ),
                     ],
                   ),
@@ -216,5 +222,81 @@ class _CustomCardState extends State<CustomCard> with WidgetsBindingObserver {
         ),
       );
     });
+  }
+
+  Widget profilePicture(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        //edit image link click as per your need.
+      },
+      child: Stack(
+        children: <Widget>[
+          Container(
+            width: double.infinity,
+            height: 200,
+            child: Container(
+              child: ClipRRect(
+                  borderRadius: BorderRadius.horizontal(),
+                  child: picture(context)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget picture(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: widget.imageUrl ?? 'N/A', // pass the imageUrl directly
+      placeholder: (context, url) => CircularProgressIndicator(),
+      errorWidget: (context, url, error) => Icon(Icons.error),
+      imageBuilder: (context, imageProvider) => GestureDetector(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext dialogContext) {
+              return Dialog(
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    PhotoView(
+                      imageProvider: imageProvider,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: IconButton(
+                        icon: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black,
+                                blurRadius: 15.0,
+                                spreadRadius: 2.0,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.white,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        child: Image(
+          image: imageProvider,
+          fit: BoxFit.cover,  // or BoxFit.fill if you want to fill and distort the image to fit the container.
+        ),
+      ),
+    );
   }
 }
