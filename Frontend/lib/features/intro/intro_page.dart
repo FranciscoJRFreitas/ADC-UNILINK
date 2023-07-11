@@ -55,37 +55,55 @@ class _IntroPageState extends State<IntroPage> {
           pages: [
             PageViewModel(
               image: Center(
-                child: Lottie.asset(
-                  'assets/animation/1.json',
-                  repeat: true,
-                  reverse: false,
+                child: Image.asset(
+                  'assets/images/university_slider.png',
+                  height: 200,
                 ),
               ),
               body:
-                  "Rigid belief systems, including skeptism, is signing up for the suppression of curiosity.",
-              title: "Sign Up",
+                  "Now you have access to the information of your university in any place ",
+              title: "Welcome",
             ),
             PageViewModel(
               image: Center(
-                child: Lottie.asset(
-                  'assets/animation/2.json',
-                  repeat: true,
-                  reverse: false,
+                child: Image.asset(
+                  'assets/images/news_slider.png',
+                  height: 200,
+                ),
+              ),
+              body: "Don't lose the last news about your university",
+              title: "News",
+            ),
+            PageViewModel(
+              image: Center(
+                child: Image.asset(
+                  'assets/images/chat_slider.png',
+                  height: 200,
                 ),
               ),
               body:
-                  "To remember our login details, we use the Remember Password Option displayed in Official site or work in an email account or any social / login to your sites",
-              title: "Sign in",
+                  "Interact with your professors and colleagues with our chat",
+              title: "Chat",
             ),
             PageViewModel(
               image: Center(
-                child: Lottie.asset(
-                  'assets/animation/3.json',
-                  repeat: true,
-                  reverse: false,
+                child: Image.asset(
+                  'assets/images/calendar_slider.png',
+                  height: 200,
                 ),
               ),
-              body: "Why are you waiting?",
+              body:
+                  "Manage our own calendar and always be update of the events of your classes",
+              title: "Calendar",
+            ),
+            PageViewModel(
+              image: Center(
+                child: Image.asset(
+                  'assets/images/jumpIn_slider.png',
+                  height: 200,
+                ),
+              ),
+              body: "What are you waiting for ?",
               title: "Jump in!",
             ),
             if (!kIsWeb)
