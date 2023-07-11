@@ -42,7 +42,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   late Group? _selectedGroup = null;
   final TextEditingController searchController = TextEditingController();
   List<Group> allGroups = [];

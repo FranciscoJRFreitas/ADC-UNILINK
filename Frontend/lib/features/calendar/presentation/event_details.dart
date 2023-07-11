@@ -10,7 +10,6 @@ import '../../../../widgets/LineComboBox.dart';
 import '../../../../widgets/widget.dart';
 import '../../../../widgets/LineTextField.dart';
 
-
 class EventDetailsPage extends StatefulWidget {
   final Event event;
 
@@ -44,7 +43,8 @@ class _EventDetailsPage extends State<EventDetailsPage> {
     endController = TextEditingController(text: event.endTime.toString());
     _selectedTypeController = _getEventTypeString(event.type);
     _selectedLocation = null;
-    selectLocationText = event.location == null ? "Select Location" : "1 Location Selected";
+    selectLocationText =
+        event.location == null ? "Select Location" : "1 Location Selected";
   }
 
   // Function to display the snackbar
@@ -60,7 +60,8 @@ class _EventDetailsPage extends State<EventDetailsPage> {
     );
   }
 
-  Future<void> modifyAttributes(Event ev,
+  Future<void> modifyAttributes(
+    Event ev,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     DatabaseReference eventsRef = FirebaseDatabase.instance
@@ -68,7 +69,6 @@ class _EventDetailsPage extends State<EventDetailsPage> {
         .child('schedule')
         .child(event.creator!)
         .child(ev.id!);
-
 
     // Add the event to the database
     eventsRef.set(ev.toJson()).then((_) {
@@ -107,7 +107,10 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                     top: 20), // Provide space for the image at the top
                 child: Column(
                   children: [
-                    SizedBox(height: 40),
+                    Text(
+                      "Change Event Details",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     Divider(
                       thickness: 2,
                       color: Style.lightBlue,
@@ -115,8 +118,9 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                     SizedBox(height: 15),
                     LineComboBox(
                       selectedValue: _selectedTypeController,
-                      items:
-                      EventType.values.map((e) => _getEventTypeString(e)).toList(),
+                      items: EventType.values
+                          .map((e) => _getEventTypeString(e))
+                          .toList(),
                       icon: Icons.type_specimen,
                       onChanged: (dynamic newValue) {
                         setState(() {
@@ -154,7 +158,11 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                         });
                       },
                       selectedValue: selectLocationText,
-                      items: [selectLocationText, "From FCT place", "From maps"],
+                      items: [
+                        selectLocationText,
+                        "From FCT place",
+                        "From maps"
+                      ],
                       icon: Icons.place,
                       onChanged: (newValue) async {
                         if (newValue == "From FCT place" ||
@@ -205,7 +213,8 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                         alignment: Alignment.center,
                         buttonName: 'Save Changes',
                         onTap: () async {
-                          DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+                          DateFormat dateFormat =
+                              DateFormat('yyyy-MM-dd HH:mm');
                           bool isNull = _selectedLocation == null;
                           Event ev = Event(
                               id: event.id,
@@ -218,7 +227,8 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                               location: !isNull
                                   ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
                                   : '0');
-                          modifyAttributes(ev,
+                          modifyAttributes(
+                            ev,
                             _showErrorSnackbar,
                           );
                           Navigator.of(context).pop();

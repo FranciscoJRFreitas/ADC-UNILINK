@@ -70,7 +70,7 @@ class CombinedButtonState extends State<CombinedButton>
     }
   }
 
-    void collapseOverlay() {
+  void collapseOverlay() {
     _expandAnimationController.reverse();
     _opacityAnimationController.reverse().then((value) {
       if (_overlayEntry != null) {
@@ -83,7 +83,6 @@ class CombinedButtonState extends State<CombinedButton>
     });
   }
 
-
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     var size = renderBox.size;
@@ -94,7 +93,13 @@ class CombinedButtonState extends State<CombinedButton>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         left: offset.dx,
-        top: offset.dy - size.height * (_isExpanded ? kIsWeb ? 2.5 : 3.75 : 1.5),
+        top: offset.dy -
+            size.height *
+                (_isExpanded
+                    ? kIsWeb
+                        ? 2.5
+                        : 3.75
+                    : 1.5),
         width: size.width,
         child: SlideTransition(
           position: _offsetAnimation,
@@ -132,9 +137,12 @@ class CombinedButtonState extends State<CombinedButton>
           borderRadius: BorderRadius.circular(30),
         ),
         child: Center(
-          child: Icon(
-            _isExpanded ? Icons.close : Icons.attach_file,
-            color: Colors.white,
+          child: Tooltip(
+            message: "Attach file",
+            child: Icon(
+              _isExpanded ? Icons.close : Icons.attach_file,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
