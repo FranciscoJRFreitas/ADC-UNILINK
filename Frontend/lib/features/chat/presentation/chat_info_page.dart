@@ -12,6 +12,7 @@ import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
+import 'package:unilink2023/widgets/AutoCompleteDropdown.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import '../../../constants.dart';
@@ -1072,7 +1073,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AlertDialog(
+            return AutocompleteDropDown();
+            /*return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               title: Text(
                 "Send an Invite",
@@ -1131,7 +1133,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   child: const Text("CANCEL"),
                 ),
               ],
-            );
+            );*/
           }));
         });
   }
