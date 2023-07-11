@@ -10,6 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
+import 'package:unilink2023/features/calendar/presentation/calendar_day_page.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
@@ -19,6 +20,7 @@ import '../../../data/cache_factory_provider.dart';
 import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
+import 'event_details.dart';
 
 class CalendarPage extends StatefulWidget {
   final String username;
@@ -257,32 +259,25 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
+    return kIsWeb ? _buildWebLayout() : _buildTableCalendarMobile(context);
+  }
+
+  Widget _buildWebLayout() {
     return Scaffold(
       body: format == CalendarFormat.month
           ? SingleChildScrollView(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildTableCalendar(context),
-                  buttonAddCalendar(context),
-                  ..._scheduleWidget(context),
-                  _eventsWidget(context),
+                  _buildTableCalendarWeb(context),
+                  _buildThreeColumns(),
                 ],
               ),
             )
           : Column(
               children: [
-                _buildTableCalendar(context),
-                buttonAddCalendar(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ..._scheduleWidget(context),
-                        _eventsWidget(context),
-                      ],
-                    ),
-                  ),
-                ),
+                _buildTableCalendarWeb(context),
+                Expanded(child: _buildThreeColumns()),
               ],
             ),
       floatingActionButton: FloatingActionButton(
@@ -301,6 +296,281 @@ class _CalendarPageState extends State<CalendarPage> {
         elevation: 6,
         backgroundColor: Theme.of(context).primaryColor,
       ),
+    );
+  }
+
+  Widget _buildThreeColumns() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 1,
+          child: Container(
+            width: MediaQuery.of(context).size.width / 3 - 20.0,
+            child: Column(
+              children: [
+                _buildSectionHeader("Schedule", context, false,
+                    MediaQuery.of(context).size.width / 3 - 20.0),
+                Container(
+                  height: format == CalendarFormat.month
+                      ? 200
+                      : format == CalendarFormat.twoWeeks
+                          ? MediaQuery.of(context).size.height * 0.57
+                          : MediaQuery.of(context).size.height * 0.64,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: _scheduleWidget(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Container(
+            width: MediaQuery.of(context).size.width / 3 - 20.0,
+            child: Column(
+              children: [
+                _buildSectionHeader("Personal Events", context, false,
+                    MediaQuery.of(context).size.width / 3 - 20.0),
+                Container(
+                  height: format == CalendarFormat.month
+                      ? 200
+                      : format == CalendarFormat.twoWeeks
+                          ? MediaQuery.of(context).size.height * 0.57
+                          : MediaQuery.of(context).size.height * 0.64,
+                  child: SingleChildScrollView(
+                    child: Column(children: [
+                      _personalEventsWidget(context),
+                    ]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Container(
+            width: MediaQuery.of(context).size.width / 3 - 20.0,
+            child: Column(
+              children: [
+                _buildSectionHeader("Group Events", context, false,
+                    MediaQuery.of(context).size.width / 3 - 20.0),
+                Container(
+                  height: format == CalendarFormat.month
+                      ? 200
+                      : format == CalendarFormat.twoWeeks
+                          ? MediaQuery.of(context).size.height * 0.55
+                          : MediaQuery.of(context).size.height * 0.62,
+                  child: SingleChildScrollView(
+                    child: Column(children: [
+                      _groupEventsWidget(context),
+                    ]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableCalendarWeb(BuildContext context) {
+    return TableCalendar(
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Week',
+        CalendarFormat.twoWeeks: 'Month',
+        CalendarFormat.week: '2 Weeks',
+      },
+      firstDay: DateTime(2000, 1, 1),
+      lastDay: DateTime(2030, 1, 1),
+      focusedDay: focusedDay,
+      calendarFormat: format,
+      onFormatChanged: (CalendarFormat _format) {
+        setState(() {
+          format = _format;
+        });
+      },
+      onDaySelected: (DateTime selectDay, DateTime focusDay) {
+        setState(() {
+          selectedDay = selectDay;
+          focusedDay = selectDay;
+        });
+      },
+      headerStyle: HeaderStyle(
+        formatButtonVisible:
+            true, // hides the format button, which is not needed here
+        titleCentered: true,
+      ),
+      calendarStyle: CalendarStyle(
+        // Other style properties...
+        selectedDecoration: BoxDecoration(
+          color: Colors.blue, // change to your desired color
+          shape: BoxShape.circle,
+        ),
+      ),
+      selectedDayPredicate: (day) {
+        return isSameDay(selectedDay, day);
+      },
+      eventLoader: (day) {
+        return events[day] ?? [];
+      },
+    );
+  }
+
+  Widget _buildTableCalendarMobile(BuildContext context) {
+    return Scaffold(
+      body: TableCalendar(
+        availableCalendarFormats: const {
+          CalendarFormat.month: 'Week',
+        },
+        firstDay: DateTime(2000, 1, 1),
+        lastDay: DateTime(2030, 1, 1),
+        focusedDay: focusedDay,
+        calendarFormat: CalendarFormat.month,
+        onDaySelected: (DateTime selectDay, DateTime focusDay) {
+          setState(() {
+            selectedDay = selectDay;
+            focusedDay = selectDay;
+          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  DayCalendarPage(username: widget.username, date: selectDay),
+            ),
+          );
+        },
+        headerStyle: HeaderStyle(
+          formatButtonVisible:
+              true, // hides the format button, which is not needed here
+          titleCentered: true,
+        ),
+        calendarStyle: CalendarStyle(
+          // Other style properties...
+          selectedDecoration: BoxDecoration(
+            color: Colors.blue, // change to your desired color
+            shape: BoxShape.circle,
+          ),
+        ),
+        selectedDayPredicate: (day) {
+          return isSameDay(selectedDay, day);
+        },
+        eventLoader: (day) {
+          return events[day] ?? [];
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: "Create a Personal Event",
+        onPressed: () {
+          if (kIsWeb)
+            _createEventPopUpDialogWeb(context);
+          else
+            _createEventPopUpDialogMobile(context);
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+        elevation: 6,
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
+  }
+
+  List<Widget> _scheduleWidget(BuildContext context) {
+    return schedule.map<Widget>((daySchedule) {
+      if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: daySchedule['classes'].length + 3,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return SizedBox(height: 20);
+            } else if (index == 1) {
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '  Schedule',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              );
+            } else if (index == 2) {
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 300,
+                  child: Divider(
+                    thickness: 1,
+                    color: Style.lightBlue,
+                  ),
+                ),
+              );
+            } else {
+              var classData = daySchedule['classes'][index - 3];
+              return ListTile(
+                title: Text(
+                  classData['name'],
+                ),
+                subtitle: Text(
+                  '${classData['startTime']} - ${classData['endTime']}',
+                ),
+              );
+            }
+          },
+        );
+      } else {
+        return Container();
+      }
+    }).toList();
+  }
+
+  Widget _personalEventsWidget(BuildContext context) {
+    List<Event> personalEvents = [];
+    events[selectedDay]?.forEach((event) {
+      if (event.groupId == null) {
+        personalEvents.add(event);
+      }
+    });
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: personalEvents.length,
+      itemBuilder: (context, index) {
+        return _buildEventTile(personalEvents[index], context);
+      },
+    );
+  }
+
+  Widget _groupEventsWidget(BuildContext context) {
+    Map<String, List<Event>> groupEvents = {};
+    events[selectedDay]?.forEach((event) {
+      if (event.groupId != null) {
+        if (!groupEvents.containsKey(event.groupId)) {
+          groupEvents[event.groupId!] = [];
+        }
+        groupEvents[event.groupId]!.add(event);
+      }
+    });
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: groupEvents.length,
+      itemBuilder: (context, index) {
+        String groupId = groupEvents.keys.elementAt(index);
+        return Column(
+          children: groupEvents[groupId]!
+              .map((event) => _buildEventTile(event, context))
+              .toList(),
+        );
+      },
     );
   }
 
@@ -353,160 +623,120 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget _buildTableCalendar(BuildContext context) {
-    return TableCalendar(
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Week',
-        CalendarFormat.twoWeeks: 'Month',
-        CalendarFormat.week: '2 Weeks',
-      },
-      firstDay: DateTime(2000, 1, 1),
-      lastDay: DateTime(2030, 1, 1),
-      focusedDay: focusedDay,
-      calendarFormat: format,
-      onFormatChanged: (CalendarFormat _format) {
-        setState(() {
-          format = _format;
-        });
-      },
-      onDaySelected: (DateTime selectDay, DateTime focusDay) {
-        setState(() {
-          selectedDay = selectDay;
-          focusedDay = selectDay;
-        });
-      },
-      headerStyle: HeaderStyle(
-        formatButtonVisible:
-            true, // hides the format button, which is not needed here
-        titleCentered: true,
-      ),
-      calendarStyle: CalendarStyle(
-        // Other style properties...
-        selectedDecoration: BoxDecoration(
-          color: Colors.blue, // change to your desired color
-          shape: BoxShape.circle,
-        ),
-      ),
-      selectedDayPredicate: (day) {
-        return isSameDay(selectedDay, day);
-      },
-      eventLoader: (day) {
-        return events[day] ?? [];
-      },
-    );
-  }
-
-  List<Widget> _scheduleWidget(BuildContext context) {
-    return schedule.map<Widget>((daySchedule) {
-      if (daySchedule['day'] == getDayOfWeek(selectedDay)) {
-        return Column(
-          children: [
-            SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '  Schedule',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                width: 300,
-                child: Divider(
-                  thickness: 1,
-                  color: Style.lightBlue,
-                ),
-              ),
-            ),
-            ...daySchedule['classes'].map<Widget>((classData) {
-              return ListTile(
-                title: Text(
-                  classData['name'],
-                ),
-                subtitle: Text(
-                  '${classData['startTime']} - ${classData['endTime']}',
-                ),
-              );
-            }).toList(),
-          ],
-        );
-      } else {
-        return Container();
-      }
-    }).toList();
-  }
-
-  Widget _eventsWidget(BuildContext context) {
-    Map<String, List<Event>> groupEvents =
-        {}; // New map to separate events by group
-    List<Event> personalEvents = [];
-
-    // Separate the events into the new containers
-    events[selectedDay]?.forEach((event) {
-      if (event.groupId != null) {
-        if (!groupEvents.containsKey(event.groupId)) {
-          groupEvents[event.groupId!] = [];
-        }
-        groupEvents[event.groupId]!.add(event);
-      } else {
-        personalEvents.add(event);
-      }
-    });
-
-    return Column(
-      children: [
-        if (personalEvents.isNotEmpty)
-          _buildSectionHeader("Personal Events", context, false),
-        ...personalEvents
-            .map((event) => _buildEventTile(event, context))
-            .toList(),
-        for (var groupId in groupEvents.keys) ...[
-          _buildSectionHeader(groupId, context, true),
-          ...groupEvents[groupId]!
-              .map((event) => _buildEventTile(event, context))
-              .toList(),
-        ],
-      ],
-    );
-  }
-
   Widget _buildEventTile(Event event, BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         child: ListTile(
-          title: Row(
+          title: Column(
             children: [
-              InkWell(
-                child: Text(
-                  event.title,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              if (event.location != "0") ...[
-                SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MainScreen(
-                                index: 10, location: event.location)));
-                  },
-                  child: Tooltip(
-                    message: "View in Maps",
-                    child: Icon(Icons.directions,
-                        size: 20, color: Style.lightBlue),
+              Row(
+                children: [
+                  getDateIcon(event, context),
+                  InkWell(
+                    child: Text(
+                      event.title,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-              ]
+                  Expanded(
+                      child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (event.location != "0") ...[
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MainScreen(
+                                        index: 10, location: event.location)));
+                          },
+                          child: Tooltip(
+                            message: "View in Maps",
+                            child: Icon(Icons.directions,
+                                size: 20, color: Style.lightBlue),
+                          ),
+                        ),
+                      ],
+                      SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MainScreen(index: 15),
+                            ),
+                          );
+                        },
+                        child: Tooltip(
+                          message: "View in My Events",
+                          child: Icon(Icons.event_note_rounded,
+                              size: 20, color: Style.lightBlue),
+                        ),
+                      ),
+                      if (event.groupId != null) ...[
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MainScreen(
+                                  index: 6,
+                                  selectedGroup: event.groupId,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Tooltip(
+                            message: "View Group Chat",
+                            child: Icon(Icons.chat,
+                                size: 20, color: Style.lightBlue),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ))
+                ],
+              ),
+              Divider(
+                color: Style.lightBlue,
+                thickness: 1,
+              ),
             ],
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (event.groupId != null) ...[
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.group, size: 20, color: Style.lightBlue),
+                    SizedBox(width: 5),
+                    Row(
+                      children: [
+                        Text(
+                          'Group: ',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(fontSize: 14),
+                        ),
+                        Text(
+                          event.groupId!,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
               SizedBox(height: 8),
               Row(
                 children: [
@@ -522,7 +752,7 @@ class _CalendarPageState extends State<CalendarPage> {
                             .copyWith(fontSize: 14),
                       ),
                       Text(
-                        _getEventTypeString(event.type),
+                        getEventTypeString(event.type),
                         style: Theme.of(context).textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -649,8 +879,52 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget _buildSectionHeader(
-      String groupId, BuildContext context, bool hasChatRedirect) {
+  Widget getDateIcon(Event event, BuildContext context) {
+    DateTime currentDate = DateTime.now();
+    DateTime startDate = event.startTime;
+    DateTime endDate = event.endTime;
+
+    int prev = currentDate.difference(startDate).inMilliseconds;
+    int after = endDate.difference(currentDate).inMilliseconds;
+
+    return prev > 0
+        ? after > 0
+            ? Tooltip(
+                message: 'Ongoing Event',
+                child: MouseRegion(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.hourglass_top,
+                      color: Colors.yellow,
+                    ),
+                  ),
+                ),
+              )
+            : Tooltip(
+                message: 'Past Event',
+                child: MouseRegion(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              )
+        : Tooltip(
+            message: 'Upcoming Event',
+            child: MouseRegion(
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.more_time, color: Colors.blueGrey)),
+            ),
+          );
+  }
+
+  Widget _buildSectionHeader(String groupId, BuildContext context,
+      bool hasChatRedirect, double? size) {
     return Column(
       children: [
         SizedBox(height: 20),
@@ -682,7 +956,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Tooltip(
-                            message: "View Group Chat",
+                            message: "Views Group Chat",
                             child: Icon(
                               Icons.chat,
                               color: Theme.of(context).secondaryHeaderColor,
@@ -700,11 +974,12 @@ class _CalendarPageState extends State<CalendarPage> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
           ],
+          mainAxisAlignment: MainAxisAlignment.center,
         ),
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.center,
           child: Container(
-            width: 300,
+            width: size,
             child: Divider(
               thickness: 1,
               color: Style.lightBlue,
@@ -733,7 +1008,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   LineComboBox(
                     selectedValue: _selectedEventType,
                     items:
-                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                        eventTypes.map((e) => getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -895,7 +1170,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         LineComboBox(
                           selectedValue: _selectedEventType,
                           items: eventTypes
-                              .map((e) => _getEventTypeString(e))
+                              .map((e) => getEventTypeString(e))
                               .toList(),
                           icon: Icons.type_specimen,
                           onChanged: (dynamic newValue) {
@@ -1079,54 +1354,54 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
     );
   }
+}
 
-  String getDayOfWeek(DateTime date) {
-    switch (date.weekday) {
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        return '';
-    }
+String getDayOfWeek(DateTime date) {
+  switch (date.weekday) {
+    case 1:
+      return 'Monday';
+    case 2:
+      return 'Tuesday';
+    case 3:
+      return 'Wednesday';
+    case 4:
+      return 'Thursday';
+    case 5:
+      return 'Friday';
+    case 6:
+      return 'Saturday';
+    case 7:
+      return 'Sunday';
+    default:
+      return '';
   }
+}
 
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
-    }
+String getEventTypeString(EventType eventType) {
+  switch (eventType) {
+    case EventType.academic:
+      return 'Academic';
+    case EventType.entertainment:
+      return 'Entertainment';
+    case EventType.faire:
+      return 'Faire';
+    case EventType.athletics:
+      return 'Athletics';
+    case EventType.competition:
+      return 'Competition';
+    case EventType.party:
+      return 'Party';
+    case EventType.ceremony:
+      return 'Ceremony';
+    case EventType.conference:
+      return 'Conference';
+    case EventType.lecture:
+      return 'Lecture';
+    case EventType.meeting:
+      return 'Meeting';
+    case EventType.workshop:
+      return 'Workshop';
+    case EventType.exhibit:
+      return 'Exhibit';
   }
 }

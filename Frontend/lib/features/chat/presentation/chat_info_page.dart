@@ -25,6 +25,7 @@ import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 
 import '../../../widgets/LocationPopUp.dart';
+import '../../calendar/presentation/calendar_day_page.dart';
 
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
@@ -619,14 +620,28 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                       children: [
                                                         InkWell(
                                                           onTap: () {
-                                                            Navigator.push(
+                                                            if (kIsWeb) {
+                                                              Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder: (context) => MainScreen(
+                                                                          index:
+                                                                              9,
+                                                                          date:
+                                                                              event.startTime)));
+                                                            } else {
+                                                              Navigator.push(
                                                                 context,
                                                                 MaterialPageRoute(
-                                                                    builder: (context) => MainScreen(
-                                                                        index:
-                                                                            9,
-                                                                        date: event
-                                                                            .startTime)));
+                                                                  builder: (context) => DayCalendarPage(
+                                                                      username:
+                                                                          widget
+                                                                              .username,
+                                                                      date: event
+                                                                          .startTime),
+                                                                ),
+                                                              );
+                                                            }
                                                           },
                                                           child: Tooltip(
                                                             message:

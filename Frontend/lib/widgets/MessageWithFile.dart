@@ -360,7 +360,7 @@ class _MessageWithFileState extends State<MessageWithFile> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: Text(
-                      formatTimeInMillis(widget.time),
+                      "Edited",
                       style: TextStyle(fontSize: 10, color: Colors.grey),),),
                   Padding(
                     padding: const EdgeInsets.only(left: 2),

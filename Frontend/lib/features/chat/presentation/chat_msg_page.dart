@@ -478,9 +478,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                 ),
               );
             },
-            icon: Icon(
-              Icons.info,
-              color: Theme.of(context).textTheme.bodyLarge!.color,
+            icon: Tooltip(
+              message: "Group Information",
+              child: Icon(
+                Icons.info,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
             ),
           ),
         ],
@@ -806,12 +809,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   info = true;
                 });
               },
-              icon: Icon(
-                Icons.info,
-                color: Provider.of<ThemeNotifier>(context).currentTheme ==
-                        kDarkTheme
-                    ? Colors.white70
-                    : Theme.of(context).primaryColor,
+              icon: Tooltip(
+                message: "Group Information",
+                child: Icon(
+                  Icons.info,
+                  color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                          kDarkTheme
+                      ? Colors.white70
+                      : Theme.of(context).primaryColor,
+                ),
               ),
             ),
         ],
@@ -893,7 +899,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               isSystemMessage: true,
               groupId: widget.groupId,
               id: message.id,
-              isEdited : false,
+              isEdited: false,
             ));
           }
 
