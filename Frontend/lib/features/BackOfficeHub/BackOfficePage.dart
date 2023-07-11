@@ -26,42 +26,43 @@ class BackOfficePage extends StatefulWidget {
 class _BackOfficePageState extends State<BackOfficePage> {
   late String selectedRole = 'SU';
 
-  Widget userManagement(BuildContext context){
+  Widget userManagement(BuildContext context) {
     return AlertDialog(
-      title: Text('User Management',  style: TextStyle(fontSize: 25),),
+      title: Text(
+        'User Management',
+        style: TextStyle(fontSize: 25),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-              Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
               elevation: 2,
             ),
             icon: Icon(Icons.person_add),
             label: Text('Create User'),
             onPressed: () {
-              TextEditingController nameController =
-              TextEditingController();
+              TextEditingController nameController = TextEditingController();
               TextEditingController usernameController =
-              TextEditingController();
-              TextEditingController emailController =
-              TextEditingController();
+                  TextEditingController();
+              TextEditingController emailController = TextEditingController();
               TextEditingController passwordController =
-              TextEditingController();
+                  TextEditingController();
+              TextEditingController numberController = TextEditingController();
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return StatefulBuilder(
                     // Add this
-                    builder: (BuildContext context,
-                        StateSetter setState) {
+                    builder: (BuildContext context, StateSetter setState) {
                       // Add this
                       return AlertDialog(
-                        title: Text('Create User',  style: TextStyle(fontSize: 30)),
+                        title:
+                            Text('Create User', style: TextStyle(fontSize: 30)),
                         content: SingleChildScrollView(
-                          child: Column(
+                            child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             LineTextField(
@@ -75,6 +76,10 @@ class _BackOfficePageState extends State<BackOfficePage> {
                             LineTextField(
                               controller: emailController,
                               title: 'Email',
+                            ),
+                            LineTextField(
+                              controller: numberController,
+                              title: 'Student number(empty if not a student)',
                             ),
                             LineTextField(
                               controller: passwordController,
@@ -98,27 +103,21 @@ class _BackOfficePageState extends State<BackOfficePage> {
                               },
                             ),
                           ],
-                          )),
+                        )),
                         actions: [
                           ElevatedButton(
                             onPressed: () {
-                              String name =
-                                  nameController.text;
-                              String username =
-                                  usernameController.text;
-                              String email =
-                                  emailController.text;
-                              String password =
-                                  passwordController.text;
+                              String name = nameController.text;
+                              String username = usernameController.text;
+                              String email = emailController.text;
+                              String password = passwordController.text;
                               String role = selectedRole;
+                              String number = numberController.text.isEmpty
+                                  ? ""
+                                  : numberController.text;
                               // Call the registerUser function with the entered data
-                              registerUser(
-                                  name,
-                                  username,
-                                  email,
-                                  password,
-                                  role,
-                                  _showErrorSnackbar);
+                              registerUser(name, username, email, password,
+                                  role, number, _showErrorSnackbar);
                               // Handle create user logic with the entered data
                               Navigator.of(context).pop();
                             },
@@ -138,11 +137,12 @@ class _BackOfficePageState extends State<BackOfficePage> {
               );
             },
           ),
-          SizedBox(height: 10,),
+          SizedBox(
+            height: 10,
+          ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-              Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
               elevation: 2,
             ),
@@ -162,7 +162,9 @@ class _BackOfficePageState extends State<BackOfficePage> {
     );
   }
 
-  Widget eventManagement(BuildContext context,){
+  Widget eventManagement(
+    BuildContext context,
+  ) {
     TextEditingController groupId = TextEditingController();
     return AlertDialog(
       title: Text('Enter Group ID', style: TextStyle(fontSize: 30)),
@@ -189,19 +191,15 @@ class _BackOfficePageState extends State<BackOfficePage> {
           onPressed: () async {
             Navigator.of(context).pop();
 
-            final database =
-            FirebaseDatabase.instance.ref();
-            DatabaseEvent snapshot = await database
-                .child('events')
-                .child(groupId.text)
-                .once();
+            final database = FirebaseDatabase.instance.ref();
+            DatabaseEvent snapshot =
+                await database.child('events').child(groupId.text).once();
 
             if (snapshot.snapshot.value != null) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      GroupEventsPage(groupId: groupId.text),
+                  builder: (context) => GroupEventsPage(groupId: groupId.text),
                 ),
               );
             } else {
@@ -250,7 +248,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                  Theme.of(context).primaryColor, // button's fill color
+                      Theme.of(context).primaryColor, // button's fill color
                   foregroundColor: Colors.white,
                   elevation: 2,
                   padding: EdgeInsets.all(20),
@@ -273,7 +271,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                  Theme.of(context).primaryColor, // button's fill color
+                      Theme.of(context).primaryColor, // button's fill color
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.all(20),
                   elevation: 2,
@@ -302,7 +300,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                  Theme.of(context).primaryColor, // button's fill color
+                      Theme.of(context).primaryColor, // button's fill color
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.all(20),
                   elevation: 2,
@@ -325,7 +323,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                  Theme.of(context).primaryColor, // button's fill color
+                      Theme.of(context).primaryColor, // button's fill color
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.all(20),
                   elevation: 2,
@@ -335,8 +333,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
                 onPressed: () {
                   setState(() {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => AnomaliesPage()),
+                      MaterialPageRoute(builder: (context) => AnomaliesPage()),
                     );
                   });
                 },
@@ -348,116 +345,113 @@ class _BackOfficePageState extends State<BackOfficePage> {
     );
   }
 
-  Widget mobileLayout(BuildContext context){
+  Widget mobileLayout(BuildContext context) {
     return Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-            Container(
-              width: 300, // adjust these values as needed
-              height: 100,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
+        Container(
+          width: 300, // adjust these values as needed
+          height: 100,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
                   Theme.of(context).primaryColor, // button's fill color
-                  foregroundColor: Colors.white,
-                  elevation: 2,
-                  padding: EdgeInsets.all(20),
-                ),
-                icon: Icon(Icons.manage_accounts),
-                label: Text('User Management'),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return userManagement(context);
-                    },
-                  );
-                },
-              ),
+              foregroundColor: Colors.white,
+              elevation: 2,
+              padding: EdgeInsets.all(20),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-            Container(
-              width: 300, // adjust these values as needed
-              height: 100,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
+            icon: Icon(Icons.manage_accounts),
+            label: Text('User Management'),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return userManagement(context);
+                },
+              );
+            },
+          ),
+        ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+        Container(
+          width: 300, // adjust these values as needed
+          height: 100,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
                   Theme.of(context).primaryColor, // button's fill color
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.all(20),
-                  elevation: 2,
-                ),
-                icon: Icon(Icons.groups),
-                label: Text('Group Management'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GroupPage(),
-                    ),
-                  );
-                },
-              ),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.all(20),
+              elevation: 2,
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-            Container(
-              width: 300, // adjust these values as needed
-              height: 100,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
+            icon: Icon(Icons.groups),
+            label: Text('Group Management'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GroupPage(),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+        Container(
+          width: 300, // adjust these values as needed
+          height: 100,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
                   Theme.of(context).primaryColor, // button's fill color
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.all(20),
-                  elevation: 2,
-                ),
-                icon: Icon(Icons.edit_calendar),
-                label: Text('Event Management'),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return eventManagement(context);
-                    },
-                  );
-                },
-              ),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.all(20),
+              elevation: 2,
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-            Container(
-              width: 300, // adjust these values as needed
-              height: 100,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
+            icon: Icon(Icons.edit_calendar),
+            label: Text('Event Management'),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return eventManagement(context);
+                },
+              );
+            },
+          ),
+        ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+        Container(
+          width: 300, // adjust these values as needed
+          height: 100,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
                   Theme.of(context).primaryColor, // button's fill color
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.all(20),
-                  elevation: 2,
-                ),
-                icon: Icon(Icons.report),
-                label: Text('Anomalies'),
-                onPressed: () {
-                  setState(() {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => AnomaliesPage()),
-                    );
-                  });
-                },
-              ),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.all(20),
+              elevation: 2,
             ),
-          ],
-        ));
+            icon: Icon(Icons.report),
+            label: Text('Anomalies'),
+            onPressed: () {
+              setState(() {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => AnomaliesPage()),
+                );
+              });
+            },
+          ),
+        ),
+      ],
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: kIsWeb ? webLayout(context) : mobileLayout(context)
-    );
+    return Scaffold(body: kIsWeb ? webLayout(context) : mobileLayout(context));
   }
 
   Future<void> registerUser(
@@ -466,6 +460,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
     String email,
     String password,
     String role,
+    String number,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + 'rest/register/';
@@ -478,6 +473,7 @@ class _BackOfficePageState extends State<BackOfficePage> {
         'email': email,
         'password': password,
         'confirmPwd': password,
+        'studentNumber': number,
         'role': role,
         'activityState': 'ACTIVE',
       }),
