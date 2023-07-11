@@ -85,9 +85,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ? 2
           : index == 6
               ? 3
-              : index == 8
+              : index == 3
                   ? 4
-                  : 0;
+                  : index == 15
+                      ? 1
+                      : 0;
     }
     if (date != null) scheduleDate = date;
     if (location != null) markerLocation = location;
@@ -364,6 +366,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   onTap: () {
                     setState(() {
                       _selectedIndex = 3;
+                      _bottomNavigationIndex = 4;
                     });
                     Navigator.pop(context);
                   },
@@ -399,6 +402,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 15;
+                          _bottomNavigationIndex = 1;
                         });
                         Navigator.pop(context);
                       },
@@ -419,7 +423,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 1;
-                          _bottomNavigationIndex = 1;
                         });
                         Navigator.pop(context);
                       },
@@ -526,7 +529,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 8;
-                    _bottomNavigationIndex = 4;
                   });
                   Navigator.pop(context);
                 },
@@ -564,13 +566,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     markerLocation = "";
                     scheduleDate = DateTime.now();
                     _bottomNavigationIndex = index;
-                    _selectedIndex = index == 2
-                        ? 10
-                        : index == 3
-                            ? 6
-                            : index == 4
-                                ? 8
-                                : index;
+                    _selectedIndex = index == 1
+                        ? 15
+                        : index == 2
+                            ? 10
+                            : index == 3
+                                ? 6
+                                : index == 4
+                                    ? 3
+                                    : index;
                     scales[_selectedIndex] = 1;
                     _controller.reverse();
                     scales[_selectedIndex] = 0;
@@ -588,8 +592,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     label: 'News',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.search, 1, AxisDirection.right),
-                    label: 'Search',
+                    icon: _buildIcon(Icons.event_note, 15, AxisDirection.right),
+                    label: 'Events',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.map, 10, AxisDirection.right),
@@ -600,8 +604,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     label: 'Chat',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.settings, 8, AxisDirection.left),
-                    label: 'Settings',
+                    icon: _buildIcon(Icons.person, 3, AxisDirection.left),
+                    label: 'Profile',
                   ),
                 ],
               )
@@ -624,16 +628,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             offset: Offset(0, -5 * math.sin(_controller.value * math.pi * 2)),
             child: child,
           );
-        } else if (index == 1) {
+        } else if (index == 15) {
           // For search icon
           return Transform.scale(
-            scale: 1.0 + (0.33 * _controller.value),
-            child: child,
-          );
+              scale: 1.0 +
+                  (_controller.status == AnimationStatus.forward ? 0.2 : -0.2) *
+                      _controller.value,
+              child: child);
         } else if (index == 10) {
-          // For maps icon
-          return Transform.translate(
-            offset: Offset(-5 * math.sin(_controller.value * math.pi * 2), 0),
+          return Transform.rotate(
+            angle: _controller.value * 2 * math.pi, // For 270 degree rotation
             child: child,
           );
         } else if (index == 6) {
@@ -644,10 +648,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     _controller.value,
             child: child,
           );
-        } else if (index == 8) {
+        } else if (index == 3) {
           // If the icon is for settings
-          return Transform.rotate(
-            angle: _controller.value * 1.5 * math.pi, // For 270 degree rotation
+          return Transform.translate(
+            offset: Offset(0, -5 * math.sin(_controller.value * math.pi * 2)),
             child: child,
           );
         }
