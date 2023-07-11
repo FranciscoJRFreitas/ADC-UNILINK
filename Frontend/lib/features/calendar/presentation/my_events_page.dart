@@ -594,7 +594,9 @@ class _MyEventsPageState extends State<MyEventsPage>
         ],
         if (groupFilteredEvents.isEmpty)
           Center(
-            child: noSearchResult(),
+            child: searchGroupsController.text.trim().isEmpty
+                ? Column()
+                : noSearchResult(),
           ),
       ],
     );

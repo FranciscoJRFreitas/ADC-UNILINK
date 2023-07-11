@@ -173,7 +173,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             builder: (context) => MainScreen(index: 6),
           ),
         );
-        _showErrorSnackbar("You have been kicked from ${widget.groupId}!", true);
+        _showErrorSnackbar("You no longer belong to group ${widget.groupId}!", true);
       }
     });
   }
