@@ -129,7 +129,7 @@ class _AnomaliesPageState extends State<AnomaliesPage>
           centerTitle: true,
           title: Text(
             'Anomalies Management',
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
           backgroundColor: Theme.of(context)
               .primaryColor, // Customize color as per your need

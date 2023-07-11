@@ -21,6 +21,7 @@ import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
 import 'event_details.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class CalendarPage extends StatefulWidget {
   final String username;
@@ -280,22 +281,93 @@ class _CalendarPageState extends State<CalendarPage> {
                 Expanded(child: _buildThreeColumns()),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: "Create a Personal Event",
-        onPressed: () {
-          if (kIsWeb)
-            _createEventPopUpDialogWeb(context);
-          else
-            _createEventPopUpDialogMobile(context);
-        },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-        elevation: 6,
+      floatingActionButton: SpeedDial(
+        // both default to 16
+        childMargin: EdgeInsets.only(right: 10),
+        spacing: 10.0,
+        animatedIcon: AnimatedIcons.menu_close,
+        animatedIconTheme: IconThemeData(size: 22.0),
+        // this is ignored if animatedIcon is non null
+        // child: Icon(Icons.add),
+        visible: true,
+        // If true user is forced to close dial manually
+        // by tapping main button and overlay is not rendered.
+        closeManually: false,
+        curve: Curves.bounceIn,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        onOpen: () => print('OPENING DIAL'),
+        onClose: () => print('DIAL CLOSED'),
+        tooltip: 'Functionalities',
+        heroTag: 'speed-dial-hero-tag',
         backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 80.0,
+        shape: CircleBorder(),
+        children: [
+          buttonAddCalendar(context),
+          buttonAddEvent(context),
+          // Add other SpeedDialChild widgets if needed
+        ],
       ),
+    );
+  }
+
+  SpeedDialChild buttonAddCalendar(BuildContext context) {
+    return SpeedDialChild(
+      child: Icon(Icons.edit_calendar),
+      backgroundColor: Theme.of(context).primaryColor,
+      label: 'Add Calendar ',
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Add Calendar'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    child: Text('Pick a file'),
+                    onPressed: () {
+                      //pickFile(context);
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  child: Text('Create'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Process your file here
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  SpeedDialChild buttonAddEvent(BuildContext context) {
+    return SpeedDialChild(
+      child: Icon(Icons.event),
+      backgroundColor: Theme.of(context).primaryColor,
+      label: 'Add Event ',
+      onTap: () {
+        if (kIsWeb)
+          _createEventPopUpDialogWeb(context);
+        else
+          _createEventPopUpDialogMobile(context);
+      },
     );
   }
 
@@ -314,8 +386,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: format == CalendarFormat.month
                       ? 200
                       : format == CalendarFormat.twoWeeks
-                          ? MediaQuery.of(context).size.height * 0.57
-                          : MediaQuery.of(context).size.height * 0.64,
+                      ? MediaQuery.of(context).size.height * 0.57
+                      : MediaQuery.of(context).size.height * 0.64,
                   child: SingleChildScrollView(
                     child: Column(
                       children: _scheduleWidget(context),
@@ -338,8 +410,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: format == CalendarFormat.month
                       ? 200
                       : format == CalendarFormat.twoWeeks
-                          ? MediaQuery.of(context).size.height * 0.57
-                          : MediaQuery.of(context).size.height * 0.64,
+                      ? MediaQuery.of(context).size.height * 0.57
+                      : MediaQuery.of(context).size.height * 0.64,
                   child: SingleChildScrollView(
                     child: Column(children: [
                       _personalEventsWidget(context),
@@ -362,8 +434,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: format == CalendarFormat.month
                       ? 200
                       : format == CalendarFormat.twoWeeks
-                          ? MediaQuery.of(context).size.height * 0.55
-                          : MediaQuery.of(context).size.height * 0.62,
+                      ? MediaQuery.of(context).size.height * 0.55
+                      : MediaQuery.of(context).size.height * 0.62,
                   child: SingleChildScrollView(
                     child: Column(children: [
                       _groupEventsWidget(context),
@@ -956,7 +1028,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Tooltip(
-                            message: "Views Group Chat",
+                            message: "View Group Chat",
                             child: Icon(
                               Icons.chat,
                               color: Theme.of(context).secondaryHeaderColor,

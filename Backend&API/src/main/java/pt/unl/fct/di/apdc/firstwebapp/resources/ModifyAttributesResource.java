@@ -129,6 +129,7 @@ public class ModifyAttributesResource {
         if (StringUtils.isNotEmpty(data.landlinePhone)) userBuilder.set("user_landlinePhone", data.landlinePhone);
         if (StringUtils.isNotEmpty(data.mobilePhone)) userBuilder.set("user_mobilePhone", data.mobilePhone);
         if (StringUtils.isNotEmpty(data.occupation)) userBuilder.set("user_occupation", data.occupation);
+        if (StringUtils.isNotEmpty(data.course)) userBuilder.set("user_course", data.course);
         if (StringUtils.isNotEmpty(data.workplace)) userBuilder.set("user_workplace", data.workplace);
         if (StringUtils.isNotEmpty(data.address)) userBuilder.set("user_address", data.address);
         if (StringUtils.isNotEmpty(data.additionalAddress))
@@ -171,6 +172,8 @@ public class ModifyAttributesResource {
         responseData.put("postalCode", userUpdated.getString("user_postalCode"));
         responseData.put("nif", userUpdated.getString("user_taxIdentificationNumber"));
         responseData.put("photo", userUpdated.getString("user_photo"));
+        responseData.put("course", userUpdated.getString("user_course"));
+        responseData.put("studentNumber", userUpdated.getString("user_student_number"));
 
         return Response.ok(g.toJson(responseData)).build();
     }

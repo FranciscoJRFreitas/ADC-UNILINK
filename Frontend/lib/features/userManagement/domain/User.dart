@@ -12,6 +12,7 @@ class User {
   final String displayName;
   final String username;
   final String email;
+  final String studentNumber;
   final String? role;
   final String? educationLevel;
   final String? birthDate;
@@ -20,12 +21,14 @@ class User {
   final String? mobilePhone;
   final String? occupation;
   final String? creationTime;
+  final String? course;
 
   User({
     required this.displayName,
     required this.username,
     required this.email,
     required this.role,
+    required this.studentNumber,
     required this.educationLevel,
     required this.birthDate,
     required this.profileVisibility,
@@ -33,6 +36,7 @@ class User {
     required this.mobilePhone,
     required this.occupation,
     required this.creationTime,
+    required this.course,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -48,7 +52,9 @@ class User {
         state: '',
         mobilePhone: '',
         occupation: '',
-        creationTime: ''
+        creationTime: '',
+        studentNumber:'',
+        course: '',
       );
     } else {
       return User(
@@ -62,7 +68,9 @@ class User {
         role: json['user_role']['string'],
         state: json['user_state']['string'],
         username: json['user_username']['string'],
-        creationTime: json['user_creation_time']['string']
+        creationTime: json['user_creation_time']['string'],
+        studentNumber: json['user_student_number']['string'],
+        course: json['user_course']['string'],
       );
     }
   }
@@ -111,6 +119,7 @@ class User {
       'displayName': displayName,
       'email': email,
       'username': username,
+      'studentNumber': studentNumber,
       'role': nullFormat(role),
       'educationLevel': nullFormat(educationLevel),
       'birthDate': nullFormat(birthDate),
@@ -121,6 +130,7 @@ class User {
       'token': token,
       'password': password,
       'creationTime': nullFormat(creationTime),
+      'course': nullFormat(course),
     };
   }
 

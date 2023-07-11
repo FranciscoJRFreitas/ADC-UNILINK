@@ -85,9 +85,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ? 2
           : index == 6
               ? 3
-              : index == 8
+              : index == 3
                   ? 4
-                  : 0;
+                  : index == 15
+                      ? 1
+                      : 0;
     }
     if (date != null) scheduleDate = date;
     if (location != null) markerLocation = location;
@@ -113,14 +115,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         NewsFeedPage(), //0
         SearchUsersPage(user: _currentUser), //1
         ListUsersPage(user: _currentUser), //2
-        /*ModifyAttributesPage(
-          user: _currentUser,
-          onUserUpdate: (updatedUser) {
-            setState(() {
-              _currentUser = updatedUser;
-            });
-          },
-        ),*/
         HomePage(), //3
         ChangePasswordPage(), //4
         RemoveAccountPage(), //5
@@ -139,7 +133,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ReportAnomalyPage(user: _currentUser), //11
         BackOfficePage(), //12
         Placeholder(), //13
-
         Placeholder(), //diretor //14
         MyEventsPage(username: _currentUser.username), //15
       ];
@@ -348,8 +341,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             height: 5,
                           ),
                           Text(
-                            //trocar por numero de aluno
-                            'Role: ${_currentUser.role}',
+                            'Student Number: ${_currentUser.studentNumber}',
                             style: TextStyle(
                               color: Colors.white60,
                               //roleColor == Colors.yellow ? Colors.black: Colors.white,
@@ -373,65 +365,49 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   onTap: () {
                     setState(() {
                       _selectedIndex = 3;
+                      _bottomNavigationIndex = 4;
                     });
                     Navigator.pop(context);
                   },
                 ),
-              _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
-                  ? ExpansionTile(
-                      leading: Icon(
-                        Icons.person_add_alt_1_outlined,
-                      ),
-                      title: Text('Student',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      children: [
-                          ListTile(
-                            leading: Icon(Icons.perm_contact_calendar),
-                            title: Text('Calendar'),
-                            onTap: () {
-                              setState(() {
-                                scheduleDate = DateTime.now();
-                                _selectedIndex = 9;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.event_note),
-                            title: Text('My Events'),
-                            onTap: () {
-                              setState(() {
-                                _selectedIndex = 15;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ])
-                  : Container(),
-              _currentUser.role == 'PROF' || _currentUser.role == 'SU'
-                  ? ListTile(
-                      leading: Icon(Icons.newspaper),
-                      title: Text('Professor'),
+              ExpansionTile(
+                  leading: Icon(
+                    Icons.person_add_alt_1_outlined,
+                  ),
+                  title: Text(
+                      _currentUser.role == 'STUDENT'
+                          ? 'Student'
+                          : _currentUser.role == 'PROFESSOR'
+                              ? 'Professor'
+                              : _currentUser.role == 'DIRECTOR'
+                                  ? 'Director'
+                                  : 'SU',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.perm_contact_calendar),
+                      title: Text('Calendar'),
                       onTap: () {
                         setState(() {
-                          _selectedIndex = 10;
+                          scheduleDate = DateTime.now();
+                          _selectedIndex = 9;
                         });
                         Navigator.pop(context);
                       },
-                    )
-                  : Container(),
-              _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
-                  ? ListTile(
-                      leading: Icon(Icons.newspaper),
-                      title: Text('Director'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.event_note),
+                      title: Text('My Events'),
                       onTap: () {
                         setState(() {
-                          _selectedIndex = 11;
+                          _selectedIndex = 15;
+                          _bottomNavigationIndex = 1;
                         });
                         Navigator.pop(context);
                       },
-                    )
-                  : Container(),
+                    ),
+                  ]),
+
               ExpansionTile(
                   leading: Icon(
                     Icons.group,
@@ -446,7 +422,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedIndex = 1;
-                          _bottomNavigationIndex = 1;
                         });
                         Navigator.pop(context);
                       },
@@ -553,7 +528,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 onTap: () {
                   setState(() {
                     _selectedIndex = 8;
-                    _bottomNavigationIndex = 4;
                   });
                   Navigator.pop(context);
                 },
@@ -591,13 +565,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     markerLocation = "";
                     scheduleDate = DateTime.now();
                     _bottomNavigationIndex = index;
-                    _selectedIndex = index == 2
-                        ? 10
-                        : index == 3
-                            ? 6
-                            : index == 4
-                                ? 8
-                                : index;
+                    _selectedIndex = index == 1
+                        ? 15
+                        : index == 2
+                            ? 10
+                            : index == 3
+                                ? 6
+                                : index == 4
+                                    ? 3
+                                    : index;
                     scales[_selectedIndex] = 1;
                     _controller.reverse();
                     scales[_selectedIndex] = 0;
@@ -615,8 +591,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     label: 'News',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.search, 1, AxisDirection.right),
-                    label: 'Search',
+                    icon: _buildIcon(Icons.event_note, 15, AxisDirection.right),
+                    label: 'Events',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.map, 10, AxisDirection.right),
@@ -627,8 +603,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     label: 'Chat',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.settings, 8, AxisDirection.left),
-                    label: 'Settings',
+                    icon: _buildIcon(Icons.person, 3, AxisDirection.left),
+                    label: 'Profile',
                   ),
                 ],
               )
@@ -651,16 +627,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             offset: Offset(0, -5 * math.sin(_controller.value * math.pi * 2)),
             child: child,
           );
-        } else if (index == 1) {
+        } else if (index == 15) {
           // For search icon
           return Transform.scale(
-            scale: 1.0 + (0.33 * _controller.value),
-            child: child,
-          );
+              scale: 1.0 +
+                  (_controller.status == AnimationStatus.forward ? 0.2 : -0.2) *
+                      _controller.value,
+              child: child);
         } else if (index == 10) {
-          // For maps icon
-          return Transform.translate(
-            offset: Offset(-5 * math.sin(_controller.value * math.pi * 2), 0),
+          return Transform.rotate(
+            angle: _controller.value * 2 * math.pi, // For 270 degree rotation
             child: child,
           );
         } else if (index == 6) {
@@ -671,10 +647,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     _controller.value,
             child: child,
           );
-        } else if (index == 8) {
+        } else if (index == 3) {
           // If the icon is for settings
-          return Transform.rotate(
-            angle: _controller.value * 1.5 * math.pi, // For 270 degree rotation
+          return Transform.translate(
+            offset: Offset(0, -5 * math.sin(_controller.value * math.pi * 2)),
             child: child,
           );
         }

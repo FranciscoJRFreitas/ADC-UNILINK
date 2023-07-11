@@ -47,6 +47,7 @@ class CacheFactoryImpl implements CacheFactory {
     String displayName = await get("", 'displayName') ?? '';
     String username = await get("", 'username') ?? '';
     String email = await get("", 'email') ?? '';
+    String studentNumber = await get("", 'studentNumber');
     String? role = await get("", 'role') ?? '';
     String? educationLevel = await get("", 'educationLevel') ?? '';
     String? birthDate = await get("", 'birthDate') ?? '';
@@ -55,11 +56,13 @@ class CacheFactoryImpl implements CacheFactory {
     String? mobilePhone = await get("", 'mobilePhone') ?? '';
     String? occupation = await get("", 'occupation') ?? '';
     String? creationTime = await get("", 'creationTime') ?? '';
+    String? course = await get("", 'course') ?? '';
 
     return User(
       displayName: displayName,
       username: username,
       email: email,
+      studentNumber: studentNumber,
       role: role,
       educationLevel: educationLevel,
       birthDate: birthDate,
@@ -68,6 +71,7 @@ class CacheFactoryImpl implements CacheFactory {
       mobilePhone: mobilePhone,
       occupation: occupation,
       creationTime: creationTime,
+      course: course,
     );
   }
 
@@ -98,6 +102,8 @@ class CacheFactoryImpl implements CacheFactory {
     if (get('users', 'profileVisibility') != null) delete('profileVisibility');
     if (get('users', 'educationLevel') != null) delete('educationLevel');
     if (get('users', 'birthDate') != null) delete('birthDate');
+    if (get('users', 'course') != null) delete('course');
+    if (get('users', 'studentNumber') != null) delete('studentNumber');
   }
 
   @override
@@ -115,6 +121,7 @@ class CacheFactoryImpl implements CacheFactory {
   void setUser(User user, String token, String password) {
     set('displayName', user.displayName);
     set('email', user.email);
+    set('studentNumber', user.studentNumber);
     set('educationLevel', user.educationLevel);
     set('birthDate', user.birthDate);
     set('profileVisibility', user.profileVisibility);
@@ -126,10 +133,10 @@ class CacheFactoryImpl implements CacheFactory {
     set('password', password);
     set('token', token);
     set('creationTime', user.creationTime);
+    set('course', user.course);
   }
 
   Future<List<dynamic>> _getMessagesList(String groupId) async {
-
     String? jsonString = await window.localStorage[groupId];
     if (jsonString != null) {
       return jsonDecode(jsonString);

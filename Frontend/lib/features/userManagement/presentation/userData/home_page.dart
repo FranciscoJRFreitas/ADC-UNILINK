@@ -52,8 +52,8 @@ class _HomePageState extends State<HomePage> {
                             child: IconButton(
                               icon: Container(
                                 decoration: BoxDecoration(
-                                  shape: BoxShape
-                                      .circle, // use circle if the icon is circular
+                                  shape: BoxShape.circle,
+                                  // use circle if the icon is circular
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black,
@@ -154,10 +154,15 @@ class _HomePageState extends State<HomePage> {
               color: Style.lightBlue,
             ),
             SizedBox(height: 10),
-            InfoItem(
-              title: 'Role',
-              value: _currentUser.role ?? 'N/A',
-              icon: Icons.person,
+            ListTile(
+              leading: Icon(
+                Icons.library_books,
+                color: Theme.of(context).primaryIconTheme.color,
+              ),
+              title: Text(
+                _currentUser.course ?? 'N/A',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             SizedBox(height: 5),
             Divider(
@@ -247,9 +252,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //Widget editBuild(BuildContext context) {
-  //return
-  //}
+//Widget editBuild(BuildContext context) {
+//return
+//}
 }
 
 class InfoItem extends StatelessWidget {

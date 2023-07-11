@@ -344,6 +344,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                       // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
                         sendMessage(value);
+                        setState(() {});
                       },
                     ),
                   ),
@@ -1019,10 +1020,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         };
       }
       messageRef.child(generatedId!).set(messageData).then((value) {
-        messageController.clear();
-        messageFocusNode.requestFocus();
-        pickedFile = null;
-        picked = null;
+        setState(() {
+          messageController.clear();
+          messageFocusNode.requestFocus();
+          pickedFile = null;
+          picked = null;
+        });
       }).catchError((error) {
         // Handle the error if the message fails to send
         print('Failed to send message: $error');
