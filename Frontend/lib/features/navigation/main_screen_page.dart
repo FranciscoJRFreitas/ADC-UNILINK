@@ -113,14 +113,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         NewsFeedPage(), //0
         SearchUsersPage(user: _currentUser), //1
         ListUsersPage(user: _currentUser), //2
-        /*ModifyAttributesPage(
-          user: _currentUser,
-          onUserUpdate: (updatedUser) {
-            setState(() {
-              _currentUser = updatedUser;
-            });
-          },
-        ),*/
         HomePage(), //3
         ChangePasswordPage(), //4
         RemoveAccountPage(), //5
@@ -139,7 +131,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ReportAnomalyPage(user: _currentUser), //11
         BackOfficePage(), //12
         Placeholder(), //13
-
         Placeholder(), //diretor //14
         MyEventsPage(username: _currentUser.username), //15
       ];
@@ -377,61 +368,43 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     Navigator.pop(context);
                   },
                 ),
-              _currentUser.role == 'STUDENT' || _currentUser.role == 'SU'
-                  ? ExpansionTile(
-                      leading: Icon(
-                        Icons.person_add_alt_1_outlined,
-                      ),
-                      title: Text('Student',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      children: [
-                          ListTile(
-                            leading: Icon(Icons.perm_contact_calendar),
-                            title: Text('Calendar'),
-                            onTap: () {
-                              setState(() {
-                                scheduleDate = DateTime.now();
-                                _selectedIndex = 9;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.event_note),
-                            title: Text('My Events'),
-                            onTap: () {
-                              setState(() {
-                                _selectedIndex = 15;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ])
-                  : Container(),
-              _currentUser.role == 'PROF' || _currentUser.role == 'SU'
-                  ? ListTile(
-                      leading: Icon(Icons.newspaper),
-                      title: Text('Professor'),
+              ExpansionTile(
+                  leading: Icon(
+                    Icons.person_add_alt_1_outlined,
+                  ),
+                  title: Text(
+                      _currentUser.role == 'STUDENT'
+                          ? 'Student'
+                          : _currentUser.role == 'PROFESSOR'
+                              ? 'Professor'
+                              : _currentUser.role == 'DIRECTOR'
+                                  ? 'Director'
+                                  : 'SU',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.perm_contact_calendar),
+                      title: Text('Calendar'),
                       onTap: () {
                         setState(() {
-                          _selectedIndex = 10;
+                          scheduleDate = DateTime.now();
+                          _selectedIndex = 9;
                         });
                         Navigator.pop(context);
                       },
-                    )
-                  : Container(),
-              _currentUser.role == 'DIRECTOR' || _currentUser.role == 'SU'
-                  ? ListTile(
-                      leading: Icon(Icons.newspaper),
-                      title: Text('Director'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.event_note),
+                      title: Text('My Events'),
                       onTap: () {
                         setState(() {
-                          _selectedIndex = 11;
+                          _selectedIndex = 15;
                         });
                         Navigator.pop(context);
                       },
-                    )
-                  : Container(),
+                    ),
+                  ]),
+
               ExpansionTile(
                   leading: Icon(
                     Icons.group,
