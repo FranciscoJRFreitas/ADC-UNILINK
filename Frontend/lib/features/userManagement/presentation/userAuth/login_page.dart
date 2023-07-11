@@ -16,7 +16,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import 'package:flutter/foundation.dart';
-import 'package:google_translator/google_translator.dart';
 
 import 'recover_password_page.dart';
 
@@ -405,10 +404,12 @@ Future<int> login(
 
         if (page == "News") index = 0;
         if (page == "Profile") index = 3;
-        if (page == "Schedule") index = 9;
+        if (page == "Calendar") index = 9;
+        if(page == "My Events") index = 15;
         if (page == "Chat") index = 6;
-        if (page == "Contacts") index = 7;
         if (page == "Campus") index = 10;
+        if (page == "Contacts") index = 7;
+        
 
         Navigator.pushAndRemoveUntil(
           context,

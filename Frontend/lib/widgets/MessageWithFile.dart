@@ -22,6 +22,7 @@ class MessageWithFile extends StatefulWidget {
   final bool isAdmin;
   final String fileExtension;
   final String message;
+  final bool isEdited;
 
   const MessageWithFile({
     Key? key,
@@ -35,6 +36,7 @@ class MessageWithFile extends StatefulWidget {
     required this.isAdmin,
     this.isSystemMessage = false,
     required this.message,
+    required this.isEdited,
   }) : super(key: key);
 
   @override
@@ -351,13 +353,20 @@ class _MessageWithFileState extends State<MessageWithFile> {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ]),
-
-                  //profilePicture(context),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  if(widget.isEdited)
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: Text(
                       formatTimeInMillis(widget.time),
-                      style: TextStyle(fontSize: 10, color: Colors.white),
+                      style: TextStyle(fontSize: 10, color: Colors.grey),),),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2),
+                    child: Text(
+                      formatTimeInMillis(widget.time),
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                   ),
                 ],

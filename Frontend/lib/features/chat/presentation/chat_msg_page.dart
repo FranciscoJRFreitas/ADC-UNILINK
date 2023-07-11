@@ -893,6 +893,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               isSystemMessage: true,
               groupId: widget.groupId,
               id: message.id,
+              isEdited : false,
             ));
           }
 
@@ -907,6 +908,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   isAdmin: isAdmin,
                   fileExtension: message.extension!,
                   message: message.text,
+                  isEdited: message.isEdited,
                 )
               : MessageTile(
                   message: message.text,
@@ -918,6 +920,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   groupId: widget.groupId,
                   id: message.id,
                   isAdmin: isAdmin,
+                  isEdited: message.isEdited,
                 ));
 
           return Column(
@@ -1010,10 +1013,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         };
       }
       messageRef.child(generatedId!).set(messageData).then((value) {
-        messageController.clear();
-        messageFocusNode.requestFocus();
-        pickedFile = null;
-        picked = null;
+        setState(() {
+          messageController.clear();
+          messageFocusNode.requestFocus();
+          pickedFile = null;
+          picked = null;
+        });
       }).catchError((error) {
         // Handle the error if the message fails to send
         print('Failed to send message: $error');
@@ -1143,7 +1148,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       ),
     );
   }
-
 }
 
 class DisplayPictureScreen extends StatelessWidget {
