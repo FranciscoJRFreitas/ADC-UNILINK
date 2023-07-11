@@ -136,6 +136,7 @@ public Response createMultipleGroups(List<Group> groups, @Context HttpHeaders he
         newMessageRef.child("message").setValueAsync("Welcome to " + group.DisplayName + "!");
         newMessageRef.child("timestamp").setValueAsync(System.currentTimeMillis());
         newMessageRef.child("isSystemMessage").setValueAsync(true);
+        newMessageRef.child("isEdited").setValueAsync(true);
 
         DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
         DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);
