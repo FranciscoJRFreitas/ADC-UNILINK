@@ -22,6 +22,7 @@ import 'dart:convert';
 
 class EditProfilePage extends StatefulWidget {
   final User user;
+
   EditProfilePage({required this.user});
 
   @override
@@ -36,6 +37,7 @@ class _EditProfilePage extends State<EditProfilePage> {
   late TextEditingController birthDateController;
   late TextEditingController mobilePhoneController;
   late TextEditingController occupationController;
+  late TextEditingController courseController;
 
   DocumentReference picsRef =
       FirebaseFirestore.instance.collection('ProfilePictures').doc();
@@ -52,6 +54,7 @@ class _EditProfilePage extends State<EditProfilePage> {
     birthDateController = TextEditingController(text: user.birthDate);
     mobilePhoneController = TextEditingController(text: user.mobilePhone);
     occupationController = TextEditingController(text: user.occupation);
+    courseController = TextEditingController(text: user.course);
     _selectedEducationLevel = user.educationLevel == 'D'
         ? 'Doctorate'
         : user.educationLevel == 'SE'
@@ -89,6 +92,7 @@ class _EditProfilePage extends State<EditProfilePage> {
     String profileVisibility,
     String mobilePhone,
     String occupation,
+    String course,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + 'rest/modify/';
@@ -114,12 +118,14 @@ class _EditProfilePage extends State<EditProfilePage> {
         'profileVisibility': profileVisibility,
         'mobilePhone': mobilePhone,
         'occupation': occupation,
+        'course': course,
       }),
     );
 
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
-
+      print(responseBody);
+      print(responseBody['occupation'],);
       User user = User(
         displayName: responseBody['displayName'],
         username: responseBody['username'],
@@ -131,6 +137,8 @@ class _EditProfilePage extends State<EditProfilePage> {
         state: responseBody['state'],
         mobilePhone: responseBody['mobilePhone'],
         occupation: responseBody['occupation'],
+        studentNumber: responseBody['studentNumber'],
+        course: responseBody['course'],
         creationTime: await cacheFactory.get('users', 'creationTime'),
       );
 
@@ -314,6 +322,15 @@ class _EditProfilePage extends State<EditProfilePage> {
                     ),
                     SizedBox(height: 5),
                     Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: LineTextField(
+                          title: 'Course',
+                          icon: Icons.school,
+                          controller: courseController,
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10)),
+                    ),
+                    SizedBox(height: 5),
+                    Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: LineComboBox(
                           selectedValue: _selectedEducationLevel!,
@@ -403,9 +420,9 @@ class _EditProfilePage extends State<EditProfilePage> {
                             _isPublic ? 'PUBLIC' : 'PRIVATE',
                             mobilePhoneController.text,
                             occupationController.text,
+                            courseController.text,
                             _showErrorSnackbar,
                           );
-
                         },
                         bgColor: Theme.of(context).dividerColor,
                         textColor: Colors.white,

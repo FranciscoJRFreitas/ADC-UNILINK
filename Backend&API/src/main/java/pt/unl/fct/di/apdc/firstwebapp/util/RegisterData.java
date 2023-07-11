@@ -9,6 +9,7 @@ public class RegisterData {
     public String email;
     public String password;
     public String confirmPwd;
+    public String studentNumber;
     public UserRole role;
     public UserActivityState activityState;
     public UserEducationLevel educationLevel;
@@ -24,11 +25,12 @@ public class RegisterData {
     public String postalCode;
     public String taxIdentificationNumber;
     public String photo;
+    public String course;
 
     public RegisterData() {
     }
 
-    public RegisterData(String displayName, String username, String email, String password, String confirmPwd) {
+    public RegisterData(String displayName, String username, String email, String password, String confirmPwd, String studentNumber) {
         this.displayName = displayName;
         this.username = username;
         this.email = email;
@@ -38,6 +40,7 @@ public class RegisterData {
         this.activityState = UserActivityState.INACTIVE;
         this.profileVisibility = UserProfileVisibility.PUBLIC;
         this.educationLevel = UserEducationLevel.PE;
+        this.studentNumber = studentNumber;
     }
 
     /*

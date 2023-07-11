@@ -22,16 +22,17 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPwdController = TextEditingController();
+  final TextEditingController studentNumberController = TextEditingController();
   String _selectedEducationLevel = 'Education Level';
   final TextEditingController registration_dateController =
       TextEditingController();
   String _selectedProfileVisibility = 'Profile Visibility (Public by default)';
   String sv = '';
-  final TextEditingController landlinePhoneController = TextEditingController();
   final TextEditingController mobilePhoneController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
   final TextEditingController workplaceController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  final TextEditingController courseController = TextEditingController();
   final TextEditingController additionalAddressController =
       TextEditingController();
   final TextEditingController localityController = TextEditingController();
@@ -55,6 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
     String displayName,
     String username,
     String email,
+    String studentNumber,
     String password,
     String confirmPwd,
     String educationLevel,
@@ -62,6 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
     String profileVisibility,
     String mobilePhone,
     String occupation,
+    String course,
     void Function(String, bool) showErrorSnackbar,
   ) async {
     final url = kBaseUrl + 'rest/register/';
@@ -72,6 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'displayName': displayName,
         'username': username,
         'email': email,
+        'studentNumber': studentNumber,
         'password': password,
         'confirmPwd': confirmPwd,
         'educationLevel': educationLevel,
@@ -79,6 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'profileVisibility': profileVisibility,
         'mobilePhone': mobilePhone,
         'occupation': occupation,
+        'course': course,
       }),
     );
 
@@ -155,6 +160,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           MyTextField(
                             small: false,
+                            controller: studentNumberController,
+                            hintText: 'Student Number *',
+                            inputType: TextInputType.name,
+                          ),
+                          MyTextField(
+                            small: false,
                             controller: emailController,
                             hintText: 'Email *',
                             inputType: TextInputType.emailAddress,
@@ -188,6 +199,12 @@ class _RegisterPageState extends State<RegisterPage> {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             children: <Widget>[
+                              MyTextField(
+                                small: false,
+                                controller: courseController,
+                                hintText: 'Course',
+                                inputType: TextInputType.name,
+                              ),
                               MyTextField(
                                 small: false,
                                 controller: mobilePhoneController,
@@ -257,6 +274,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     nameController.text,
                                     usernameController.text,
                                     emailController.text,
+                                    studentNumberController.text,
                                     passwordController.text,
                                     confirmPwdController.text,
                                     sv = _selectedEducationLevel == 'Doctorate'
@@ -278,6 +296,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     //Default Private
                                     mobilePhoneController.text,
                                     occupationController.text,
+                                    courseController.text,
                                     _showErrorSnackbar,
                                   );
                                 },

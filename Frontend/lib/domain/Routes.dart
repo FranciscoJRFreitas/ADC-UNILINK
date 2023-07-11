@@ -13,6 +13,7 @@ class Routes {
               displayName: '',
               username: '',
               email: '',
+              studentNumber: '',
               role: '',
               educationLevel: '',
               birthDate: '',
@@ -20,7 +21,9 @@ class Routes {
               state: '',
               mobilePhone: '',
               occupation: '',
-              creationTime: ''),
+              creationTime: '',
+              course: '',
+          ),
         ),
   };
 
