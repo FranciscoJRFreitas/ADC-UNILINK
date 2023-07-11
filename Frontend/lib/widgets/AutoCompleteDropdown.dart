@@ -8,10 +8,12 @@ import 'package:http/http.dart' as http;
 import '../features/userManagement/domain/User.dart';
 
 class AutocompleteDropdown extends StatefulWidget {
+  List<String>? users;
   final String groupId;
   final Function(String, bool) showError;
+  bool? kick;
 
-  AutocompleteDropdown({required this.groupId, required this.showError});
+  AutocompleteDropdown({required this.groupId, required this.showError, this.users, this.kick});
 
   @override
   _AutocompleteDropdownState createState() => _AutocompleteDropdownState();
@@ -24,7 +26,10 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
   @override
   void initState() {
     super.initState();
-    fetchUsers();
+    print(widget.users);
+    if (widget.users != null)
+      users = widget.users!;
+    else fetchUsers();
   }
 
   Future<void> fetchUsers() async {
@@ -78,6 +83,30 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
     }
   }
 
+  Future<void> kickGroup(
+      BuildContext context,
+      String groupId,
+      String userId,
+      void Function(String, bool) showErrorSnackbar,
+      ) async {
+    final url =
+        kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
+    final tokenID = await cacheFactory.get('users', 'token');
+    final storedUsername = await cacheFactory.get('users', 'username');
+    Token token = new Token(tokenID: tokenID, username: storedUsername);
+
+    final response = await http.post(Uri.parse(url), headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${json.encode(token.toJson())}'
+    });
+
+    if (response.statusCode == 200) {
+      showErrorSnackbar('kicked ${userId}!', false);
+    } else {
+      showErrorSnackbar('Error kicking from group!', true);
+    }
+  }
+
   Widget mobileLayout(BuildContext context){
           return SingleChildScrollView(
             child: Container(
@@ -119,7 +148,7 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
                             focusNode: fieldFocusNode,
                             onChanged: (text) => _selectedOption = text,
                             decoration: InputDecoration(
-                              labelText: "Search for a User",
+                              labelText: widget.kick != true ? "Search for a user to invite" : "Search for a member to kick" ,
                               hintStyle: Theme.of(context).textTheme.bodyLarge,
                               labelStyle: Theme.of(context).textTheme.bodyLarge,
                               focusedBorder: UnderlineInputBorder(
@@ -162,13 +191,15 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
                       ElevatedButton(
                         onPressed: () async {
                           {
-                            inviteGroup(widget.groupId, _selectedOption, widget.showError);
+                            if (widget.kick == true)
+                              kickGroup(context, widget.groupId, _selectedOption, widget.showError);
+                            else inviteGroup(widget.groupId, _selectedOption, widget.showError);
                             Navigator.of(context).pop();
                           }
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black87),
-                        child: const Text("SEND"),
+                        child: widget.kick != true ? Text("SEND") : Text("KICK"),
                       ),
                     ])
                       ]),
@@ -182,8 +213,11 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
   @override
   Widget build(BuildContext context) {
     return kIsWeb ? AlertDialog(
-        title: Text(
+        title: widget.kick != true ? Text(
           "Send an Invite",
+          textAlign: TextAlign.left,
+        ) : Text(
+          "Kick a member",
           textAlign: TextAlign.left,
         ),
         backgroundColor: Theme.of(context).canvasColor,
@@ -212,7 +246,7 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
           focusNode: fieldFocusNode,
           onChanged: (text) => _selectedOption = text,
           decoration: InputDecoration(
-            labelText: "Search for a User",
+            labelText: widget.kick != true ? "Search for a user" : "Search for a member",
             focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.grey)),
             enabledBorder: UnderlineInputBorder(
@@ -255,13 +289,15 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
         ElevatedButton(
           onPressed: () async {
             {
-              inviteGroup(widget.groupId, _selectedOption, widget.showError);
+              if (widget.kick == true)
+                kickGroup(context, widget.groupId, _selectedOption, widget.showError);
+              else inviteGroup(widget.groupId, _selectedOption, widget.showError);
               Navigator.of(context).pop();
             }
           },
           style: ElevatedButton.styleFrom(
               primary: Theme.of(context).primaryColor),
-          child: const Text("SEND"),
+          child: widget.kick != true ? Text("SEND") : Text("KICK"),
         ),
         ElevatedButton(
           onPressed: () {
@@ -275,15 +311,4 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
     ): mobileLayout(context);
   }
 
-  /*void _showErrorSnackbar(String message, bool Error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Error ? Colors.red : Colors.blue.shade900,
-      ),
-    );
-  }*/
 }
