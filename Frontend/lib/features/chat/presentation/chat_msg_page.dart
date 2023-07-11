@@ -978,6 +978,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'displayName': widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
+          'isEdited': false,
         };
       } else if (picked != null) {
         final fileBytes = picked!.files.first.bytes;
@@ -995,6 +996,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'displayName': widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
+          'isEdited': false,
         };
       } else {
         messageData = {
@@ -1004,6 +1006,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           'displayName': widget.user.displayName,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
           'isSystemMessage': false,
+          'isEdited': false,
         };
       }
       messageRef.child(generatedId!).set(messageData).then((value) {
@@ -1141,10 +1144,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
     );
   }
 
-// Future<void> _initCamera() async {
-//   final cameras = await availableCameras();
-//   camera = cameras.first;
-// }
 }
 
 class DisplayPictureScreen extends StatelessWidget {

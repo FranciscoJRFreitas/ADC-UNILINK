@@ -2245,7 +2245,17 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     });
 
     if (response.statusCode == 200) {
-      showErrorSnackbar('Left group!', false);
+      final databaseRef =
+          FirebaseDatabase.instance.ref().child('groups').child(groupId);
+      // Check if the group exists in the Realtime Database
+      final DatabaseEvent snapshot = await databaseRef.once();
+      if (snapshot.snapshot.value == null) {
+        deleteFolder("GroupAttachements/${groupId}");
+
+        final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
+        await imageRef.delete();
+        showErrorSnackbar('Left group!', false);
+      }
     } else {
       showErrorSnackbar('Error Leaving group!', true);
     }
@@ -2270,11 +2280,29 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     });
 
     if (response.statusCode == 200) {
+      deleteFolder("GroupAttachements/${groupId}");
+
+      final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
+      await imageRef.delete();
+
       showErrorSnackbar('deleted group!', false);
     } else {
       showErrorSnackbar('Error deleting group!', true);
     }
   }
+}
+
+Future<void> deleteFolder(String folderPath) async {
+  final storage = FirebaseStorage.instance;
+  final ListResult result = await storage.ref(folderPath).listAll();
+
+  // Delete each file within the folder
+  for (final Reference ref in result.items) {
+    await ref.delete();
+  }
+
+  // Delete the empty folder
+  await storage.ref(folderPath).delete();
 }
 
 class MembersData {

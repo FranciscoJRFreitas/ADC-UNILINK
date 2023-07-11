@@ -129,8 +129,8 @@ class CacheFactoryImpl implements CacheFactory {
   }
 
   Future<List<dynamic>> _getMessagesList(String groupId) async {
-    String groupRef = groupId;
-    String? jsonString = await window.localStorage[groupRef];
+
+    String? jsonString = await window.localStorage[groupId];
     if (jsonString != null) {
       return jsonDecode(jsonString);
     } else {
