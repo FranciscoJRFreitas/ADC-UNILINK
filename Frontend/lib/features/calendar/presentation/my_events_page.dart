@@ -644,7 +644,6 @@ class _MyEventsPageState extends State<MyEventsPage>
               Row(
                 children: [
                   getDateIcon(event, context),
-                  SizedBox(width: 10),
                   InkWell(
                     child: Text(
                       event.title,

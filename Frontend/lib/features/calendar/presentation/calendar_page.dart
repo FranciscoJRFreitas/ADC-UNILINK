@@ -20,17 +20,17 @@ import '../../../widgets/LocationPopUp.dart';
 import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
 
-class SchedulePage extends StatefulWidget {
+class CalendarPage extends StatefulWidget {
   final String username;
   final DateTime date;
 
-  SchedulePage({required this.username, required this.date});
+  CalendarPage({required this.username, required this.date});
 
   @override
-  _SchedulePageState createState() => _SchedulePageState(date);
+  _CalendarPageState createState() => _CalendarPageState(date);
 }
 
-class _SchedulePageState extends State<SchedulePage> {
+class _CalendarPageState extends State<CalendarPage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startController = TextEditingController();
@@ -41,7 +41,7 @@ class _SchedulePageState extends State<SchedulePage> {
   DateFormat customFormat = DateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'");
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-  _SchedulePageState(date) {
+  _CalendarPageState(date) {
     selectedDay = DateTime(date.year, date.month, date.day);
     focusedDay = date;
   }

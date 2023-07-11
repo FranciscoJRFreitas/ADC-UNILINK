@@ -29,7 +29,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
-import '../calendar/presentation/schedule_page.dart';
+import '../calendar/presentation/calendar_page.dart';
 import 'package:flutter/services.dart';
 
 class MainScreen extends StatefulWidget {
@@ -132,16 +132,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         SettingsPage(
             loggedIn: true,
             isBackOffice: _currentUser.role == 'BACKOFFICE'), //8
-        SchedulePage(
+        CalendarPage(
             username: _currentUser.username,
             date: scheduleDate), //estudante //9
         MyMap(markerLocation: markerLocation), //10
-        ReportAnomalyPage(user: _currentUser),
-        BackOfficePage(),
-        Placeholder(),
+        ReportAnomalyPage(user: _currentUser), //11
+        BackOfficePage(), //12
+        Placeholder(), //13
 
-        Placeholder(), //diretor //12
-        MyEventsPage(username: _currentUser.username),
+        Placeholder(), //diretor //14
+        MyEventsPage(username: _currentUser.username), //15
       ];
 
   Widget picture(BuildContext context) {
