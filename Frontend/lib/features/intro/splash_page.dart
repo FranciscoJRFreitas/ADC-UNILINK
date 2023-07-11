@@ -10,23 +10,29 @@ import 'package:unilink2023/features/userManagement/presentation/userAuth/login_
 import 'package:flutter/material.dart';
 
 import 'package:flutter/src/foundation/constants.dart';
+import 'dart:math' as math;
 
 class SplashPage extends StatefulWidget {
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends State<SplashPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
   @override
   void initState() {
     const int msMobile = 2500;
     const int msWeb = 3500;
-    const bool testing = true; // set this to true when testing
-
+    const bool testing = true;
+    // set this to true when testing
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 5000),
+      vsync: this,
+    );
     super.initState();
     Timer(
       Duration(milliseconds: testing ? 0 : (kIsWeb ? msWeb : msMobile)),
-      //TODO Changed for testing reasons
       () async {
         var loginB = await cacheFactory.get('settings', 'checkLogin');
         var introB = await cacheFactory.get('settings', 'checkIntro');
@@ -81,6 +87,7 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
@@ -88,20 +95,24 @@ class _SplashPageState extends State<SplashPage> {
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Center(
-              child: Image.asset(
-                kIsWeb
-                    ? Provider.of<ThemeNotifier>(context).currentTheme! ==
-                            kDarkTheme
-                        ? 'assets/animation/NOVAanimation-web_dark.gif'
-                        : 'assets/animation/NOVAanimation-web.gif'
-                    : Provider.of<ThemeNotifier>(context).currentTheme! ==
-                            kDarkTheme
-                        ? 'assets/animation/NOVAanimation-mobile_dark.gif'
-                        : 'assets/animation/NOVAanimation-mobile.gif',
-                width: constraints.maxWidth,
-                height: constraints.maxHeight,
-                fit: BoxFit.cover,
-                repeat: ImageRepeat.repeat,
+              child: Transform.rotate(
+                angle: _controller.value * 2.0 * math.pi,
+                child: Image.asset(
+                  /*kIsWeb
+                      ? Provider.of<ThemeNotifier>(context).currentTheme! ==
+                              kDarkTheme
+                          ? 'assets/icon/ICON_UNILINK-03.png'
+                          : 'assets/icon/ICON_UNILINK-03.png' // por o fundo branco
+                      : Provider.of<ThemeNotifier>(context).currentTheme! ==
+                              kDarkTheme
+                          ? 'assets/icon/ICON_UNILINK-03.png'
+                          : 'assets/icon/ICON_UNILINK-03.png',*/
+                  'assets/icon/ICON_UNILINK-03.png',
+                  width: 300,
+                  height: 300,
+                  //fit: BoxFit.cover,
+                  repeat: ImageRepeat.repeat,
+                ),
               ),
             );
           },
@@ -113,5 +124,6 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void dispose() {
     super.dispose();
+    _controller.dispose();
   }
 }
