@@ -24,6 +24,9 @@ public class ModifyAttributesData {
     public String postalCode;
     public String taxIdentificationNumber;
     public String photo;
+    public String course;
+    public String studentNumber;
+
 
     public ModifyAttributesData() {
     }

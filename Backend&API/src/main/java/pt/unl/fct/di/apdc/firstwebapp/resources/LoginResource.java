@@ -151,6 +151,7 @@ public class LoginResource {
         responseData.put("username", user.getString("user_username"));
         responseData.put("email", user.getString("user_email"));
         responseData.put("role", user.getString("user_role"));
+        responseData.put("studentNumber", user.getString("user_student_number"));
         responseData.put("birthDate", user.getString("user_birthDate"));
         responseData.put("educationLevel", user.getString("user_educationLevel"));
         responseData.put("profileVisibility", user.getString("user_profileVisibility"));
@@ -166,6 +167,7 @@ public class LoginResource {
         responseData.put("nif", user.getString("user_taxIdentificationNumber"));
         responseData.put("photo", user.getString("user_photo"));
         responseData.put("creationTime", user.getTimestamp("user_creation_time"));
+        responseData.put("course", user.getString("user_course"));
 
         LOG.info("User " + user.getString("user_username") + " logged in successfully.");
         LOG.info("The tokenID for the current session is " + token.tokenID + "\n  Creation time: " + token.creationDate + "\n  Expiration time: " + token.expirationDate);
