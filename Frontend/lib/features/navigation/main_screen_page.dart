@@ -341,8 +341,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             height: 5,
                           ),
                           Text(
-                            //trocar por numero de aluno
-                            'Role: ${_currentUser.role}',
+                            'Student Number: ${_currentUser.studentNumber}',
                             style: TextStyle(
                               color: Colors.white60,
                               //roleColor == Colors.yellow ? Colors.black: Colors.white,
