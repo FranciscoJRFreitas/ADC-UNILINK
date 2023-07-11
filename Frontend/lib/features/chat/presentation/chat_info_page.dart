@@ -1069,12 +1069,13 @@ class _ChatInfoPageState extends State<ChatInfoPage>
   }
 
   popUpDialogWeb(BuildContext context) {
+    List<String> options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Olaolaoloa'];
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AutocompleteDropDown();
+            return AutocompleteDropdown(options: options);
             /*return AlertDialog(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               title: Text(
