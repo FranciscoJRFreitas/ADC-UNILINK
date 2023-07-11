@@ -168,8 +168,11 @@ class _SettingsPageState extends State<SettingsPage> {
                         case 'Profile':
                           iconData = Icons.person;
                           break;
-                        case 'Schedule':
-                          iconData = Icons.schedule;
+                        case 'Calendar':
+                          iconData = Icons.perm_contact_calendar;
+                          break;
+                          case 'My Events':
+                          iconData = Icons.event_note;
                           break;
                         case 'Chat':
                           iconData = Icons.chat;

@@ -405,10 +405,12 @@ Future<int> login(
 
         if (page == "News") index = 0;
         if (page == "Profile") index = 3;
-        if (page == "Schedule") index = 9;
+        if (page == "Calendar") index = 9;
+        if(page == "My Events") index = 15;
         if (page == "Chat") index = 6;
-        if (page == "Contacts") index = 7;
         if (page == "Campus") index = 10;
+        if (page == "Contacts") index = 7;
+        
 
         Navigator.pushAndRemoveUntil(
           context,

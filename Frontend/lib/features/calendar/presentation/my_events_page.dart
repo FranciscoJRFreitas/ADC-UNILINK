@@ -194,7 +194,10 @@ class _MyEventsPageState extends State<MyEventsPage>
                   ),
                 ),
                 personalFilteredEvents.isEmpty
-                    ? Expanded(child: noEventWidget(false))
+                    ? Expanded(
+                        child: searchPersonalController.text.trim().isEmpty
+                            ? noEventWidget(false)
+                            : noSearchResult())
                     : Expanded(
                         child: SingleChildScrollView(
                           child: Column(
@@ -239,7 +242,10 @@ class _MyEventsPageState extends State<MyEventsPage>
                     ),
                   ),
                   groupEvents.isEmpty
-                      ? Expanded(child: noEventWidget(true))
+                      ? Expanded(
+                          child: searchGroupsController.text.trim().isEmpty
+                              ? noEventWidget(true)
+                              : noSearchResult())
                       : Expanded(
                           child: SingleChildScrollView(
                             child: Column(
@@ -254,6 +260,7 @@ class _MyEventsPageState extends State<MyEventsPage>
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Create a Personal Event",
         onPressed: () {
           _createEventPopUpDialog(context);
         },
@@ -336,6 +343,8 @@ class _MyEventsPageState extends State<MyEventsPage>
                                         },
                                         decoration: InputDecoration(
                                           labelText: 'Search',
+                                          hintText:
+                                              'You can filter for types and descriptions!',
                                           labelStyle: Theme.of(context)
                                               .textTheme
                                               .bodyLarge!
@@ -358,8 +367,12 @@ class _MyEventsPageState extends State<MyEventsPage>
                                       height:
                                           MediaQuery.of(context).size.height /
                                               2,
-                                      child:
-                                          Center(child: noEventWidget(false)),
+                                      child: Center(
+                                          child: searchPersonalController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? noEventWidget(false)
+                                              : noSearchResult()),
                                     )
                                   ] else
                                     Padding(
@@ -443,7 +456,12 @@ class _MyEventsPageState extends State<MyEventsPage>
                                       height:
                                           MediaQuery.of(context).size.height /
                                               2,
-                                      child: Center(child: noEventWidget(true)),
+                                      child: Center(
+                                          child: searchGroupsController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? noEventWidget(true)
+                                              : noSearchResult()),
                                     )
                                   ] else
                                     Padding(
@@ -490,6 +508,7 @@ class _MyEventsPageState extends State<MyEventsPage>
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Create a Personal Event",
         onPressed: () {
           _createEventPopUpDialogMobile(context);
         },
@@ -500,6 +519,32 @@ class _MyEventsPageState extends State<MyEventsPage>
         ),
         elevation: 6,
         backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
+  }
+
+  noSearchResult() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              color: Colors.grey[700],
+              size: 75,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "There were no search results...",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
       ),
     );
   }
@@ -599,7 +644,6 @@ class _MyEventsPageState extends State<MyEventsPage>
               Row(
                 children: [
                   getDateIcon(event, context),
-                  SizedBox(width: 10),
                   InkWell(
                     child: Text(
                       event.title,
@@ -620,8 +664,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     builder: (context) => MainScreen(
                                         index: 10, location: event.location)));
                           },
-                          child: Icon(Icons.directions,
-                              size: 20, color: Style.lightBlue),
+                          child: Tooltip(
+                            message: "View in Maps",
+                            child: Icon(Icons.directions,
+                                size: 20, color: Style.lightBlue),
+                          ),
                         ),
                       ],
                       SizedBox(width: 10),
@@ -633,8 +680,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                                   builder: (context) => MainScreen(
                                       index: 9, date: event.startTime)));
                         },
-                        child: Icon(Icons.perm_contact_calendar,
-                            size: 20, color: Style.lightBlue),
+                        child: Tooltip(
+                          message: "View in Calendar",
+                          child: Icon(Icons.perm_contact_calendar,
+                              size: 20, color: Style.lightBlue),
+                        ),
                       ),
                       if (event.groupId != null) ...[
                         SizedBox(width: 10),
@@ -671,8 +721,11 @@ class _MyEventsPageState extends State<MyEventsPage>
                           onTap: () {
                             _removeEventPopUpDialogWeb(context, event);
                           },
-                          child: Icon(Icons.delete_forever,
-                              size: 20, color: Style.lightBlue),
+                          child: Tooltip(
+                            message: "Remove Event",
+                            child: Icon(Icons.delete_forever,
+                                size: 20, color: Style.lightBlue),
+                          ),
                         ),
                       ],
                     ],
@@ -1059,6 +1112,8 @@ class _MyEventsPageState extends State<MyEventsPage>
                     descriptionController.clear();
                     startController.clear();
                     endController.clear();
+                    _selectedLocation = null;
+                    selectLocationText = "Select Location";
                   },
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor),
@@ -1212,17 +1267,17 @@ class _MyEventsPageState extends State<MyEventsPage>
       } else {
         personalFilteredEvents = personalEvents.where((event) {
           final title = event.title.toLowerCase();
-          print("Title: " + title);
           final description = event.description.toLowerCase();
-          print("Description: " + description);
+          final type = _getEventTypeString(event.type).toLowerCase();
           final searchLower = query.toLowerCase();
-          print("Query: " + searchLower);
 
           return query.isNotEmpty &&
               (isMatch(title, searchLower) ||
                   isMatch(description, searchLower) ||
+                  isMatch(type, searchLower) ||
                   title.contains(searchLower) ||
-                  description.contains(searchLower));
+                  description.contains(searchLower) ||
+                  type.contains(searchLower));
         }).toList();
       }
     });

@@ -1159,6 +1159,7 @@ class DisplayPictureScreen extends StatelessWidget {
     return Scaffold(
       body: Image.file(File(imagePath)),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Send a Message",
         onPressed: () {
           sendPicture(imagePath);
         },
@@ -1230,6 +1231,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Send a photo",
         // Provide an onPressed callback.
         onPressed: () async {
           // Take the Picture in a try / catch block. If anything goes wrong,

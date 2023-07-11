@@ -3,11 +3,12 @@ import 'package:unilink2023/data/cache_factory_provider.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/my_text_button.dart';
 
-
 class EditStartingPage extends StatefulWidget {
   final VoidCallback? onDialogClosed;
   final bool loggedIn;
-  const EditStartingPage({Key? key, this.onDialogClosed, required this.loggedIn}) : super(key: key);
+  const EditStartingPage(
+      {Key? key, this.onDialogClosed, required this.loggedIn})
+      : super(key: key);
 
   @override
   _EditStartingPageState createState() => _EditStartingPageState(loggedIn);
@@ -18,7 +19,7 @@ class _EditStartingPageState extends State<EditStartingPage> {
   IconData icon = Icons.pages;
   bool _loggedIn = false;
 
-  _EditStartingPageState(loggedIn){
+  _EditStartingPageState(loggedIn) {
     _loggedIn = loggedIn;
   }
 
@@ -31,18 +32,21 @@ class _EditStartingPageState extends State<EditStartingPage> {
   Future<void> getSettings() async {
     _startingPage = await cacheFactory.get('settings', 'index');
     setState(() {});
-    if (!_loggedIn && (_startingPage != 'News' && _startingPage != 'Contacts' && _startingPage != 'Campus'))
-      _startingPage = "News";
+    if (!_loggedIn &&
+        (_startingPage != 'News' &&
+            _startingPage != 'Contacts' &&
+            _startingPage != 'Campus')) _startingPage = "News";
     updateIcon();
   }
 
   void updateIcon() {
     if (_startingPage == "News") icon = Icons.newspaper;
     if (_startingPage == "Profile") icon = Icons.person;
-    if (_startingPage == "Schedule") icon = Icons.schedule;
+    if (_startingPage == "Calendar") icon = Icons.perm_contact_calendar;
+    if (_startingPage == "My Events") icon = Icons.event_note;
     if (_startingPage == "Chat") icon = Icons.chat;
-    if (_startingPage == "Contacts") icon = Icons.call;
     if (_startingPage == "Campus") icon = Icons.map;
+    if (_startingPage == "Contacts") icon = Icons.call;
   }
 
   @override
@@ -140,19 +144,22 @@ class _EditStartingPageState extends State<EditStartingPage> {
     );
   }
 
-  List<String> itemList(){
-    if (_loggedIn) return [
-      'News',
-      'Profile',
-      'Schedule',
-      'Chat',
-      'Contacts',
-      'Campus',
-    ];
-    else return [
-      'News',
-      'Contacts',
-      'Campus',
-    ];
+  List<String> itemList() {
+    if (_loggedIn)
+      return [
+        'News',
+        'Profile',
+        'Calendar',
+        'My Events',
+        'Chat',
+        'Campus',
+        'Contacts',
+      ];
+    else
+      return [
+        'News',
+        'Contacts',
+        'Campus',
+      ];
   }
 }

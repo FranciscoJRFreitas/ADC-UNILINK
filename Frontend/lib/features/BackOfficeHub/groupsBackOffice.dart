@@ -348,7 +348,10 @@ class _GroupPageState extends State<GroupPage> {
                         height: 24,
                         child: IconButton(
                           padding: EdgeInsets.zero,
-                          icon: Icon(Icons.delete, color: Colors.blue),
+                          icon: Tooltip(
+                            message: "Remove Group",
+                            child: Icon(Icons.delete, color: Colors.blue),
+                          ),
                           onPressed: () {
                             _showDeleteConfirmation(context, group.DisplayName);
                           },

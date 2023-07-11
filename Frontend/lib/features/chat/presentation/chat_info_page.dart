@@ -629,11 +629,16 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                         date: event
                                                                             .startTime)));
                                                           },
-                                                          child: Icon(
-                                                              Icons.schedule,
-                                                              size: 20,
-                                                              color: Style
-                                                                  .lightBlue),
+                                                          child: Tooltip(
+                                                            message:
+                                                                "View in Calendar",
+                                                            child: Icon(
+                                                                Icons
+                                                                    .perm_contact_calendar,
+                                                                size: 20,
+                                                                color: Style
+                                                                    .lightBlue),
+                                                          ),
                                                         ),
                                                         if (event.location !=
                                                             "0") ...[
@@ -649,12 +654,16 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                           location:
                                                                               event.location)));
                                                             },
-                                                            child: Icon(
-                                                                Icons
-                                                                    .directions,
-                                                                size: 20,
-                                                                color: Style
-                                                                    .lightBlue),
+                                                            child: Tooltip(
+                                                              message:
+                                                                  "View in Maps",
+                                                              child: Icon(
+                                                                  Icons
+                                                                      .directions,
+                                                                  size: 20,
+                                                                  color: Style
+                                                                      .lightBlue),
+                                                            ),
                                                           ),
                                                         ],
                                                         if (isAdmin) ...[
@@ -670,11 +679,15 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                     context,
                                                                     event.id!);
                                                             },
-                                                            child: Icon(
-                                                              Icons.delete,
-                                                              color: Colors
-                                                                  .lightBlue,
-                                                              size: 20,
+                                                            child: Tooltip(
+                                                              message:
+                                                                  "Remove Event",
+                                                              child: Icon(
+                                                                Icons.delete,
+                                                                color: Colors
+                                                                    .lightBlue,
+                                                                size: 20,
+                                                              ),
                                                             ),
                                                           ),
                                                         ],
