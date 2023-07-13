@@ -166,7 +166,6 @@ class _CalendarPageState extends State<CalendarPage> {
       setState(() {
         Map<dynamic, dynamic> currEvent =
             event.snapshot.value as Map<dynamic, dynamic>;
-        print("SNAPSHOT: " + event.snapshot.value.toString());
         Event currentEvent = Event(
           type: parseEventType(currEvent["type"]),
           title: currEvent["title"],
@@ -281,20 +280,20 @@ class _CalendarPageState extends State<CalendarPage> {
     return SpeedDialChild(
       child: Icon(Icons.edit_calendar),
       backgroundColor: Theme.of(context).primaryColor,
-      label: 'Add Calendar ',
+      label: 'Add Schedule ',
       onTap: () {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Add Calendar'),
+              title: Text('Add Schedule'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ElevatedButton(
                     child: Text('Pick a file'),
                     onPressed: () {
-                      //pickFile(context);
+                      pickFile();
                     },
                   ),
                 ],
@@ -309,8 +308,9 @@ class _CalendarPageState extends State<CalendarPage> {
                 ElevatedButton(
                   child: Text('Create'),
                   onPressed: () {
+                    uploadSchedule();
+                    loadSchedule();
                     Navigator.of(context).pop();
-                    // Process your file here
                   },
                 ),
               ],
@@ -353,7 +353,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           ? MediaQuery.of(context).size.height * 0.57
                           : MediaQuery.of(context).size.height * 0.64,
                   child: schedule.isEmpty
-                      ? noEventWidget(false)
+                      ? noScheduleWidget()
                       : SingleChildScrollView(
                           child: Column(
                             children: _scheduleWidget(context),
@@ -526,31 +526,12 @@ class _CalendarPageState extends State<CalendarPage> {
         return ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: daySchedule['classes'].length + 3,
+          itemCount: daySchedule['classes'].length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
               return SizedBox(height: 20);
-            } else if (index == 1) {
-              return Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '  Schedule',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              );
-            } else if (index == 2) {
-              return Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  width: 300,
-                  child: Divider(
-                    thickness: 1,
-                    color: Style.lightBlue,
-                  ),
-                ),
-              );
             } else {
-              var classData = daySchedule['classes'][index - 3];
+              var classData = daySchedule['classes'][index - 1];
               return ListTile(
                 title: Text(
                   classData['name'],
@@ -577,7 +558,7 @@ class _CalendarPageState extends State<CalendarPage> {
     });
 
     return personalEvents.isEmpty
-        ? noEventWidget(false)
+        ? noPersonalEventsWidget()
         : ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -600,7 +581,7 @@ class _CalendarPageState extends State<CalendarPage> {
     });
 
     return groupEvents.isEmpty
-        ? noEventWidget(false)
+        ? noEventWidget()
         : ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -1332,11 +1313,11 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  noEventWidget(bool isGroupEvents) {
+  noEventWidget() {
     return Center(
       child: Container(
         height: MediaQuery.of(context).size.height / 2,
-        padding: const EdgeInsets.symmetric(horizontal: 25),
+        padding: const EdgeInsets.fromLTRB(25, 105, 25, 0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1357,6 +1338,72 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
             const Text(
               "You don't have any events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  noPersonalEventsWidget() {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height / 2,
+        padding: const EdgeInsets.fromLTRB(25, 105, 25, 0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {},
+                child: Icon(
+                  Icons.person_off_rounded,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don't have any personal events scheduled!",
+              textAlign: TextAlign.center,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  noScheduleWidget() {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height / 2,
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {},
+                child: Icon(
+                  Icons.event_busy,
+                  color: Colors.grey[700],
+                  size: 75,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "You don't have an uploaded schedule!",
               textAlign: TextAlign.center,
             )
           ],

@@ -40,6 +40,7 @@ class _IntroPageState extends State<IntroPage> {
     return SafeArea(
       child: Scaffold(
         body: IntroductionScreen(
+          dotsFlex: 2,
           showDoneButton: true,
           onSkip: () {
             navigateToWelcomePage(context);
