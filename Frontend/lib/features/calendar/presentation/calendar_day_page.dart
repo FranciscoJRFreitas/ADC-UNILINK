@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 import '../../../application/loadLocations.dart';
 import '../../../constants.dart';
 import '../../../data/cache_factory_provider.dart';
@@ -88,7 +86,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
             Event currentEvent = Event(
-                type: _parseEventType(currEvent["type"]),
+                type: parseEventType(currEvent["type"]),
                 title: currEvent["title"],
                 description: currEvent['description'],
                 location: currEvent['location'],
@@ -175,7 +173,7 @@ class _DayCalendarPageState extends State<DayCalendarPage>
             event.snapshot.value as Map<dynamic, dynamic>;
 
         Event currentEvent = Event(
-          type: _parseEventType(currEvent["type"]),
+          type: parseEventType(currEvent["type"]),
           title: currEvent["title"],
           description: currEvent['description'],
           location: currEvent['location'],
@@ -225,41 +223,6 @@ class _DayCalendarPageState extends State<DayCalendarPage>
     setState(() {
 
     });
-  }
-
-  EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
   }
 
   Future<void> loadSchedule() async {

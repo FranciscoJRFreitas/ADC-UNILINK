@@ -65,10 +65,18 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
       String userId,
       void Function(String, bool) showErrorSnackbar,
       ) async {
+
+    final storedUsername = await cacheFactory.get('users', 'username');
+
+    if(userId == storedUsername) {
+      showErrorSnackbar("You are already in this group!", true);
+      return;
+    }
+
     final url =
         kBaseUrl + "rest/chat/invite?groupId=" + groupId + "&userId=" + userId;
     final tokenID = await cacheFactory.get('users', 'token');
-    final storedUsername = await cacheFactory.get('users', 'username');
+
     Token token = new Token(tokenID: tokenID, username: storedUsername);
 
     final response = await http.post(Uri.parse(url), headers: {

@@ -3,10 +3,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:unilink2023/features/anomaly/Domain/Anomaly.dart';
+import 'package:unilink2023/features/map/application/map_utils.dart';
 
 import '../../application/loadLocations.dart';
 import '../../constants.dart';
 import '../userManagement/domain/User.dart';
+import 'application/anomaly_utils.dart';
 
 class MyReportedAnomaliesTab extends StatefulWidget {
   User user;
@@ -321,23 +323,6 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
     ]));
   }
 
-  Color getStatusColor(String status) {
-    switch (status) {
-      case 'Detected':
-        return Colors.yellow;
-      case 'Confirmed':
-        return Colors.orange;
-      case 'Rejected':
-        return Colors.red;
-      case 'In Progress':
-        return Colors.blue;
-      case 'Solved':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
   String formatTimeInMillis(int timeInMillis) {
     String res = '';
     var date = DateTime.fromMillisecondsSinceEpoch(timeInMillis);
@@ -346,19 +331,5 @@ class _MyReportedAnomaliesTabState extends State<MyReportedAnomaliesTab> {
     formatter = DateFormat('d/M/y');
     res += ' ' + formatter.format(date);
     return res;
-  }
-
-  LatLng parseCoordinates(String coordinates) {
-    // Parse the coordinates string and return a LatLng object
-    // This is just a placeholder, replace it with your actual logic
-    double latitude = 0.0;
-    double longitude = 0.0;
-    // Split the coordinates string and convert to double values
-    List<String> coords = coordinates.split(",");
-    if (coords.length == 2) {
-      latitude = double.tryParse(coords[0]) ?? 0.0;
-      longitude = double.tryParse(coords[1]) ?? 0.0;
-    }
-    return LatLng(latitude, longitude);
   }
 }
