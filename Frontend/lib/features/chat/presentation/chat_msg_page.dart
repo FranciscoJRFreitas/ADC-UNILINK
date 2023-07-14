@@ -29,11 +29,16 @@ import 'package:unilink2023/domain/ThemeNotifier.dart';
 
 class GroupMessagesPage extends StatefulWidget {
   final String groupId;
+  final displayname;
   final domainUser.User user;
 
   final TextEditingController emailUsernameController = TextEditingController();
 
-  GroupMessagesPage({Key? key, required this.groupId, required this.user})
+  GroupMessagesPage(
+      {Key? key,
+      required this.groupId,
+      required this.user,
+      required this.displayname})
       : super(key: key); // Pass the key to the super constructor
 
   @override
@@ -187,7 +192,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           ),
         );
         _showErrorSnackbar(
-            "You no longer belong to group ${widget.groupId}!", true);
+            "You no longer belong to group ${widget.displayname}!", true);
       }
     });
   }
@@ -528,7 +533,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
         centerTitle: true,
         elevation: 0,
         title: Text(
-          widget.groupId,
+          widget.displayname,
           style: Theme.of(context)
               .textTheme
               .bodyLarge!
@@ -544,6 +549,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   builder: (context) => ChatInfoPage(
                     groupId: widget.groupId,
                     username: widget.user.username,
+                    displayname: widget.displayname,
                   ),
                 ),
               );
@@ -864,7 +870,10 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             Expanded(
               flex: 1,
               child: ChatInfoPage(
-                  groupId: widget.groupId, username: widget.user.username),
+                groupId: widget.groupId,
+                username: widget.user.username,
+                displayname: widget.displayname,
+              ),
             ),
           ],
         ],
@@ -888,7 +897,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             : null,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
-          widget.groupId,
+          widget.displayname,
           style: Theme.of(context).textTheme.bodyLarge,
           selectionColor: Colors.white,
         ),

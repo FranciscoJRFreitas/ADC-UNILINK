@@ -29,12 +29,15 @@ import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/ThemeNotifier.dart';
 import '../../../widgets/LocationPopUp.dart';
 
-
 class ChatInfoPage extends StatefulWidget {
   final String groupId;
+  final String displayname;
   final String username;
 
-  ChatInfoPage({required this.groupId, required this.username});
+  ChatInfoPage(
+      {required this.groupId,
+      required this.username,
+      required this.displayname});
 
   @override
   State<ChatInfoPage> createState() => _ChatInfoPageState();
@@ -386,7 +389,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          ' ' + widget.groupId,
+                          ' ' + widget.displayname,
                           style: Theme.of(context).textTheme.titleLarge,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -2055,8 +2058,4 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       showErrorSnackbar('Error Leaving group!', true);
     }
   }
-
-
 }
-
-

@@ -299,6 +299,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 key: ValueKey(_selectedGroup!.id),
                 groupId: _selectedGroup!.id,
                 user: widget.user,
+                displayname: _selectedGroup!.DisplayName,
               ),
             ),
           ],
@@ -475,6 +476,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               key: ValueKey(_selectedGroup!.id),
               groupId: _selectedGroup!.id,
               user: widget.user,
+              displayname: _selectedGroup!.DisplayName,
             ),
           ),
         );
@@ -535,6 +537,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                     key: ValueKey(group.id),
                                     groupId: group.id,
                                     user: widget.user,
+                                    displayname: group.DisplayName,
                                   ),
                                 ),
                               );

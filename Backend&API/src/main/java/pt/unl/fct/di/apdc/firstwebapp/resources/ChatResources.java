@@ -93,7 +93,7 @@ public class ChatResources {
         }
 
         DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
-        DatabaseReference newChatRef = chatsRef.child(group.DisplayName); // Generate a unique ID for the new chat
+        DatabaseReference newChatRef = chatsRef.push(); // Generate a unique ID for the new chat
 
         // Check if the group already exists
         newChatRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -142,7 +142,7 @@ public class ChatResources {
         DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);
 
         Map<String, Object> groupsUpdates = new HashMap<>();
-        groupsUpdates.put(group.DisplayName, true);
+        groupsUpdates.put(newChatRef.getKey(), true);
 
         newChatsForUserRef.child("Groups").updateChildrenAsync(groupsUpdates);
     }
@@ -383,105 +383,128 @@ public class ChatResources {
         });
     }
 
+    private void sendInviteEmail(String groupId, String userDisplayName, String email, String token) {
 
-    private void sendInviteEmail(String groupId, String userDisplayName, String email, String Token) {
-        String from = "fj.freitas@campus.fct.unl.pt";
-        String fromName = "UniLink";
-        String subject = "Invited for a group!";
-        String invitationLink = "https://unilink23.oa.r.appspot.com/rest/chat/join?token=" + Token;
-        String htmlContent = "<!DOCTYPE html>" +
-                "<html>" +
-                "<head>" +
-                "<meta charset='utf-8'>" +
-                "<style>" +
-                ".email-container {" +
-                "    font-family: Arial, sans-serif;" +
-                "    max-width: 600px;" +
-                "    margin: auto;" +
-                "    padding: 20px;" +
-                "    background-color: #ffffff;" +
-                "    border: 1px solid #cccccc;" +
-                "    border-radius: 5px;" +
-                "    text-align: center;" +
-                "}" +
-                ".email-container a {" +
-                "    color: #ffffff;" +
-                "}" +
-                ".email-text a{" +
-                "      font-size: 1em;" +
-                "      color: #005890;" +
-                "      margin: 20px 0;" +
-                "      text-align: left;" +
-                "    }" +
-                ".email-header {" +
-                "    font-size: 1.5em;" +
-                "    font-weight: bold;" +
-                "    color: #333333;" +
-                "}" +
-                ".email-text {" +
-                "    font-size: 1em;" +
-                "    color: #666666;" +
-                "    margin: 20px 0;" +
-                "    text-align: left;" +
-                "}" +
-                ".email-button {" +
-                "    display: inline-block;" +
-                "    font-size: 1em;" +
-                "    font-weight: bold;" +
-                "    color: #f5f5f5;" +
-                "    background-color: #005890;" +
-                "    border-radius: 5px;" +
-                "    padding: 10px 20px;" +
-                "    text-decoration: none;" +
-                "}" +
-                "</style>" +
-                "</head>" +
-                "<body>" +
-                "<div class='email-container'>" +
-                "    <h1 class='email-header'>You received an invitation!</h1>" +
-                "    <p class='email-text'>Dear " + userDisplayName + ",<br><br>" +
-                "    You have received an invitation to join " + groupId + ".</p>" +
-                "    <p class='email-text'>To accept the invitation to join this group, please click the button below.</p>" +
-                "    <a target='_blank' href='" + invitationLink + "' class='email-button'>Accept Invitation</a>" +
-                "    <p class='email-text'>" +
-                "        If the button above does not work, you can copy and paste the following link directly into your browser:<br>" +
-                "        <a target='_blank' href='" + invitationLink + "'>" + invitationLink + "</a><br><br>" +
-                "        Best regards,<br>" +
-                "        UniLink" +
-                "    </p>" +
-                "</div>" +
-                "</body>" +
-                "</html>";
+        // Retrieve displayName and description from Realtime Database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference groupRef = database.getReference("groups").child(groupId);
+        groupRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String displayName = dataSnapshot.child("DisplayName").getValue(String.class);
 
+                    // Update the email content with displayName and description
+                    String from = "fj.freitas@campus.fct.unl.pt";
+                    String fromName = "UniLink";
+                    String subject = "Invited for a group!";
+                    String invitationLink = "https://unilink23.oa.r.appspot.com/rest/chat/join?token=" + token;
+                    String htmlContent = "<!DOCTYPE html>" +
+                            "<html>" +
+                            "<head>" +
+                            "<meta charset='utf-8'>" +
+                            "<style>" +
+                            ".email-container {" +
+                            "    font-family: Arial, sans-serif;" +
+                            "    max-width: 600px;" +
+                            "    margin: auto;" +
+                            "    padding: 20px;" +
+                            "    background-color: #ffffff;" +
+                            "    border: 1px solid #cccccc;" +
+                            "    border-radius: 5px;" +
+                            "    text-align: center;" +
+                            "}" +
+                            ".email-container a {" +
+                            "    color: #ffffff;" +
+                            "}" +
+                            ".email-text a{" +
+                            "      font-size: 1em;" +
+                            "      color: #005890;" +
+                            "      margin: 20px 0;" +
+                            "      text-align: left;" +
+                            "    }" +
+                            ".email-header {" +
+                            "    font-size: 1.5em;" +
+                            "    font-weight: bold;" +
+                            "    color: #333333;" +
+                            "}" +
+                            ".email-text {" +
+                            "    font-size: 1em;" +
+                            "    color: #666666;" +
+                            "    margin: 20px 0;" +
+                            "    text-align: left;" +
+                            "}" +
+                            ".email-button {" +
+                            "    display: inline-block;" +
+                            "    font-size: 1em;" +
+                            "    font-weight: bold;" +
+                            "    color: #f5f5f5;" +
+                            "    background-color: #005890;" +
+                            "    border-radius: 5px;" +
+                            "    padding: 10px 20px;" +
+                            "    text-decoration: none;" +
+                            "}" +
+                            "</style>" +
+                            "</head>" +
+                            "<body>" +
+                            "<div class='email-container'>" +
+                            "    <h1 class='email-header'>You received an invitation!</h1>" +
+                            "    <p class='email-text'>Dear " + userDisplayName + ",<br><br>" +
+                            "    You have received an invitation to join " + displayName + ".</p>" +
+                            "    <p class='email-text'>To accept the invitation to join this group, please click the button below.</p>" +
+                            "    <a target='_blank' href='" + invitationLink + "' class='email-button'>Accept Invitation</a>" +
+                            "    <p class='email-text'>" +
+                            "        If the button above does not work, you can copy and paste the following link directly into your browser:<br>" +
+                            "        <a target='_blank' href='" + invitationLink + "'>" + invitationLink + "</a><br><br>" +
+                            "        Best regards,<br>" +
+                            "        UniLink" +
+                            "    </p>" +
+                            "</div>" +
+                            "</body>" +
+                            "</html>";
 
-        MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
-        MailjetRequest request;
-        MailjetResponse response;
+                    // Send email
+                    MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
+                    MailjetRequest request;
+                    MailjetResponse response;
 
-        try {
-            request = new MailjetRequest(Emailv31.resource)
-                    .property(Emailv31.MESSAGES, new JSONArray()
-                            .put(new JSONObject()
-                                    .put(Emailv31.Message.FROM, new JSONObject()
-                                            .put("Email", from)
-                                            .put("Name", fromName))
-                                    .put(Emailv31.Message.TO, new JSONArray()
-                                            .put(new JSONObject()
-                                                    .put("Email", email)))
-                                    .put(Emailv31.Message.SUBJECT, subject)
-                                    .put(Emailv31.Message.HTMLPART, htmlContent)
-                                    .put(Emailv31.Message.CUSTOMID, "Invite")));
+                    try {
+                        request = new MailjetRequest(Emailv31.resource)
+                                .property(Emailv31.MESSAGES, new JSONArray()
+                                        .put(new JSONObject()
+                                                .put(Emailv31.Message.FROM, new JSONObject()
+                                                        .put("Email", from)
+                                                        .put("Name", fromName))
+                                                .put(Emailv31.Message.TO, new JSONArray()
+                                                        .put(new JSONObject()
+                                                                .put("Email", email)))
+                                                .put(Emailv31.Message.SUBJECT, subject)
+                                                .put(Emailv31.Message.HTMLPART, htmlContent)
+                                                .put(Emailv31.Message.CUSTOMID, "Invite")));
 
-            response = client.post(request);
+                        response = client.post(request);
 
-            if (response.getStatus() != 200) {
-                throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
+                        if (response.getStatus() != 200) {
+                            throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
+                        }
+                        LOG.info("Email sent.");
+                    } catch (Exception e) {
+                        LOG.log(Level.SEVERE, "Error sending email", e);
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    // Handle error: group node does not exist
+                    LOG.warning("Group node does not exist in the database.");
+                }
             }
-            LOG.info("Email sent.");
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error sending email", e);
-            throw new RuntimeException(e);
-        }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Handle error: read operation canceled
+                LOG.severe("Error reading group information from the database: " + error.getMessage());
+            }
+        });
     }
+
 
 }
