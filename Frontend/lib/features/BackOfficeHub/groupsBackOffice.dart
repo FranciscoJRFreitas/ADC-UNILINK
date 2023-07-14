@@ -42,19 +42,23 @@ class _GroupPageState extends State<GroupPage> {
     groupsRef.onChildAdded.listen((event1) {
       setState(() {
         Map<dynamic, dynamic> groupData =
-        event1.snapshot.value as Map<dynamic, dynamic>;
+            event1.snapshot.value as Map<dynamic, dynamic>;
         //print(groupData["DisplayName"]);
-        DatabaseReference membersRef =
-        FirebaseDatabase.instance.ref().child('members').child(
-            groupData["DisplayName"]);
+        DatabaseReference membersRef = FirebaseDatabase.instance
+            .ref()
+            .child('members')
+            .child(groupData["DisplayName"]);
 
         membersRef.once().then((event2) {
           setState(() {
-            Map<dynamic, dynamic>? membersData = event2.snapshot.value as Map<dynamic, dynamic>?;
+            Map<dynamic, dynamic>? membersData =
+                event2.snapshot.value as Map<dynamic, dynamic>?;
 
             if (membersData != null) {
-              List<String> memberKeys = membersData.keys.map((key) => key.toString()).toList();
-              groupMembers.putIfAbsent(groupData["DisplayName"], () => memberKeys);
+              List<String> memberKeys =
+                  membersData.keys.map((key) => key.toString()).toList();
+              groupMembers.putIfAbsent(
+                  groupData["DisplayName"], () => memberKeys);
             }
 
             print(groupMembers.values);
@@ -68,9 +72,9 @@ class _GroupPageState extends State<GroupPage> {
             );
             groups.add(currentGroup);
           });
-          });
         });
       });
+    });
     groupsRef.onChildRemoved.listen((event) {
       String groupId = event.snapshot.key as String;
 
@@ -200,7 +204,7 @@ class _GroupPageState extends State<GroupPage> {
                         LineTextField(
                           controller: adminId,
                           title: 'Admin ID',
-                          ),
+                        ),
                       ],
                     ),
                     actions: <Widget>[
@@ -208,8 +212,8 @@ class _GroupPageState extends State<GroupPage> {
                         child: Text('Create'),
                         onPressed: () {
                           Navigator.of(context).pop();
-                          createGroup(context, groupName.text, description.text, adminId.text,
-                              _showErrorSnackbar);
+                          createGroup(context, groupName.text, description.text,
+                              adminId.text, _showErrorSnackbar);
                         },
                       ),
                       ElevatedButton(
@@ -239,7 +243,8 @@ class _GroupPageState extends State<GroupPage> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Create Groups', style: TextStyle(fontSize: 30)),
+                    title:
+                        Text('Create Groups', style: TextStyle(fontSize: 30)),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -303,7 +308,8 @@ class _GroupPageState extends State<GroupPage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Divider(
-                    color: Provider.of<ThemeNotifier>(context).currentTheme == kDarkTheme
+                    color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                            kDarkTheme
                         ? Colors.white60
                         : Theme.of(context).primaryColor,
                     thickness: 1,
@@ -311,7 +317,8 @@ class _GroupPageState extends State<GroupPage> {
                   Container(
                     color: Theme.of(context).scaffoldBackgroundColor,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                       child: ListTile(
                         title: Text(
                           group.DisplayName,
@@ -327,9 +334,10 @@ class _GroupPageState extends State<GroupPage> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (kIsWeb)
-                                      invitePopupDialogWeb(context, group.DisplayName);
+                                      invitePopupDialogWeb(context, group.id);
                                     else
-                                      invitePopupDialogMobile(context, group.DisplayName);
+                                      invitePopupDialogMobile(
+                                          context, group.id);
                                   },
                                   child: Text('Invite'),
                                 ),
@@ -337,9 +345,11 @@ class _GroupPageState extends State<GroupPage> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (kIsWeb)
-                                      kickPopupDialogWeb(context, group.DisplayName);
+                                      kickPopupDialogWeb(
+                                          context, group.DisplayName);
                                     else
-                                      kickPopupDialogMobile(context, group.DisplayName);
+                                      kickPopupDialogMobile(
+                                          context, group.DisplayName);
                                   },
                                   child: Text('Kick'),
                                 ),
@@ -378,14 +388,14 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
-
   void _showDeleteConfirmation(BuildContext context, String groupId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Delete Group', style: TextStyle(fontSize: 30)),
-          content: Text('Are you sure you want to delete this group?', style: Theme.of(context).textTheme.bodyLarge),
+          content: Text('Are you sure you want to delete this group?',
+              style: Theme.of(context).textTheme.bodyLarge),
           actions: <Widget>[
             ElevatedButton(
               child: Text('Delete'),
@@ -412,7 +422,8 @@ class _GroupPageState extends State<GroupPage> {
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar);
+            return AutocompleteDropdown(
+                groupId: groupId, showError: _showErrorSnackbar);
           }));
         });
   }
@@ -424,7 +435,8 @@ class _GroupPageState extends State<GroupPage> {
       backgroundColor: Style.darkBlue,
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
-          return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar);
+          return AutocompleteDropdown(
+              groupId: groupId, showError: _showErrorSnackbar);
         }),
       ),
     );
@@ -436,7 +448,11 @@ class _GroupPageState extends State<GroupPage> {
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
-            return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar, users: groupMembers[groupId], kick: true);
+            return AutocompleteDropdown(
+                groupId: groupId,
+                showError: _showErrorSnackbar,
+                users: groupMembers[groupId],
+                kick: true);
           }));
         });
   }
@@ -448,12 +464,15 @@ class _GroupPageState extends State<GroupPage> {
       backgroundColor: Style.darkBlue,
       builder: (context) => StatefulBuilder(
         builder: ((context, setState) {
-          return AutocompleteDropdown(groupId: groupId, showError: _showErrorSnackbar, users: groupMembers[groupId], kick: true);
+          return AutocompleteDropdown(
+              groupId: groupId,
+              showError: _showErrorSnackbar,
+              users: groupMembers[groupId],
+              kick: true);
         }),
       ),
     );
   }
-
 
   void _showKickDialog(BuildContext context, String groupId) {
     showDialog(
