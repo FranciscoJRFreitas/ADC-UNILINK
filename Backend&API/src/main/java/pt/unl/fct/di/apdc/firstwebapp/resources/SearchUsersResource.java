@@ -2,9 +2,7 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.*;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -20,18 +18,15 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static pt.unl.fct.di.apdc.firstwebapp.util.LevenshteinDistance.levenshteinDistance;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.g;
 
 @Path("/search")
 public class SearchUsersResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(SearchUsersResource.class.getName());
     private static final int MAX_DISTANCE = 2; //Levenshtein algorithm distance
     private static final int MAX_RESULTS_DISPLAYED = 10;
-    private final Gson g = new Gson();
-
-    public SearchUsersResource() {
-    }
 
     @POST
     @Path("/")
@@ -39,43 +34,24 @@ public class SearchUsersResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response searchUsers(SearchUsersData data, @Context HttpHeaders headers) {
         LOG.info("Searching: " + data.searchQuery + " " + data.username);
-
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-        Transaction txn = datastore.newTransaction();
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(token.username);
+        Transaction txn = datastoreService.newTransaction();
         try {
             Entity user = txn.get(userKey);
-            Entity originalToken = txn.get(tokenKey);
+            String userRoleString = user.getString("user_role");
 
-            if (user == null) {
-                txn.rollback();
-                return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + data.username).build();
-            }
-
-            if (originalToken == null) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-            }
-
-            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-            }
-
-            UserRole userRole = UserRole.valueOf(user.getString("user_role"));
+            UserRole userRole = UserRole.valueOf(userRoleString);
 
             List<Object> users = getEntitiesForUserRole(userRole, data.searchQuery);
-
             return Response.ok(users).build();
-
         } finally {
             if (txn.isActive()) txn.rollback();
         }
+
     }
 
     private List<Object> getEntitiesForUserRole(UserRole userRole, String searchQuery) {
@@ -92,8 +68,6 @@ public class SearchUsersResource {
                 queries.add(buildQuery(UserRole.STUDENT, null));
                 break;
             case BACKOFFICE:
-                queries.add(buildQuery(null, null));
-                break;
             case SU:
                 queries.add(buildQuery(null, null));
                 break;
@@ -136,7 +110,7 @@ public class SearchUsersResource {
 
     private List<Entity> fuzzySearch(Query<Entity> query, String searchQuery) {
         String[] propertiesToSearch = new String[]{"user_username", "user_displayName"};
-        QueryResults<Entity> results = datastore.run(query);
+        QueryResults<Entity> results = datastoreService.run(query);
         List<Entity> filteredResults = new ArrayList<>();
         int counter = 0;
 

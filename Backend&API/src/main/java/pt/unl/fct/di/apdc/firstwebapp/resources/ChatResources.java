@@ -30,13 +30,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response.Status;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.firebaseInstance;
+
 
 @Path("/chat")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ChatResources {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
-
     private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(ChatResources.class.getName());
 
@@ -56,7 +56,6 @@ public class ChatResources {
             //se teve sucesso a criar o grupo adicionar os participantes
             List<String> participants = group.participants;
             for (String participant : participants) {
-
                 inviteToGroup(group.DisplayName, participant, headers);
             }
         }
@@ -69,40 +68,20 @@ public class ChatResources {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createGroup(Group group, @Context HttpHeaders headers) {
-
-        String authTokenHeader = headers.getHeaderString("Authorization");
-        String authToken = authTokenHeader.substring("Bearer".length()).trim();
-        AuthToken token = g.fromJson(authToken, AuthToken.class);
-
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-
-        Entity originalToken = datastore.get(tokenKey);
-
-        if (originalToken == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-        }
-
-        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-        }
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(group.adminID);
-        Entity admin = datastore.get(userKey);
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(group.adminID);
+        Entity admin = datastoreService.get(userKey);
         if (admin == null) {
             return Response.status(Status.NOT_FOUND).entity("AdminId doesnt exist").build();
         }
 
-        DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
+        DatabaseReference chatsRef = firebaseInstance.getReference("groups");
         DatabaseReference newChatRef = chatsRef.push(); // Generate a unique ID for the new chat
 
         // Check if the group already exists
         newChatRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    // Group already exists, return an error response
-                } else {
-                    // Group doesn't exist, proceed with creating it
+                if (!dataSnapshot.exists()) {
                     createNewGroup(group, newChatRef);
                 }
             }
@@ -121,11 +100,11 @@ public class ChatResources {
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
         newChatRef.child("description").setValueAsync(group.description);
 
-        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(newChatRef.getKey());
+        DatabaseReference membersRef = firebaseInstance.getReference("members").child(newChatRef.getKey());
         // When creating a group, the creator becomes the admin
         membersRef.child(group.adminID).setValueAsync(true); // Set the creator as a member
 
-        DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(newChatRef.getKey());
+        DatabaseReference messagesRef = firebaseInstance.getReference("messages").child(newChatRef.getKey());
         DatabaseReference newMessageRef = messagesRef.push(); // Generate a unique ID for the new message
 
         // Set the data for the new message
@@ -138,7 +117,7 @@ public class ChatResources {
         newMessageRef.child("isSystemMessage").setValueAsync(true);
         newMessageRef.child("isEdited").setValueAsync(false);
 
-        DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
+        DatabaseReference chatsByUser = firebaseInstance.getReference("chat");
         DatabaseReference newChatsForUserRef = chatsByUser.child(group.adminID);
 
         Map<String, Object> groupsUpdates = new HashMap<>();
@@ -152,25 +131,7 @@ public class ChatResources {
     @Path("/delete/{groupId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteGroup(@PathParam("groupId") String groupId, @Context HttpHeaders headers) {
-
-        String authTokenHeader = headers.getHeaderString("Authorization");
-        String authToken = authTokenHeader.substring("Bearer".length()).trim();
-        AuthToken token = g.fromJson(authToken, AuthToken.class);
-
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-
-        Entity originalToken = datastore.get(tokenKey);
-
-        if (originalToken == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-        }
-
-        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-        }
-
-        DatabaseReference chatsRef = FirebaseDatabase.getInstance().getReference("groups");
+        DatabaseReference chatsRef = firebaseInstance.getReference("groups");
         DatabaseReference deletedChatRef = chatsRef.child(groupId);
 
         // Check if the group exists
@@ -178,7 +139,7 @@ public class ChatResources {
             return Response.status(Response.Status.NOT_FOUND).entity("Group not found.").build();
         }
 
-        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
+        DatabaseReference membersRef = firebaseInstance.getReference("members").child(groupId);
 
         // Retrieve all members of the group
         membersRef.addValueEventListener(new ValueEventListener() {
@@ -187,7 +148,7 @@ public class ChatResources {
                 for (DataSnapshot memberSnapshot : dataSnapshot.getChildren()) {
                     String memberId = memberSnapshot.getKey();
 
-                    DatabaseReference memberChatsRef = FirebaseDatabase.getInstance().getReference("chat").child(memberId);
+                    DatabaseReference memberChatsRef = firebaseInstance.getReference("chat").child(memberId);
                     DatabaseReference memberGroupsRef = memberChatsRef.child("Groups");
 
                     // Remove the group from each member's chats
@@ -195,11 +156,11 @@ public class ChatResources {
                 }
 
                 // Delete the group and its associated data
-                DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
+                DatabaseReference eventsRef = firebaseInstance.getReference("events");
                 eventsRef.child(groupId).removeValueAsync();
                 deletedChatRef.removeValueAsync();
                 membersRef.removeValueAsync();
-                DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(groupId);
+                DatabaseReference messagesRef = firebaseInstance.getReference("messages").child(groupId);
                 messagesRef.removeValueAsync();
             }
 
@@ -221,10 +182,10 @@ public class ChatResources {
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+        Key tokenKey = datastoreService.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
 
-        Entity originalToken = datastore.get(tokenKey);
+        Entity originalToken = datastoreService.get(tokenKey);
 
         if (originalToken == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
@@ -234,17 +195,17 @@ public class ChatResources {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(userId);
-        Entity user = datastore.get(userKey);
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(userId);
+        Entity user = datastoreService.get(userKey);
 
         if (user == null) {
             return Response.status(Status.NOT_FOUND).entity("User not found.").build();
         }
 
         InviteToken Invtoken = new InviteToken(userId, groupId);
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
-            Key invtokenKey = datastore.newKeyFactory().setKind("InviteToken").newKey(Invtoken.tokenID);
+            Key invtokenKey = datastoreService.newKeyFactory().setKind("InviteToken").newKey(Invtoken.tokenID);
             Entity invtoken = Entity.newBuilder(invtokenKey)
                     .set("user", Invtoken.username)
                     .set("groupId", Invtoken.groupId)
@@ -266,9 +227,9 @@ public class ChatResources {
     @Path("/join")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response joinGroup(@QueryParam("token") String token) {
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
-            Key tokenkey = datastore.newKeyFactory().setKind("InviteToken").newKey(token);
+            Key tokenkey = datastoreService.newKeyFactory().setKind("InviteToken").newKey(token);
             Entity invtoken = txn.get(tokenkey);
             if (invtoken == null) {
                 return Response.status(Status.FORBIDDEN).build();
@@ -276,9 +237,9 @@ public class ChatResources {
             String group = invtoken.getString("groupId");
             String user = invtoken.getString("user");
 
-            DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(group);
+            DatabaseReference membersRef = firebaseInstance.getReference("members").child(group);
             membersRef.child(user).setValueAsync(false);
-            DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(user).child("Groups");
+            DatabaseReference chatRef = firebaseInstance.getReference("chat").child(user).child("Groups");
             chatRef.child(group).setValueAsync(true);
 
             txn.delete(tokenkey);
@@ -297,10 +258,10 @@ public class ChatResources {
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+        Key tokenKey = datastoreService.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
 
-        Entity originalToken = datastore.get(tokenKey);
+        Entity originalToken = datastoreService.get(tokenKey);
 
         if (originalToken == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
@@ -310,17 +271,17 @@ public class ChatResources {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
         }
 
-        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
+        DatabaseReference membersRef = firebaseInstance.getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
-        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
+        DatabaseReference chatRef = firebaseInstance.getReference("chat").child(userId).child("Groups");
         chatRef.child(groupId).removeValueAsync();
         membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
-                    DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
+                    DatabaseReference groupsRef = firebaseInstance.getReference("groups");
                     groupsRef.child(groupId).removeValueAsync();
-                    DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
+                    DatabaseReference messagesRef = firebaseInstance.getReference("messages");
                     messagesRef.child(groupId).removeValueAsync();
                 }
             }
@@ -348,14 +309,14 @@ public class ChatResources {
     }
 
     public static void leaveGroup(String groupId, String userId) {
-        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("members").child(groupId);
+        DatabaseReference membersRef = firebaseInstance.getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
-        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userId).child("Groups");
+        DatabaseReference chatRef = firebaseInstance.getReference("chat").child(userId).child("Groups");
         chatRef.child(groupId).removeValueAsync();
 
-        DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("groups");
-        DatabaseReference messagesRef = FirebaseDatabase.getInstance().getReference("messages");
-        //DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
+        DatabaseReference groupsRef = firebaseInstance.getReference("groups");
+        DatabaseReference messagesRef = firebaseInstance.getReference("messages");
+        //DatabaseReference eventsRef = firebaseInstance.getReference("events");
         //eventsRef.child(groupId).removeValueAsync();
 
         groupsRef.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -386,8 +347,7 @@ public class ChatResources {
     private void sendInviteEmail(String groupId, String userDisplayName, String email, String token) {
 
         // Retrieve displayName and description from Realtime Database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference groupRef = database.getReference("groups").child(groupId);
+        DatabaseReference groupRef = firebaseInstance.getReference("groups").child(groupId);
         groupRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

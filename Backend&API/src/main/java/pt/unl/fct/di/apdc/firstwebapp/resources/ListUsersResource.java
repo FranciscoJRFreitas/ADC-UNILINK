@@ -2,7 +2,6 @@ package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.*;
 
 import javax.json.Json;
@@ -15,15 +14,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.g;
 
 @Path("/list")
 public class ListUsersResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
-    private final Gson g = new Gson();
-    private static final Logger LOG = Logger.getLogger(ListUsersResource.class.getName());
-
     public ListUsersResource() {
     }
 
@@ -32,40 +28,18 @@ public class ListUsersResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listUsers(@Context HttpHeaders headers) {
-
         String authTokenHeader = headers.getHeaderString("Authorization");
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
-
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-
-        Transaction txn = datastore.newTransaction();
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(token.username);
+        Transaction txn = datastoreService.newTransaction();
 
         try{
             Entity user = txn.get(userKey);
-            Entity originalToken = txn.get(tokenKey);
-
-            if (user == null) {
-                txn.rollback();
-                return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + token.username).build();
-            }
-
-            if(originalToken == null) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-            }
-
-            if (!token.tokenID.equals(originalToken.getString("user_tokenID"))|| System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-            }
-
             UserRole userRole = UserRole.valueOf(user.getString("user_role"));
 
             Query<Entity> query = getQueryForUserRole(userRole);
-            QueryResults<Entity> results = datastore.run(query);
+            QueryResults<Entity> results = datastoreService.run(query);
 
             List<Object> users = new ArrayList<>();
             while (results.hasNext()) {
@@ -101,10 +75,6 @@ public class ListUsersResource {
                         .build();
                 break;
             case BACKOFFICE:
-                query = Query.newEntityQueryBuilder()
-                        .setKind("User")
-                        .build();
-                break;
             case SU:
                 query = Query.newEntityQueryBuilder()
                         .setKind("User")

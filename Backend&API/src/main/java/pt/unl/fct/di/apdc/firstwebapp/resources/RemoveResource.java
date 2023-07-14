@@ -21,14 +21,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
 
-import pt.unl.fct.di.apdc.firstwebapp.resources.ChatResources;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.*;
 
 
 @Path("/remove")
 public class RemoveResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
-    private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
     public RemoveResource() {
@@ -43,39 +40,21 @@ public class RemoveResource {
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(token.username);
+        Key tokenKey = datastoreService.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
             Entity user = txn.get(userKey);
-            Entity originalToken = txn.get(tokenKey);
-
-            if (user == null) {
-                txn.rollback();
-                return Response.status(Response.Status.BAD_REQUEST).entity("User not found: " + token.username).build();
-            }
-
-            if (originalToken == null) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Login is required for this action!").build();
-            }
-
             String storedPassword = user.getString("user_pwd");
             String providedPassword = DigestUtils.sha512Hex(password);
 
             if (!storedPassword.equals(providedPassword))
                 return Response.status(Response.Status.UNAUTHORIZED).entity("Incorrect password! You need to verify your identity.").build();
 
-            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) && System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-            }
-
             if (!targetUsername.isEmpty()) {
-
-                Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
+                Key targetUserKey = datastoreService.newKeyFactory().setKind("User").newKey(targetUsername);
                 Entity targetUser = txn.get(targetUserKey);
 
                 if (targetUser == null) {
@@ -90,8 +69,8 @@ public class RemoveResource {
 
                 txn.delete(targetUserKey, tokenKey);
                 txn.commit();
-                DatabaseReference groupsRef = FirebaseDatabase.getInstance().getReference("chat").child(targetUsername).child("Groups");
-                DatabaseReference scheduleRef = FirebaseDatabase.getInstance().getReference("schedule");
+                DatabaseReference groupsRef = firebaseInstance.getReference("chat").child(targetUsername).child("Groups");
+                DatabaseReference scheduleRef = firebaseInstance.getReference("schedule");
                 scheduleRef.child(targetUsername).removeValueAsync();
 
                 groupsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -101,13 +80,13 @@ public class RemoveResource {
                             String childKey = childSnapshot.getKey();
                             ChatResources.leaveGroup(childKey, targetUsername);
                         }
-                        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat");
+                        DatabaseReference chatRef = firebaseInstance.getReference("chat");
                         chatRef.child(targetUsername).removeValueAsync();
 
                         try {
                             UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(targetUser.getString("user_email"));
                             String uid = userRecord.getUid();
-                            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                            DatabaseReference usersRef = firebaseInstance.getReference("users");
                             usersRef.child(uid).removeValueAsync();
                             FirebaseAuth.getInstance().deleteUser(uid);
                         } catch (FirebaseAuthException e) {
@@ -127,8 +106,8 @@ public class RemoveResource {
 
             txn.delete(userKey, tokenKey);
             txn.commit();
-            DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(token.username).child("Groups");
-            DatabaseReference scheduleRef = FirebaseDatabase.getInstance().getReference("schedule");
+            DatabaseReference chatRef = firebaseInstance.getReference("chat").child(token.username).child("Groups");
+            DatabaseReference scheduleRef = firebaseInstance.getReference("schedule");
             scheduleRef.child(token.username).removeValueAsync();
             String email = user.getString("user_email");
             chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -138,13 +117,13 @@ public class RemoveResource {
                         String childKey = childSnapshot.getKey();
                         ChatResources.leaveGroup(childKey, token.username);
                     }
-                    DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat");
+                    DatabaseReference chatRef = firebaseInstance.getReference("chat");
                     chatRef.child(token.username).removeValueAsync();
 
                     try {
                         UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(user.getString("user_email"));
                         String uid = userRecord.getUid();
-                        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                        DatabaseReference usersRef = firebaseInstance.getReference("users");
                         usersRef.child(uid).removeValueAsync();
                         FirebaseAuth.getInstance().deleteUser(uid);
                     } catch (FirebaseAuthException e) {
