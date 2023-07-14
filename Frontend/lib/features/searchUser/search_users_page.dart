@@ -29,12 +29,11 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   @override
   void initState() {
     super.initState();
-    loadData(); // Call the method in initState
+    loadData();
   }
 
   Future<void> loadData() async {
     uUsername = await cacheFactory.get('users', 'username');
-    //TODO More data needs to be retrieved
     setState(() {});
   }
 

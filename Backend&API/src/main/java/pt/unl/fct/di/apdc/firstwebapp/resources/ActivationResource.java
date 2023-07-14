@@ -9,14 +9,11 @@ import javax.ws.rs.core.Response.Status;
 
 import com.google.cloud.datastore.*;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
 
 
 @Path("/activate")
 public class ActivationResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
-    private static final Logger LOG = Logger.getLogger(ActivationResource.class.getName());
-
     @GET
     @Path("/")
     public Response activateAccount(@QueryParam("token") String token) {
@@ -25,7 +22,7 @@ public class ActivationResource {
                 .setFilter(StructuredQuery.PropertyFilter.eq("user_activation_token", token))
                 .build();
 
-        QueryResults<Entity> results = datastore.run(query);
+        QueryResults<Entity> results = datastoreService.run(query);
 
         String htmlResponse;
 
@@ -36,7 +33,7 @@ public class ActivationResource {
                     .set("user_activation_token", "")
                     .build();
 
-            Transaction txn = datastore.newTransaction();
+            Transaction txn = datastoreService.newTransaction();
             try {
                 txn.update(newUser);
                 txn.commit();

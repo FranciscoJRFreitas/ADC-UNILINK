@@ -21,11 +21,11 @@ import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.RecoverPwdHTMLLoader;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+
 
 @Path("/recoverPwd")
 public class RecoverPasswordResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(ActivationResource.class.getName());
 
     @POST
@@ -35,13 +35,13 @@ public class RecoverPasswordResource {
                 .setKind("User")
                 .setFilter(StructuredQuery.PropertyFilter.eq("user_username", username))
                 .build();
-        QueryResults<Entity> resultsByUsername = datastore.run(queryByUsername);
+        QueryResults<Entity> resultsByUsername = datastoreService.run(queryByUsername);
 
         Query<Entity> queryByEmail = Query.newEntityQueryBuilder()
                 .setKind("User")
                 .setFilter(StructuredQuery.PropertyFilter.eq("user_email", username))
                 .build();
-        QueryResults<Entity> resultsByEmail = datastore.run(queryByEmail);
+        QueryResults<Entity> resultsByEmail = datastoreService.run(queryByEmail);
 
         Entity user = null;
         if (resultsByUsername.hasNext())
@@ -64,7 +64,7 @@ public class RecoverPasswordResource {
                 .set("password_reset_token", token.tokenID)
                 .build();
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
             txn.update(newUser);
             txn.commit();
@@ -180,7 +180,7 @@ public class RecoverPasswordResource {
                 .setFilter(StructuredQuery.PropertyFilter.eq("password_reset_token", token))
                 .build();
 
-        QueryResults<Entity> results = datastore.run(query);
+        QueryResults<Entity> results = datastoreService.run(query);
 
         String htmlResponse;
 
@@ -251,7 +251,7 @@ public class RecoverPasswordResource {
                 .setFilter(StructuredQuery.PropertyFilter.eq("password_reset_token", token))
                 .build();
 
-        QueryResults<Entity> results = datastore.run(query);
+        QueryResults<Entity> results = datastoreService.run(query);
 
         Entity user = results.next();
 
@@ -276,7 +276,7 @@ public class RecoverPasswordResource {
             e.printStackTrace();
         }
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
             txn.update(newUser);
             txn.commit();

@@ -26,14 +26,13 @@ import pt.unl.fct.di.apdc.firstwebapp.util.ModifyAttributesData;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserRole;
 import pt.unl.fct.di.apdc.firstwebapp.util.VerifyAction;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.*;
+
 @Path("/modify")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ModifyAttributesResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(ModifyAttributesResource.class.getName());
-
-    private final Gson g = new Gson();
 
     public ModifyAttributesResource() {
     }
@@ -44,14 +43,8 @@ public class ModifyAttributesResource {
     public Response modifyAttributes(ModifyAttributesData data, @Context HttpHeaders headers) {
         LOG.fine("Attempt to modify attributes for user:" + data.username);
 
-        String authTokenHeader = headers.getHeaderString("Authorization");
-        String authToken = authTokenHeader.substring("Bearer".length()).trim();
-        AuthToken token = g.fromJson(authToken, AuthToken.class);
-
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-        Transaction txn = datastore.newTransaction();
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(data.username);
+        Transaction txn = datastoreService.newTransaction();
 
         // Checks input data
         String validationResult = data.validModifyAttributes();
@@ -61,35 +54,13 @@ public class ModifyAttributesResource {
 
         try {
             Entity user = txn.get(userKey);
-            Entity originalToken = txn.get(tokenKey);
-
-            if (user == null) {
-                txn.rollback();
-                return Response.status(Status.BAD_REQUEST).entity("User not found: " + data.username).build();
-            }
-
-            if (originalToken == null) {
-                txn.rollback();
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-            }
-            String storedPassword = user.getString("user_pwd");
-            String providedPassword = DigestUtils.sha512Hex(data.password);
-
-            if (!storedPassword.equals(providedPassword)) {
-                return Response.status(Status.UNAUTHORIZED).entity("Incorrect password for user: " + data.username).build();
-            }
-
-            if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-                txn.rollback();
-                return Response.status(Status.UNAUTHORIZED).entity("Session Expired.").build();
-            }
 
             UserRole userRole = UserRole.valueOf(user.getString("user_role"));
             if (StringUtils.isEmpty(data.targetUsername))
                 return modifyUserAttributes(user, userRole, data, txn);
             else {
 
-                Key targetUserKey = datastore.newKeyFactory().setKind("User").newKey(data.targetUsername);
+                Key targetUserKey = datastoreService.newKeyFactory().setKind("User").newKey(data.targetUsername);
                 Entity targetUser = txn.get(targetUserKey);
 
                 if (targetUser == null) {
@@ -150,7 +121,7 @@ public class ModifyAttributesResource {
         LOG.info("User attributes modified: " + data.username);
         txn.commit();
 
-        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chat").child(userUpdated.getString("user_username"));
+        DatabaseReference chatRef = firebaseInstance.getReference("chat").child(userUpdated.getString("user_username"));
         chatRef.child("DisplayName").setValueAsync(userUpdated.getString("user_displayName"));
 
         Map<String, Object> responseData = new HashMap<>();
