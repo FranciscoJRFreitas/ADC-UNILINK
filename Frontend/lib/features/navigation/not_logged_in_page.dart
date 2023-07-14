@@ -45,6 +45,13 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final headerHeight = 28;
+    final itemHeight = 51;
+    int topItemsCount = 3;
+    final topPartHeight = headerHeight + itemHeight * topItemsCount;
+    final sizedBoxHeight = screenHeight - topPartHeight - (itemHeight * 3);
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -112,7 +119,7 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 75),
+            SizedBox(height: sizedBoxHeight),
             Divider(
               // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
               thickness: 1, // Adjusts the divider's thickness.

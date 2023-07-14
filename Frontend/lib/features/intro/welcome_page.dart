@@ -34,7 +34,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     height: 5,
                   ),
                   Text(
-                    "Welcome to the new UniHub platform!",
+                    "Welcome to UniHub!",
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge!
@@ -47,7 +47,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: Text(
-                      "Making universities more accessible...",
+                      "Elevate Your University Experience",
                       style: Theme.of(context)
                           .textTheme
                           .bodyLarge!
