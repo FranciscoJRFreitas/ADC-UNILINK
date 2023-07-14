@@ -4,7 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:unilink2023/features/screen.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../data/cache_factory_provider.dart';
 import '../../../../domain/Token.dart';
 import '../../../../widgets/widget.dart';
@@ -14,7 +13,6 @@ import '../../../../constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../navigation/not_logged_in_page.dart';
 
 class RemoveAccountPage extends StatefulWidget {
   RemoveAccountPage();
@@ -184,7 +182,7 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                   context,
                   _currentUsername!,
                   passwordController.text.trim(),
-                  targetUsernameController.text,
+                  targetUsernameController.text.trim(),
                 );
               },
             ),

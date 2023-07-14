@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter/services.dart';
 import 'package:unilink2023/application/loadLocations.dart';
+import 'package:unilink2023/features/map/application/map_utils.dart';
 import '../../data/cache_factory_provider.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -103,20 +104,6 @@ class _MyMapState extends State<MyMap> {
         _mapStyle = string;
       });
     });
-  }
-
-  LatLng parseCoordinates(String coordinates) {
-    // Parse the coordinates string and return a LatLng object
-    // This is just a placeholder, replace it with your actual logic
-    double latitude = 0.0;
-    double longitude = 0.0;
-    // Split the coordinates string and convert to double values
-    List<String> coords = coordinates.split(",");
-    if (coords.length == 2) {
-      latitude = double.tryParse(coords[0]) ?? 0.0;
-      longitude = double.tryParse(coords[1]) ?? 0.0;
-    }
-    return LatLng(latitude, longitude);
   }
 
   void addEventMarker() async {

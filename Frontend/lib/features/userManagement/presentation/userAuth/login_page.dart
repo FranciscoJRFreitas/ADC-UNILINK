@@ -155,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                             });
                             login(
                               context,
-                              emailUsernameController.text,
+                              emailUsernameController.text.trim(),
                               passwordController.text,
                               _showErrorSnackbar,
                             ).then((_) {
@@ -180,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                                       });
                                       login(
                                         context,
-                                        emailUsernameController.text,
+                                        emailUsernameController.text.trim(),
                                         passwordController.text,
                                         _showErrorSnackbar,
                                       ).then((_) {

@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LocationPopUp.dart';
@@ -41,7 +42,7 @@ class _EventDetailsPage extends State<EventDetailsPage> {
     descriptionController = TextEditingController(text: event.description);
     startController = TextEditingController(text: event.startTime.toString());
     endController = TextEditingController(text: event.endTime.toString());
-    _selectedTypeController = _getEventTypeString(event.type);
+    _selectedTypeController = getEventTypeString(event.type);
     _selectedLocation = null;
     selectLocationText =
         event.location == null ? "Select Location" : "1 Location Selected";
@@ -119,7 +120,7 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                     LineComboBox(
                       selectedValue: _selectedTypeController,
                       items: EventType.values
-                          .map((e) => _getEventTypeString(e))
+                          .map((e) => getEventTypeString(e))
                           .toList(),
                       icon: Icons.type_specimen,
                       onChanged: (dynamic newValue) {
@@ -219,9 +220,9 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                           Event ev = Event(
                               id: event.id,
                               creator: event.creator,
-                              type: _parseEventType(_selectedTypeController),
-                              title: titleController.text,
-                              description: descriptionController.text,
+                              type: parseEventType(_selectedTypeController),
+                              title: titleController.text.trim(),
+                              description: descriptionController.text.trim(),
                               startTime: dateFormat.parse(startController.text),
                               endTime: dateFormat.parse(endController.text),
                               location: !isNull
@@ -269,67 +270,4 @@ class _EventDetailsPage extends State<EventDetailsPage> {
     );
   }
 
-  EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
-  }
-
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
-    }
-  }
 }

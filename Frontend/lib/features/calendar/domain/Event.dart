@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 
 class Event {
   final String? id;
@@ -35,12 +36,13 @@ class Event {
       location: json['location'] ?? '',
     );
   }
+
   factory Event.fromSnapshotId(String id, DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
       id: id,
       creator: data['creator'] as String,
-      type: _parseEventType(data['type'] as String),
+      type: parseEventType(data['type'] as String),
       title: data['title'] as String,
       description: data['description'] as String,
       startTime: DateTime.parse(data['startTime']),
@@ -54,7 +56,7 @@ class Event {
     return Event(
       groupId: id,
       creator: data['creator'] as String,
-      type: _parseEventType(data['type'] as String),
+      type: parseEventType(data['type'] as String),
       title: data['title'] as String,
       description: data['description'] as String,
       startTime: DateTime.parse(data['startTime']),
@@ -66,9 +68,9 @@ class Event {
   factory Event.fromSnapshot(DataSnapshot snapshot) {
     final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
     return Event(
-      id:data['id'] as String,
+      id: data['id'] as String,
       creator: data['creator'] as String,
-      type: _parseEventType(data['type'] as String),
+      type: parseEventType(data['type'] as String),
       title: data['title'] as String,
       description: data['description'] as String,
       startTime: DateTime.parse(data['startTime']),
@@ -81,78 +83,13 @@ class Event {
     return {
       'id': id,
       'creator': creator,
-      'type': _getEventTypeString(type),
+      'type': getEventTypeString(type),
       'title': title,
       'description': description,
       'startTime': startTime.toString(),
       'endTime': endTime.toString(),
       'location': location,
     };
-  }
-
-  static EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
-  }
-
-
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
-    }
   }
 }
 

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -414,13 +413,13 @@ class _EditProfilePage extends State<EditProfilePage> {
                                             : 'PE',
                             birthDateController.text,
                             user.username,
-                            displayNameController.text,
+                            displayNameController.text.trim(),
                             user.role!,
                             'ACTIVE',
                             _isPublic ? 'PUBLIC' : 'PRIVATE',
-                            mobilePhoneController.text,
-                            occupationController.text,
-                            courseController.text,
+                            mobilePhoneController.text.trim(),
+                            occupationController.text.trim(),
+                            courseController.text.trim(),
                             _showErrorSnackbar,
                           );
                         },

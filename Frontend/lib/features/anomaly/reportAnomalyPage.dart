@@ -154,8 +154,8 @@ class ReportAnomalyTabState extends State<ReportAnomalyTab> {
   }
 
   void _sendAnomaly(BuildContext context) {
-    final anomalytitle = _anomalyTitleController.text;
-    final anomalydesc = _anomalyController.text;
+    final anomalytitle = _anomalyTitleController.text.trim();
+    final anomalydesc = _anomalyController.text.trim();
     String coordinates = _selectedLocation != null
         ? "${_selectedLocation!.latitude},${_selectedLocation!.longitude}"
         : "0";

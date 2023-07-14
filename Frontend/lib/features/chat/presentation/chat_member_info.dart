@@ -1,20 +1,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:unilink2023/features/chat/presentation/chat_info_page.dart';
-
+import 'package:unilink2023/features/chat/domain/Member.dart';
 import '../../../constants.dart';
 import '../../../data/cache_factory_provider.dart';
-
 import '../../../domain/Token.dart';
-
 import 'package:http/http.dart' as http;
-
 import '../../../widgets/InfoItem.dart';
 
 class ChatMemberInfo extends StatefulWidget {

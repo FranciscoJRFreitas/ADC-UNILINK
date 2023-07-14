@@ -1,10 +1,6 @@
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:unilink2023/widgets/widgets.dart';
-
 import '../../../../constants.dart';
 import '../../../../widgets/my_text_button.dart';
 import '../../../../widgets/my_text_field.dart';
@@ -93,7 +89,7 @@ class RecoverPasswordPageState extends State<RecoverPasswordPage> {
                           });
                           recoverPassword(
                             context,
-                            emailUsernameController.text,
+                            emailUsernameController.text.trim(),
                             _showErrorSnackbar,
                           ).then((_) {
                             setState(() {

@@ -10,8 +10,7 @@ import '../../data/cache_factory_provider.dart';
 import '../userManagement/presentation/userAuth/change_password_page.dart';
 import '../userManagement/presentation/userAuth/remove_account_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:country_flags/country_flags.dart';
-import 'package:circle_flags/circle_flags.dart';
+
 
 class SettingsPage extends StatefulWidget {
   final bool loggedIn;

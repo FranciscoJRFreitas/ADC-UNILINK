@@ -7,7 +7,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:unilink2023/domain/Token.dart';
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 import 'package:unilink2023/features/map/MapPage.dart';
+import 'package:unilink2023/features/map/application/map_utils.dart';
 
 import '../../application/loadLocations.dart';
 import '../../constants.dart';
@@ -214,7 +216,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                             .copyWith(fontSize: 14),
                                       ),
                                       Text(
-                                        _getEventTypeString(event.type),
+                                        getEventTypeString(event.type),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyMedium,
@@ -530,49 +532,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     );
   }
 
-  LatLng parseCoordinates(String coordinates) {
-    // Parse the coordinates string and return a LatLng object
-    // This is just a placeholder, replace it with your actual logic
-    double latitude = 0.0;
-    double longitude = 0.0;
-    // Split the coordinates string and convert to double values
-    List<String> coords = coordinates.split(",");
-    if (coords.length == 2) {
-      latitude = double.tryParse(coords[0]) ?? 0.0;
-      longitude = double.tryParse(coords[1]) ?? 0.0;
-    }
-    return LatLng(latitude, longitude);
-  }
-
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
-    }
-  }
-
   Future<void> removeEvent(
     BuildContext context,
     String eventId,
@@ -600,38 +559,4 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     }
   }
 
-  EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
-  }
 }

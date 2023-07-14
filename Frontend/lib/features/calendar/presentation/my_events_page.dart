@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:unilink2023/application/loadLocations.dart';
 import 'package:unilink2023/constants.dart';
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/calendar/presentation/event_details.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
@@ -15,8 +16,6 @@ import 'package:unilink2023/widgets/LineComboBox.dart';
 import 'package:unilink2023/widgets/LineDateTimeField.dart';
 import 'package:unilink2023/widgets/LineTextField.dart';
 import 'package:unilink2023/widgets/LocationPopUp.dart';
-
-import 'calendar_day_page.dart';
 
 class MyEventsPage extends StatefulWidget {
   final String username;
@@ -135,7 +134,7 @@ class _MyEventsPageState extends State<MyEventsPage>
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
             Event currentEvent = Event(
-                type: _parseEventType(currEvent["type"]),
+                type: parseEventType(currEvent["type"]),
                 title: currEvent["title"],
                 description: currEvent['description'],
                 location: currEvent['location'],
@@ -842,7 +841,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                             .copyWith(fontSize: 14),
                       ),
                       Text(
-                        _getEventTypeString(event.type),
+                        getEventTypeString(event.type),
                         style: Theme.of(context).textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1013,35 +1012,6 @@ class _MyEventsPageState extends State<MyEventsPage>
           );
   }
 
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
-    }
-  }
-
   noEventWidget(bool isGroupEvents) {
     return Center(
       child: Container(
@@ -1094,7 +1064,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                   LineComboBox(
                     selectedValue: _selectedEventType,
                     items:
-                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                        eventTypes.map((e) => getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -1177,9 +1147,9 @@ class _MyEventsPageState extends State<MyEventsPage>
                     bool isNull = _selectedLocation == null;
                     _createPersonalEvent(Event(
                         creator: widget.username,
-                        type: _parseEventType(_selectedEventType),
-                        title: titleController.text,
-                        description: descriptionController.text,
+                        type: parseEventType(_selectedEventType),
+                        title: titleController.text.trim(),
+                        description: descriptionController.text.trim(),
                         startTime: dateFormat.parse(startController.text),
                         endTime: dateFormat.parse(endController.text),
                         location: !isNull
@@ -1247,41 +1217,6 @@ class _MyEventsPageState extends State<MyEventsPage>
         backgroundColor: Error ? Colors.red : Colors.blue.shade900,
       ),
     );
-  }
-
-  EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
   }
 
   _removeEventPopUpDialogWeb(BuildContext context, Event e) {
@@ -1354,7 +1289,7 @@ class _MyEventsPageState extends State<MyEventsPage>
         personalFilteredEvents = personalEvents.where((event) {
           final title = event.title.toLowerCase();
           final description = event.description.toLowerCase();
-          final type = _getEventTypeString(event.type).toLowerCase();
+          final type = getEventTypeString(event.type).toLowerCase();
           final searchLower = query.toLowerCase();
 
           return query.isNotEmpty &&
@@ -1378,7 +1313,7 @@ class _MyEventsPageState extends State<MyEventsPage>
         groupFilteredEvents = groupEvents.where((event) {
           final title = event.title.toLowerCase();
           final description = event.description.toLowerCase();
-          final type = _getEventTypeString(event.type);
+          final type = getEventTypeString(event.type);
           final groupId = event.groupId!;
           final searchLower = query.toLowerCase();
 
@@ -1494,7 +1429,7 @@ class _MyEventsPageState extends State<MyEventsPage>
                         LineComboBox(
                           selectedValue: _selectedEventType,
                           items: eventTypes
-                              .map((e) => _getEventTypeString(e))
+                              .map((e) => getEventTypeString(e))
                               .toList(),
                           icon: Icons.type_specimen,
                           onChanged: (dynamic newValue) {
@@ -1586,9 +1521,9 @@ class _MyEventsPageState extends State<MyEventsPage>
                                 bool isNull = _selectedLocation == null;
                                 _createPersonalEvent(Event(
                                     creator: widget.username,
-                                    type: _parseEventType(_selectedEventType),
-                                    title: titleController.text,
-                                    description: descriptionController.text,
+                                    type: parseEventType(_selectedEventType),
+                                    title: titleController.text.trim(),
+                                    description: descriptionController.text.trim(),
                                     startTime:
                                         dateFormat.parse(startController.text),
                                     endTime:

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
 import 'package:unilink2023/features/calendar/presentation/calendar_day_page.dart';
 import 'package:unilink2023/widgets/LineComboBox.dart';
@@ -18,9 +18,7 @@ import '../../../application/loadLocations.dart';
 import '../../../constants.dart';
 import '../../../data/cache_factory_provider.dart';
 import '../../../widgets/LocationPopUp.dart';
-import '../../chat/presentation/chat_info_page.dart';
 import '../../navigation/main_screen_page.dart';
-import 'event_details.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class CalendarPage extends StatefulWidget {
@@ -95,7 +93,7 @@ class _CalendarPageState extends State<CalendarPage> {
           newevents.forEach((key, value) {
             Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
             Event currentEvent = Event(
-                type: _parseEventType(currEvent["type"]),
+                type: parseEventType(currEvent["type"]),
                 title: currEvent["title"],
                 description: currEvent['description'],
                 location: currEvent['location'],
@@ -169,7 +167,7 @@ class _CalendarPageState extends State<CalendarPage> {
         Map<dynamic, dynamic> currEvent =
             event.snapshot.value as Map<dynamic, dynamic>;
         Event currentEvent = Event(
-          type: _parseEventType(currEvent["type"]),
+          type: parseEventType(currEvent["type"]),
           title: currEvent["title"],
           description: currEvent['description'],
           location: currEvent['location'],
@@ -204,41 +202,6 @@ class _CalendarPageState extends State<CalendarPage> {
         }
       });
     });
-  }
-
-  EventType _parseEventType(String? eventTypeString) {
-    if (eventTypeString != null) {
-      eventTypeString = eventTypeString.toLowerCase();
-
-      switch (eventTypeString) {
-        case 'academic':
-          return EventType.academic;
-        case 'entertainment':
-          return EventType.entertainment;
-        case 'faire':
-          return EventType.faire;
-        case 'athletics':
-          return EventType.athletics;
-        case 'competition':
-          return EventType.competition;
-        case 'party':
-          return EventType.party;
-        case 'ceremony':
-          return EventType.ceremony;
-        case 'conference':
-          return EventType.conference;
-        case 'lecture':
-          return EventType.lecture;
-        case 'meeting':
-          return EventType.meeting;
-        case 'workshop':
-          return EventType.workshop;
-        case 'exhibit':
-          return EventType.exhibit;
-      }
-    }
-
-    return EventType.academic;
   }
 
   Future<void> loadSchedule() async {
@@ -1103,9 +1066,9 @@ class _CalendarPageState extends State<CalendarPage> {
                       bool isNull = _selectedLocation == null;
                       _createPersonalEvent(Event(
                           creator: widget.username,
-                          type: _parseEventType(_selectedEventType),
-                          title: titleController.text,
-                          description: descriptionController.text,
+                          type: parseEventType(_selectedEventType),
+                          title: titleController.text.trim(),
+                          description: descriptionController.text.trim(),
                           startTime: dateFormat.parse(startController.text),
                           endTime: dateFormat.parse(endController.text),
                           location: !isNull
@@ -1273,9 +1236,9 @@ class _CalendarPageState extends State<CalendarPage> {
                                 bool isNull = _selectedLocation == null;
                                 _createPersonalEvent(Event(
                                     creator: widget.username,
-                                    type: _parseEventType(_selectedEventType),
-                                    title: titleController.text,
-                                    description: descriptionController.text,
+                                    type: parseEventType(_selectedEventType),
+                                    title: titleController.text.trim(),
+                                    description: descriptionController.text.trim(),
                                     startTime:
                                         dateFormat.parse(startController.text),
                                     endTime:
@@ -1311,22 +1274,6 @@ class _CalendarPageState extends State<CalendarPage> {
       startController.clear();
       endController.clear();
     });
-  }
-
-  List<String> _formatDateTime(DateTime dateTime1, DateTime dateTime2) {
-    if (dateTime1.day != dateTime2.day ||
-        dateTime1.month != dateTime2.month ||
-        dateTime1.year != dateTime2.year) {
-      return [
-        DateFormat('HH:mm of yyyy-MM-dd').format(dateTime1),
-        DateFormat('HH:mm of yyyy-MM-dd').format(dateTime2)
-      ];
-    } else {
-      return [
-        DateFormat('HH:mm').format(dateTime1),
-        DateFormat('HH:mm').format(dateTime2)
-      ];
-    }
   }
 
   void _createPersonalEvent(Event event) {
@@ -1484,34 +1431,5 @@ String getDayOfWeek(DateTime date) {
       return 'Sunday';
     default:
       return '';
-  }
-}
-
-String getEventTypeString(EventType eventType) {
-  switch (eventType) {
-    case EventType.academic:
-      return 'Academic';
-    case EventType.entertainment:
-      return 'Entertainment';
-    case EventType.faire:
-      return 'Faire';
-    case EventType.athletics:
-      return 'Athletics';
-    case EventType.competition:
-      return 'Competition';
-    case EventType.party:
-      return 'Party';
-    case EventType.ceremony:
-      return 'Ceremony';
-    case EventType.conference:
-      return 'Conference';
-    case EventType.lecture:
-      return 'Lecture';
-    case EventType.meeting:
-      return 'Meeting';
-    case EventType.workshop:
-      return 'Workshop';
-    case EventType.exhibit:
-      return 'Exhibit';
   }
 }

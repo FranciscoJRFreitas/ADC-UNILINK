@@ -667,8 +667,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 ElevatedButton(
                   onPressed: () async {
                     {
-                      createGroup(context, groupNameController.text,
-                          descriptionController.text, _showErrorSnackbar);
+                      createGroup(
+                          context,
+                          groupNameController.text.trim(),
+                          descriptionController.text.trim(),
+                          _showErrorSnackbar);
                       Navigator.of(context).pop();
                     }
                   },
@@ -742,8 +745,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             onPressed: () async {
                               createGroup(
                                 context,
-                                groupNameController.text,
-                                descriptionController.text,
+                                groupNameController.text.trim(),
+                                descriptionController.text.trim(),
                                 _showErrorSnackbar,
                               );
                               Navigator.of(context).pop();

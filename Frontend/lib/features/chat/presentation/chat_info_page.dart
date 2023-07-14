@@ -11,7 +11,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:unilink2023/application/loadLocations.dart';
+import 'package:unilink2023/features/calendar/application/event_utils.dart';
 import 'package:unilink2023/features/calendar/domain/Event.dart';
+import 'package:unilink2023/features/chat/application/chat_utils.dart';
+import 'package:unilink2023/features/chat/domain/Member.dart';
 import 'package:unilink2023/features/chat/presentation/chat_member_info.dart';
 import 'package:unilink2023/features/navigation/main_screen_page.dart';
 import 'package:unilink2023/widgets/AutoCompleteDropdown.dart';
@@ -725,7 +728,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                                                         14),
                                                           ),
                                                           Text(
-                                                            _getEventTypeString(
+                                                            getEventTypeString(
                                                                 event.type),
                                                             style: Theme.of(
                                                                     context)
@@ -1365,7 +1368,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                   LineComboBox(
                     selectedValue: _selectedEventType,
                     items:
-                        eventTypes.map((e) => _getEventTypeString(e)).toList(),
+                        eventTypes.map((e) => getEventTypeString(e)).toList(),
                     icon: Icons.type_specimen,
                     onChanged: (dynamic newValue) {
                       setState(() {
@@ -1448,8 +1451,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       createEvent(
                           context,
                           _selectedEventType,
-                          titleController.text,
-                          descriptionController.text,
+                          titleController.text.trim(),
+                          descriptionController.text.trim(),
                           startController.text,
                           endController.text,
                           widget.groupId,
@@ -1527,7 +1530,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                         LineComboBox(
                           selectedValue: _selectedEventType,
                           items: eventTypes
-                              .map((e) => _getEventTypeString(e))
+                              .map((e) => getEventTypeString(e))
                               .toList(),
                           icon: Icons.type_specimen,
                           onChanged: (dynamic newValue) {
@@ -1617,8 +1620,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 createEvent(
                                     context,
                                     _selectedEventType,
-                                    titleController.text,
-                                    descriptionController.text,
+                                    titleController.text.trim(),
+                                    descriptionController.text.trim(),
                                     startController.text,
                                     endController.text,
                                     widget.groupId,
@@ -1766,35 +1769,6 @@ class _ChatInfoPageState extends State<ChatInfoPage>
         }),
       ),
     );
-  }
-
-  static String _getEventTypeString(EventType eventType) {
-    switch (eventType) {
-      case EventType.academic:
-        return 'Academic';
-      case EventType.entertainment:
-        return 'Entertainment';
-      case EventType.faire:
-        return 'Faire';
-      case EventType.athletics:
-        return 'Athletics';
-      case EventType.competition:
-        return 'Competition';
-      case EventType.party:
-        return 'Party';
-      case EventType.ceremony:
-        return 'Ceremony';
-      case EventType.conference:
-        return 'Conference';
-      case EventType.lecture:
-        return 'Lecture';
-      case EventType.meeting:
-        return 'Meeting';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.exhibit:
-        return 'Exhibit';
-    }
   }
 
   Future<Uint8List?> downloadData(String username) async {
@@ -2082,55 +2056,7 @@ class _ChatInfoPageState extends State<ChatInfoPage>
     }
   }
 
-  Future<void> deleteGroup(
-    BuildContext context,
-    String groupId,
-    String userId,
-    void Function(String, bool) showErrorSnackbar,
-  ) async {
-    cacheFactory.removeGroup(groupId);
-    cacheFactory.deleteMessage(
-        groupId, '-1'); //Deleting group messages from cache
-    final url = kBaseUrl + "rest/chat/delete/${groupId}";
-    final tokenID = await cacheFactory.get('users', 'token');
-    Token token = new Token(tokenID: tokenID, username: userId);
 
-    final response = await http.delete(Uri.parse(url), headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${json.encode(token.toJson())}'
-    });
-
-    if (response.statusCode == 200) {
-      deleteFolder("GroupAttachements/${groupId}");
-
-      final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
-      await imageRef.delete();
-
-      showErrorSnackbar('deleted group!', false);
-    } else {
-      showErrorSnackbar('Error deleting group!', true);
-    }
-  }
 }
 
-Future<void> deleteFolder(String folderPath) async {
-  final storage = FirebaseStorage.instance;
-  final ListResult result = await storage.ref(folderPath).listAll();
 
-  // Delete each file within the folder
-  for (final Reference ref in result.items) {
-    await ref.delete();
-  }
-
-  // Delete the empty folder
-  await storage.ref(folderPath).delete();
-}
-
-class MembersData {
-  final String username;
-  final String dispName;
-  bool isAdmin;
-
-  MembersData(
-      {required this.username, required this.dispName, required this.isAdmin});
-}
