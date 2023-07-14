@@ -19,6 +19,7 @@ import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:unilink2023/features/BackOfficeHub/eventsBackOffice.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class GroupPage extends StatefulWidget {
   @override
@@ -624,11 +625,28 @@ class _GroupPageState extends State<GroupPage> {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${json.encode(token.toJson())}'
     });
-
     if (response.statusCode == 200) {
-      showErrorSnackbar('Deleted ${groupId}!', false);
+      deleteFolder("GroupAttachements/${groupId}");
+
+      final imageRef = FirebaseStorage.instance.ref('GroupPictures/$groupId');
+      await imageRef.delete();
+
+      showErrorSnackbar('deleted group!', false);
     } else {
-      showErrorSnackbar('Error Deleting group ! : ${response.body}', true);
+      showErrorSnackbar('Error deleting group!', true);
     }
+  }
+
+  Future<void> deleteFolder(String folderPath) async {
+    final storage = FirebaseStorage.instance;
+    final ListResult result = await storage.ref(folderPath).listAll();
+
+    // Delete each file within the folder
+    for (final Reference ref in result.items) {
+      await ref.delete();
+    }
+
+    // Delete the empty folder
+    await storage.ref(folderPath).delete();
   }
 }
