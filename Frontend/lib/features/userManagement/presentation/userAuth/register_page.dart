@@ -271,10 +271,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 buttonName: 'Register',
                                 onTap: () {
                                   registerUser(
-                                    nameController.text,
-                                    usernameController.text,
-                                    emailController.text,
-                                    studentNumberController.text,
+                                    nameController.text.trim(),
+                                    usernameController.text.trim(),
+                                    emailController.text.trim(),
+                                    studentNumberController.text.trim(),
                                     passwordController.text,
                                     confirmPwdController.text,
                                     sv = _selectedEducationLevel == 'Doctorate'
@@ -294,9 +294,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ? 'PRIVATE'
                                         : 'PUBLIC',
                                     //Default Private
-                                    mobilePhoneController.text,
-                                    occupationController.text,
-                                    courseController.text,
+                                    mobilePhoneController.text.trim(),
+                                    occupationController.text.trim(),
+                                    courseController.text.trim(),
                                     _showErrorSnackbar,
                                   );
                                 },

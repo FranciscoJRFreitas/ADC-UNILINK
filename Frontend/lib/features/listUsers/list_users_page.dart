@@ -66,7 +66,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
         child: ListView.builder(
           itemCount: users.length,
           itemBuilder: (context, index) {
-            User user = users[index];
+            User currentUser = users[index];
             bool isNotUser = true; //widget.user.role != 'USER';
             if (users.isEmpty && widget.user.role != 'SU')
               return Text(
@@ -78,8 +78,8 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (context) => ProfilePage(
-                              user: user,
-                              isNotUser: isNotUser,
+                              user: currentUser,
+                          requestingRole: widget.user.role!,
                             )),
                   );
                 },
@@ -91,9 +91,9 @@ class _ListUsersPageState extends State<ListUsersPage> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: ListTile(
-                      leading: profilePicture(context, user.username),
+                      leading: profilePicture(context, currentUser.username),
                       title: Text(
-                        '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}',
+                        '${currentUser.displayName}${currentUser.username == widget.user.username ? ' (You)' : ''}',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Column(
@@ -104,7 +104,7 @@ class _ListUsersPageState extends State<ListUsersPage> {
                             children: [
                               Icon(Icons.person, size: 20),
                               SizedBox(width: 5),
-                              Text('Username: ${user.username}'),
+                              Text('Username: ${currentUser.username}'),
                             ],
                           ),
                           // ... Add other information rows with icons here

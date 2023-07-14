@@ -8,7 +8,6 @@ export 'listUsers/list_users_page.dart';
 export 'userManagement/presentation/userData/edit_profile_page.dart';
 export 'userManagement/presentation/userAuth/remove_account_page.dart';
 export 'chat/presentation/chat_page.dart';
-//export 'userData/userprofile_page.dart';
 export 'intro/splash_page.dart';
 export 'settings/settings_page.dart';
 export 'searchUser/search_users_page.dart';

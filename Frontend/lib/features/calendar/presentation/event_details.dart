@@ -221,8 +221,8 @@ class _EventDetailsPage extends State<EventDetailsPage> {
                               id: event.id,
                               creator: event.creator,
                               type: parseEventType(_selectedTypeController),
-                              title: titleController.text,
-                              description: descriptionController.text,
+                              title: titleController.text.trim(),
+                              description: descriptionController.text.trim(),
                               startTime: dateFormat.parse(startController.text),
                               endTime: dateFormat.parse(endController.text),
                               location: !isNull

@@ -102,42 +102,14 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
             child: ListView.builder(
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
-                User user = _searchResults[index];
-                bool isNotUser = widget.user.role != 'STUDENT';
-                /*return Card(
-                  child: ListTile(
-                    title: Text(
-                        '${user.displayName}${user.username == widget.user.username ? ' (You)' : ''}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Username: ${user.username}'),
-                        Text('Email: ${user.email}'),
-                        if (isNotUser) Text('Role: ${user.role}'),
-                        if (isNotUser) Text('State: ${user.state}'),
-                        if (isNotUser)
-                          Text('Profile Visibility: ${user.profileVisibility}'),
-                        if (isNotUser) Text('Landline: ${user.landlinePhone}'),
-                        if (isNotUser) Text('Mobile: ${user.mobilePhone}'),
-                        if (isNotUser) Text('Occupation: ${user.occupation}'),
-                        if (isNotUser) Text('Workplace: ${user.workplace}'),
-                        if (isNotUser) Text('Address: ${user.address}'),
-                        if (isNotUser)
-                          Text('Additional Address: ${user.additionalAddress}'),
-                        if (isNotUser) Text('Locality: ${user.locality}'),
-                        if (isNotUser) Text('Postal Code: ${user.postalCode}'),
-                        if (isNotUser) Text('NIF: ${user.nif}'),
-                      ],
-                    ),
-                  ),
-                );*/
+                User currentUser = _searchResults[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) => ProfilePage(
-                                user: user,
-                                isNotUser: isNotUser,
+                                user: currentUser,
+                                requestingRole: widget.user.role!,
                               )),
                     );
                   },
@@ -151,9 +123,9 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                       padding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                       child: ListTile(
-                        leading: profilePicture(context, user.username),
+                        leading: profilePicture(context, currentUser.username),
                         title: Text(
-                          '${user.displayName}${user.username == uUsername ? ' (You)' : ''}', //TODO Mudar para token em vez de widget
+                          '${currentUser.displayName}${currentUser.username == uUsername ? ' (You)' : ''}', //TODO Mudar para token em vez de widget
                           //TODO Faz sentido user ver se a si próprio no search?
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
@@ -169,7 +141,7 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                                     Icons.person,
                                     size: 20),
                                 SizedBox(width: 5),
-                                Text('Username: ${user.username}'),
+                                Text('Username: ${currentUser.username}'),
                               ],
                             ),
                             // ... Add other information rows with icons here

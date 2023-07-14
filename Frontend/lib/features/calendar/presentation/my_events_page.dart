@@ -1148,8 +1148,8 @@ class _MyEventsPageState extends State<MyEventsPage>
                     _createPersonalEvent(Event(
                         creator: widget.username,
                         type: parseEventType(_selectedEventType),
-                        title: titleController.text,
-                        description: descriptionController.text,
+                        title: titleController.text.trim(),
+                        description: descriptionController.text.trim(),
                         startTime: dateFormat.parse(startController.text),
                         endTime: dateFormat.parse(endController.text),
                         location: !isNull
@@ -1522,8 +1522,8 @@ class _MyEventsPageState extends State<MyEventsPage>
                                 _createPersonalEvent(Event(
                                     creator: widget.username,
                                     type: parseEventType(_selectedEventType),
-                                    title: titleController.text,
-                                    description: descriptionController.text,
+                                    title: titleController.text.trim(),
+                                    description: descriptionController.text.trim(),
                                     startTime:
                                         dateFormat.parse(startController.text),
                                     endTime:

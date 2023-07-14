@@ -1451,8 +1451,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                       createEvent(
                           context,
                           _selectedEventType,
-                          titleController.text,
-                          descriptionController.text,
+                          titleController.text.trim(),
+                          descriptionController.text.trim(),
                           startController.text,
                           endController.text,
                           widget.groupId,
@@ -1620,8 +1620,8 @@ class _ChatInfoPageState extends State<ChatInfoPage>
                                 createEvent(
                                     context,
                                     _selectedEventType,
-                                    titleController.text,
-                                    descriptionController.text,
+                                    titleController.text.trim(),
+                                    descriptionController.text.trim(),
                                     startController.text,
                                     endController.text,
                                     widget.groupId,

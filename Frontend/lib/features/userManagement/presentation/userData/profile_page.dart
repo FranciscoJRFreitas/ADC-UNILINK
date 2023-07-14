@@ -9,13 +9,11 @@ import 'package:unilink2023/constants.dart';
 import 'package:unilink2023/features/userManagement/domain/User.dart';
 import 'package:unilink2023/widgets/InfoItem.dart';
 
-
-
 class ProfilePage extends StatelessWidget {
   final User user;
-  final bool isNotUser;
+  final String requestingRole;
 
-  ProfilePage({required this.user, required this.isNotUser});
+  ProfilePage({required this.user, required this.requestingRole});
 
   Future<Uint8List?> downloadData(String username) async {
     return FirebaseStorage.instance
@@ -123,6 +121,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Theme.of(context).primaryColor, //roleColor,
         title: Text(
           "User Information",
@@ -156,10 +155,15 @@ class ProfilePage extends StatelessWidget {
               color: Style.lightBlue,
             ),
             SizedBox(height: 10),
-            InfoItem(
-              title: 'Role',
-              value: user.role ?? 'N/A',
-              icon: Icons.person,
+            ListTile(
+              leading: Icon(
+                Icons.library_books,
+                color: Theme.of(context).primaryIconTheme.color,
+              ),
+              title: Text(
+                user.course ?? 'N/A',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             SizedBox(height: 5),
             Divider(
@@ -181,50 +185,57 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.alternate_email,
             ),
             InfoItem(
+              title: 'Student Number',
+              value: user.studentNumber,
+              icon: Icons.numbers,
+            ),
+            InfoItem(
               title: 'Email',
               value: user.email,
               icon: Icons.mail,
             ),
-            InfoItem(
-              title: "Education Level",
-              value: user.educationLevel == 'D'
-                  ? 'Doctorate'
-                  : user.educationLevel == 'SE'
-                      ? 'Secondary Education'
-                      : user.educationLevel == 'UD'
-                          ? 'Undergraduate Degree'
-                          : user.educationLevel == 'MD'
-                              ? 'Master\'s Degree'
-                              : user.educationLevel == 'PE'
-                                  ? 'Primary Education'
-                                  : '',
-              icon: Icons.school,
-            ),
-            InfoItem(
-              title: "Birth date",
-              value: user.birthDate ?? '',
-              icon: Icons.schedule,
-            ),
-            InfoItem(
-              title: "Mobile Phone",
-              value: user.mobilePhone ?? '',
-              icon: Icons.phone,
-            ),
-            InfoItem(
-              title: "Occupation",
-              value: user.occupation ?? '',
-              icon: Icons.cases_rounded,
-            ),
-            InfoItem(
-              title: "Profile Visibility",
-              value: user.profileVisibility ?? '',
-              icon: Icons.public,
-            ),
-            InfoItem(
-              title: "Account Creation Date",
-              value: formatDateInMillis(),
-              icon: Icons.app_registration_rounded,
-            ),
+            if (requestingRole != 'STUDENT') ...[
+              InfoItem(
+                title: "Education Level",
+                value: user.educationLevel == 'D'
+                    ? 'Doctorate'
+                    : user.educationLevel == 'SE'
+                        ? 'Secondary Education'
+                        : user.educationLevel == 'UD'
+                            ? 'Undergraduate Degree'
+                            : user.educationLevel == 'MD'
+                                ? 'Master\'s Degree'
+                                : user.educationLevel == 'PE'
+                                    ? 'Primary Education'
+                                    : '',
+                icon: Icons.school,
+              ),
+              InfoItem(
+                title: "Birth date",
+                value: user.birthDate ?? '',
+                icon: Icons.schedule,
+              ),
+              InfoItem(
+                title: "Mobile Phone",
+                value: user.mobilePhone ?? '',
+                icon: Icons.phone,
+              ),
+              InfoItem(
+                title: "Occupation",
+                value: user.occupation ?? '',
+                icon: Icons.cases_rounded,
+              ),
+              InfoItem(
+                title: "Profile Visibility",
+                value: user.profileVisibility ?? '',
+                icon: Icons.public,
+              ),
+              InfoItem(
+                title: "Account Creation Date",
+                value: formatDateInMillis(),
+                icon: Icons.app_registration_rounded,
+              ),
+            ],
           ],
         ),
       ),
@@ -232,12 +243,13 @@ class ProfilePage extends StatelessWidget {
   }
 
   String formatDateInMillis() {
-    if (user.creationTime == "" || user.creationTime == null) return "";
+    if (user.creationTime == "" || user.creationTime == null)
+      return "";
     else {
-      var date = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(user.creationTime!).millisecondsSinceEpoch);
+      var date = DateTime.fromMillisecondsSinceEpoch(
+          DateTime.parse(user.creationTime!).millisecondsSinceEpoch);
       var formatter = DateFormat('d/M/y');
       return formatter.format(date);
     }
   }
 }
-

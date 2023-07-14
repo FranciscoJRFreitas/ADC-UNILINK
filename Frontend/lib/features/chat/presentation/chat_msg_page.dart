@@ -387,9 +387,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                   GestureDetector(
                     onTap: () {
                       combinedButtonKey.currentState?.collapseOverlay();
-                      sendMessage(messageController.text.isEmpty
+                      sendMessage(messageController.text.trim().isEmpty
                           ? ""
-                          : messageController.text);
+                          : messageController.text.trim());
                       setState(() {});
                     },
                     child: Container(
@@ -692,9 +692,9 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                     GestureDetector(
                       onTap: () {
                         combinedButtonKey.currentState?.collapseOverlay();
-                        sendMessage(messageController.text.isEmpty
+                        sendMessage(messageController.text.trim().isEmpty
                             ? ""
-                            : messageController.text);
+                            : messageController.text.trim());
                         setState(() {});
                       },
                       child: Container(
@@ -1006,7 +1006,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   sendMessage(String content) async {
-    if (content.isNotEmpty || picked != null || pickedFile != null) {
+    if (content  != "" || picked != null || pickedFile != null) {
       final DatabaseReference messageRef = FirebaseDatabase.instance
           .ref()
           .child('messages')
