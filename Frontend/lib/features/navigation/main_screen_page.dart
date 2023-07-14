@@ -235,22 +235,29 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return _buildWebLayout(context);
-    } else {
-      return _buildWebLayout(context);
-    }
-  }
-
-  Widget _buildWebLayout(BuildContext context) {
     final userProvider = Provider.of<UserNotifier>(context);
     _currentUser = userProvider.currentUser!;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final headerHeight = 170.0;
+    final itemHeight = 51;
+
+    int topItemsCount;
+    if (_currentUser.role == 'SU')
+      topItemsCount = 8;
+    else if (_currentUser.role == 'BACKOFFICE')
+      topItemsCount = 4;
+    else
+      topItemsCount = 7;
+
+    final topPartHeight = headerHeight + itemHeight * topItemsCount;
+
+    final sizedBoxHeight = screenHeight - topPartHeight - (itemHeight * 3);
+
     if (isFirst) {
       isFirst = false;
       _selectedIndex = _currentUser.role != 'BACKOFFICE' ? widget.index! : 12;
     }
-    Color roleColor = _currentUser.getRoleColor(_currentUser.role);
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -291,7 +298,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             )
           ],
         ),
-
         drawer: Drawer(
           backgroundColor: Theme.of(context).primaryColor,
           child: ListView(
@@ -374,7 +380,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   title: Text(
                       _currentUser.role == 'STUDENT'
                           ? 'Student'
-                          : _currentUser.role == 'PROFESSOR'
+                          : _currentUser.role == 'PROF'
                               ? 'Professor'
                               : _currentUser.role == 'DIRECTOR'
                                   ? 'Director'
@@ -404,7 +410,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       },
                     ),
                   ]),
-
               ExpansionTile(
                   leading: Icon(
                     Icons.group,
@@ -501,11 +506,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     Navigator.pop(context);
                   },
                 ),
-              SizedBox(height: 75),
+              SizedBox(height: sizedBoxHeight > 0 ? sizedBoxHeight : 0),
               Divider(
-                // Adjusts the divider's vertical extent. The actual divider line is in the middle of the extent.
-                thickness: 1, // Adjusts the divider's thickness.
-                color: kBackgroundColor, // Adjusts the divider's color.
+                thickness: 1,
+                color: kBackgroundColor,
               ),
               ListTile(
                 leading: Icon(Icons.call),
@@ -549,11 +553,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   }
                 },
               ),
-              // ... other Drawer items
             ],
           ),
         ),
-        //body: _widgetOptions()[_selectedIndex],
         body: getSelectedWidget(),
         bottomNavigationBar: !kIsWeb
             ? BottomNavigationBar(
