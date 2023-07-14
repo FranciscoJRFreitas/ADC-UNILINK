@@ -345,11 +345,9 @@ class _GroupPageState extends State<GroupPage> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (kIsWeb)
-                                      kickPopupDialogWeb(
-                                          context, group.DisplayName);
+                                      kickPopupDialogWeb(context, group.id);
                                     else
-                                      kickPopupDialogMobile(
-                                          context, group.DisplayName);
+                                      kickPopupDialogMobile(context, group.id);
                                   },
                                   child: Text('Kick'),
                                 ),
@@ -370,7 +368,7 @@ class _GroupPageState extends State<GroupPage> {
                         padding: EdgeInsets.zero,
                         icon: Icon(Icons.delete, color: Colors.blue),
                         onPressed: () {
-                          _showDeleteConfirmation(context, group.DisplayName);
+                          _showDeleteConfirmation(context, group.id);
                         },
                       ),
                     ),
