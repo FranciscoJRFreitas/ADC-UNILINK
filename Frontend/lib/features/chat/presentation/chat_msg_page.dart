@@ -376,7 +376,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                       maxLines: 10,
                       // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
-                        sendMessage(value);
+                        sendMessage(value.trim());
                         setState(() {});
                       },
                     ),
@@ -682,7 +682,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         maxLines: 4,
                         // when user presses enter it will adapt to it
                         onFieldSubmitted: (String value) {
-                          sendMessage(value);
+                          sendMessage(value.trim());
                         },
                       ),
                     ),
