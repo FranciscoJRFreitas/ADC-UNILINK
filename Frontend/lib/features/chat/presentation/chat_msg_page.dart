@@ -57,6 +57,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
       GlobalKey<CombinedButtonState>();
   late bool info = false;
   late bool isScrollLocked = false;
+  bool _showScrollButton = false;
 
   //late String lastMessageId = '';
 
@@ -65,17 +66,29 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_scrollListener);
 
     _messaging = FirebaseMessaging.instance;
-    // _initCamera();
     _configureMessaging();
     if (kIsWeb) messageFocusNode.requestFocus();
 
-    // Get a reference to the messages node for the specific group
     messagesRef =
         FirebaseDatabase.instance.ref().child('messages').child(widget.groupId);
 
     initMessages();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset !=
+        _scrollController.position.maxScrollExtent) {
+      setState(() {
+        _showScrollButton = true;
+      });
+    } else {
+      setState(() {
+        _showScrollButton = false;
+      });
+    }
   }
 
   void initMessages() async {
@@ -173,13 +186,15 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             builder: (context) => MainScreen(index: 6),
           ),
         );
-        _showErrorSnackbar("You no longer belong to group ${widget.groupId}!", true);
+        _showErrorSnackbar(
+            "You no longer belong to group ${widget.groupId}!", true);
       }
     });
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_scrollListener);
     super.dispose();
   }
 
@@ -225,7 +240,6 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
               onNotification: (ScrollNotification notification) {
                 if (notification is ScrollEndNotification &&
                     _scrollController.position.pixels == 0) {
-                  // Load older messages here
                   loadOlderMessages();
                 }
                 return false;
@@ -367,17 +381,22 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                       decoration: InputDecoration(
                         hintText: "Send a message...",
                         hintStyle: TextStyle(
-                            color: Theme.of(context).secondaryHeaderColor,
+                            color: Theme.of(context)
+                                .secondaryHeaderColor
+                                .withOpacity(0.5),
                             fontSize: 16),
                         border: InputBorder.none,
                       ),
                       minLines: 1,
                       //Normal textInputField will be displayed
                       maxLines: 10,
-                      // when user presses enter it will adapt to it
                       onFieldSubmitted: (String value) {
-                        sendMessage(value.trim());
-                        setState(() {});
+                        if (value.length <= 25000)
+                          sendMessage(value.trim());
+                        else {
+                          _confirmSendMessageDialog(
+                              context, value.substring(0, 24999));
+                        }
                       },
                     ),
                   ),
@@ -480,6 +499,23 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           ),
         ],
       ),
+      floatingActionButton: _showScrollButton
+          ? Padding(
+              padding: EdgeInsets.only(
+                bottom: 70.0,
+                right: 10,
+              ),
+              child: FloatingActionButton(
+                onPressed: _scrollToBottom,
+                child: Icon(
+                  Icons.arrow_downward,
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
+                backgroundColor: Theme.of(context).primaryColor,
+                mini: true, // Set mini size
+              ),
+            )
+          : null,
     );
   }
 
@@ -682,7 +718,12 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
                         maxLines: 4,
                         // when user presses enter it will adapt to it
                         onFieldSubmitted: (String value) {
-                          sendMessage(value.trim());
+                          if (value.length <= 25000)
+                            sendMessage(value.trim());
+                          else {
+                            _confirmSendMessageDialog(
+                                context, value.substring(0, 24999));
+                          }
                         },
                       ),
                     ),
@@ -786,6 +827,24 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
           ],
         ),
       ),
+      floatingActionButton: _showScrollButton
+          ? Padding(
+              padding: EdgeInsets.only(
+                bottom: 70.0,
+                right: 10,
+              ),
+              child: FloatingActionButton(
+                tooltip: "Scroll to Bottom",
+                onPressed: _scrollToBottom,
+                child: Icon(
+                  Icons.arrow_downward,
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
+                backgroundColor: Theme.of(context).primaryColor,
+                mini: true, // Set mini size
+              ),
+            )
+          : null,
     );
   }
 
@@ -1006,7 +1065,7 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
   }
 
   sendMessage(String content) async {
-    if (content  != "" || picked != null || pickedFile != null) {
+    if (content != "" || picked != null || pickedFile != null) {
       final DatabaseReference messageRef = FirebaseDatabase.instance
           .ref()
           .child('messages')
@@ -1078,6 +1137,13 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
 
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _scrollToBottom();
+      });
+    } else {
+      setState(() {
+        messageController.clear();
+        messageFocusNode.requestFocus();
+        pickedFile = null;
+        picked = null;
       });
     }
   }
@@ -1174,6 +1240,65 @@ class _GroupMessagesPageState extends State<GroupMessagesPage> {
             );
           }
         });
+  }
+
+  void _confirmSendMessageDialog(BuildContext context, String value) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 12),
+          contentPadding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+          title: Text('Exceeded Message Size Limit',
+              style: TextStyle(color: Colors.black87, fontSize: 18)),
+          content: Text(
+            'There will be sent only the first 25 000 characters. Do you pretend to continue?',
+            style: TextStyle(color: Colors.black87, fontSize: 16),
+          ),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel',
+                  style: TextStyle(color: Colors.black87, fontSize: 16)),
+              onPressed: () {
+                setState(() {
+                  messageController.clear();
+                  messageFocusNode.requestFocus();
+                  pickedFile = null;
+                  picked = null;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: Text('Send',
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
+              onPressed: () async {
+                sendMessage(value.trim());
+                setState(() {
+                  messageController.clear();
+                  messageFocusNode.requestFocus();
+                  pickedFile = null;
+                  picked = null;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<Uint8List?> layoutImage() async {
