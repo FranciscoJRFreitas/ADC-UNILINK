@@ -491,65 +491,82 @@ class _DayCalendarPageState extends State<DayCalendarPage>
                     ),
                   ),
                   Expanded(
-                      child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (event.location != "0") ...[
-                        SizedBox(width: 10),
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MainScreen(
-                                        index: 10, location: event.location)));
-                          },
-                          child: Tooltip(
-                            message: "View in Maps",
-                            child: Icon(Icons.directions,
-                                size: 20, color: Style.lightBlue),
-                          ),
-                        ),
-                      ],
-                      SizedBox(width: 10),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MainScreen(index: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (event.location != "0") ...[
+                          SizedBox(width: 10),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MainScreen(
+                                          index: 10,
+                                          location: event.location)));
+                            },
+                            child: Tooltip(
+                              message: "View in Maps",
+                              child: Icon(Icons.directions,
+                                  size: 20, color: Style.lightBlue),
                             ),
-                          );
-                        },
-                        child: Tooltip(
-                          message: "View in My Events",
-                          child: Icon(Icons.event_note_rounded,
-                              size: 20, color: Style.lightBlue),
-                        ),
-                      ),
-                      if (event.groupId != null) ...[
+                          ),
+                        ],
                         SizedBox(width: 10),
                         InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MainScreen(
-                                  index: 6,
-                                  selectedGroup: event.groupId,
-                                ),
+                                builder: (context) => MainScreen(index: 15),
                               ),
                             );
                           },
                           child: Tooltip(
-                            message: "View Group Chat",
-                            child: Icon(Icons.chat,
+                            message: "View in My Events",
+                            child: Icon(Icons.event_note_rounded,
                                 size: 20, color: Style.lightBlue),
                           ),
                         ),
+                        if (event.groupId != null) ...[
+                          SizedBox(width: 10),
+                          FutureBuilder<String>(
+                            future: fetchGroupDisplayName(event.groupId!),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<String> snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return SizedBox.shrink();
+                              } else {
+                                if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MainScreen(
+                                            index: 6,
+                                            selectedGroup: event.groupId,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Tooltip(
+                                      message: "View Group Chat",
+                                      child: Icon(Icons.chat,
+                                          size: 20, color: Style.lightBlue),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ],
                       ],
-                    ],
-                  ))
+                    ),
+                  )
                 ],
               ),
               Divider(
@@ -576,11 +593,27 @@ class _DayCalendarPageState extends State<DayCalendarPage>
                               .titleMedium!
                               .copyWith(fontSize: 14),
                         ),
-                        Text(
-                          event.groupId!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        FutureBuilder<String>(
+                          future: fetchGroupDisplayName(event.groupId!),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else {
+                              if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                return Text(
+                                  snapshot.data ??
+                                      'Group Display Name not found',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -727,6 +760,20 @@ class _DayCalendarPageState extends State<DayCalendarPage>
         ),
       ),
     );
+  }
+
+  Future<String> fetchGroupDisplayName(String groupId) async {
+    DatabaseReference groupRef =
+        FirebaseDatabase.instance.ref().child('groups').child(groupId);
+    DataSnapshot snapshot = await groupRef
+        .child('DisplayName')
+        .once()
+        .then((event) => event.snapshot);
+    if (snapshot.value != null) {
+      return snapshot.value.toString();
+    } else {
+      return 'Group Display Name not found';
+    }
   }
 
   Widget getDateIcon(Event event, BuildContext context) {

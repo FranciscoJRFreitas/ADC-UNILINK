@@ -679,93 +679,78 @@ class _MyEventsPageState extends State<MyEventsPage>
   }
 
   Widget _buildEventTile(Event event, BuildContext context) {
-    DatabaseReference groupRef =
-        FirebaseDatabase.instance.ref().child('groups').child(event.groupId!);
-
-    return FutureBuilder<DataSnapshot>(
-      future:
-          groupRef.child('DisplayName').once().then((event) => event.snapshot),
-      builder: (BuildContext context, AsyncSnapshot<DataSnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // While waiting for the data to load, you can show a loading indicator or a placeholder.
-          return CircularProgressIndicator();
-        }
-
-        if (snapshot.hasError) {
-          // Handle any errors that occurred during data retrieval.
-          return Text('Error: ${snapshot.error}');
-        }
-
-        if (snapshot.data?.value != null) {
-          // Retrieve the group display name from the snapshot
-          String groupDisplayName = snapshot.data!.value.toString();
-
-          return Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              child: ListTile(
-                title: Column(
-                  children: [
-                    Row(
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: ListTile(
+          title: Column(
+            children: [
+              Row(
+                children: [
+                  getDateIcon(event, context),
+                  InkWell(
+                    child: Text(
+                      event.title,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        getDateIcon(event, context),
-                        InkWell(
-                          child: Text(
-                            event.title,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (event.location != "0") ...[
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainScreen(
-                                                index: 10,
-                                                location: event.location)));
-                                  },
-                                  child: Tooltip(
-                                    message: "View in Maps",
-                                    child: Icon(Icons.directions,
-                                        size: 20, color: Style.lightBlue),
+                        if (event.location != "0") ...[
+                          SizedBox(width: 10),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MainScreen(
+                                    index: 10,
+                                    location: event.location,
                                   ),
                                 ),
-                              ],
-                              SizedBox(width: 10),
-                              InkWell(
-                                onTap: () {
-                                  if (kIsWeb) {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainScreen(
-                                                index: 9,
-                                                date: event.startTime)));
-                                  } else {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainScreen(
-                                                index: 9,
-                                                date: event.startTime)));
-                                  }
-                                },
-                                child: Tooltip(
-                                  message: "View in Calendar",
-                                  child: Icon(Icons.perm_contact_calendar,
-                                      size: 20, color: Style.lightBlue),
-                                ),
+                              );
+                            },
+                            child: Tooltip(
+                              message: "View in Maps",
+                              child: Icon(Icons.directions,
+                                  size: 20, color: Style.lightBlue),
+                            ),
+                          ),
+                        ],
+                        SizedBox(width: 10),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MainScreen(index: 15),
                               ),
-                              if (event.groupId != null) ...[
-                                SizedBox(width: 10),
-                                InkWell(
+                            );
+                          },
+                          child: Tooltip(
+                            message: "View in My Events",
+                            child: Icon(Icons.event_note_rounded,
+                                size: 20, color: Style.lightBlue),
+                          ),
+                        ),
+                        if (event.groupId != null) ...[
+                          SizedBox(width: 10),
+                          FutureBuilder<String>(
+                            future: fetchGroupDisplayName(event.groupId!),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<String> snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return SizedBox.shrink();
+                              }
+                              if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              }
+                              if (snapshot.data != null) {
+                                return InkWell(
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -782,56 +767,45 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     child: Icon(Icons.chat,
                                         size: 20, color: Style.lightBlue),
                                   ),
-                                ),
-                              ] else ...[
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return EventDetailsPage(event: event);
-                                        });
-                                  },
-                                  child: Tooltip(
-                                    message: "Edit Event",
-                                    child: Icon(Icons.edit,
-                                        size: 20, color: Style.lightBlue),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    _removeEventPopUpDialogWeb(context, event);
-                                  },
-                                  child: Tooltip(
-                                    message: "Remove Event",
-                                    child: Icon(Icons.delete_forever,
-                                        size: 20, color: Style.lightBlue),
-                                  ),
-                                ),
-                              ],
-                            ],
+                                );
+                              }
+                              return SizedBox.shrink();
+                            },
                           ),
-                        )
+                        ],
                       ],
                     ),
-                    Divider(
-                      color: Style.lightBlue,
-                      thickness: 1,
-                    ),
-                  ],
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ],
+              ),
+              Divider(
+                color: Style.lightBlue,
+                thickness: 1,
+              ),
+            ],
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (event.groupId != null) ...[
+                SizedBox(height: 8),
+                Row(
                   children: [
-                    if (event.groupId != null) ...[
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.group, size: 20, color: Style.lightBlue),
-                          SizedBox(width: 5),
-                          Row(
+                    Icon(Icons.group, size: 20, color: Style.lightBlue),
+                    SizedBox(width: 5),
+                    FutureBuilder<String>(
+                      future: fetchGroupDisplayName(event.groupId!),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        if (snapshot.data != null) {
+                          return Row(
                             children: [
                               Text(
                                 'Group: ',
@@ -841,460 +815,164 @@ class _MyEventsPageState extends State<MyEventsPage>
                                     .copyWith(fontSize: 14),
                               ),
                               Text(
-                                groupDisplayName,
+                                snapshot.data!,
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
-                          ),
-                        ],
-                      ),
-                    ],
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.type_specimen,
-                            size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Row(
-                          children: [
-                            Text(
-                              'Type: ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .copyWith(fontSize: 14),
-                            ),
-                            Text(
-                              getEventTypeString(event.type),
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.description,
-                            size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Text(
-                          'Description: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
-                        Flexible(
-                          child: Text(
-                            event.description,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    if (event.location != '0') ...[
-                      Row(
-                        children: [
-                          Icon(Icons.place, size: 20, color: Style.lightBlue),
-                          SizedBox(width: 5),
-                          Text(
-                            'Location: ',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontSize: 14),
-                          ),
-                          FutureBuilder<String>(
-                            future: getPlaceInLocations(event.location!),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<String> snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return SizedBox.shrink();
-                              } else {
-                                if (snapshot.hasError)
-                                  return Text('Error: ${snapshot.error}');
-                                else
-                                  return snapshot.data == ""
-                                      ? Text(
-                                          "Custom Location",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        )
-                                      : Text(
-                                          snapshot.data!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                    ],
-                    Row(
-                      children: [
-                        Icon(Icons.schedule, size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Text(
-                          'Start: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
-                        Flexible(
-                          child: Text(
-                            '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.schedule, size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Text(
-                          'End: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
-                        Flexible(
-                          child: Text(
-                            '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                        return SizedBox.shrink();
+                      },
                     ),
                   ],
                 ),
+              ],
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.type_specimen, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Row(
+                    children: [
+                      Text(
+                        'Type: ',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(fontSize: 14),
+                      ),
+                      Text(
+                        getEventTypeString(event.type),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-          );
-        } else {
-          // Handle case when the group display name is not found
-          return Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              child: ListTile(
-                title: Column(
-                  children: [
-                    Row(
-                      children: [
-                        getDateIcon(event, context),
-                        InkWell(
-                          child: Text(
-                            event.title,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (event.location != "0") ...[
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainScreen(
-                                                index: 10,
-                                                location: event.location)));
-                                  },
-                                  child: Tooltip(
-                                    message: "View in Maps",
-                                    child: Icon(Icons.directions,
-                                        size: 20, color: Style.lightBlue),
-                                  ),
-                                ),
-                              ],
-                              SizedBox(width: 10),
-                              InkWell(
-                                onTap: () {
-                                  if (kIsWeb) {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainScreen(
-                                                index: 9,
-                                                date: event.startTime)));
-                                  } else {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainScreen(
-                                                index: 9,
-                                                date: event.startTime)));
-                                  }
-                                },
-                                child: Tooltip(
-                                  message: "View in Calendar",
-                                  child: Icon(Icons.perm_contact_calendar,
-                                      size: 20, color: Style.lightBlue),
-                                ),
-                              ),
-                              if (event.groupId != null) ...[
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => MainScreen(
-                                          index: 6,
-                                          selectedGroup: event.groupId,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Tooltip(
-                                    message: "View Group Chat",
-                                    child: Icon(Icons.chat,
-                                        size: 20, color: Style.lightBlue),
-                                  ),
-                                ),
-                              ] else ...[
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return EventDetailsPage(event: event);
-                                        });
-                                  },
-                                  child: Tooltip(
-                                    message: "Edit Event",
-                                    child: Icon(Icons.edit,
-                                        size: 20, color: Style.lightBlue),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    _removeEventPopUpDialogWeb(context, event);
-                                  },
-                                  child: Tooltip(
-                                    message: "Remove Event",
-                                    child: Icon(Icons.delete_forever,
-                                        size: 20, color: Style.lightBlue),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        )
-                      ],
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.description, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Text(
+                    'Description: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 14),
+                  ),
+                  Flexible(
+                    child: Text(
+                      event.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    Divider(
-                      color: Style.lightBlue,
-                      thickness: 1,
-                    ),
-                  ],
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (event.groupId != null) ...[
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.group, size: 20, color: Style.lightBlue),
-                          SizedBox(width: 5),
-                          Row(
-                            children: [
-                              Text(
-                                'Group: ',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(fontSize: 14),
-                              ),
-                              Text(
-                                'Group Display Name not found',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.type_specimen,
-                            size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Row(
-                          children: [
-                            Text(
-                              'Type: ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .copyWith(fontSize: 14),
-                            ),
-                            Text(
-                              getEventTypeString(event.type),
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.description,
-                            size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Text(
-                          'Description: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
-                        Flexible(
-                          child: Text(
-                            event.description,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    if (event.location != '0') ...[
-                      Row(
-                        children: [
-                          Icon(Icons.place, size: 20, color: Style.lightBlue),
-                          SizedBox(width: 5),
-                          Text(
-                            'Location: ',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontSize: 14),
-                          ),
-                          FutureBuilder<String>(
-                            future: getPlaceInLocations(event.location!),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<String> snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return SizedBox.shrink();
-                              } else {
-                                if (snapshot.hasError)
-                                  return Text('Error: ${snapshot.error}');
-                                else
-                                  return snapshot.data == ""
-                                      ? Text(
-                                          "Custom Location",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        )
-                                      : Text(
-                                          snapshot.data!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                    ],
-                    Row(
-                      children: [
-                        Icon(Icons.schedule, size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Text(
-                          'Start: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
-                        Flexible(
-                          child: Text(
-                            '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.schedule, size: 20, color: Style.lightBlue),
-                        SizedBox(width: 5),
-                        Text(
-                          'End: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
-                        Flexible(
-                          child: Text(
-                            '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          );
-        }
-      },
+              SizedBox(height: 8),
+              if (event.location != '0') ...[
+                Row(
+                  children: [
+                    Icon(Icons.place, size: 20, color: Style.lightBlue),
+                    SizedBox(width: 5),
+                    Text(
+                      'Location: ',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(fontSize: 14),
+                    ),
+                    FutureBuilder<String>(
+                      future: getPlaceInLocations(event.location!),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SizedBox.shrink();
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        return Text(
+                          snapshot.data ?? "Custom Location",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+              ],
+              Row(
+                children: [
+                  Icon(Icons.schedule, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Text(
+                    'Start: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 14),
+                  ),
+                  Flexible(
+                    child: Text(
+                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.schedule, size: 20, color: Style.lightBlue),
+                  SizedBox(width: 5),
+                  Text(
+                    'End: ',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontSize: 14),
+                  ),
+                  Flexible(
+                    child: Text(
+                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
+
+  Future<String> fetchGroupDisplayName(String groupId) async {
+    DatabaseReference groupRef =
+        FirebaseDatabase.instance.ref().child('groups').child(groupId);
+    DataSnapshot snapshot = await groupRef
+        .child('DisplayName')
+        .once()
+        .then((event) => event.snapshot);
+    if (snapshot.value != null) {
+      return snapshot.value.toString();
+    } else {
+      return 'Group Display Name not found';
+    }
   }
 
   Widget getDateIcon(Event event, BuildContext context) {

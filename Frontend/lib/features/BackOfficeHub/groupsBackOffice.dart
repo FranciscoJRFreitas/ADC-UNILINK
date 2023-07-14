@@ -48,7 +48,7 @@ class _GroupPageState extends State<GroupPage> {
         DatabaseReference membersRef = FirebaseDatabase.instance
             .ref()
             .child('members')
-            .child(groupData["DisplayName"]);
+            .child(event1.snapshot.key!);
 
         membersRef.once().then((event2) {
           setState(() {
