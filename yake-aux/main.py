@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # import CORS
 import yake
 
 app = Flask(__name__)
+CORS(app, origins="https://unilink23.oa.r.appspot.com")
 
 def extractKeywords(text):
     language = "pt"

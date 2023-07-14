@@ -103,11 +103,11 @@ class _SplashPageState extends State<SplashPage>
                               kDarkTheme
                           ? 'assets/icon/ICON_UNILINK-03.png'
                           : 'assets/icon/ICON_UNILINK-03.png',*/
-                  'assets/icon/3dgifmaker67696.gif',
+                  'assets/icon/UniHub.gif',
                   width: 300,
                   height: 300,
                   //fit: BoxFit.cover,
-                  repeat: ImageRepeat.repeat,
+                  repeat: ImageRepeat.noRepeat,
                 ),
               ),
             );
