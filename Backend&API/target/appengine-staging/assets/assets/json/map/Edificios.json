@@ -1,0 +1,30 @@
+{
+"type": "FeatureCollection",
+"Name": "Edifícios",
+"crs": { "type": "Name", "properties": { "Name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2055559,38.6612857,0]},"properties":{"Name":"Edifício I","description":"- Direção\n- Administração\n- Conselho Científico\n- Conselho Pedagógico\n- Divisão Académica\n- Divisão de Recursos Financeiros\n- Divisão de Recursos Humanos\n- Divisão de Apoio à Formação Avançada\n- Divisão de Planeamento e Gestão da Qualidade\n- Gabinete de Apoio à Direção / Unidade de Alumni e Fundraising\n- Gabinete de Apoio à Direção / Assessoria Jurídica\n- Gabinete de Apoio à Direção / Unidade de Contratos\n- Departamento de Física"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2034692,38.6608501,0]},"properties":{"Name":"Edifício II","description":"- Departamento de Ciência dos Materiais\n- Departamento de Informática\n- NOVA LINCS - NOVA Laboratory for Computer Science and Informatics"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2072349,38.6631581,0]},"properties":{"Name":"Edifício III","description":"- Divisão de Infraestruturas e Informáticas\n- Gabinete de Apoio à Direção / Unidade de Apoio à Execução Pedagógica e Formação Contínua\n- Gabinete de Apoio ao Estudante e ao Diplomado/Aconselhamento Vocacional e Psicológico\n- Divisão de Apoio Geral"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2072082,38.6628105,0]},"properties":{"Name":"Edifício IV","description":"- FabLab\n- Sala de Actos \n- Salas de Aulas"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2068809,38.6633508,0]},"properties":{"Name":"Edifício V","description":"- Auditório Caixa Geral de Depósitos"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2030025,38.6606155,0]},"properties":{"Name":"Edifício VI","description":"- Madan Parque"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2058295,38.6606742,0]},"properties":{"Name":"Edifício VII","description":"- Complexo Pedagógico\n- Departamento de Matemática\n- Departamento de Ciências Sociais Aplicadas\n- Unidade de Investigação e Desenvolvimento\n- UT Austin / Portugal"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2066288,38.6598615,0]},"properties":{"Name":"Edifício VIII","description":"- Departamento de Engenharia Mecânica e Industrial"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2071438,38.6601547,0]},"properties":{"Name":"Edifício IX","description":"- Departamento de Engenharia Civil\n- Departamento de Ciências da Terra"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2048907,38.6605275,0]},"properties":{"Name":"Edifício X","description":"- Departamento de Engenharia Eletrotécnica e de Computadores"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2066261,38.6629445,0]},"properties":{"Name":"Edifício XI","description":"- Laboratório de e-Learning"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2077392,38.6623455,0]},"properties":{"Name":"Edifício Departamental","description":"- Departamento de Química\n- Departamento de Ciências e Engenharia do Ambiente\n- Departamento de Conservação e Restauro\n- Departamento de Ciências da Vida\n- Departamento de Ciências e Tecnologia da Biomassa"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2055774,38.6627057,0]},"properties":{"Name":"Biblioteca","description":"- Divisão de Documentação e Cultura\n- Gabinete de Apoio à Direção/ Unidade de Apoio a Projetos e Relações Exteriores \n- Gabinete de Apoio à Direção / Unidade de Promoção de Investigação e Inovação"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2048961,38.661558,0]},"properties":{"Name":"Cantina","description":"- Cantina\n- Serviços de Ação Social\n- Associação dos Estudantes\n- Reprografia \"Duplix\""}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.206028,38.6623036,0]},"properties":{"Name":"Centro de Excelência do Ambiente","description":"- Divisão de Acompanhamento de Parcerias\n- Divisão de Apoio Técnico/ Secção de Manutenção e Serviços Gerais\n- Divisão de Apoio Técnico/ Secção de Planeamento Físico e Ambiental\n- Divisão de Apoio Técnico/ Secção de Segurança e Saúde no Trabalho\n- Divisão de Comunicação e Relações Exteriores\n- Divisão de Eventos e Apoio ao Estudante e ao Diplomado\n- NOVA.ID.FCT"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2068353,38.661692,0]},"properties":{"Name":"Hangar I","description":"- Associação de Estudantes"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2066985,38.6619015,0]},"properties":{"Name":"Hangar II","description":"- Secção de Economato"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2065322,38.6620774,0]},"properties":{"Name":"Hangar III","description":"- Vicarte - Centro do Vidro e Cerâmica para as Artes"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2040861,38.6601212,0]},"properties":{"Name":"UNINOVA I"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2036891,38.659828,0]},"properties":{"Name":"UNINOVA II"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2034316,38.6615203,0]},"properties":{"Name":"NOVA LINCS","description":"NOVA Laboratory for Computer Science and Informatics"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2033994,38.6594342,0]},"properties":{"Name":"CENIMAT"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2042309,38.662023,0]},"properties":{"Name":"Creche"}}
+]
+}
