@@ -38,6 +38,7 @@ class _MyMapState extends State<MyMap> {
   var zoom = 17.0;
   var tilt = 30.0;
   String myMarkerLocation = "";
+  double zoomIconFactor = 1.0;
 
   _MyMapState(String? markerLocation) {
     if (markerLocation != null && markerLocation != "") {
@@ -56,6 +57,7 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> parkMarkers = Set();
   Set<Marker> portMarkers = Set();
   Set<Marker> servMarkers = Set();
+  Set<Marker> transpMarkers = Set();
   Map<PolylineId, Polyline> polylines = {};
   //Set<Marker> currentPositionMarkers = Set();
 
@@ -67,7 +69,8 @@ class _MyMapState extends State<MyMap> {
     'Restauration',
     'Parking',
     'Gates',
-    'Services'
+    'Services',
+    'Transports'
   ];
 
   String _mapStyle = '';
@@ -117,40 +120,11 @@ class _MyMapState extends State<MyMap> {
         markerId: MarkerId(name),
         position: location,
         onTap: () {
-          if (kIsWeb) {
-            showMarkerInfoWindow(MarkerId(name), name, '');
-          } else {
-            showMarkerInfoWindowMobile(MarkerId(name), name, '');
-          }
+          showMarkerInfoWindow(MarkerId(name), name, '');
         }));
   }
 
-  /*void updateCurrentPositionMarker(loc.LocationData newLocation) async {
-    final ImageConfiguration imageConfiguration = createLocalImageConfiguration(
-        context,
-        size: Size.square(48)); // adjust the size as needed
-    final BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
-        imageConfiguration, 'assets/images/locationArrow.png');
-
-    setState(() {
-      currentPositionMarkers.clear();
-      currentPositionMarkers.add(
-        Marker(
-          markerId: MarkerId('current_position'),
-          position: LatLng(newLocation.latitude!, newLocation.longitude!),
-          icon: customIcon,
-          infoWindow: InfoWindow(
-            title: 'Current Position',
-          ),
-        ),
-      );
-      markers.addAll(currentPositionMarkers);
-    });
-  }*/
-
   getDirections(double? lat, double? long) async {
-    //print("$currentLocation.latitude" + " " + "$currentLocation.longitude");
-    //print(distance);
     if (mapController != null && isLocked) {
       mapController!
           .moveCamera(CameraUpdate.newLatLngZoom(cameraposition, zoom));
@@ -267,7 +241,7 @@ class _MyMapState extends State<MyMap> {
   void updateMarkers() {
     markers.clear();
 
-    if (myMarkerLocation != null && myMarkerLocation != "") {
+    if (myMarkerLocation != "") {
       addEventMarker();
     }
 
@@ -286,6 +260,9 @@ class _MyMapState extends State<MyMap> {
     if (selectedDropdownItems.contains('Services')) {
       markers.addAll(servMarkers);
     }
+    if (selectedDropdownItems.contains('Transports')) {
+      markers.addAll(transpMarkers);
+    }
   }
 
   @override
@@ -296,6 +273,9 @@ class _MyMapState extends State<MyMap> {
           return Stack(
             children: [
               GoogleMap(
+                onCameraMove: (CameraPosition position) async {
+                  zoomChanged();
+                },
                 onMapCreated: (GoogleMapController controller) {
                   controller.setMapStyle(_mapStyle);
                   mapController =
@@ -317,79 +297,179 @@ class _MyMapState extends State<MyMap> {
                 top: 10.0,
                 left: 10.0,
                 child: Container(
-                  alignment: Alignment.topRight,
-                  child: ElevatedButton(
-                    onPressed: () => showOptionsBottomSheet(context),
-                    child: Text('Map Options'),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(25.0),
+                    boxShadow: [
+                      // shadow
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.75),
+                        spreadRadius: 1,
+                        blurRadius: 1.5,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: IconButton(
+                      icon: Icon(Icons.layers),
+                      color: Colors.black,
+                      onPressed: () => showOptionsBottomSheet(context),
+                      tooltip: 'Map Options',
+                    ),
                   ),
                 ),
               ),
               Positioned(
                 top: 10.0,
                 right: 10.0,
-                child: Switch(
-                  value: isSattelite,
-                  onChanged: (value) {
-                    setState(() {
-                      isSattelite = value;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        duration: Duration(milliseconds: 750),
-                        content: Text(
-                          isSattelite
-                              ? 'Switched to Satellite mode'
-                              : 'Switched to Normal mode',
-                          style: DefaultTextStyle.of(context)
-                              .style
-                              .copyWith(color: Colors.white),
-                        ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(25.0),
+                    boxShadow: [
+                      // shadow
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.75),
+                        spreadRadius: 1,
+                        blurRadius: 1.5,
+                        offset: Offset(0, 1),
                       ),
-                    );
-                  },
-                  activeTrackColor:
-                      Theme.of(context).primaryColor.withOpacity(0.5),
-                  activeColor: Theme.of(context).primaryColor,
-                ),
-              ),
-              Positioned(
-                bottom: 20.0,
-                right: 20.0,
-                child: Visibility(
-                  visible: isDirections,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        isDirections = false;
-                        polylines = {};
-                      });
-                    },
-                    child: Text('Stop giving directions'),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Switch(
+                      value: isSattelite,
+                      onChanged: (value) {
+                        setState(() {
+                          isSattelite = value;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            duration: Duration(milliseconds: 750),
+                            content: Text(
+                              isSattelite
+                                  ? 'Switched to Satellite mode'
+                                  : 'Switched to Normal mode',
+                              style: DefaultTextStyle.of(context)
+                                  .style
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ),
+                        );
+                      },
+                      activeTrackColor:
+                          Theme.of(context).primaryColor.withOpacity(0.5),
+                      activeColor: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
               ),
+              if (isDirections)
+                Positioned(
+                  bottom: 22.5,
+                  left: 5.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(25.0),
+                      boxShadow: [
+                        // shadow
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.75),
+                          spreadRadius: 1,
+                          blurRadius: 1.5,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: IconButton(
+                        icon: Icon(Icons.close), // cross icon
+                        color: Colors.black,
+                        onPressed: () {
+                          setState(() {
+                            if (isLocked) {
+                              cameraposition = center;
+                              isLocked = false;
+                              zoom = 17.0;
+                              tilt = 0.0;
+                              mapController!.moveCamera(
+                                  CameraUpdate.newCameraPosition(CameraPosition(
+                                      target: cameraposition,
+                                      zoom: zoom,
+                                      bearing: 0.0,
+                                      tilt: tilt)));
+                            }
+                            isDirections = false;
+                            polylines = {};
+                          });
+                        },
+                        tooltip: 'Close Directions',
+                      ),
+                    ),
+                  ),
+                ),
               Positioned(
-                bottom:
-                    60.0, // Adjust the offset to position the buttons as desired
-                right: 20.0,
+                bottom: 22.5,
+                right: 5.0,
                 child: Visibility(
                   visible: isDirections,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (!isLocked) {
-                          isLocked = true;
-                          zoom = 19.5;
-                          tilt = 30.0;
-                        } else {
-                          isLocked = false;
-                          zoom = 17.0;
-                          tilt = 0.0;
-                        }
-                        polylines = {};
-                      });
-                    },
-                    child: Text(isLocked ? "Unlock Camera" : "Lock Camera"),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white
+                          .withOpacity(0.7), // semi-transparent white
+                      borderRadius:
+                          BorderRadius.circular(25.0), // round corners
+                      boxShadow: [
+                        // shadow
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.75),
+                          spreadRadius: 1,
+                          blurRadius: 1.5,
+                          offset: Offset(0, 1), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.all(8.0), // padding for the icon
+                      child: IconButton(
+                        icon: Icon(isLocked
+                            ? Icons.stop
+                            : distance >= 0.75
+                                ? Icons.drive_eta
+                                : Icons.directions_walk),
+                        color: Colors.black,
+                        onPressed: () {
+                          setState(() {
+                            if (!isLocked) {
+                              isLocked = true;
+                              zoom = 19.5;
+                              tilt = 30.0;
+                            } else {
+                              cameraposition = center;
+                              isLocked = false;
+                              zoom = 17.0;
+                              tilt = 0.0;
+                              mapController!.moveCamera(
+                                  CameraUpdate.newCameraPosition(CameraPosition(
+                                      target: cameraposition,
+                                      zoom: zoom,
+                                      bearing: 0.0,
+                                      tilt: tilt)));
+                            }
+                            polylines = {};
+                          });
+                        },
+                        tooltip: isLocked
+                            ? 'Exit Navigation Mode'
+                            : 'Enter Navigation Mode',
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -404,101 +484,88 @@ class _MyMapState extends State<MyMap> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ...dropdownItems.map((item) {
-                return ListTile(
-                  onTap: () {
-                    setState(() {
-                      if (selectedDropdownItems.contains(item)) {
-                        selectedDropdownItems.remove(item);
-                      } else {
-                        selectedDropdownItems.add(item);
-                      }
-                    });
-                    updateMarkers();
-                  },
-                  leading: Icon(
-                      item == "Campus"
-                          ? Icons.school
-                          : item == "Buildings"
-                              ? Icons.location_city
-                              : item == "Restauration"
-                                  ? Icons.restaurant
-                                  : item == "Building"
-                                      ? Icons.location_city
-                                      : item == "Parking"
-                                          ? Icons.local_parking
-                                          : item == "Gates"
-                                              ? Icons.sensor_door_outlined
-                                              : item == "Services"
-                                                  ? Icons.support_agent
-                                                  : Icons.abc,
-                      color: Colors.grey),
-                  title: Text(
-                    item,
-                  ),
-                );
-              }).toList(),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                title: Text('Done'),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter modalSheetSetState) {
+            return Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...dropdownItems.map((item) {
+                    bool isSelected = selectedDropdownItems.contains(item);
+                    return ListTile(
+                      onTap: () {
+                        modalSheetSetState(() {
+                          if (isSelected) {
+                            selectedDropdownItems.remove(item);
+                          } else {
+                            selectedDropdownItems.add(item);
+                          }
+                        });
+                        // setState call in main widget tree to update map markers
+                        setState(() {
+                          updateMarkers();
+                        });
+                      },
+                      leading: Icon(
+                          item == "Campus"
+                              ? Icons.school
+                              : item == "Buildings"
+                                  ? Icons.location_city
+                                  : item == "Restauration"
+                                      ? Icons.restaurant
+                                      : item == "Building"
+                                          ? Icons.location_city
+                                          : item == "Parking"
+                                              ? Icons.local_parking
+                                              : item == "Gates"
+                                                  ? Icons.sensor_door_outlined
+                                                  : item == "Services"
+                                                      ? Icons.support_agent
+                                                      : item == "Transports"
+                                                          ? Icons.directions_bus
+                                                          : Icons.abc,
+                          color: isSelected
+                              ? selectedColor(context)
+                              : unselectedColor(context)),
+                      title: Text(
+                        item,
+                        style: TextStyle(
+                            color: isSelected
+                                ? selectedColor(context)
+                                : unselectedColor(context)),
+                      ),
+                    );
+                  }).toList(),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
   void showMarkerInfoWindow(MarkerId markerId, String name, String desc) {
-    isPopupOpen = true;
-    final String title = name;
-    final String snippet = desc;
-
-    showDialog(
-      context: context,
-      barrierDismissible:
-          false, // Prevent dismissing the popup by tapping outside
-      builder: (BuildContext context) {
-        return Stack(
-          children: [
-            ModalBarrier(
-              dismissible: false,
-              color: Colors.transparent,
-            ),
-            AlertDialog(
-              title: Text(title!),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(snippet!),
-                  ElevatedButton(
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await Future.delayed(Duration(milliseconds: 50));
-                      isPopupOpen = false;
-                    },
-                    child: Text('Close'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showMarkerInfoWindowMobile(MarkerId markerId, String name, String desc) {
     final Marker tappedMarker =
         markers.firstWhere((marker) => marker.markerId == markerId);
     final String title = name;
     final String snippet = desc;
+
+    // Count the number of '-' in the snippet
+    int dashCount = snippet.split('-').length - 1;
+
+    // Determine the initial child size based on dashCount
+    double initialChildSize;
+    if (dashCount == 0) {
+      initialChildSize = 0.2;
+    } else {
+      // Increase the size by 0.05 for each dash, up to a maximum of 0.5
+      initialChildSize = 0.2 + 0.05 * dashCount;
+      if (initialChildSize > 0.5) {
+        initialChildSize = 0.5;
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -506,80 +573,106 @@ class _MyMapState extends State<MyMap> {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.topCenter,
-                child: IconButton(
-                  icon: Icon(Icons.minimize),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+        return DraggableScrollableSheet(
+          expand: false,
+          minChildSize: 0.2,
+          initialChildSize: initialChildSize,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return Container(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Stack(
                 children: [
-                  SizedBox(height: 40),
                   Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        title!,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
+                    alignment: Alignment.topCenter,
+                    child: IconButton(
+                      icon: Icon(Icons.minimize),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
                     ),
                   ),
-                  SizedBox(height: 10),
-                  if (!kIsWeb)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            if (isDirections) {
-                              setState(() {
-                                isDirections = false;
-                                polylines = {};
-                              });
-                              await Future.delayed(Duration(seconds: 1));
-                            }
-                            isDirections = true;
-                            getDirections(tappedMarker.position.latitude,
-                                tappedMarker.position.longitude);
-                            Navigator.of(context).pop();
-                          },
-                          icon: Icon(Icons.directions_walk, color: Colors.blue),
-                          label: Text('Get Directions',
-                              style: TextStyle(color: Colors.blue)),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.white, // Background color
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(20), // Border radius
+                  ListView.builder(
+                    controller: scrollController,
+                    itemCount: 1,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 40),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                  SizedBox(height: 18),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: snippet.length > 10 ? 8.0 : 2.0,
-                    ),
-                    child: Text(snippet!,
-                        style: Theme.of(context).textTheme.bodySmall),
+                          SizedBox(height: 10),
+                          if (!kIsWeb)
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    if (isDirections) {
+                                      setState(() {
+                                        isDirections = false;
+                                        polylines = {};
+                                      });
+                                      await Future.delayed(
+                                          Duration(seconds: 1));
+                                    }
+                                    isDirections = true;
+                                    getDirections(
+                                        tappedMarker.position.latitude,
+                                        tappedMarker.position.longitude);
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: Icon(
+                                      distance >= 0.75
+                                          ? Icons.drive_eta
+                                          : Icons.directions_walk,
+                                      color: Colors.blue),
+                                  label: Text('Get Directions',
+                                      style: TextStyle(color: Colors.blue)),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.white, // Background color
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          20), // Border radius
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          SizedBox(height: 18),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: snippet.length > 10 ? 8.0 : 2.0,
+                            ),
+                            child: Text(snippet,
+                                style: kIsWeb
+                                    ? Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(fontSize: 18)
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(fontSize: 16)),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -630,14 +723,27 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
-  Future<Uint8List> getImages(String path, int width) async {
+  Future<Uint8List> getImages(String path, int size) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetHeight: width);
+        targetWidth: (size * zoomIconFactor.toInt()));
     ui.FrameInfo fi = await codec.getNextFrame();
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
+  }
+
+  void zoomChanged() async {
+    double zoomLevel = await mapController!.getZoomLevel();
+
+    if (zoomLevel <= 14.0) {
+      zoomIconFactor = 0.333;
+    } else if (zoomLevel <= 17.0) {
+      zoomIconFactor = 0.666;
+    } else {
+      zoomIconFactor = 10.999;
+    }
+    //loadMarkersFromJson();
   }
 
   loadMarkersFromJson() async {
@@ -653,6 +759,8 @@ class _MyMapState extends State<MyMap> {
         await rootBundle.loadString('assets/json/map/Portarias.json');
     String servicesJson =
         await rootBundle.loadString('assets/json/map/Servicos.json');
+    String transportsJson =
+        await rootBundle.loadString('assets/json/map/Transportes.json');
 
     List<dynamic> campusData = jsonDecode(campusJson)['features'];
     List<dynamic> buildingsData = jsonDecode(buildingsJson)['features'];
@@ -660,16 +768,19 @@ class _MyMapState extends State<MyMap> {
     List<dynamic> parkingLotsData = jsonDecode(parkingLotsJson)['features'];
     List<dynamic> gatesData = jsonDecode(gatesJson)['features'];
     List<dynamic> servicesData = jsonDecode(servicesJson)['features'];
+    List<dynamic> transportsData = jsonDecode(transportsJson)['features'];
 
     List<LatLng> polygonPoints = [];
 
     final Uint8List buildings =
-        await getImages('assets/icon/building.png', 130);
-    final Uint8List gates = await getImages('assets/icon/gates.png', 130);
-    final Uint8List parking = await getImages('assets/icon/Parking.png', 130);
-    final Uint8List service = await getImages('assets/icon/service.png', 130);
+        await getImages('assets/icon/building.png', kIsWeb ? 40 : 130);
+    final Uint8List gates = await getImages('assets/icon/gates.png', kIsWeb ? 40 : 130);
+    final Uint8List parking = await getImages('assets/icon/Parking.png', kIsWeb ? 40 : 130);
+    final Uint8List service = await getImages('assets/icon/service.png', kIsWeb ? 40 : 130);
     final Uint8List restaurant =
-        await getImages('assets/icon/restaurant.png', 130);
+        await getImages('assets/icon/restaurant.png', kIsWeb ? 40 : 130);
+    final Uint8List transports = await getImages('assets/icon/bus.png', kIsWeb ? 40 : 130);
+
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
       double latitude = coordinates[1];
       double longitude = coordinates[0];
@@ -698,13 +809,8 @@ class _MyMapState extends State<MyMap> {
             position: latLng,
             onTap: () {
               if (!isPopupOpen) {
-                if (kIsWeb) {
-                  showMarkerInfoWindow(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                } else {
-                  showMarkerInfoWindowMobile(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                }
+                showMarkerInfoWindow(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
               }
             }),
         //icon: BitmapDescriptor.fromAssetImage(configuration, assetName),
@@ -723,13 +829,8 @@ class _MyMapState extends State<MyMap> {
           position: latLng,
           onTap: () {
             if (!isPopupOpen) {
-              if (kIsWeb) {
-                showMarkerInfoWindow(MarkerId(name), name,
-                    feature['properties']['description'] ?? '');
-              } else {
-                showMarkerInfoWindowMobile(MarkerId(name), name,
-                    feature['properties']['description'] ?? '');
-              }
+              showMarkerInfoWindow(MarkerId(name), name,
+                  feature['properties']['description'] ?? '');
             }
           }));
     }
@@ -746,13 +847,8 @@ class _MyMapState extends State<MyMap> {
             position: latLng,
             onTap: () {
               if (!isPopupOpen) {
-                if (kIsWeb) {
-                  showMarkerInfoWindow(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                } else {
-                  showMarkerInfoWindowMobile(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                }
+                showMarkerInfoWindow(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
               }
             }),
       );
@@ -770,13 +866,8 @@ class _MyMapState extends State<MyMap> {
             icon: BitmapDescriptor.fromBytes(gates),
             onTap: () {
               if (!isPopupOpen) {
-                if (kIsWeb) {
-                  showMarkerInfoWindow(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                } else {
-                  showMarkerInfoWindowMobile(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                }
+                showMarkerInfoWindow(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
               }
             }),
       );
@@ -794,13 +885,27 @@ class _MyMapState extends State<MyMap> {
             position: latLng,
             onTap: () {
               if (!isPopupOpen) {
-                if (kIsWeb) {
-                  showMarkerInfoWindow(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                } else {
-                  showMarkerInfoWindowMobile(MarkerId(name), name,
-                      feature['properties']['description'] ?? '');
-                }
+                showMarkerInfoWindow(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
+              }
+            }),
+      );
+    }
+
+    for (var feature in transportsData) {
+      String name = feature['properties']['Name'];
+      List<dynamic> coordinates = feature['geometry']['coordinates'];
+      LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+      transpMarkers.add(
+        Marker(
+            markerId: MarkerId(name),
+            icon: BitmapDescriptor.fromBytes(transports),
+            position: latLng,
+            onTap: () {
+              if (!isPopupOpen) {
+                showMarkerInfoWindow(MarkerId(name), name,
+                    feature['properties']['description'] ?? '');
               }
             }),
       );

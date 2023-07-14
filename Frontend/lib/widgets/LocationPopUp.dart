@@ -26,6 +26,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
   late Set<Marker> parkMarkers = Set();
   late Set<Marker> portMarkers = Set();
   late Set<Marker> servMarkers = Set();
+  late Set<Marker> transpMarkers = Set();
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
     parkMarkers = await loadParkLocationsFromJson();
     portMarkers = await loadPortLocationsFromJson();
     servMarkers = await loadServLocationsFromJson();
+    transpMarkers = await loadTranspLocationsFromJson();
   }
 
   @override
@@ -103,7 +105,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                                   .copyWith(fontSize: 20),
                             ),
                             onTap: () => setState(() {
-                              selectedPlace = 'Building';
+                              selectedPlace = 'Buildings';
                             }),
                           ),
                           ListTile(
@@ -115,7 +117,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                                   .copyWith(fontSize: 20),
                             ),
                             onTap: () => setState(() {
-                              selectedPlace = 'Restaurant';
+                              selectedPlace = 'Restaurants';
                             }),
                           ),
                           ListTile(
@@ -127,7 +129,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                                   .copyWith(fontSize: 20),
                             ),
                             onTap: () => setState(() {
-                              selectedPlace = 'Park';
+                              selectedPlace = 'Parking Lots';
                             }),
                           ),
                           ListTile(
@@ -139,7 +141,7 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                                   .copyWith(fontSize: 20),
                             ),
                             onTap: () => setState(() {
-                              selectedPlace = 'Port';
+                              selectedPlace = 'Gates';
                             }),
                           ),
                           ListTile(
@@ -151,7 +153,19 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
                                   .copyWith(fontSize: 20),
                             ),
                             onTap: () => setState(() {
-                              selectedPlace = 'Service';
+                              selectedPlace = 'Services';
+                            }),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Transports',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontSize: 20),
+                            ),
+                            onTap: () => setState(() {
+                              selectedPlace = 'Transports';
                             }),
                           ),
                         ]
@@ -196,16 +210,18 @@ class _EventLocationPopUpState extends State<EventLocationPopUp> {
 
   Set<Marker> getMarkersForPlace(String place) {
     switch (place) {
-      case 'Building':
+      case 'Buildings':
         return edMarkers;
-      case 'Restaurant':
+      case 'Restaurants':
         return restMarkers;
-      case 'Park':
+      case 'Parking Lots':
         return parkMarkers;
-      case 'Port':
+      case 'Gates':
         return portMarkers;
-      case 'Service':
+      case 'Services':
         return servMarkers;
+        case 'Transports':
+        return transpMarkers;
       default:
         return {};
     }

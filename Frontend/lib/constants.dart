@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'domain/ThemeNotifier.dart';
 
 //Logic and URLS
 const kExtractKeywordsUrl = 'https://yakeaux.oa.r.appspot.com/extract';
@@ -215,6 +218,24 @@ final ThemeData kDarkTheme = ThemeData(
 
   // customize other properties as needed
 );
+
+// Dynamic color
+Color logoutColor(BuildContext context) {
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Colors.red : Color(0xFFFFDAB9);
+}
+
+Color loginColor(BuildContext context) {
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Colors.green : Color.fromARGB(185, 206, 32, 203);
+}
+
+Color selectedColor(BuildContext context) {
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Style.darkBlue : Style.lightBlue;
+}
+
+Color unselectedColor(BuildContext context) {
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Colors.grey : Colors.black;
+}
+
 
 class Style {
   static Color white = Colors.white;

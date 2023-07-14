@@ -128,6 +128,30 @@ Future<Set<Marker>> loadServLocationsFromJson() async {
   return servMarkers;
 }
 
+Future<Set<Marker>> loadTranspLocationsFromJson() async {
+  Set<Marker> transpMarkers = Set();
+  String transportsJson = await rootBundle
+      .loadString('assets/json/map/Transportes.json');
+  List<dynamic> transportsData = jsonDecode(transportsJson)['features'];
+  for (var feature in transportsData) {
+    String name = feature['properties']['Name'];
+    List<dynamic> coordinates = feature['geometry']['coordinates'];
+    LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+
+    transpMarkers.add(
+      Marker(
+        markerId: MarkerId(name),
+        position: latLng,
+        infoWindow: InfoWindow(
+          title: name,
+          snippet: feature['properties']['description'] ?? '',
+        ),
+      ),
+    );
+  }
+  return transpMarkers;
+}
+
 Future<Set<Marker>> loadLocationsFromJson() async {
   Set<Marker> allMarkers = {};
   allMarkers.addAll(await loadEdLocationsFromJson());
@@ -135,6 +159,7 @@ Future<Set<Marker>> loadLocationsFromJson() async {
   allMarkers.addAll(await loadParkLocationsFromJson());
   allMarkers.addAll(await loadPortLocationsFromJson());
   allMarkers.addAll(await loadServLocationsFromJson());
+  allMarkers.addAll(await loadTranspLocationsFromJson());
   return allMarkers;
 }
 

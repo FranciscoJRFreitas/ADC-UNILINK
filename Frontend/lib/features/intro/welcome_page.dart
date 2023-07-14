@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unilink2023/constants.dart';
 import '../screen.dart';
 import '../../widgets/widget.dart';
 import 'package:flutter/foundation.dart';
@@ -99,7 +100,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 .textTheme
                                 .bodyMedium!
                                 .copyWith(
-                                  color: Colors.blue.shade400,
+                                  color: loginColor(context),
                                   decoration: TextDecoration.underline,
                                 ),
                           ),

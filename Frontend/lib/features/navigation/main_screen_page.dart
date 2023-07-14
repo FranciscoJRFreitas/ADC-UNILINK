@@ -277,9 +277,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             Tooltip(
               message: 'Quick Logout',
               child: IconButton(
-                icon: Icon(Icons.logout,
-                    color: Theme.of(context).textTheme.bodyLarge!.color),
-                color: roleColor == Colors.yellow ? Colors.black : Colors.white,
+                icon: Icon(Icons.logout, color: logoutColor(context)),
                 onPressed: () async {
                   final token = await cacheFactory.get('users', 'token');
                   if (token != null) {
@@ -532,9 +530,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.logout_sharp),
+                leading: Icon(
+                  Icons.logout_sharp,
+                  color: logoutColor(context),
+                ),
                 title: Text('Logout',
-                    style: Theme.of(context).textTheme.bodyLarge),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge!
+                        .copyWith(color: logoutColor(context))),
                 onTap: () async {
                   final token = await cacheFactory.get('users', 'token');
                   if (token != null) {

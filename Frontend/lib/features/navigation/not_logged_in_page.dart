@@ -61,7 +61,7 @@ class _NotLoggedInScreenState extends State<NotLoggedInScreen> {
           Tooltip(
             message: 'Login',
             child: IconButton(
-              icon: Icon(Icons.login),
+              icon: Icon(Icons.login, color: loginColor(context),),
               color: Colors.white,
               onPressed: () {
                 Navigator.push(

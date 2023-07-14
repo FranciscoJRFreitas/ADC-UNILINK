@@ -62,7 +62,7 @@ class _IntroPageState extends State<IntroPage> {
                 ),
               ),
               body:
-                  "Now you have access to the information of your university in any place ",
+                  "Experience your university at your fingertips, no matter where you are.",
               title: "Welcome",
             ),
             PageViewModel(
@@ -72,7 +72,7 @@ class _IntroPageState extends State<IntroPage> {
                   height: 200,
                 ),
               ),
-              body: "Don't lose the last news about your university",
+              body: "Stay tuned with the latest happenings and updates from your university.",
               title: "News",
             ),
             PageViewModel(
@@ -83,7 +83,7 @@ class _IntroPageState extends State<IntroPage> {
                 ),
               ),
               body:
-                  "Interact with your professors and colleagues with our chat",
+                  "Engage in enriching conversations with your professors and fellow students through our interactive chat feature.",
               title: "Chat",
             ),
             PageViewModel(
@@ -94,7 +94,7 @@ class _IntroPageState extends State<IntroPage> {
                 ),
               ),
               body:
-                  "Manage our own calendar and always be update of the events of your classes",
+                  "Efficiently organize your schedule and never miss out on important class events with our personalized calendar tool.",
               title: "Calendar",
             ),
             PageViewModel(
@@ -105,14 +105,14 @@ class _IntroPageState extends State<IntroPage> {
                 ),
               ),
               body:
-                  "Navigate the campus effortlessly, locate places and receive dynamic directions with our Maps feature.",
+                  "Navigate our campus with ease, discover locations, and get real-time directions with our intuitive Maps feature.",
               title: "Maps",
             ),
             if (!kIsWeb)
               PageViewModel(
                 title: "Activate Notifications",
                 body:
-                    "To receive updates and important information, please enable floating notifications.",
+                    "For real-time updates and crucial information, kindly enable our streamlined floating notifications.",
                 image: Center(
                   child: Icon(Icons.notifications,
                       size: 100, color: Color(0xFF5857a2)),
@@ -144,8 +144,8 @@ class _IntroPageState extends State<IntroPage> {
                   height: 200,
                 ),
               ),
-              body: "What are you waiting for ?",
-              title: "Jump in!",
+              body: "Unleash the power of our university app!",
+              title: "Dive in and explore now!",
             ),
           ],
         ),
