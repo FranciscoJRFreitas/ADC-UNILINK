@@ -162,78 +162,6 @@ class _BackOfficePageState extends State<BackOfficePage> {
     );
   }
 
-  Widget eventManagement(
-    BuildContext context,
-  ) {
-    TextEditingController groupId = TextEditingController();
-    return AlertDialog(
-      title: Text('Enter Group ID', style: TextStyle(fontSize: 30)),
-      contentPadding: EdgeInsets.fromLTRB(24, 2, 24, 0),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "to view the group's events",
-            style: TextStyle(fontSize: 16),
-          ),
-          SizedBox(height: 8),
-          LineTextField(
-            controller: groupId,
-            title: 'Group ID',
-          ),
-          SizedBox(height: 20),
-        ],
-      ),
-      actions: <Widget>[
-        ElevatedButton(
-          child: Text('OK'),
-          onPressed: () async {
-            Navigator.of(context).pop();
-
-            final database = FirebaseDatabase.instance.ref();
-            DatabaseEvent snapshot =
-                await database.child('events').child(groupId.text).once();
-
-            if (snapshot.snapshot.value != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GroupEventsPage(groupId: groupId.text),
-                ),
-              );
-            } else {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('No Events Found'),
-                    content: Text(
-                        'There are no events available for the entered group ID.'),
-                    actions: <Widget>[
-                      ElevatedButton(
-                        child: Text('OK'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            }
-          },
-        ),
-        ElevatedButton(
-          child: Text('Cancel'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    );
-  }
-
   Widget webLayout(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -294,29 +222,6 @@ class _BackOfficePageState extends State<BackOfficePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Container(
-              width: 300, // adjust these values as needed
-              height: 100,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Theme.of(context).primaryColor, // button's fill color
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.all(20),
-                  elevation: 2,
-                ),
-                icon: Icon(Icons.edit_calendar),
-                label: Text('Event Management'),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return eventManagement(context);
-                    },
-                  );
-                },
-              ),
-            ),
             Container(
               width: 300, // adjust these values as needed
               height: 100,
@@ -394,30 +299,6 @@ class _BackOfficePageState extends State<BackOfficePage> {
                 MaterialPageRoute(
                   builder: (context) => GroupPage(),
                 ),
-              );
-            },
-          ),
-        ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-        Container(
-          width: 300, // adjust these values as needed
-          height: 100,
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  Theme.of(context).primaryColor, // button's fill color
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.all(20),
-              elevation: 2,
-            ),
-            icon: Icon(Icons.edit_calendar),
-            label: Text('Event Management'),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return eventManagement(context);
-                },
               );
             },
           ),

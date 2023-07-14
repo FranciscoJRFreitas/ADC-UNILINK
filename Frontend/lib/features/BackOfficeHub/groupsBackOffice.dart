@@ -18,6 +18,7 @@ import '../navigation/main_screen_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'package:unilink2023/features/BackOfficeHub/eventsBackOffice.dart';
 
 class GroupPage extends StatefulWidget {
   @override
@@ -350,6 +351,21 @@ class _GroupPageState extends State<GroupPage> {
                                       kickPopupDialogMobile(context, group.id);
                                   },
                                   child: Text('Kick'),
+                                ),
+                                SizedBox(width: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => GroupEventsPage(
+                                          groupId: group.id,
+                                          displayname: group.DisplayName,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Text('Events'),
                                 ),
                               ],
                             ),

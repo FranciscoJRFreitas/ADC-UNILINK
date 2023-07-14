@@ -21,8 +21,9 @@ import 'package:http/http.dart' as http;
 
 class GroupEventsPage extends StatefulWidget {
   final String groupId;
+  final String displayname;
 
-  const GroupEventsPage({required this.groupId});
+  const GroupEventsPage({required this.groupId, required this.displayname});
 
   @override
   _GroupEventsPageState createState() => _GroupEventsPageState();
@@ -69,7 +70,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
-          widget.groupId + " events",
+          widget.displayname + " events",
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         backgroundColor: Theme.of(context).primaryColor,
@@ -558,5 +559,4 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
       showErrorSnackbar('Failed to remove the event: ${response.body}', true);
     }
   }
-
 }
