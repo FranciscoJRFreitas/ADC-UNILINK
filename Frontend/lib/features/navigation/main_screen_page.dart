@@ -116,7 +116,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ListUsersPage(user: _currentUser), //2
         HomePage(), //3
         ChangePasswordPage(), //4
-        RemoveAccountPage(), //5
+        RemoveAccountPage(
+          isBackoffice: false,
+        ), //5
         ChatPage(
           user: _currentUser,
           selectedGroup: _selectedGroup,

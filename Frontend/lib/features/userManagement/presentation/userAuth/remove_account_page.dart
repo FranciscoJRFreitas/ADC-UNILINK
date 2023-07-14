@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:unilink2023/features/BackOfficeHub/BackOfficePage.dart';
+import 'package:unilink2023/features/navigation/not_logged_in_page.dart';
 import 'package:unilink2023/features/screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../data/cache_factory_provider.dart';
@@ -13,9 +15,10 @@ import '../../../../constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 class RemoveAccountPage extends StatefulWidget {
-  RemoveAccountPage();
+  final bool isBackoffice;
+
+  RemoveAccountPage({required this.isBackoffice});
 
   @override
   _RemoveAccountPageState createState() => _RemoveAccountPageState();
@@ -254,9 +257,11 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
 
     if (response.statusCode == 200) {
       if (targetUsername.isEmpty) {
-        cacheFactory.removeLoginCache();
-        cacheFactory.removeMessagesCache();
-        cacheFactory.removeGroupsCache();
+        if (!widget.isBackoffice) {
+          cacheFactory.removeLoginCache();
+          cacheFactory.removeMessagesCache();
+          cacheFactory.removeGroupsCache();
+        }
         try {
           FirebaseStorage.instance
               .ref()
@@ -299,7 +304,9 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
         Navigator.pop(context);
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => WelcomePage()),
+          !widget.isBackoffice
+              ? MaterialPageRoute(builder: (context) => NotLoggedInScreen())
+              : MaterialPageRoute(builder: (context) => MainScreen(index: 12)),
           (Route<dynamic> route) => false,
         );
         return;

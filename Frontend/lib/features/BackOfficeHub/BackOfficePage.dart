@@ -152,7 +152,9 @@ class _BackOfficePageState extends State<BackOfficePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RemoveAccountPage(),
+                  builder: (context) => RemoveAccountPage(
+                    isBackoffice: true,
+                  ),
                 ),
               );
             },

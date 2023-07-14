@@ -11,7 +11,6 @@ import '../userManagement/presentation/userAuth/change_password_page.dart';
 import '../userManagement/presentation/userAuth/remove_account_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-
 class SettingsPage extends StatefulWidget {
   final bool loggedIn;
   final bool isBackOffice;
@@ -170,7 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         case 'Calendar':
                           iconData = Icons.perm_contact_calendar;
                           break;
-                          case 'My Events':
+                        case 'My Events':
                           iconData = Icons.event_note;
                           break;
                         case 'Chat':
@@ -250,7 +249,10 @@ class _SettingsPageState extends State<SettingsPage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => RemoveAccountPage()),
+              MaterialPageRoute(
+                  builder: (context) => RemoveAccountPage(
+                        isBackoffice: false,
+                      )),
             );
           }),
       Option(
