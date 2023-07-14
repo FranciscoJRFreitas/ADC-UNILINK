@@ -611,7 +611,7 @@ class _MyMapState extends State<MyMap> {
                             ),
                           ),
                           SizedBox(height: 10),
-                          if (!kIsWeb)
+                          if (!kIsWeb && !isDirections)
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Padding(
@@ -774,12 +774,16 @@ class _MyMapState extends State<MyMap> {
 
     final Uint8List buildings =
         await getImages('assets/icon/building.png', kIsWeb ? 40 : 130);
-    final Uint8List gates = await getImages('assets/icon/gates.png', kIsWeb ? 40 : 130);
-    final Uint8List parking = await getImages('assets/icon/Parking.png', kIsWeb ? 40 : 130);
-    final Uint8List service = await getImages('assets/icon/service.png', kIsWeb ? 40 : 130);
+    final Uint8List gates =
+        await getImages('assets/icon/gates.png', kIsWeb ? 40 : 130);
+    final Uint8List parking =
+        await getImages('assets/icon/Parking.png', kIsWeb ? 40 : 130);
+    final Uint8List service =
+        await getImages('assets/icon/service.png', kIsWeb ? 40 : 130);
     final Uint8List restaurant =
         await getImages('assets/icon/restaurant.png', kIsWeb ? 40 : 130);
-    final Uint8List transports = await getImages('assets/icon/bus.png', kIsWeb ? 40 : 130);
+    final Uint8List transports =
+        await getImages('assets/icon/bus.png', kIsWeb ? 40 : 130);
 
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
       double latitude = coordinates[1];
