@@ -50,7 +50,7 @@ public class RecoverPasswordResource {
             user = resultsByEmail.next();
 
         if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("No user found").build();
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found. Verify your username or email.").build();
         }
 
         if (user.getString("user_state").equals(UserActivityState.INACTIVE.toString())) {

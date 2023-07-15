@@ -6,6 +6,8 @@ C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\SearchUsersData.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\VerifyAction.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ListUsersResource.java
+C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\filters\AuthenticationFilter.java
+C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\util\ProjectConfig.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ChangePasswordResource.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\filters\CostumeCORSFilter.java
 C:\Users\franf\workspace-google\ADC-UNILINK\Backend&API\src\main\java\pt\unl\fct\di\apdc\firstwebapp\resources\ModifyAttributesResource.java
