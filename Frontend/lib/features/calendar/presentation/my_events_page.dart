@@ -77,6 +77,7 @@ class _MyEventsPageState extends State<MyEventsPage>
     myEventsRef.onChildAdded.listen((event) {
       Event ev = Event.fromSnapshot(event.snapshot);
       setState(() {
+        print("event added.");
         personalEvents.add(ev);
         personalFilteredEvents.add(ev);
       });
@@ -84,7 +85,7 @@ class _MyEventsPageState extends State<MyEventsPage>
 
     myEventsRef.onChildRemoved.listen((event) {
       String eventId = event.snapshot.key as String;
-
+      print("event removed.");
       setState(() {
         personalFilteredEvents.removeWhere((element) => element.id == eventId);
         personalEvents.removeWhere((event) => event.id == eventId);
@@ -93,7 +94,7 @@ class _MyEventsPageState extends State<MyEventsPage>
 
     myEventsRef.onChildChanged.listen((event) {
       String eventId = event.snapshot.key as String;
-
+      print("event changed.");
       setState(() {
         Event ev = Event.fromSnapshot(event.snapshot);
         personalEvents.removeWhere((element) => element.id == eventId);
@@ -726,13 +727,13 @@ class _MyEventsPageState extends State<MyEventsPage>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MainScreen(index: 15),
+                                builder: (context) => MainScreen(index: 9),
                               ),
                             );
                           },
                           child: Tooltip(
                             message: "View in My Events",
-                            child: Icon(Icons.event_note_rounded,
+                            child: Icon(Icons.perm_contact_calendar,
                                 size: 20, color: Style.lightBlue),
                           ),
                         ),
