@@ -773,8 +773,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           userGroupsSnapshot.value as Map<dynamic, dynamic>;
       for (String groupId in userGroups.keys) {
         await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
-        await FirebaseMessaging.instance.unsubscribeFromTopic('invite/$username');
       }
     }
+    await FirebaseMessaging.instance.unsubscribeFromTopic('invite/$username');
   }
 }

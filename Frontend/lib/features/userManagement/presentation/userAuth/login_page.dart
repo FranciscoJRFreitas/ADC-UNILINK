@@ -434,9 +434,9 @@ void _subscribeTopic(FirebaseAuth.User _currentUser, String username) async {
         allGroupsSnapshot.value as Map<dynamic, dynamic>;
     for (String groupId in userGroups.keys) {
       await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
-      await FirebaseMessaging.instance.unsubscribeFromTopic('invite/$username');
     }
   }
+  await FirebaseMessaging.instance.unsubscribeFromTopic('invite/$username');
 
   DatabaseReference userRef =
       FirebaseDatabase.instance.ref().child('chat').child(username);
@@ -450,9 +450,9 @@ void _subscribeTopic(FirebaseAuth.User _currentUser, String username) async {
         userGroupsSnapshot.value as Map<dynamic, dynamic>;
     for (String groupId in userGroups.keys) {
       await FirebaseMessaging.instance.subscribeToTopic(groupId);
-      await FirebaseMessaging.instance.subscribeToTopic('invite/$username');
     }
   }
+  await FirebaseMessaging.instance.subscribeToTopic('invite/$username');
 }
 
 Map<String, dynamic> parseResponse(String responseBody) {

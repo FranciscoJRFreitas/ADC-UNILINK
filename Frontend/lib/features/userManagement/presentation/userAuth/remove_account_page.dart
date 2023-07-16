@@ -224,9 +224,9 @@ class _RemoveAccountPageState extends State<RemoveAccountPage> {
                 allGroupsSnapshot.value as Map<dynamic, dynamic>;
             for (String groupId in userGroups.keys) {
               await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
-              await FirebaseMessaging.instance.unsubscribeFromTopic('invite/${targetUsername.isEmpty ? username : targetUsername}');
             }
           }
+          await FirebaseMessaging.instance.unsubscribeFromTopic('invite/${targetUsername.isEmpty ? username : targetUsername}');
         }
         removeUserDataFromFireBase(
             user, targetUsername.isEmpty ? username : targetUsername);
