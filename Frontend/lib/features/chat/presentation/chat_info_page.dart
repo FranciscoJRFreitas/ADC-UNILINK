@@ -344,8 +344,10 @@ class _ChatInfoPageState extends State<ChatInfoPage>
               elevation: 0,
               title: Text(
                 "Group Information",
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Theme.of(context).textTheme.bodyLarge!.color),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: Colors.white),
               ),
               backgroundColor: Theme.of(context).primaryColor,
               actions: <Widget>[

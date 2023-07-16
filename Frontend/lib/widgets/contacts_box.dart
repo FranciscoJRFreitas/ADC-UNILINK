@@ -24,11 +24,15 @@ class ContactCard extends StatelessWidget {
           availableHeight < MediaQuery.of(context).size.height
               ? availableHeight / 5
               : MediaQuery.of(context).size.height / 5;
-      final double fontSize = availableWidth < 400 ? 12 : 17;
-      final double iconSize = availableWidth < 400 ? 20 : 30;
+      final double fontSize = availableWidth < 400 ? 10 : 15;
+      final double iconSize = availableWidth < 400 ? 25 : 35;
+      final String? number =
+          contact?.phoneNumber != null && contact!.phoneNumber.length > 16
+              ? contact!.phoneNumber.substring(0, 16)
+              : contact?.phoneNumber;
 
       return Container(
-        height: cardHeight + 15,
+        height: cardHeight + 20,
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15), // rounded corners
@@ -82,8 +86,18 @@ class ContactCard extends StatelessWidget {
                           SizedBox(height: 8.0),
                           Row(
                             children: [
-                              Icon(Icons.phone,
-                                  color: Colors.white, size: iconSize - 10),
+                              InkWell(
+                                  child: Icon(Icons.phone,
+                                      color: Colors.white, size: iconSize - 8),
+                                  onTap: () async {
+                                    print(contact!.phoneNumber);
+                                    final url = Uri.parse('tel:$number');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    } else {
+                                      throw 'Could not launch $url';
+                                    }
+                                  }),
                               SizedBox(width: 5.0),
                               Expanded(
                                 // new line
@@ -105,7 +119,7 @@ class ContactCard extends StatelessWidget {
                           children: [
                             InkWell(
                               child: Icon(Icons.email,
-                                  color: Colors.white, size: iconSize - 10),
+                                  color: Colors.white, size: iconSize - 8),
                               onTap: () async {
                                 var email = contact
                                     ?.email; // replace with the email you want
@@ -144,7 +158,7 @@ class ContactCard extends StatelessWidget {
                                 SizedBox(width: 5.0),
                                 InkWell(
                                   onTap: () async {
-                                    String? uri = contact?.facebook;
+                                    String? uri = contact?.facebook.trim();
                                     if (uri != null) {
                                       Uri url = Uri.parse(uri);
                                       if (await canLaunchUrl(url)) {
@@ -167,7 +181,7 @@ class ContactCard extends StatelessWidget {
                                 SizedBox(width: 8.0),
                                 InkWell(
                                   onTap: () async {
-                                    String? uri = contact?.instagram;
+                                    String? uri = contact?.instagram.trim();
                                     if (uri != null) {
                                       Uri url = Uri.parse(uri);
                                       if (await canLaunchUrl(url)) {
@@ -187,6 +201,7 @@ class ContactCard extends StatelessWidget {
                               onTap: () async {
                                 String? uri = contact?.url;
                                 if (uri != null) {
+                                  uri = uri.trim();
                                   Uri url = Uri.parse(uri);
                                   if (await canLaunchUrl(url)) {
                                     await launchUrl(url);

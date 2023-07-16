@@ -25,7 +25,7 @@ class _ContactsPageState extends State<ContactsPage> {
 
   void _fetchContacts() async {
     String jsonString =
-    await rootBundle.loadString('assets/json/contacts.json');
+        await rootBundle.loadString('assets/json/contacts.json');
     var contactsJson = json.decode(jsonString);
 
     var departmentsJson = contactsJson['departments'];
@@ -89,23 +89,70 @@ class _ContactsPageState extends State<ContactsPage> {
       listOptions: ListOptions(
         listHeaderBuilder: (context, symbol) {
           return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text(
-                symbol,
-                style: TextStyle(color: Colors.black),
+            padding: const EdgeInsets.only(right: 18, top: 4, bottom: 4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.horizontal(
+                    right: Radius.circular(100),
+                  ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                    top: 8,
+                    right: 16,
+                    bottom: 8,
+                  ),
+                  child: Text(
+                    symbol,
+                    textScaleFactor: 1,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                    ),
+                  ),
+                ),
               ),
             ),
           );
         },
       ),
-      scrollbarOptions: const ScrollbarOptions(
+      scrollbarOptions: ScrollbarOptions(
         backgroundColor: Color.fromARGB(255, 11, 76, 142),
+        symbolBuilder: (context, symbol, state) {
+          Color color;
+          bool hasContacts = checkForContacts(symbol);
+          if (hasContacts) {
+            color = Colors.white; // letters that have contacts will be white
+          } else {
+            color = Colors.black.withOpacity(
+                0.3); // letters that don't have any contacts will be black
+          }
+
+          return Container(
+            padding: const EdgeInsets.only(left: 4, top: 2, bottom: 2),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(100),
+              ),
+              color: state == AlphabetScrollbarItemState.active
+                  ? Colors.blue
+                  : null,
+            ),
+            child: Center(
+              child: FittedBox(
+                child: Text(
+                  symbol,
+                  style: TextStyle(color: color, fontSize: 20),
+                ),
+              ),
+            ),
+          );
+        },
       ),
       overlayOptions: const OverlayOptions(
         showOverlay: false,
@@ -118,6 +165,16 @@ class _ContactsPageState extends State<ContactsPage> {
         options: options,
       ),
     );
+  }
+
+  bool checkForContacts(String symbol) {
+    // contacts is your list of contact names
+    for (Contact contact in _contacts) {
+      if (contact.contactName.startsWith(symbol)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void _launchURL(String url) async {
@@ -141,8 +198,8 @@ class _ActionsRow extends StatelessWidget {
           iconTheme: const IconThemeData(color: Colors.white, size: 18),
           textButtonTheme: TextButtonThemeData(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all(Colors.white),
-              ))),
+            foregroundColor: MaterialStateProperty.all(Colors.white),
+          ))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -168,6 +168,9 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         backgroundColor: Theme.of(context).primaryColor,
+        iconTheme: IconThemeData(
+          color: Theme.of(context).textTheme.bodyLarge!.color,
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -343,10 +346,8 @@ class _ChatMemberInfoPageState extends State<ChatMemberInfo> {
     String userId,
     void Function(String, bool) showErrorSnackbar,
   ) async {
-    final url = kBaseUrl + "rest/chat/leave?groupId=" +
-        groupId +
-        "&userId=" +
-        userId;
+    final url =
+        kBaseUrl + "rest/chat/leave?groupId=" + groupId + "&userId=" + userId;
     final tokenID = await cacheFactory.get('users', 'token');
     Token token = new Token(tokenID: tokenID, username: sessionUserId);
 

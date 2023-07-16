@@ -601,19 +601,22 @@ class _MyMapState extends State<MyMap> {
                         children: [
                           SizedBox(height: 40),
                           Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: Alignment.center,
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: Text(
                                 title,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(color: Colors.white),
                               ),
                             ),
                           ),
                           SizedBox(height: 10),
                           if (!kIsWeb)
                             Align(
-                              alignment: Alignment.centerLeft,
+                              alignment: Alignment.center,
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: ElevatedButton.icon(
@@ -640,7 +643,8 @@ class _MyMapState extends State<MyMap> {
                                   label: Text('Get Directions',
                                       style: TextStyle(color: Colors.blue)),
                                   style: ElevatedButton.styleFrom(
-                                    primary: Colors.white, // Background color
+                                    backgroundColor:
+                                        Colors.white, // Background color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                           20), // Border radius
@@ -650,20 +654,20 @@ class _MyMapState extends State<MyMap> {
                               ),
                             ),
                           SizedBox(height: 18),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: snippet.length > 10 ? 8.0 : 2.0,
-                            ),
+                          Align(
+                            alignment: Alignment.center,
                             child: Text(snippet,
                                 style: kIsWeb
                                     ? Theme.of(context)
                                         .textTheme
                                         .bodyMedium!
-                                        .copyWith(fontSize: 18)
+                                        .copyWith(
+                                            fontSize: 18, color: Colors.white)
                                     : Theme.of(context)
                                         .textTheme
                                         .bodyMedium!
-                                        .copyWith(fontSize: 16)),
+                                        .copyWith(
+                                            fontSize: 16, color: Colors.white)),
                           ),
                         ],
                       );
@@ -774,12 +778,16 @@ class _MyMapState extends State<MyMap> {
 
     final Uint8List buildings =
         await getImages('assets/icon/building.png', kIsWeb ? 40 : 130);
-    final Uint8List gates = await getImages('assets/icon/gates.png', kIsWeb ? 40 : 130);
-    final Uint8List parking = await getImages('assets/icon/Parking.png', kIsWeb ? 40 : 130);
-    final Uint8List service = await getImages('assets/icon/service.png', kIsWeb ? 40 : 130);
+    final Uint8List gates =
+        await getImages('assets/icon/gates.png', kIsWeb ? 40 : 130);
+    final Uint8List parking =
+        await getImages('assets/icon/Parking.png', kIsWeb ? 40 : 130);
+    final Uint8List service =
+        await getImages('assets/icon/service.png', kIsWeb ? 40 : 130);
     final Uint8List restaurant =
         await getImages('assets/icon/restaurant.png', kIsWeb ? 40 : 130);
-    final Uint8List transports = await getImages('assets/icon/bus.png', kIsWeb ? 40 : 130);
+    final Uint8List transports =
+        await getImages('assets/icon/bus.png', kIsWeb ? 40 : 130);
 
     for (var coordinates in campusData[0]['geometry']['coordinates'][0]) {
       double latitude = coordinates[1];

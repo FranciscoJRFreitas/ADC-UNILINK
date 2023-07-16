@@ -44,7 +44,6 @@ const kBodyText2 = TextStyle(
   color: Colors.white,
 );
 
-
 const Color primaryColor = Color.fromARGB(255, 76, 139, 171);
 const Color secondaryColor = Colors.green;
 const Color primaryColorDarker = Color.fromARGB(255, 43, 74, 89);
@@ -154,6 +153,7 @@ final ThemeData kLightTheme = ThemeData(
   iconTheme: IconThemeData(color: Colors.white),
   canvasColor: Color.fromARGB(255, 193, 192, 199),
   dividerColor: Style.lightBlue,
+  dialogBackgroundColor: Style.lightBlue,
   // customize other properties as needed
 );
 
@@ -215,27 +215,35 @@ final ThemeData kDarkTheme = ThemeData(
   cardColor: Colors.white30, iconTheme: IconThemeData(color: Colors.white),
   canvasColor: kBackgroundColor,
   dividerColor: Style.darkBlue,
+  dialogBackgroundColor: Style.darkBlue,
 
   // customize other properties as needed
 );
 
 // Dynamic color
 Color logoutColor(BuildContext context) {
-  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Colors.red : Color(0xFFFFDAB9);
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme
+      ? Colors.red
+      : Color.fromARGB(255, 255, 1, 1);
 }
 
 Color loginColor(BuildContext context) {
-  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Colors.green : Color.fromARGB(185, 206, 32, 203);
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme
+      ? Colors.green
+      : Color.fromARGB(255, 17, 117, 42);
 }
 
 Color selectedColor(BuildContext context) {
-  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Style.darkBlue : Style.lightBlue;
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme
+      ? Style.darkBlue
+      : Style.lightBlue;
 }
 
 Color unselectedColor(BuildContext context) {
-  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme ? Colors.grey : Colors.black;
+  return Provider.of<ThemeNotifier>(context).currentTheme! == kDarkTheme
+      ? Colors.grey
+      : Colors.black;
 }
-
 
 class Style {
   static Color white = Colors.white;

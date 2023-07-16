@@ -38,7 +38,27 @@ class _LineDateTimeFieldState extends State<LineDateTimeField> {
               context: context,
               initialDate: DateTime.now(), //get today's date
               firstDate: widget.firstDate,
-              lastDate: widget.lastDate);
+              lastDate: widget.lastDate,
+              builder: (BuildContext context, Widget? child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                          background: Colors.blue,
+                          primary: Colors.blue, // color of the OK button
+                          onPrimary:
+                              Colors.white, // color of the OK button's text
+                          secondary: Colors.red, // color of the Cancel button
+                          onSecondary:
+                              Colors.black, // Adjust to your preference
+                          onBackground:
+                              Colors.blue, // Adjust to your preference
+                          surface: Colors.blue, // Adjust to your preference
+                          onSurface: Colors.white, // Adjust to your preference
+                        ),
+                  ),
+                  child: child!,
+                );
+              });
           if (pickedDate != null) {
             TimeOfDay? pickedTime = await showTimePicker(
               context: context,
@@ -47,12 +67,17 @@ class _LineDateTimeFieldState extends State<LineDateTimeField> {
                 return Theme(
                   data: Theme.of(context).copyWith(
                     colorScheme: Theme.of(context).colorScheme.copyWith(
-                          background: Theme.of(context)
-                              .scaffoldBackgroundColor, // Adjust to your preference
-                          onBackground:
+                          background: Colors.blue,
+                          primary: Colors.white, // color of the OK button
+                          onPrimary:
+                              Colors.white, // color of the OK button's text
+                          secondary: Colors.red, // color of the Cancel button
+                          onSecondary:
                               Colors.black, // Adjust to your preference
-                          surface: Colors.white, // Adjust to your preference
-                          onSurface: Colors.black, // Adjust to your preference
+                          onBackground:
+                              Colors.blue, // Adjust to your preference
+                          surface: Colors.blue, // Adjust to your preference
+                          onSurface: Colors.white, // Adjust to your preference
                         ),
                   ),
                   child: child!,
@@ -98,7 +123,7 @@ class _LineDateTimeFieldState extends State<LineDateTimeField> {
         focusedBorder:
             UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
         enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Color.fromARGB(92, 161, 161, 161))),
+            borderSide: BorderSide(color: Color.fromARGB(92, 121, 120, 120))),
         errorBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.red, width: 2.0)),
         focusedErrorBorder: UnderlineInputBorder(

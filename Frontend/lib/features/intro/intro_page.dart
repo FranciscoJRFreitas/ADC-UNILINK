@@ -57,22 +57,12 @@ class _IntroPageState extends State<IntroPage> {
             PageViewModel(
               image: Center(
                 child: Image.asset(
-                  'assets/images/university_slider.png',
-                  height: 200,
-                ),
-              ),
-              body:
-                  "Experience your university at your fingertips, no matter where you are.",
-              title: "Welcome",
-            ),
-            PageViewModel(
-              image: Center(
-                child: Image.asset(
                   'assets/images/news_slider.png',
                   height: 200,
                 ),
               ),
-              body: "Stay tuned with the latest happenings and updates from your university.",
+              body:
+                  "Stay tuned with the latest happenings and updates from your university.",
               title: "News",
             ),
             PageViewModel(
