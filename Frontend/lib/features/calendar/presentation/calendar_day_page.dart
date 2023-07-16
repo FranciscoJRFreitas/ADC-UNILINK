@@ -63,75 +63,81 @@ class _DayCalendarPageState extends State<DayCalendarPage>
         .child('Groups');
 
     await chatRef.once().then((event) {
-      Map<dynamic, dynamic> newgroup =
-          event.snapshot.value as Map<dynamic, dynamic>;
-      newgroup.forEach((key, value) {
-        setState(() {
-          groups.add(key);
+      if (event.snapshot.value != null) {
+        Map<dynamic, dynamic> newgroup =
+            event.snapshot.value as Map<dynamic, dynamic>;
+        newgroup.forEach((key, value) {
+          setState(() {
+            groups.add(key);
+          });
         });
-      });
+      }
     });
 
-    for (String groupId in groups) {
-      DatabaseReference eventsRef =
-          await FirebaseDatabase.instance.ref().child('events').child(groupId);
+    if (!groups.isEmpty) {
+      for (String groupId in groups) {
+        DatabaseReference eventsRef = await FirebaseDatabase.instance
+            .ref()
+            .child('events')
+            .child(groupId);
 
-      await eventsRef.once().then((userDataSnapshot) {
-        if (userDataSnapshot.snapshot.value != null) {
-          Map<dynamic, dynamic> newevents =
-              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+        await eventsRef.once().then((userDataSnapshot) {
+          if (userDataSnapshot.snapshot.value != null) {
+            Map<dynamic, dynamic> newevents =
+                userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
 
-          newevents.forEach((key, value) {
-            Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
-            Event currentEvent = Event(
-                type: parseEventType(currEvent["type"]),
-                title: currEvent["title"],
-                description: currEvent['description'],
-                location: currEvent['location'],
-                groupId: groupId,
-                startTime: DateTime.parse(currEvent["startTime"]),
-                endTime: DateTime.parse(currEvent["endTime"]));
+            newevents.forEach((key, value) {
+              Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
+              Event currentEvent = Event(
+                  type: parseEventType(currEvent["type"]),
+                  title: currEvent["title"],
+                  description: currEvent['description'],
+                  location: currEvent['location'],
+                  groupId: groupId,
+                  startTime: DateTime.parse(currEvent["startTime"]),
+                  endTime: DateTime.parse(currEvent["endTime"]));
 
-            DateTime startDate = DateTime(
-              currentEvent.startTime.year,
-              currentEvent.startTime.month,
-              currentEvent.startTime.day,
-            );
-            DateTime endDate = DateTime(
-              currentEvent.endTime.year,
-              currentEvent.endTime.month,
-              currentEvent.endTime.day,
-            );
+              DateTime startDate = DateTime(
+                currentEvent.startTime.year,
+                currentEvent.startTime.month,
+                currentEvent.startTime.day,
+              );
+              DateTime endDate = DateTime(
+                currentEvent.endTime.year,
+                currentEvent.endTime.month,
+                currentEvent.endTime.day,
+              );
 
-            DateTime widgetDate = DateTime(
-              widget.date.year,
-              widget.date.month,
-              widget.date.day,
-            );
+              DateTime widgetDate = DateTime(
+                widget.date.year,
+                widget.date.month,
+                widget.date.day,
+              );
 
 // Iterate through each day from the start date to the end date
-            for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
-              DateTime currentDate = startDate.add(Duration(days: i));
+              for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+                DateTime currentDate = startDate.add(Duration(days: i));
 
-              // Compare current date with widget.date
-              if (currentDate.year == widgetDate.year &&
-                  currentDate.month == widgetDate.month &&
-                  currentDate.day == widgetDate.day) {
-                String formattedCurrentDateTime =
-                    customFormat.format(currentDate);
-                DateTime parsedCurrentDateTime =
-                    customFormat.parse(formattedCurrentDateTime, true);
+                // Compare current date with widget.date
+                if (currentDate.year == widgetDate.year &&
+                    currentDate.month == widgetDate.month &&
+                    currentDate.day == widgetDate.day) {
+                  String formattedCurrentDateTime =
+                      customFormat.format(currentDate);
+                  DateTime parsedCurrentDateTime =
+                      customFormat.parse(formattedCurrentDateTime, true);
 
-                if (events.containsKey(parsedCurrentDateTime)) {
-                  events[parsedCurrentDateTime]!.add(currentEvent);
-                } else {
-                  events[parsedCurrentDateTime] = [currentEvent];
+                  if (events.containsKey(parsedCurrentDateTime)) {
+                    events[parsedCurrentDateTime]!.add(currentEvent);
+                  } else {
+                    events[parsedCurrentDateTime] = [currentEvent];
+                  }
                 }
               }
-            }
-          });
-        }
-      });
+            });
+          }
+        });
+      }
     }
 
     _getPersonalEvents();
