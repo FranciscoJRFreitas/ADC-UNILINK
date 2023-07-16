@@ -468,6 +468,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   Widget _buildMobileLayout(BuildContext context) {
     List<Group> groups = filteredGroups;
+
     if (_selectedGroup != null && _selectedGroup != "") {
       Future.delayed(Duration(milliseconds: 200), () {
         Navigator.of(context).pushReplacement(
@@ -482,6 +483,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         );
       });
     }
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -491,7 +493,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           "Groups",
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+        backgroundColor:
+            Colors.transparent, // Set the background color to transparent
       ),
       body: Column(
         children: <Widget>[
@@ -523,93 +526,88 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 ? searchController.text.trim().isEmpty
                     ? noGroupWidget()
                     : noSearchResult()
-                : ListView(
+                : ListView.builder(
                     padding: EdgeInsets.only(top: 10, bottom: 80),
-                    children: groups.map((group) {
+                    itemCount: groups.length,
+                    itemBuilder: (context, index) {
+                      Group group = groups[index];
                       Message? firstMessage = firstMessageOfGroups[group.id];
-                      return Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => GroupMessagesPage(
-                                    key: ValueKey(group.id),
-                                    groupId: group.id,
-                                    user: widget.user,
-                                    displayname: group.DisplayName,
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => GroupMessagesPage(
+                                key: ValueKey(group.id),
+                                groupId: group.id,
+                                user: widget.user,
+                                displayname: group.DisplayName,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          color: _selectedGroup == group
+                              ? Theme.of(context).primaryColorDark
+                              : Theme.of(context).scaffoldBackgroundColor,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 8),
+                            child: ListTile(
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(200),
+                                child: groupPicture(context, group.id),
+                              ),
+                              title: Text(
+                                '${group.DisplayName}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(
+                                    formatTimeInMillis(firstMessage != null
+                                        ? firstMessage.timestamp
+                                        : 0),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              color: _selectedGroup == group
-                                  ? Theme.of(context).primaryColorDark
-                                  : Theme.of(context).scaffoldBackgroundColor,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 8),
-                                child: ListTile(
-                                  leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(200),
-                                      child: groupPicture(context, group.id)),
-                                  title: Text(
-                                    '${group.DisplayName}',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  trailing: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                ],
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Row(
                                     children: [
-                                      Text(
-                                        formatTimeInMillis(firstMessage != null
-                                            ? firstMessage.timestamp
-                                            : 0),
-                                        style: TextStyle(
-                                            fontSize: 10, color: Colors.grey),
+                                      Expanded(
+                                        child: Text(
+                                          '${firstMessage?.displayName ?? ''}: ${firstMessage?.text ?? ''}',
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
                                       SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          //Maybe have icon?
-                                          //Icon(Icons.message, size: 20),
-                                          //SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              '${firstMessage != null ? firstMessage.displayName : ''}: ${firstMessage != null ? firstMessage.text : ''}',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                          ),
-                                          SizedBox(height: 8),
-                                        ],
-                                      ),
-                                      Divider(
-                                        color:
-                                            Provider.of<ThemeNotifier>(context)
-                                                        .currentTheme ==
-                                                    kDarkTheme
-                                                ? Colors.white60
-                                                : Theme.of(context)
-                                                    .primaryColor,
-                                        thickness: 1,
-                                      ),
                                     ],
                                   ),
-                                ),
+                                  Divider(
+                                    color: Provider.of<ThemeNotifier>(context)
+                                                .currentTheme ==
+                                            kDarkTheme
+                                        ? Colors.white60
+                                        : Theme.of(context).primaryColor,
+                                    thickness: 1,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       );
-                    }).toList(),
+                    },
                   ),
           ),
         ],
