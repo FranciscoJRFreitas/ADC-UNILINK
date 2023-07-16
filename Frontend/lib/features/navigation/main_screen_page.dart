@@ -775,6 +775,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
       }
     }
-    await FirebaseMessaging.instance.unsubscribeFromTopic('invite/$username');
+    await FirebaseMessaging.instance.unsubscribeFromTopic('invite-$username');
   }
 }
