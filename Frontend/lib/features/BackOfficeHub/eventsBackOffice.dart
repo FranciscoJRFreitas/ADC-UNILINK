@@ -86,324 +86,302 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
       );
     }
 
-    return Padding(
+    return ListView.builder(
+      itemCount: events.length,
       padding: EdgeInsets.only(top: 10),
-      child: Expanded(
-        child: ListView.builder(
-          itemCount: events.length,
-          itemBuilder: (context, index) {
-            Event event = events[index];
-            return Material(
-              color: Colors.transparent,
-              child: GestureDetector(
-                onTap: () {
-                  // Handle event onTap
-                },
-                child: Stack(
-                  children: <Widget>[
-                    Divider(
-                      color: Provider.of<ThemeNotifier>(context).currentTheme ==
-                              kDarkTheme
-                          ? Colors.white60
-                          : Theme.of(context).primaryColor,
-                      thickness: 1,
-                    ),
-                    Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        child: ListTile(
-                          title: Row(
-                            children: [
-                              InkWell(
-                                child: Text(
-                                  event.title,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              if (events[index].location != "0") ...[
-                                SizedBox(width: 10),
-                                InkWell(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          content: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
+      itemBuilder: (context, index) {
+        Event event = events[index];
+        return Material(
+          color: Colors.transparent,
+          child: GestureDetector(
+            onTap: () {
+              // Handle event onTap
+            },
+            child: Stack(
+              children: <Widget>[
+                Divider(
+                  color: Provider.of<ThemeNotifier>(context).currentTheme ==
+                          kDarkTheme
+                      ? Colors.white60
+                      : Theme.of(context).primaryColor,
+                  thickness: 1,
+                ),
+                Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: ListTile(
+                      title: Row(
+                        children: [
+                          InkWell(
+                            child: Text(
+                              event.title,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          if (events[index].location != "0") ...[
+                            SizedBox(width: 10),
+                            InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
                                                 0.9,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
+                                        height:
+                                            MediaQuery.of(context).size.height *
                                                 0.8,
-                                            child: Column(
-                                              children: <Widget>[
-                                                Expanded(
-                                                  child: GoogleMap(
-                                                    onMapCreated:
-                                                        (GoogleMapController
-                                                            controller) {},
-                                                    initialCameraPosition:
-                                                        CameraPosition(
-                                                      target: parseCoordinates(
-                                                          events[index]
-                                                              .location!),
-                                                      zoom: 17,
-                                                    ),
-                                                    markers: {
-                                                      Marker(
-                                                        markerId: MarkerId(
-                                                            'anomalyMarker'),
-                                                        position:
-                                                            parseCoordinates(
-                                                                events[index]
-                                                                    .location!),
-                                                      ),
-                                                    },
-                                                  ),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: GoogleMap(
+                                                onMapCreated:
+                                                    (GoogleMapController
+                                                        controller) {},
+                                                initialCameraPosition:
+                                                    CameraPosition(
+                                                  target: parseCoordinates(
+                                                      events[index].location!),
+                                                  zoom: 17,
                                                 ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: Text('Close'),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
+                                                markers: {
+                                                  Marker(
+                                                    markerId: MarkerId(
+                                                        'anomalyMarker'),
+                                                    position: parseCoordinates(
+                                                        events[index]
+                                                            .location!),
+                                                  ),
+                                                },
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      },
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Close'),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     );
                                   },
-                                  child: Tooltip(
-                                    message: "View in Maps",
-                                    child: Icon(Icons.directions),
-                                  ),
-                                ),
-                              ]
-                            ],
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                                );
+                              },
+                              child: Tooltip(
+                                message: "View in Maps",
+                                child: Icon(Icons.directions),
+                              ),
+                            ),
+                          ]
+                        ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 8),
+                          Row(
                             children: [
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.type_specimen,
-                                    size: 20,
-                                    color: Style.lightBlue,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Type: ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium!
-                                            .copyWith(fontSize: 14),
-                                      ),
-                                      Text(
-                                        getEventTypeString(event.type),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              Icon(
+                                Icons.type_specimen,
+                                size: 20,
+                                color: Style.lightBlue,
                               ),
-                              SizedBox(height: 8),
+                              SizedBox(width: 5),
                               Row(
                                 children: [
-                                  Icon(
-                                    Icons.description,
-                                    size: 20,
-                                    color: Style.lightBlue,
-                                  ),
-                                  SizedBox(width: 5),
                                   Text(
-                                    'Description: ',
+                                    'Type: ',
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleMedium!
+                                        .headline6!
                                         .copyWith(fontSize: 14),
                                   ),
-                                  Flexible(
-                                    child: Text(
-                                      event.description,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              if (event.location != '0') ...[
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.place,
-                                      size: 20,
-                                      color: Style.lightBlue,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      'Location: ',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(fontSize: 14),
-                                    ),
-                                    FutureBuilder<String>(
-                                      future:
-                                          getPlaceInLocations(event.location!),
-                                      builder: (BuildContext context,
-                                          AsyncSnapshot<String> snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return SizedBox.shrink();
-                                        } else {
-                                          if (snapshot.hasError)
-                                            return Text(
-                                                'Error: ${snapshot.error}');
-                                          else
-                                            return snapshot.data == ""
-                                                ? Text(
-                                                    "Custom Location",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  )
-                                                : Text(
-                                                    snapshot.data!,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                              ],
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.schedule,
-                                    size: 20,
-                                    color: Style.lightBlue,
-                                  ),
-                                  SizedBox(width: 5),
                                   Text(
-                                    'Start: ',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium!
-                                        .copyWith(fontSize: 14),
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.schedule,
-                                    size: 20,
-                                    color: Style.lightBlue,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'End: ',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium!
-                                        .copyWith(fontSize: 14),
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                    getEventTypeString(event.type),
+                                    style:
+                                        Theme.of(context).textTheme.bodyText1,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 15,
-                      right: 10,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Tooltip(
-                            message: "Remove Event",
-                            child: Icon(Icons.delete, color: Colors.blue),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.description,
+                                size: 20,
+                                color: Style.lightBlue,
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                'Description: ',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(fontSize: 14),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  event.description,
+                                  style: Theme.of(context).textTheme.bodyText1,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          onPressed: () {
-                            if (kIsWeb)
-                              _removeEventPopUpDialogWeb(context, event.id!);
-                            else
-                              _removeEventPopUpDialogMobile(context, event.id!);
-                          },
-                        ),
+                          SizedBox(height: 8),
+                          if (event.location != '0') ...[
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.place,
+                                  size: 20,
+                                  color: Style.lightBlue,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Location: ',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headline6!
+                                      .copyWith(fontSize: 14),
+                                ),
+                                FutureBuilder<String>(
+                                  future: getPlaceInLocations(event.location!),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<String> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return SizedBox.shrink();
+                                    } else {
+                                      if (snapshot.hasError)
+                                        return Text('Error: ${snapshot.error}');
+                                      else
+                                        return snapshot.data == ""
+                                            ? Text(
+                                                "Custom Location",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              )
+                                            : Text(
+                                                snapshot.data!,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                          ],
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                size: 20,
+                                color: Style.lightBlue,
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                'Start: ',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(fontSize: 14),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}',
+                                  style: Theme.of(context).textTheme.bodyText1,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                size: 20,
+                                color: Style.lightBlue,
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                'End: ',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline6!
+                                    .copyWith(fontSize: 14),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  '${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime)}',
+                                  style: Theme.of(context).textTheme.bodyText1,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    Divider(
-                      color: Colors.black87,
-                      thickness: 1,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      ),
+                Positioned(
+                  top: 15,
+                  right: 10,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: Tooltip(
+                        message: "Remove Event",
+                        child: Icon(Icons.delete, color: Colors.blue),
+                      ),
+                      onPressed: () {
+                        if (kIsWeb)
+                          _removeEventPopUpDialogWeb(context, event.id!);
+                        else
+                          _removeEventPopUpDialogMobile(context, event.id!);
+                      },
+                    ),
+                  ),
+                ),
+                Divider(
+                  color: Colors.black87,
+                  thickness: 1,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -414,7 +392,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         builder: (context) {
           return StatefulBuilder(builder: ((context, setState) {
             return AlertDialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Colors.black,
               title: const Text(
                 "Remove an event",
                 textAlign: TextAlign.left,
