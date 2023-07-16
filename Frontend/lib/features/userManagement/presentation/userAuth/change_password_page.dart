@@ -21,15 +21,33 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   TextEditingController currentPwdController = TextEditingController();
   TextEditingController newPwdController = TextEditingController();
   TextEditingController confirmNewPwdController = TextEditingController();
+  FocusNode _passwordFocusNode = FocusNode();
+  FocusNode _newPasswordFocusNode = FocusNode();
+  FocusNode _confirmPasswordFocusNode = FocusNode();
   bool currentPwdVisibility = true;
   bool newPwdVisibility = true;
   bool confirmNewPwdVisibility = true;
 
   String? _currentUsername;
 
+  @override
   void initState() {
     super.initState();
     getUser();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _passwordFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _passwordFocusNode.dispose();
+    _newPasswordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
+    currentPwdController.dispose();
+    newPwdController.dispose();
+    confirmNewPwdController.dispose();
+    super.dispose();
   }
 
   Future<void> getUser() async {
@@ -57,6 +75,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             'assets/images/back_arrow.svg',
             width: 40,
             height: 30,
+            color: Colors.white,
           ),
         ),
       ),
@@ -65,33 +84,48 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         child: Column(
           children: [
             MyPasswordField(
-              controller: currentPwdController,
-              hintText: "Current Password *",
-              isPasswordVisible: currentPwdVisibility,
-              onTap: () {
-                setState(() {
-                  currentPwdVisibility = !currentPwdVisibility;
-                });
-              },
-            ),
+                controller: currentPwdController,
+                hintText: "Current Password *",
+                isPasswordVisible: currentPwdVisibility,
+                focusNode: _passwordFocusNode,
+                onTap: () {
+                  setState(() {
+                    currentPwdVisibility = !currentPwdVisibility;
+                  });
+                },
+                onSubmitted: (_) =>
+                    FocusScope.of(context).requestFocus(_newPasswordFocusNode)),
             MyPasswordField(
               controller: newPwdController,
               hintText: "New Password *",
               isPasswordVisible: newPwdVisibility,
+              focusNode: _newPasswordFocusNode,
               onTap: () {
                 setState(() {
                   newPwdVisibility = !newPwdVisibility;
                 });
               },
+              onSubmitted: (_) =>
+                  FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
             ),
             MyPasswordField(
               controller: confirmNewPwdController,
               hintText: "Confirm New Password *",
               isPasswordVisible: confirmNewPwdVisibility,
+              focusNode: _confirmPasswordFocusNode,
               onTap: () {
                 setState(() {
                   confirmNewPwdVisibility = !confirmNewPwdVisibility;
                 });
+              },
+              onSubmitted: (_) async {
+                await changePassword(
+                  context,
+                  _currentUsername!,
+                  currentPwdController.text,
+                  newPwdController.text,
+                  confirmNewPwdController.text,
+                );
               },
             ),
             SizedBox(height: 16),
@@ -136,10 +170,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String newPassword,
     String confirmPassword,
   ) async {
-    if (currentPassword == '' && newPassword == '' && confirmPassword == '') {
+    if (currentPassword == '' || newPassword == '' || confirmPassword == '') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Form fields are empty!"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else if (currentPassword == newPassword &&
+        currentPassword == confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Your new password cannot be the same as your current password. Please choose a different password!",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -166,34 +213,43 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       );
 
       if (response.statusCode == 200) {
-        User user = await Provider.of<UserNotifier>(context, listen: false).currentUser!;
+        User user = await Provider.of<UserNotifier>(context, listen: false)
+            .currentUser!;
         cacheFactory.setUser(user, tokenID, newPassword);
-        await Provider.of<UserNotifier>(context, listen: false).updateUser(user);
+        await Provider.of<UserNotifier>(context, listen: false)
+            .updateUser(user);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Password changed successfully."),
             backgroundColor: Colors.green,
           ),
         );
+
+        currentPwdController.clear();
+        newPwdController.clear();
+        confirmNewPwdController.clear();
       } else if (response.statusCode == 400) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("User not found"),
+            content: Text("Passwords do not match."),
             backgroundColor: Colors.red,
           ),
         );
+
       } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Incorrect password"),
+            content: Text("Incorrect current password."),
             backgroundColor: Colors.red,
           ),
         );
+
+        currentPwdController.clear();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text("There was an error on our side please try again later"),
+            content: Text(
+                "There was an error on our side. Please try again later..."),
             backgroundColor: Colors.red,
           ),
         );

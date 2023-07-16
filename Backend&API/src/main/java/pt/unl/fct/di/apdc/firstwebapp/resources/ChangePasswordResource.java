@@ -1,11 +1,13 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Transaction;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
-import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.ChangePasswordData;
 
@@ -20,12 +22,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.logging.Logger;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.g;
+
 @Path("/changePwd")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ChangePasswordResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
-    private final Gson g = new Gson();
     private static final Logger LOG = Logger.getLogger(ChangePasswordResource.class.getName());
 
     public ChangePasswordResource() {
@@ -45,10 +47,10 @@ public class ChangePasswordResource {
         String authToken = authTokenHeader.substring("Bearer".length()).trim();
         AuthToken token = g.fromJson(authToken, AuthToken.class);
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(data.username);
+        Key tokenKey = datastoreService.newKeyFactory().addAncestor(PathElement.of("User", token.username))
                 .setKind("User Token").newKey(token.username);
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
             Entity user = txn.get(userKey);
             Entity originalToken = txn.get(tokenKey);

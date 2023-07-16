@@ -614,7 +614,7 @@ class _MyMapState extends State<MyMap> {
                             ),
                           ),
                           SizedBox(height: 10),
-                          if (!kIsWeb)
+                          if (!kIsWeb && !isDirections)
                             Align(
                               alignment: Alignment.center,
                               child: Padding(

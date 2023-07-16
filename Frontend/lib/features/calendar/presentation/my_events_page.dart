@@ -77,6 +77,7 @@ class _MyEventsPageState extends State<MyEventsPage>
     myEventsRef.onChildAdded.listen((event) {
       Event ev = Event.fromSnapshot(event.snapshot);
       setState(() {
+        print("event added.");
         personalEvents.add(ev);
         personalFilteredEvents.add(ev);
       });
@@ -84,7 +85,7 @@ class _MyEventsPageState extends State<MyEventsPage>
 
     myEventsRef.onChildRemoved.listen((event) {
       String eventId = event.snapshot.key as String;
-
+      print("event removed.");
       setState(() {
         personalFilteredEvents.removeWhere((element) => element.id == eventId);
         personalEvents.removeWhere((event) => event.id == eventId);
@@ -93,7 +94,7 @@ class _MyEventsPageState extends State<MyEventsPage>
 
     myEventsRef.onChildChanged.listen((event) {
       String eventId = event.snapshot.key as String;
-
+      print("event changed.");
       setState(() {
         Event ev = Event.fromSnapshot(event.snapshot);
         personalEvents.removeWhere((element) => element.id == eventId);
@@ -113,41 +114,46 @@ class _MyEventsPageState extends State<MyEventsPage>
         .child('Groups');
 
     await chatRef.once().then((event) {
-      Map<dynamic, dynamic> newgroup =
-          event.snapshot.value as Map<dynamic, dynamic>;
-      newgroup.forEach((key, value) {
-        setState(() {
-          groups.add(key);
-        });
-      });
-    });
-
-    for (String groupId in groups) {
-      DatabaseReference eventsRef =
-          await FirebaseDatabase.instance.ref().child('events').child(groupId);
-
-      await eventsRef.once().then((userDataSnapshot) {
-        if (userDataSnapshot.snapshot.value != null) {
-          Map<dynamic, dynamic> newevents =
-              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
-
-          newevents.forEach((key, value) {
-            Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
-            Event currentEvent = Event(
-                type: parseEventType(currEvent["type"]),
-                title: currEvent["title"],
-                description: currEvent['description'],
-                location: currEvent['location'],
-                groupId: groupId,
-                startTime: DateTime.parse(currEvent["startTime"]),
-                endTime: DateTime.parse(currEvent["endTime"]));
-
-            groupEvents.add(currentEvent);
-            groupFilteredEvents.add(currentEvent);
+      if (event.snapshot.value != null) {
+        Map<dynamic, dynamic> newgroup =
+            event.snapshot.value as Map<dynamic, dynamic>;
+        newgroup.forEach((key, value) {
+          setState(() {
+            groups.add(key);
           });
-          groupEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
-        }
-      });
+        });
+      }
+    });
+    if (!groups.isEmpty) {
+      for (String groupId in groups) {
+        DatabaseReference eventsRef = await FirebaseDatabase.instance
+            .ref()
+            .child('events')
+            .child(groupId);
+
+        await eventsRef.once().then((userDataSnapshot) {
+          if (userDataSnapshot.snapshot.value != null) {
+            Map<dynamic, dynamic> newevents =
+                userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+
+            newevents.forEach((key, value) {
+              Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
+              Event currentEvent = Event(
+                  type: parseEventType(currEvent["type"]),
+                  title: currEvent["title"],
+                  description: currEvent['description'],
+                  location: currEvent['location'],
+                  groupId: groupId,
+                  startTime: DateTime.parse(currEvent["startTime"]),
+                  endTime: DateTime.parse(currEvent["endTime"]));
+
+              groupEvents.add(currentEvent);
+              groupFilteredEvents.add(currentEvent);
+            });
+            groupEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+          }
+        });
+      }
     }
 
     setState(() {});
@@ -726,13 +732,13 @@ class _MyEventsPageState extends State<MyEventsPage>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MainScreen(index: 15),
+                                builder: (context) => MainScreen(index: 9),
                               ),
                             );
                           },
                           child: Tooltip(
                             message: "View in My Events",
-                            child: Icon(Icons.event_note_rounded,
+                            child: Icon(Icons.perm_contact_calendar,
                                 size: 20, color: Style.lightBlue),
                           ),
                         ),

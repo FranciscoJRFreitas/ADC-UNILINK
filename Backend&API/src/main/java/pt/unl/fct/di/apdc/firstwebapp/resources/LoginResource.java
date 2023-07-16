@@ -22,13 +22,13 @@ import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserActivityState;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.g;
+
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
-    private final Gson g = new Gson();
 
     @POST
     @Path("/")
@@ -40,20 +40,20 @@ public class LoginResource {
         Key ctrskey = createUserStatsKey(data.username);
         Key logKey = createLogKey(data.username);
 
-        Transaction txn = datastore.newTransaction();
+        Transaction txn = datastoreService.newTransaction();
         try {
 
             Query<Entity> queryByUsername = Query.newEntityQueryBuilder()
                     .setKind("User")
                     .setFilter(StructuredQuery.PropertyFilter.eq("user_username", data.username))
                     .build();
-            QueryResults<Entity> resultsByUsername = datastore.run(queryByUsername);
+            QueryResults<Entity> resultsByUsername = datastoreService.run(queryByUsername);
 
             Query<Entity> queryByEmail = Query.newEntityQueryBuilder()
                     .setKind("User")
                     .setFilter(StructuredQuery.PropertyFilter.eq("user_email", data.username))
                     .build();
-            QueryResults<Entity> resultsByEmail = datastore.run(queryByEmail);
+            QueryResults<Entity> resultsByEmail = datastoreService.run(queryByEmail);
 
             Entity user = null;
             if (resultsByUsername.hasNext())
@@ -66,7 +66,7 @@ public class LoginResource {
                 return Response.status(Status.NOT_FOUND).entity("Invalid login credentials. Please try again.").build();
             }
             String username = user.getString("user_username");
-            Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", username))
+            Key tokenKey = datastoreService.newKeyFactory().addAncestor(PathElement.of("User", username))
                     .setKind("User Token").newKey(username);
 
             Entity stats = getOrCreateUserStats(txn, ctrskey);
@@ -96,13 +96,13 @@ public class LoginResource {
     }
 
     private Key createUserStatsKey(String username) {
-        return datastore.newKeyFactory()
+        return datastoreService.newKeyFactory()
                 .addAncestors(PathElement.of("User", username))
                 .setKind("UserStats").newKey("counters");
     }
 
     private Key createLogKey(String username) {
-        return datastore.allocateId(datastore.newKeyFactory()
+        return datastoreService.allocateId(datastoreService.newKeyFactory()
                 .addAncestors(PathElement.of("User", username))
                 .setKind("UserLog").newKey());
     }

@@ -7,7 +7,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
@@ -28,11 +27,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService;
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.firebaseInstance;
+
 @Path("/register")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RegisterResource {
-
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
     public RegisterResource() {
@@ -49,8 +49,8 @@ public class RegisterResource {
         if (!validationResult.equals("OK"))
             return Response.status(Status.BAD_REQUEST).entity(validationResult).build();
 
-        Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
-        Transaction txn = datastore.newTransaction();
+        Key userKey = datastoreService.newKeyFactory().setKind("User").newKey(data.username);
+        Transaction txn = datastoreService.newTransaction();
         try {
             Entity user = txn.get(userKey);
 
@@ -63,7 +63,7 @@ public class RegisterResource {
                     .setKind("User")
                     .setFilter(StructuredQuery.PropertyFilter.eq("user_email", data.email))
                     .build();
-            QueryResults<Entity> resultsByEmail = datastore.run(queryByEmail);
+            QueryResults<Entity> resultsByEmail = datastoreService.run(queryByEmail);
 
             if (resultsByEmail.hasNext()) {
                 txn.rollback();
@@ -120,7 +120,7 @@ public class RegisterResource {
             String uid = userRecord.getUid();
 
             // Save the UID in the "users" node
-            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+            DatabaseReference usersRef = firebaseInstance.getReference("users");
             usersRef.child(uid).setValueAsync(false);
 
             System.out.println("New user created: " + uid);
@@ -134,7 +134,7 @@ public class RegisterResource {
     }
         private void initConversations (String username, String displayName){
             LOG.severe("Inserting data");
-            DatabaseReference chatsByUser = FirebaseDatabase.getInstance().getReference("chat");
+            DatabaseReference chatsByUser = firebaseInstance.getReference("chat");
             DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
             // Set the data for the new chat
             newChatsForUserRef.child("DisplayName").setValueAsync(displayName);

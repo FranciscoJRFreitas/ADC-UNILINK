@@ -1,35 +1,78 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
   <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="UniHub">
+  <meta name="description" content="Avaliação Individual 60313">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="UniLink">
-  <link rel="apple-touch-icon" href="/assets/icon/ICON_UNILINK-03.png">
+  <meta name="apple-mobile-web-app-title" content="unilink2023">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/assets/icon/ICON_UNILINK-03.png" />
-  <!-- TODO: Add your Google Maps API key here -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g"></script>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>UniLink</title>
+  <title>unilink2023</title>
   <link rel="manifest" href="manifest.json">
-</head>
-<body>
+  
+
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = "904732369";
+    var serviceWorkerVersion = "167058433";
   </script>
+  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
+</head>
+
+<body>
   <script>
+    //type="module"
+    // Import the functions you need from the SDKs you need
+    //import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    /*
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPHBri3-HZb_wjhFCIlVHQ8b7N59pJAjo",
+      authDomain: "unilink23.firebaseapp.com",
+      databaseURL: "https://unilink23-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "unilink23",
+      storageBucket: "unilink23.appspot.com",
+      messagingSenderId: "190649102208",
+      appId: "1:190649102208:web:bdcac3f91b382d1f519b65"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      });
+    }*/
+
     window.addEventListener('load', function (ev) {
+      // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
@@ -41,7 +84,9 @@
         }
       });
     });
+
   </script>
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
+
 </html>

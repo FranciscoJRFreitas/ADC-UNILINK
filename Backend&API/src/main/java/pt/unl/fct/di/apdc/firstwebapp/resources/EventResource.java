@@ -14,13 +14,13 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.*;
+
 @Path("/events")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class EventResource {
 
-    private final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("unilink23").build().getService();
     private static final Logger LOG = Logger.getLogger(EventResource.class.getName());
-    private final Gson g = new Gson();
 
     public EventResource() {
 
@@ -32,27 +32,10 @@ public class EventResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response addEvent(EventData data, @Context HttpHeaders headers) {
 
-        String authTokenHeader = headers.getHeaderString("Authorization");
-        String authToken = authTokenHeader.substring("Bearer".length()).trim();
-        AuthToken token = g.fromJson(authToken, AuthToken.class);
-
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-
-        Entity originalToken = datastore.get(tokenKey);
-
-        if (originalToken == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-        }
-
-        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-        }
-
-            DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-         // Generate a unique ID for the new chat
+        DatabaseReference eventsRef = firebaseInstance.getReference("events");
+        // Generate a unique ID for the new chat
         String eventId = eventsRef.child(data.groupID).push().getKey();
-            // Set the data for the new chat
+        // Set the data for the new chat
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("id", eventId);
         eventData.put("creator", data.creator);
@@ -65,42 +48,23 @@ public class EventResource {
         eventsRef.child(data.groupID).child(eventId).setValueAsync(eventData); // Generate a unique ID for the new chat
 
         Map<String, Object> responseData = new HashMap<>();
-            responseData.put("event_title", data.title);
-            responseData.put("event_type", data.type);
-            responseData.put("event_groupID", data.groupID);
-            responseData.put("event_creator", data.creator);
-            responseData.put("event_description", data.description);
-            responseData.put("event_start_time", data.startTime);
-            responseData.put("event_end_time", data.endTime);
-            responseData.put("event_location", data.location);
+        responseData.put("event_title", data.title);
+        responseData.put("event_type", data.type);
+        responseData.put("event_groupID", data.groupID);
+        responseData.put("event_creator", data.creator);
+        responseData.put("event_description", data.description);
+        responseData.put("event_start_time", data.startTime);
+        responseData.put("event_end_time", data.endTime);
+        responseData.put("event_location", data.location);
 
-
-            return Response.ok(g.toJson(responseData)).build();
-
+        return Response.ok(g.toJson(responseData)).build();
     }
 
     @DELETE
     @Path("/delete")
-    public Response removeEvent(@QueryParam("eventID") String eventID,@QueryParam("groupID") String groupID, @Context HttpHeaders headers) {
-        String authTokenHeader = headers.getHeaderString("Authorization");
-        String authToken = authTokenHeader.substring("Bearer".length()).trim();
-        AuthToken token = g.fromJson(authToken, AuthToken.class);
-
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-                .setKind("User Token").newKey(token.username);
-
-        Entity originalToken = datastore.get(tokenKey);
-
-        if (originalToken == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("User not logged in").build();
-        }
-
-        if (!token.tokenID.equals(originalToken.getString("user_tokenID")) || System.currentTimeMillis() > originalToken.getLong("user_token_expiration_date")) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Session Expired.").build();
-        }
-        DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events").child(groupID);
+    public Response removeEvent(@QueryParam("eventID") String eventID, @QueryParam("groupID") String groupID, @Context HttpHeaders headers) {
+        DatabaseReference eventsRef = firebaseInstance.getReference("events").child(groupID);
         eventsRef.child(eventID).removeValueAsync();
-
         return Response.ok().build();
     }
 

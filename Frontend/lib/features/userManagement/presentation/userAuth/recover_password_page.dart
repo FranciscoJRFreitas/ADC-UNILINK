@@ -173,6 +173,8 @@ class RecoverPasswordPageState extends State<RecoverPasswordPage> {
           false);
     } else if (response.statusCode == 417) {
       showErrorSnackbar(response.body, true);
+    } else if (response.statusCode == 404) {
+      showErrorSnackbar(response.body, true);
     } else {
       showErrorSnackbar(
           "Failed to recover password. Please try again later.", true);
