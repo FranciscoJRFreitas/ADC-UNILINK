@@ -214,11 +214,9 @@ public class ChatResources {
             txn.commit();
             String userEmail = user.getString("user_email");
             String userDisplayName = user.getString("user_displayName");
+            String invitedByDispName = datastoreService.get(datastoreService.newKeyFactory().setKind("User").newKey(token.username)).getString("user_displayName");
 
-            sendInviteEmail(groupId, userDisplayName, userEmail, Invtoken.tokenID);
-
-            DatabaseReference invitesRef = firebaseInstance.getReference("invites").child(groupId).child(userId);
-            invitesRef.child("inviteToken").setValueAsync(Invtoken.tokenID);
+            sendInviteEmail(groupId, userDisplayName, userEmail, userId, Invtoken.tokenID, invitedByDispName);
 
             return Response.ok().build();
         } finally {
@@ -347,7 +345,7 @@ public class ChatResources {
         });
     }
 
-    private void sendInviteEmail(String groupId, String userDisplayName, String email, String token) {
+    private void sendInviteEmail(String groupId, String userDisplayName, String email, String userId, String token, String invitedBy) {
 
         // Retrieve displayName and description from Realtime Database
         DatabaseReference groupRef = firebaseInstance.getReference("groups").child(groupId);
@@ -355,7 +353,15 @@ public class ChatResources {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String displayName = dataSnapshot.child("DisplayName").getValue(String.class);
+                    String groupDisplayName = dataSnapshot.child("DisplayName").getValue(String.class);
+
+                    Map<String, Object> inviteData = new HashMap<>();
+                    inviteData.put("inviteToken", token);
+                    inviteData.put("groupName", groupDisplayName);
+                    inviteData.put("invitedBy", invitedBy);
+
+                    DatabaseReference invitesRef = firebaseInstance.getReference("invites").child(groupId).child(userId);
+                    invitesRef.updateChildrenAsync(inviteData);
 
                     // Update the email content with displayName and description
                     String from = "fj.freitas@campus.fct.unl.pt";
@@ -413,7 +419,7 @@ public class ChatResources {
                             "<div class='email-container'>" +
                             "    <h1 class='email-header'>You received an invitation!</h1>" +
                             "    <p class='email-text'>Dear " + userDisplayName + ",<br><br>" +
-                            "    You have received an invitation to join " + displayName + ".</p>" +
+                            "    You have received an invitation to join " + groupDisplayName + ".</p>" +
                             "    <p class='email-text'>To accept the invitation to join this group, please click the button below.</p>" +
                             "    <a target='_blank' href='" + invitationLink + "' class='email-button'>Accept Invitation</a>" +
                             "    <p class='email-text'>" +
