@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "Serviços",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "Reprografia \"Via Cópia\"" }, "geometry": { "type": "Point", "coordinates": [ -9.2044938, 38.6616669 ] } },
+{ "type": "Feature", "properties": { "Name": "Papelaria \"Solução\"" }, "geometry": { "type": "Point", "coordinates": [ -9.2051992, 38.6614082 ] } },
+{ "type": "Feature", "properties": { "Name": "CEPE - Centro de Educação Pré-Escolar" }, "geometry": { "type": "Point", "coordinates": [ -9.2042336, 38.6620324 ] } },
+{ "type": "Feature", "properties": { "Name": "Minimercado MiniNova" }, "geometry": { "type": "Point", "coordinates": [ -9.2053883, 38.6613653 ] } }
+]
+}
