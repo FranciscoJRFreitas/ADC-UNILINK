@@ -414,7 +414,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                               //SizedBox(width: 5),
                                               Expanded(
                                                 child: Text(
-                                                  '${firstMessage != null ? firstMessage.displayName : ''}: ${firstMessage != null ? firstMessage.text : ''}',
+                                                  '${firstMessage != null ? firstMessage.displayName : ''}: ${firstMessage != null ? firstMessage.text.isEmpty ? '📎 Sent a file' : firstMessage.text : ''}',
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   maxLines: 1,
