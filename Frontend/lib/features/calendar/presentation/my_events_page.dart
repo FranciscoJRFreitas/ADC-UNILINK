@@ -114,41 +114,46 @@ class _MyEventsPageState extends State<MyEventsPage>
         .child('Groups');
 
     await chatRef.once().then((event) {
-      Map<dynamic, dynamic> newgroup =
-          event.snapshot.value as Map<dynamic, dynamic>;
-      newgroup.forEach((key, value) {
-        setState(() {
-          groups.add(key);
-        });
-      });
-    });
-
-    for (String groupId in groups) {
-      DatabaseReference eventsRef =
-          await FirebaseDatabase.instance.ref().child('events').child(groupId);
-
-      await eventsRef.once().then((userDataSnapshot) {
-        if (userDataSnapshot.snapshot.value != null) {
-          Map<dynamic, dynamic> newevents =
-              userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
-
-          newevents.forEach((key, value) {
-            Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
-            Event currentEvent = Event(
-                type: parseEventType(currEvent["type"]),
-                title: currEvent["title"],
-                description: currEvent['description'],
-                location: currEvent['location'],
-                groupId: groupId,
-                startTime: DateTime.parse(currEvent["startTime"]),
-                endTime: DateTime.parse(currEvent["endTime"]));
-
-            groupEvents.add(currentEvent);
-            groupFilteredEvents.add(currentEvent);
+      if (event.snapshot.value != null) {
+        Map<dynamic, dynamic> newgroup =
+            event.snapshot.value as Map<dynamic, dynamic>;
+        newgroup.forEach((key, value) {
+          setState(() {
+            groups.add(key);
           });
-          groupEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
-        }
-      });
+        });
+      }
+    });
+    if (!groups.isEmpty) {
+      for (String groupId in groups) {
+        DatabaseReference eventsRef = await FirebaseDatabase.instance
+            .ref()
+            .child('events')
+            .child(groupId);
+
+        await eventsRef.once().then((userDataSnapshot) {
+          if (userDataSnapshot.snapshot.value != null) {
+            Map<dynamic, dynamic> newevents =
+                userDataSnapshot.snapshot.value as Map<dynamic, dynamic>;
+
+            newevents.forEach((key, value) {
+              Map<dynamic, dynamic> currEvent = value as Map<dynamic, dynamic>;
+              Event currentEvent = Event(
+                  type: parseEventType(currEvent["type"]),
+                  title: currEvent["title"],
+                  description: currEvent['description'],
+                  location: currEvent['location'],
+                  groupId: groupId,
+                  startTime: DateTime.parse(currEvent["startTime"]),
+                  endTime: DateTime.parse(currEvent["endTime"]));
+
+              groupEvents.add(currentEvent);
+              groupFilteredEvents.add(currentEvent);
+            });
+            groupEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+          }
+        });
+      }
     }
 
     setState(() {});
