@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:url_launcher/url_launcher.dart';
 
 class CustomNotification {
   final int id;
@@ -69,10 +70,18 @@ class NotificationService {
   }
 
   _onSelectNotification(String? payload) {
-    if (payload != null && payload.isNotEmpty) {
-      print("pushed notification"); //Navigator.push...
+    if (payload != null) {
+        _launchURL(payload);
     }
   }
+
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+        await launch(url);
+    } else {
+        throw 'Could not launch $url';
+    }
+}
 
   showNotificationScheduled(
       CustomNotification notification, Duration duration) {

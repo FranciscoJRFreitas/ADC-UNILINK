@@ -40,10 +40,10 @@ class FirebaseMessagingService {
     // Handle your message. You could, for example, show a notification:
     _notificationService.showLocalNotification(
       CustomNotification(
-        id: message.data['id'],
+        id: int.tryParse(message.data['id'] ?? '') ?? 0,
         title: message.notification?.title ?? '',
         body: message.notification?.body ?? '',
-        payload: message.data['route'] ?? '',
+        payload: message.data['url'],
       ),
     );
   }
