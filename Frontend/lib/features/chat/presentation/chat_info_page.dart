@@ -2053,8 +2053,9 @@ class _ChatInfoPageState extends State<ChatInfoPage>
       }
       final User? _currentUser = FirebaseAuth.instance.currentUser;
       if (_currentUser != null) {
-        if (!kIsWeb)
+        if (!kIsWeb) {
           await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+        }
       }
     } else {
       showErrorSnackbar('Error Leaving group!', true);

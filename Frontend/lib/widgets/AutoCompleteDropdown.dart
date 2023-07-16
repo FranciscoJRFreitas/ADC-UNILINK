@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
@@ -89,6 +90,30 @@ class _AutocompleteDropdownState extends State<AutocompleteDropdown> {
     });
 
     if (response.statusCode == 200) {
+      DatabaseReference groupRef =
+          FirebaseDatabase.instance.ref().child('groups').child(groupId);
+      DatabaseEvent groupEvent = await groupRef.once();
+      DataSnapshot groupSnapshot = groupEvent.snapshot;
+      String groupName;
+      if (groupSnapshot.value is Map<String, dynamic>) {
+        groupName =
+            (groupSnapshot.value as Map<String, dynamic>)['DisplayName'] ??
+                '<Group Name>';
+      } else {
+        throw Exception('Unexpected data format');
+      }
+
+      DatabaseReference invitesRef = FirebaseDatabase.instance
+          .ref()
+          .child('invites')
+          .child(groupId)
+          .child(userId);
+      Map<String, String> inviteData = {
+        'groupName': groupName,
+        'invitedBy': storedUsername,
+      };
+      await invitesRef.set(inviteData);
+
       showErrorSnackbar('Invite sent!', false);
     } else {
       showErrorSnackbar('Error sending the invite!', true);

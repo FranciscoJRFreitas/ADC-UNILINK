@@ -217,6 +217,9 @@ public class ChatResources {
 
             sendInviteEmail(groupId, userDisplayName, userEmail, Invtoken.tokenID);
 
+            DatabaseReference invitesRef = firebaseInstance.getReference("invites").child(groupId).child(userId);
+            invitesRef.child("inviteToken").setValueAsync(Invtoken.tokenID);
+
             return Response.ok().build();
         } finally {
             if (txn.isActive()) txn.rollback();
