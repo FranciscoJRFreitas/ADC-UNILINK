@@ -1,3 +1,7 @@
+/**
+ * The RegisterData class is a utility class in Java that represents the data required for user
+ * registration and provides methods for validating the registration data.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,8 +47,10 @@ public class RegisterData {
         this.studentNumber = studentNumber;
     }
 
+    // The `validRegistration()` method is a validation method in the `RegisterData` class. It checks
+    // if the registration data provided by the user is valid or not.
     /*
-        StrinUtils checks if is or not empty or not null
+        StringUtils checks if is or not empty or not null
             email matches:
             <string>@<string>. …. .<dom>
             password matches:

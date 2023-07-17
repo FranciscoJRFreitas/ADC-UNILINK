@@ -1,3 +1,7 @@
+/**
+ * The LogoutResource class is a Java resource that handles the logout functionality for a web
+ * application, using Google Cloud Datastore for data storage.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import java.util.logging.Logger;
@@ -24,6 +28,17 @@ public class LogoutResource {
     public LogoutResource() {
     }
 
+    /**
+     * The above function is a Java method that handles a POST request to log out a user by deleting
+     * their authentication token from the datastore.
+     * 
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to retrieve the
+     * headers of the HTTP request.
+     * @return The method is returning a Response object. If the logout is successful, it returns a
+     * Response with status code 200 (OK) and the message "Logout successful." If the user is not
+     * logged in, it returns a Response with status code 401 (UNAUTHORIZED) and the message "User not
+     * logged in."
+     */
     @POST
     @Path("/")
     public Response logout(@Context HttpHeaders headers) {

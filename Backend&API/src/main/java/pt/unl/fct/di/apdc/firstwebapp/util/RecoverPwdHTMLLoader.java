@@ -1,3 +1,7 @@
+/**
+ * The RecoverPwdHTMLLoader class is responsible for loading and replacing tokens in an HTML file used
+ * for password recovery.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import java.io.BufferedReader;
@@ -6,6 +10,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class RecoverPwdHTMLLoader {
+    /**
+     * The function `loadHTML` loads the contents of a HTML file, replaces a placeholder with a given
+     * token, and returns the modified HTML as a string.
+     * 
+     * @param token The "token" parameter is a string that represents a token used for password reset.
+     * @return The method is returning a String that represents the contents of the "pwdReset.html"
+     * file, with the "{TOKEN}" placeholder replaced with the value of the "token" parameter.
+     */
     public static String loadHTML(String token) {
         try (InputStream inputStream = RecoverPwdHTMLLoader.class.getResourceAsStream("/pwdReset.html")) {
             assert inputStream != null;

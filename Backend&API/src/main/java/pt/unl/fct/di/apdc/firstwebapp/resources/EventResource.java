@@ -1,3 +1,7 @@
+/**
+ * The EventResource class is a Java resource class that handles HTTP requests related to events, such
+ * as adding and deleting events.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
@@ -26,6 +30,17 @@ public class EventResource {
 
     }
 
+    /**
+     * This Java function adds an event to a Firebase Realtime Database and returns the event data in
+     * JSON format.
+     * 
+     * @param data The "data" parameter is an object of type EventData. It contains the following
+     * properties:
+     * @param headers The `headers` parameter is used to access the HTTP headers of the incoming
+     * request. It is annotated with `@Context` to indicate that it should be injected by the JAX-RS
+     * runtime.
+     * @return The method is returning a Response object.
+     */
     @POST
     @Path("/add")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -60,6 +75,18 @@ public class EventResource {
         return Response.ok(g.toJson(responseData)).build();
     }
 
+    /**
+     * This function removes an event from a Firebase database based on the event ID and group ID
+     * provided.
+     * 
+     * @param eventID The eventID parameter is a string that represents the unique identifier of the
+     * event that needs to be deleted.
+     * @param groupID The groupID parameter is used to identify the group to which the event belongs.
+     * @param headers The `headers` parameter is used to access the HTTP headers of the request. It is
+     * of type `HttpHeaders` and can be used to retrieve information such as the authorization token,
+     * content type, etc.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @DELETE
     @Path("/delete")
     public Response removeEvent(@QueryParam("eventID") String eventID, @QueryParam("groupID") String groupID, @Context HttpHeaders headers) {

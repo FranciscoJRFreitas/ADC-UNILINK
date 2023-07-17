@@ -1,3 +1,7 @@
+/**
+ * The ModifyAttributesResource class is a Java resource class that handles requests to modify user
+ * attributes in a web application.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import java.util.HashMap;
@@ -37,6 +41,19 @@ public class ModifyAttributesResource {
     public ModifyAttributesResource() {
     }
 
+    /**
+     * This function modifies attributes for a user or target user based on their roles and
+     * permissions.
+     * 
+     * @param data The `data` parameter is an object of type `ModifyAttributesData`. It contains the
+     * data necessary to modify the attributes of a user. The specific attributes and their values are
+     * not provided in the code snippet, but they would be included in the `ModifyAttributesData`
+     * class.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the incoming request. It can be used to retrieve information such as the content
+     * type, authorization token, etc.
+     * @return The method is returning a Response object.
+     */
     @PATCH
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -82,6 +99,19 @@ public class ModifyAttributesResource {
         }
     }
 
+    /**
+     * This function updates optional fields of a user entity based on the provided data, taking into
+     * account the user's role.
+     * 
+     * @param userRole The user's role, which can be one of the following values: STUDENT, TEACHER,
+     * PARENT, ADMIN.
+     * @param user The `user` parameter is an instance of the `Entity` class, which represents a user
+     * entity in the system. It contains various attributes and their corresponding values for the
+     * user.
+     * @param data The `data` parameter is an object of type `ModifyAttributesData` which contains
+     * various optional fields that can be updated for a user. These fields include:
+     * @return The method returns an updated Entity object.
+     */
     private Entity updateOptionalFields(UserRole userRole, Entity user, ModifyAttributesData data) {
         Entity.Builder userBuilder = Entity.newBuilder(user);
 
@@ -114,6 +144,23 @@ public class ModifyAttributesResource {
         return userBuilder.build();
     }
 
+    /**
+     * The function modifies user attributes, updates the Firebase database, and returns a response
+     * with the updated user data.
+     * 
+     * @param user The "user" parameter is an instance of the Entity class, which represents a user
+     * entity in the system. It contains various attributes of the user such as username, email, role,
+     * education level, birth date, profile visibility, state, landline phone, mobile phone,
+     * occupation, workplace, address
+     * @param userRole The userRole parameter is of type UserRole and represents the role of the user.
+     * It is used to determine which optional fields can be modified for the user.
+     * @param data The `data` parameter is of type `ModifyAttributesData` and contains the updated
+     * attribute values for the user.
+     * @param txn The "txn" parameter is of type Transaction and is used to perform atomic operations
+     * on the database. It is used to update the user entity and commit the changes in a single
+     * transaction.
+     * @return The method is returning a Response object.
+     */
     private Response modifyUserAttributes(Entity user, UserRole userRole, ModifyAttributesData data, Transaction txn) {
 
         Entity userUpdated = updateOptionalFields(userRole, user, data);
@@ -149,6 +196,16 @@ public class ModifyAttributesResource {
         return Response.ok(g.toJson(responseData)).build();
     }
 
+    /**
+     * The function checks if a user with a certain role can modify the attributes of another user with
+     * a target role.
+     * 
+     * @param userRole The user role of the user who is trying to modify the attributes. This parameter
+     * represents the role of the user who is performing the action.
+     * @param targetUserRole The targetUserRole parameter represents the user role whose attributes are
+     * being modified.
+     * @return The method is returning a boolean value.
+     */
     private boolean canModifyAttributes(UserRole userRole, UserRole targetUserRole) {
         return VerifyAction.canExecute(userRole, targetUserRole, "modify_permissions");
     }

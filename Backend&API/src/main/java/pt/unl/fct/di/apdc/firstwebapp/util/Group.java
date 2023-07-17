@@ -1,3 +1,7 @@
+/**
+ * The Group class represents a group with a display name, description, admin ID, and a list of
+ * participants.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import java.util.List;

@@ -1,3 +1,7 @@
+/**
+ * The ListUsersResource class is a Java resource that handles the listing of users based on their
+ * roles and other criteria.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.*;
@@ -23,6 +27,14 @@ public class ListUsersResource {
     public ListUsersResource() {
     }
 
+    /**
+     * This function lists users based on their user role using the Google Cloud Datastore API in a
+     * Java application.
+     * 
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to retrieve the HTTP
+     * headers from the request.
+     * @return The method is returning a Response object with the list of users in JSON format.
+     */
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -53,6 +65,13 @@ public class ListUsersResource {
         }
     }
 
+    /**
+     * The function returns a query object based on the user role provided.
+     * 
+     * @param userRole The userRole parameter is an enum that represents the role of a user. The
+     * possible values for userRole are DIRECTOR, PROF, BACKOFFICE, SU, and STUDENT.
+     * @return The method is returning a Query<Entity> object.
+     */
     private Query<Entity> getQueryForUserRole(UserRole userRole) {
         Query<Entity> query;
         switch (userRole) {
@@ -94,6 +113,15 @@ public class ListUsersResource {
         return query;
     }
 
+    /**
+     * The function converts an Entity object into a JsonObject, filtering out certain properties based
+     * on the logged user's role.
+     * 
+     * @param userEntity An instance of the Entity class, representing a user entity.
+     * @param loggedUserRole The loggedUserRole parameter is of type UserRole and represents the role
+     * of the logged-in user.
+     * @return The method returns a JsonObject.
+     */
     private JsonObject entityToJsonObject(Entity userEntity, UserRole loggedUserRole) {
         JsonObjectBuilder builder = Json.createObjectBuilder();
 

@@ -1,3 +1,6 @@
+/**
+ * The InviteToken class is used to generate and store invitation tokens for a specific user and group.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import java.util.UUID;

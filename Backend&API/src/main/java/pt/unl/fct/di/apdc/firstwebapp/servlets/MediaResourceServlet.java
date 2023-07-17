@@ -1,3 +1,7 @@
+/**
+ * The MediaResourceServlet class is a Java servlet that handles file uploads and downloads from Google
+ * Cloud Storage (GCS).
+ */
 package pt.unl.fct.di.apdc.firstwebapp.servlets;
 
 import java.io.IOException;
@@ -20,6 +24,9 @@ import com.google.cloud.storage.StorageOptions;
 @SuppressWarnings("serial")
 public class MediaResourceServlet extends HttpServlet {
 
+	  // The `doGet` method in the `MediaResourceServlet` class is responsible for handling HTTP GET
+	  // requests. It retrieves a file from Google Cloud Storage (GCS) and returns it in the HTTP
+	  // response.
 	  /**
 	   * Retrieves a file from GCS and returns it in the http response.
 	   * If the request path is /gcs/Foo/Bar this will be interpreted as
@@ -46,6 +53,17 @@ public class MediaResourceServlet extends HttpServlet {
 	        blob.downloadTo(resp.getOutputStream());
 	  }
 
+	  /**
+	   * This function handles a POST request to upload a file to Google Cloud Storage.
+	   * 
+	   * @param req The `req` parameter is an instance of the `HttpServletRequest` class, which represents
+	   * the request made by the client to the server. It contains information such as the request method,
+	   * headers, parameters, and input stream.
+	   * @param resp The `resp` parameter is an instance of the `HttpServletResponse` class, which
+	   * represents the response that will be sent back to the client. It is used to send data back to the
+	   * client, such as the response status code, headers, and the response body. In this code snippet,
+	   * the
+	   */
 	  @Override
 	  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	        // Upload file to specified bucket. The request must have the form /gcs/<bucket>/<object>

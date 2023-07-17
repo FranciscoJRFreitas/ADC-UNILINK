@@ -43,6 +43,16 @@ public class ChatResources {
     public ChatResources() {
     }
 
+    /**
+     * This function creates multiple groups and invites participants to each group.
+     * 
+     * @param groups A list of Group objects that contain information about the groups to be created.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the incoming request. It can be used to retrieve information such as authentication
+     * tokens, content type, etc.
+     * @return The method is returning a Response object with a status code of 200 (OK) and an empty
+     * JSON object as the response body.
+     */
     @POST
     @Path("/create-multiple")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -64,6 +74,18 @@ public class ChatResources {
     }
 
 
+    /**
+     * This function creates a new group in the database and checks if the group already exists before
+     * creating it.
+     * 
+     * @param group The "group" parameter is an object of type Group, which contains information about
+     * the group being created. It likely includes properties such as the group name, description, and
+     * admin ID.
+     * @param headers The `headers` parameter is used to access the HTTP headers of the incoming
+     * request. It is of type `HttpHeaders` and can be used to retrieve information such as the content
+     * type, authorization token, etc.
+     * @return The method is returning a Response object.
+     */
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -95,6 +117,15 @@ public class ChatResources {
         return Response.ok("{}").build();
     }
 
+    /**
+     * The function creates a new group chat, sets the necessary data for the group and its first
+     * message, and updates the user's chat list with the new group.
+     * 
+     * @param group The "group" parameter is an object that contains information about the group being
+     * created. It has the following properties:
+     * @param newChatRef The DatabaseReference object that points to the location where the new
+     * chat/group will be created in the Firebase Realtime Database.
+     */
     private void createNewGroup(Group group, DatabaseReference newChatRef) {
         // Set the data for the new chat
         newChatRef.child("DisplayName").setValueAsync(group.DisplayName);
@@ -127,6 +158,16 @@ public class ChatResources {
     }
 
 
+    /**
+     * This function deletes a group and its associated data from a Firebase database.
+     * 
+     * @param groupId The groupId parameter is a String that represents the unique identifier of the
+     * group that needs to be deleted.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to retrieve
+     * information from the HTTP request headers. It can be used to access headers such as
+     * `Content-Type`, `Authorization`, etc.
+     * @return The method is returning a Response object.
+     */
     @DELETE
     @Path("/delete/{groupId}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -174,6 +215,20 @@ public class ChatResources {
     }
 
 
+    /**
+     * The `inviteToGroup` function handles the invitation process for a user to join a group,
+     * including authentication, checking token expiration, creating an invite token, and sending an
+     * email invitation.
+     * 
+     * @param groupId The `groupId` parameter is a string that represents the ID of the group to which
+     * the user is being invited.
+     * @param userId The `userId` parameter is a string that represents the unique identifier of the
+     * user to whom the invitation is being sent.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to retrieve the
+     * headers from the HTTP request.
+     * @return The method is returning a Response object. The response can have different status codes
+     * and entities depending on the conditions in the code.
+     */
     @POST
     @Path("/invite")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -224,6 +279,16 @@ public class ChatResources {
         }
     }
 
+    /**
+     * The function allows a user to join a group by using an invite token and updates the database
+     * accordingly.
+     * 
+     * @param token The "token" parameter is a string that represents an invite token. It is used to
+     * identify and validate the invitation to join a group.
+     * @return The method is returning a Response object. If the invtoken is null, it returns a
+     * Response with status code 403 (FORBIDDEN). If the invtoken is not null, it performs some
+     * operations and returns a Response with status code 200 (OK).
+     */
     @GET
     @Path("/join")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -251,6 +316,18 @@ public class ChatResources {
         }
     }
 
+    /**
+     * This Java function handles a POST request to leave a group, checking authentication, removing
+     * the user from the group, and deleting the group if there are no more members.
+     * 
+     * @param groupId The `groupId` parameter is a string that represents the ID of the group from
+     * which the user wants to leave.
+     * @param userId The `userId` parameter is a string that represents the unique identifier of the
+     * user who wants to leave the group.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the request.
+     * @return The method is returning a Response object.
+     */
     @POST
     @Path("/leave")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -296,6 +373,14 @@ public class ChatResources {
         return Response.ok().build();
     }
 
+    /**
+     * The function deletes all blobs (files) in a specified folder in a Google Cloud Storage bucket.
+     * 
+     * @param folderPath The folderPath parameter is a string that represents the path of the folder
+     * you want to delete. It should be the relative path of the folder within the bucket. For example,
+     * if the folder you want to delete is located at the root of the bucket, the folderPath would be
+     * an empty string ("
+     */
     public static void deleteFolder(String folderPath) {
         Storage storage = StorageOptions.getDefaultInstance().getService();
         String bucketName = "unilink23.appspot.com";
@@ -309,6 +394,14 @@ public class ChatResources {
         }
     }
 
+    /**
+     * The function `leaveGroup` removes a user from a group, deletes the group if it no longer exists,
+     * and deletes associated messages and folders.
+     * 
+     * @param groupId The unique identifier of the group that the user wants to leave.
+     * @param userId The userId parameter represents the unique identifier of the user who wants to
+     * leave the group.
+     */
     public static void leaveGroup(String groupId, String userId) {
         DatabaseReference membersRef = firebaseInstance.getReference("members").child(groupId);
         membersRef.child(userId).removeValueAsync();
@@ -345,6 +438,19 @@ public class ChatResources {
         });
     }
 
+    /**
+     * The function `sendInviteEmail` sends an invitation email to a user to join a group, including
+     * the group's display name and a link to accept the invitation.
+     * 
+     * @param groupId The ID of the group for which the invitation is being sent.
+     * @param userDisplayName The display name of the user who will receive the invitation email.
+     * @param email The email address of the user to whom the invitation email will be sent.
+     * @param userId The `userId` parameter is the unique identifier of the user who is being invited
+     * to join the group.
+     * @param token The token is a unique identifier that is generated for each invitation. It is used
+     * to verify the authenticity of the invitation when the recipient accepts it.
+     * @param invitedBy The name of the user who is sending the invitation.
+     */
     private void sendInviteEmail(String groupId, String userDisplayName, String email, String userId, String token, String invitedBy) {
 
         // Retrieve displayName and description from Realtime Database
