@@ -32,9 +32,30 @@ class _LineDateFieldState extends State<LineDateField> {
         try {
           DateTime? pickedDate = await showDatePicker(
               context: context,
-              initialDate: DateTime.now(), //get today's date
+              initialDate: DateTime.now(), //get today's date //get today's date
               firstDate: DateTime(1940),
-              lastDate: DateTime.now());
+              lastDate: DateTime.now(),
+              builder: (BuildContext context, Widget? child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                          background: Colors.blue,
+                          primary: Colors.blue, // color of the OK button
+                          onPrimary:
+                              Colors.white, // color of the OK button's text
+                          secondary: Colors.red, // color of the Cancel button
+                          onSecondary:
+                              Colors.black, // Adjust to your preference
+                          onBackground:
+                              Colors.blue, // Adjust to your preference
+                          surface: Colors.blue, // Adjust to your preference
+                          onSurface: Colors.white, // Adjust to your preference
+                        ),
+                  ),
+                  child: child!,
+                );
+              });
+
           if (pickedDate != null) {
             String formattedDate = DateFormat("yyyy-MM-dd").format(pickedDate);
             setState(() {
