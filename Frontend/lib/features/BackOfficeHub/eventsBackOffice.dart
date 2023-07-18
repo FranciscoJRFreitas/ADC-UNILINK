@@ -44,11 +44,20 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
 
     eventsRef.onChildAdded.listen((event) {
       setState(() {
-        String? id = event.snapshot.key; // Here is how you get the key
-        Event currentEvent = id != null
-            ? Event.fromSnapshotId(id, event.snapshot)
-            : Event.fromSnapshot(event.snapshot);
+        Map<dynamic, dynamic> currEvent =
+            event.snapshot.value as Map<dynamic, dynamic>;
+
+        Event currentEvent = Event(
+            type: parseEventType(currEvent["type"]),
+            title: currEvent["title"],
+            description: currEvent['description'],
+            location: currEvent['location'],
+            groupId: widget.groupId,
+            startTime: DateTime.parse(currEvent["startTime"]),
+            endTime: DateTime.parse(currEvent["endTime"]));
         events.add(currentEvent);
+
+        print(events); // Print events after adding
       });
     });
 
@@ -57,9 +66,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
 
       setState(() {
         events.removeWhere((event) => event.id == eventId);
+        print(events); // Print events after removing
       });
     });
-    print(events);
   }
 
   @override
