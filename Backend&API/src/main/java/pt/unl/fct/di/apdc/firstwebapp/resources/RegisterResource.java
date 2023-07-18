@@ -1,3 +1,8 @@
+/**
+ * The RegisterResource class is a Java resource that handles user registration by storing user
+ * information in a datastore, sending a verification email, and creating a user record in Firebase
+ * Authentication.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
@@ -36,8 +41,20 @@ public class RegisterResource {
     private static final Logger LOG = Logger.getLogger(RegisterResource.class.getName());
 
     public RegisterResource() {
-    } //This class wont be instancialized
+    } // This class wont be instancialized
 
+    /**
+     * The above function is a Java method that handles user registration by
+     * validating input data,
+     * checking for existing usernames and emails, creating a new user entity in a
+     * datastore, sending a
+     * verification email, and creating a new user record in Firebase.
+     * 
+     * @param data The `data` parameter is an object of the `RegisterData` class,
+     *             which contains the
+     *             following properties:
+     * @return The method is returning a Response object.
+     */
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -89,8 +106,12 @@ public class RegisterResource {
                     .set("user_creation_time", Timestamp.now())
                     .set("user_educationLevel", data.educationLevel == null ? "" : UserEducationLevel.PE.toString())
                     .set("user_birthDate", data.birthDate == null ? "" : data.birthDate)
-                    .set("user_profileVisibility", data.profileVisibility == null ? UserProfileVisibility.PUBLIC.toString() : data.profileVisibility.toString())
-                    .set("user_state", data.activityState == null ? UserActivityState.INACTIVE.toString() : data.activityState.toString())
+                    .set("user_profileVisibility",
+                            data.profileVisibility == null ? UserProfileVisibility.PUBLIC.toString()
+                                    : data.profileVisibility.toString())
+                    .set("user_state",
+                            data.activityState == null ? UserActivityState.INACTIVE.toString()
+                                    : data.activityState.toString())
                     .set("user_activation_token", token)
                     .set("user_course", data.course == null ? "" : data.course)
                     .set("user_landlinePhone", data.landlinePhone == null ? "" : data.landlinePhone)
@@ -101,9 +122,9 @@ public class RegisterResource {
                     .set("user_additionalAddress", data.additionalAddress == null ? "" : data.additionalAddress)
                     .set("user_locality", data.locality == null ? "" : data.locality)
                     .set("user_postalCode", data.postalCode == null ? "" : data.postalCode)
-                    .set("user_taxIdentificationNumber", data.taxIdentificationNumber == null ? "" : data.taxIdentificationNumber)
+                    .set("user_taxIdentificationNumber",
+                            data.taxIdentificationNumber == null ? "" : data.taxIdentificationNumber)
                     .set("user_photo", data.photo == null ? "" : data.photo);
-
 
             user = userBuilder.build();
             txn.add(user);
@@ -128,113 +149,136 @@ public class RegisterResource {
         } catch (FirebaseAuthException e) {
             System.err.println("Error creating user: " + e.getMessage());
         } finally {
-            if (txn.isActive()) txn.rollback();
+            if (txn.isActive())
+                txn.rollback();
         }
         return Response.ok("{}").build();
     }
-        private void initConversations (String username, String displayName){
-            LOG.severe("Inserting data");
-            DatabaseReference chatsByUser = firebaseInstance.getReference("chat");
-            DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
-            // Set the data for the new chat
-            newChatsForUserRef.child("DisplayName").setValueAsync(displayName);
-            newChatsForUserRef.child("DM").setValueAsync("DM");
-            LOG.severe("Inserting data finished");
 
-        }
-        private void sendVerificationEmail (String email, String name, String token){
-            String from = "fj.freitas@campus.fct.unl.pt";
-            String fromName = "UniLink";
-            String subject = "Account Activation";
-            String activationLink = "https://unilink23.oa.r.appspot.com/rest/activate?token=" + token;
-            String htmlContent = "<!DOCTYPE html>" +
-                    "<html>" +
-                    "<head>" +
-                    "<meta charset='utf-8'>" +
-                    "<style>" +
-                    ".email-container {" +
-                    "    font-family: Arial, sans-serif;" +
-                    "    max-width: 600px;" +
-                    "    margin: auto;" +
-                    "    padding: 20px;" +
-                    "    background-color: #ffffff;" +
-                    "    border: 1px solid #cccccc;" +
-                    "    border-radius: 5px;" +
-                    "    text-align: center;" +
-                    "}" +
-                    ".email-container a {" +
-                    "    color: #ffffff;" +
-                    "}" +
-                    ".email-header {" +
-                    "    font-size: 1.5em;" +
-                    "    font-weight: bold;" +
-                    "    color: #333333;" +
-                    "}" +
-                    ".email-text {" +
-                    "    font-size: 1em;" +
-                    "    color: #666666;" +
-                    "    margin: 20px 0;" +
-                    "    text-align: left;" +
-                    "}" +
-                    ".email-button {" +
-                    "    display: inline-block;" +
-                    "    font-size: 1em;" +
-                    "    font-weight: bold;" +
-                    "    color: #f5f5f5;" +
-                    "    background-color: #005890;" +
-                    "    border-radius: 5px;" +
-                    "    padding: 10px 20px;" +
-                    "    text-decoration: none;" +
-                    "}" +
-                    "</style>" +
-                    "</head>" +
-                    "<body>" +
-                    "<div class='email-container'>" +
-                    "    <h1 class='email-header'>Welcome to UniLink!</h1>" +
-                    "    <p class='email-text'>Dear <b>" + name + "</b>,<br><br>" +
-                    "    Thank you for registering with UniLink! </p>" +
-                    "    <p class='email-text'>To complete your registration and activate your account, please click the button below." +
-                    "    </p>" +
-
-                    "    <a target='_blank' href='" + activationLink + "' class='email-button'>Activate your account</a>" +
-                    "    <p class='email-text'>" +
-                    "        If the button above does not work, click the activation link <a target='_blank' href='" + activationLink + "'>here</a>.<br><br>" +
-                    "        Best regards,<br>" +
-                    "        The UniLink Team" +
-                    "    </p>" +
-                    "</div>" +
-                    "</body>" +
-                    "</html>";
-
-
-            MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b", new ClientOptions("v3.1"));
-            MailjetRequest request;
-            MailjetResponse response;
-
-            try {
-                request = new MailjetRequest(Emailv31.resource)
-                        .property(Emailv31.MESSAGES, new JSONArray()
-                                .put(new JSONObject()
-                                        .put(Emailv31.Message.FROM, new JSONObject()
-                                                .put("Email", from)
-                                                .put("Name", fromName))
-                                        .put(Emailv31.Message.TO, new JSONArray()
-                                                .put(new JSONObject()
-                                                        .put("Email", email)))
-                                        .put(Emailv31.Message.SUBJECT, subject)
-                                        .put(Emailv31.Message.HTMLPART, htmlContent)
-                                        .put(Emailv31.Message.CUSTOMID, "AccountActivation")));
-
-                response = client.post(request);
-
-                if (response.getStatus() != 200) {
-                    throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
-                }
-                LOG.info("Email sent.");
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Error sending email", e);
-                throw new RuntimeException(e);
-            }
-        }
+    /**
+     * The function initializes a new conversation in a Firebase database by inserting data for the
+     * chat, including the display name and a flag indicating it is a direct message.
+     * 
+     * @param username The username is a unique identifier for the user. It could be their username or
+     * any other unique identifier that you use to identify the user in your system.
+     * @param displayName The display name of the user. It is used to set the value of the
+     * "DisplayName" field in the new chat data.
+     */
+    private void initConversations(String username, String displayName) {
+        LOG.severe("Inserting data");
+        DatabaseReference chatsByUser = firebaseInstance.getReference("chat");
+        DatabaseReference newChatsForUserRef = chatsByUser.child(username); // Generate a unique ID for the new chat
+        // Set the data for the new chat
+        newChatsForUserRef.child("DisplayName").setValueAsync(displayName);
+        newChatsForUserRef.child("DM").setValueAsync("DM");
+        LOG.severe("Inserting data finished");
 
     }
+
+    /**
+     * The function `sendVerificationEmail` sends a verification email to a user with a given email,
+     * name, and activation token.
+     * 
+     * @param email The email address of the recipient to whom the verification email will be sent.
+     * @param name The name parameter is the name of the user who is registering with UniLink.
+     * @param token The token is a unique identifier that is generated when a user registers for an
+     * account. It is used to verify the user's email address and activate their account.
+     */
+    private void sendVerificationEmail(String email, String name, String token) {
+        String from = "fj.freitas@campus.fct.unl.pt";
+        String fromName = "UniLink";
+        String subject = "Account Activation";
+        String activationLink = "https://unilink23.oa.r.appspot.com/rest/activate?token=" + token;
+        String htmlContent = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<meta charset='utf-8'>" +
+                "<style>" +
+                ".email-container {" +
+                "    font-family: Arial, sans-serif;" +
+                "    max-width: 600px;" +
+                "    margin: auto;" +
+                "    padding: 20px;" +
+                "    background-color: #ffffff;" +
+                "    border: 1px solid #cccccc;" +
+                "    border-radius: 5px;" +
+                "    text-align: center;" +
+                "}" +
+                ".email-container a {" +
+                "    color: #ffffff;" +
+                "}" +
+                ".email-header {" +
+                "    font-size: 1.5em;" +
+                "    font-weight: bold;" +
+                "    color: #333333;" +
+                "}" +
+                ".email-text {" +
+                "    font-size: 1em;" +
+                "    color: #666666;" +
+                "    margin: 20px 0;" +
+                "    text-align: left;" +
+                "}" +
+                ".email-button {" +
+                "    display: inline-block;" +
+                "    font-size: 1em;" +
+                "    font-weight: bold;" +
+                "    color: #f5f5f5;" +
+                "    background-color: #005890;" +
+                "    border-radius: 5px;" +
+                "    padding: 10px 20px;" +
+                "    text-decoration: none;" +
+                "}" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='email-container'>" +
+                "    <h1 class='email-header'>Welcome to UniLink!</h1>" +
+                "    <p class='email-text'>Dear <b>" + name + "</b>,<br><br>" +
+                "    Thank you for registering with UniLink! </p>" +
+                "    <p class='email-text'>To complete your registration and activate your account, please click the button below."
+                +
+                "    </p>" +
+
+                "    <a target='_blank' href='" + activationLink + "' class='email-button'>Activate your account</a>" +
+                "    <p class='email-text'>" +
+                "        If the button above does not work, click the activation link <a target='_blank' href='"
+                + activationLink + "'>here</a>.<br><br>" +
+                "        Best regards,<br>" +
+                "        The UniLink Team" +
+                "    </p>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+
+        MailjetClient client = new MailjetClient("70ea7f6979407b8ba663b6cc22c9a998", "8894516f42fe5ce16edb28200c6e230b",
+                new ClientOptions("v3.1"));
+        MailjetRequest request;
+        MailjetResponse response;
+
+        try {
+            request = new MailjetRequest(Emailv31.resource)
+                    .property(Emailv31.MESSAGES, new JSONArray()
+                            .put(new JSONObject()
+                                    .put(Emailv31.Message.FROM, new JSONObject()
+                                            .put("Email", from)
+                                            .put("Name", fromName))
+                                    .put(Emailv31.Message.TO, new JSONArray()
+                                            .put(new JSONObject()
+                                                    .put("Email", email)))
+                                    .put(Emailv31.Message.SUBJECT, subject)
+                                    .put(Emailv31.Message.HTMLPART, htmlContent)
+                                    .put(Emailv31.Message.CUSTOMID, "AccountActivation")));
+
+            response = client.post(request);
+
+            if (response.getStatus() != 200) {
+                throw new RuntimeException("Failed to send email. Status: " + response.getStatus());
+            }
+            LOG.info("Email sent.");
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error sending email", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+}

@@ -23,7 +23,7 @@
     {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2065322,38.6620774,0]},"properties":{"Name":"Hangar III","description":"- Vicarte - Centro do Vidro e Cerâmica para as Artes"}},
     {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2040861,38.6601212,0]},"properties":{"Name":"UNINOVA I"}},
     {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2036891,38.659828,0]},"properties":{"Name":"UNINOVA II"}},
-    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2034316,38.6615203,0]},"properties":{"Name":"NOVA LINCS","description":"NOVA Laboratory for Computer Science and Informatics"}},
+    {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2034316,38.6615203,0]},"properties":{"Name":"NOVA LINCS","description":"- NOVA Laboratory for Computer Science and Informatics"}},
     {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2033994,38.6594342,0]},"properties":{"Name":"CENIMAT"}},
     {"type":"Feature","geometry":{"type":"Point","coordinates":[-9.2042309,38.662023,0]},"properties":{"Name":"Creche"}}
 ]

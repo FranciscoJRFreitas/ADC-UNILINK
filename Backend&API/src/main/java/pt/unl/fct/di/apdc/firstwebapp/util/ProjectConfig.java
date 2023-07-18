@@ -1,3 +1,7 @@
+/**
+ * The ProjectConfig class provides static variables for the project's Datastore service, Gson library,
+ * and Firebase database instance.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import com.google.cloud.datastore.Datastore;

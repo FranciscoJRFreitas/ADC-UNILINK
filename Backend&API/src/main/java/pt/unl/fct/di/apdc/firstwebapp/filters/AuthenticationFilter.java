@@ -1,3 +1,7 @@
+/**
+ * The `AuthenticationFilter` class is a Java filter that checks if a user is authenticated before
+ * allowing access to certain paths in a web application.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.filters;
 
 import com.google.cloud.datastore.*;
@@ -22,6 +26,20 @@ public class AuthenticationFilter implements Filter {
 
     }
 
+    /**
+     * This function is a filter that checks if a request is allowed based on the requested path and
+     * authentication token.
+     * 
+     * @param request The `request` parameter is of type `ServletRequest` and represents the incoming
+     * request from the client. It contains information such as the request method, headers,
+     * parameters, and body.
+     * @param response The "response" parameter is the ServletResponse object that represents the
+     * response to be sent back to the client. It is used to send data back to the client, such as HTML
+     * content or error messages.
+     * @param chain The `chain` parameter is an object of type `FilterChain`. It is used to invoke the
+     * next filter in the chain or the servlet if there are no more filters. The `doFilter` method of
+     * the `FilterChain` interface is called to pass the request and response objects to the next
+     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;

@@ -1,3 +1,7 @@
+/**
+ * The EventData class is a Java class that represents the data of an event, including its creator,
+ * type, title, description, start and end time, group ID, and location.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 public class EventData {

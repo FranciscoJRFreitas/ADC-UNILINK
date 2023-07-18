@@ -1,3 +1,7 @@
+/**
+ * The class ModifyAttributesData is a utility class in Java that represents data for modifying user
+ * attributes and provides a method for validating the data.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +40,13 @@ public class ModifyAttributesData {
         this.password = password;
     }
 
+    /**
+     * The function checks if the username and password parameters are not empty, and if the email
+     * parameter is not empty and has a valid format.
+     * 
+     * @return The method is returning a string. The possible return values are "Missing parameters.",
+     * "Invalid email format.", or "OK".
+     */
     public String validModifyAttributes() {
         if (StringUtils.isAnyEmpty(this.username, this.password)) {
             return "Missing parameters.";

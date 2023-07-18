@@ -1,3 +1,7 @@
+/**
+ * The ChangePasswordResource class is a Java resource class that handles requests to change a user's
+ * password.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
@@ -33,6 +37,17 @@ public class ChangePasswordResource {
     public ChangePasswordResource() {
     }
 
+    /**
+     * The above function is a PATCH endpoint in a Java web service that allows users to change their
+     * password, with validation and authentication checks.
+     * 
+     * @param data ChangePasswordData object that contains the username, currentPwd, and newPwd fields.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the incoming request. It is annotated with `@Context` to indicate that it should be
+     * injected by the JAX-RS runtime.
+     * @return The method is returning a Response object. The response can have different status codes
+     * and entities depending on the conditions in the code. Here are the possible return scenarios:
+     */
     @PATCH
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)

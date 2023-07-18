@@ -1,3 +1,7 @@
+/**
+ * The LoginResource class is a Java resource class that handles user login functionality for a web
+ * application.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import java.util.HashMap;
@@ -30,6 +34,20 @@ import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.g;
 public class LoginResource {
     private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
+    /**
+     * The above function is a Java method that handles user login by checking the provided credentials
+     * against the stored user data in a datastore and returning an appropriate response.
+     * 
+     * @param data The `data` parameter is an object of type `LoginData` which contains the login
+     * credentials entered by the user. It includes the `username` and `password` fields.
+     * @param request The `request` parameter is of type `HttpServletRequest` and represents the HTTP
+     * request made by the client. It contains information such as the request method, headers, and
+     * body.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and represents the HTTP headers
+     * of the request. It can be used to access and manipulate the headers sent in the request.
+     * @return The method is returning a Response object. The specific response returned depends on the
+     * logic and conditions within the method. The possible responses that can be returned are:
+     */
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -95,18 +113,43 @@ public class LoginResource {
         }
     }
 
+    /**
+     * The function `createUserStatsKey` creates a new key for a user's statistics entity in a
+     * datastore, using the username as an ancestor and "UserStats" as the kind.
+     * 
+     * @param username The username parameter is a string that represents the username of the user for
+     * whom the user statistics key is being created.
+     * @return The method is returning a private Key object.
+     */
     private Key createUserStatsKey(String username) {
         return datastoreService.newKeyFactory()
                 .addAncestors(PathElement.of("User", username))
                 .setKind("UserStats").newKey("counters");
     }
 
+    /**
+     * The function creates a new key for a user log entity in the datastore.
+     * 
+     * @param username The username parameter is a string that represents the username of the user for
+     * whom the log key is being created.
+     * @return The method is returning a private Key object.
+     */
     private Key createLogKey(String username) {
         return datastoreService.allocateId(datastoreService.newKeyFactory()
                 .addAncestors(PathElement.of("User", username))
                 .setKind("UserLog").newKey());
     }
 
+    /**
+     * The function retrieves or creates a user's statistics entity in a transaction.
+     * 
+     * @param txn The "txn" parameter is a transaction object that is used to perform operations on the
+     * datastore. It allows for atomicity and consistency when making multiple changes to the
+     * datastore.
+     * @param ctrskey The `ctrskey` parameter is a `Key` object that represents the key of the entity
+     * in the datastore. It is used to retrieve or create the entity for user statistics.
+     * @return The method is returning an Entity object.
+     */
     private Entity getOrCreateUserStats(Transaction txn, Key ctrskey) {
         Entity stats = txn.get(ctrskey);
         if (stats == null) {
@@ -119,6 +162,25 @@ public class LoginResource {
         return stats;
     }
 
+    /**
+     * This function handles a successful login by creating an authentication token, retrieving user
+     * data, and returning a response with the user's information and the token.
+     * 
+     * @param user The "user" parameter is an Entity object that represents the user who successfully
+     * logged in. It contains various properties such as "user_displayName", "user_username",
+     * "user_email", etc., which hold the user's information.
+     * @param txn The "txn" parameter is an instance of the Transaction class, which is used to perform
+     * operations on the datastore within a transaction. It allows you to read and write entities
+     * atomically, ensuring consistency and isolation.
+     * @param log The `log` parameter is an `Entity` object representing the log entry for the user's
+     * login activity. It contains information such as the user's username, login time, and IP address.
+     * @param uStats uStats is an Entity object that represents the user's statistics or activity data.
+     * It is used to store information related to the user's login activity, such as the number of
+     * active logins.
+     * @param tokenKey The tokenKey parameter is a Key object that represents the key of the entity in
+     * the datastore where the token information is stored.
+     * @return The method is returning a Response object.
+     */
     private Response handleSuccessfulLogin(Entity user, Transaction txn, Entity log, Entity uStats, Key tokenKey) {
 
         Entity originalToken = txn.get(tokenKey);
@@ -176,6 +238,19 @@ public class LoginResource {
         return Response.ok(g.toJson(responseData)).header("Authorization", "Bearer " + tokenString).build();
     }
 
+    /**
+     * The function creates an entity with various properties based on the request, headers, and a
+     * given key.
+     * 
+     * @param request The `HttpServletRequest` object represents the HTTP request made by the client.
+     * It contains information such as the request method, headers, parameters, and body.
+     * @param headers The `headers` parameter is an instance of the `HttpHeaders` class, which
+     * represents the HTTP headers of a request. It contains methods to retrieve specific header values
+     * based on their names.
+     * @param logKey The logKey parameter is the key that will be used to identify the log entity in
+     * the datastore. It is of type Key.
+     * @return The method is returning an Entity object.
+     */
     private Entity createLogEntity(HttpServletRequest request, HttpHeaders headers, Key logKey) {
         String cityLatLong = headers.getHeaderString("X-AppEngine-CityLatLong");
         String city = headers.getHeaderString("X-AppEngine-City");
@@ -194,6 +269,17 @@ public class LoginResource {
                 .build();
     }
 
+    /**
+     * The function updates the statistics of a user after a successful login.
+     * 
+     * @param stats The "stats" parameter is an Entity object that represents the current statistics of
+     * a user. It contains properties such as "user_stats_logins", "user_stats_failed",
+     * "user_first_login", and "user_last_login".
+     * @param ctrskey The `ctrskey` parameter is a Key object that represents the key of the entity
+     * that needs to be updated. It is used to specify the entity that needs to be modified in the
+     * datastore.
+     * @return The method is returning an updated Entity object with the updated login statistics.
+     */
     private Entity updateStatsForSuccessfulLogin(Entity stats, Key ctrskey) {
         return Entity.newBuilder(ctrskey)
                 .set("user_stats_logins", 1L + stats.getLong("user_stats_logins"))
@@ -203,6 +289,21 @@ public class LoginResource {
                 .build();
     }
 
+    /**
+     * The function handles a failed login attempt by updating the user's statistics, logging the
+     * event, and returning a forbidden response.
+     * 
+     * @param username The username of the user who failed to login.
+     * @param txn txn is an instance of the Transaction class, which is used to perform operations on
+     * the datastore within a transaction. It is used to update the user statistics entity and commit
+     * the changes to the datastore.
+     * @param stats The "stats" parameter is an instance of the "Entity" class, which represents an
+     * entity in the datastore. It likely contains information about the user's login statistics, such
+     * as the number of failed login attempts.
+     * @param ctrskey The `ctrskey` parameter is a `Key` object that represents the key of the entity
+     * that stores the login attempt counter for the user.
+     * @return The method is returning a Response object with a status of FORBIDDEN.
+     */
     private Response handleFailedLogin(String username, Transaction txn, Entity stats, Key ctrskey) {
         Entity ustats = updateStatsForFailedLogin(stats, ctrskey);
         txn.put(ustats);
@@ -211,6 +312,15 @@ public class LoginResource {
         return Response.status(Status.FORBIDDEN).build();
     }
 
+    /**
+     * The function updates the statistics for a failed login attempt in an entity.
+     * 
+     * @param stats An Entity object that contains the current statistics for a user.
+     * @param ctrskey The `ctrskey` parameter is a Key object that represents the key of the entity
+     * that needs to be updated. It is used to specify the entity that will be updated in the
+     * datastore.
+     * @return The method is returning an updated Entity object.
+     */
     private Entity updateStatsForFailedLogin(Entity stats, Key ctrskey) {
         return Entity.newBuilder(ctrskey)
                 .set("user_stats_logins", stats.getLong("user_stats_logins"))

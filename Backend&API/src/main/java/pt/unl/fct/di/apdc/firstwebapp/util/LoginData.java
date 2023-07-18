@@ -1,3 +1,7 @@
+/**
+ * The LoginData class is a utility class that represents the data required for a user login, including
+ * the username and password.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 public class LoginData {

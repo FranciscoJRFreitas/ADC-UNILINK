@@ -1,3 +1,7 @@
+/**
+ * The ActivationResource class is a Java resource class that handles the activation of user accounts
+ * by updating the user's state in the datastore and returning an HTML response.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import java.util.logging.Logger;
@@ -14,6 +18,17 @@ import static pt.unl.fct.di.apdc.firstwebapp.util.ProjectConfig.datastoreService
 
 @Path("/activate")
 public class ActivationResource {
+    /**
+     * This Java function activates a user account by updating the user's state and activation token in
+     * a datastore, and returns a response with an HTML message indicating the success or failure of
+     * the activation process.
+     * 
+     * @param token The `token` parameter is used to activate a user account. It is passed as a query
+     * parameter in the URL. The method checks if the token matches the `user_activation_token`
+     * property of a user entity in the datastore. If a match is found, the user's `user_state`
+     * property
+     * @return The method is returning a Response object.
+     */
     @GET
     @Path("/")
     public Response activateAccount(@QueryParam("token") String token) {

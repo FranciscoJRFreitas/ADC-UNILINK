@@ -1,3 +1,7 @@
+/**
+ * The RemoveData class is a utility class that holds information about a user's username, password,
+ * and the target username to be removed.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 public class RemoveData {

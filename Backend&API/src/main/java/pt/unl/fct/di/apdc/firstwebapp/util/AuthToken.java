@@ -1,3 +1,7 @@
+/**
+ * The AuthToken class is a utility class in Java that represents an authentication token with a
+ * username, token ID, creation date, and expiration date.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import java.util.UUID;

@@ -1,3 +1,7 @@
+/**
+ * The above class is a Java resource class that handles various operations related to anomalies, such
+ * as sending, detecting, confirming, rejecting, reviewing, resolving, and deleting anomalies.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 import com.google.cloud.datastore.Entity;
@@ -29,6 +33,17 @@ public class AnomalyResources {
     public AnomalyResources() {
     }
 
+    /**
+     * This function receives an AnomalyData object, creates a new AnomalyData object with the received
+     * data, and stores it in a Firebase database.
+     * 
+     * @param data AnomalyData object containing the anomaly information such as title, description,
+     * coordinates, and sender.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the incoming request. It can be used to retrieve information such as the content
+     * type, authorization token, or any other custom headers that were included in the request.
+     * @return The method is returning a Response object with a status of 200 (OK).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/send")
@@ -48,6 +63,17 @@ public class AnomalyResources {
     }
 
 
+    /**
+     * This Java function detects an anomaly by updating the status of the anomaly in a Firebase
+     * database.
+     * 
+     * @param anomalyId The anomalyId parameter is a string that represents the unique identifier of
+     * the anomaly that needs to be detected.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the incoming request. It can be used to retrieve information such as the content
+     * type, authorization token, or any custom headers that were included in the request.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/detect")
@@ -61,6 +87,16 @@ public class AnomalyResources {
         return Response.ok().build();
     }
 
+    /**
+     * This function confirms an anomaly by updating its status to "Confirmed" in a Firebase database.
+     * 
+     * @param anomalyId The anomalyId parameter is a string that represents the unique identifier of
+     * the anomaly that needs to be confirmed.
+     * @param headers The `headers` parameter is used to access the HTTP headers of the incoming
+     * request. It can be used to retrieve information such as the content type, authorization token,
+     * or any custom headers that were included in the request.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/confirm")
@@ -73,6 +109,16 @@ public class AnomalyResources {
         return Response.ok().build();
     }
 
+    /**
+     * This function updates the status of an anomaly to "Rejected" in a Firebase database.
+     * 
+     * @param anomalyId The anomalyId parameter is a string that represents the unique identifier of
+     * the anomaly that needs to be rejected.
+     * @param headers The `headers` parameter is used to access the HTTP headers of the incoming
+     * request. It can be used to retrieve information such as the content type, authorization token,
+     * or any custom headers that were included in the request.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/reject")
@@ -85,6 +131,16 @@ public class AnomalyResources {
         return Response.ok().build();
     }
 
+    /**
+     * This function updates the status of an anomaly to "In Progress" in a Firebase database.
+     * 
+     * @param anomalyId The anomalyId parameter is a string that represents the unique identifier of
+     * the anomaly being reviewed.
+     * @param headers The `headers` parameter is used to access the HTTP headers of the incoming
+     * request. It can be used to retrieve information such as authentication tokens, content type, and
+     * other metadata associated with the request.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/inProgress")
@@ -97,6 +153,16 @@ public class AnomalyResources {
         return Response.ok().build();
     }
 
+    /**
+     * This function resolves an anomaly by updating its status to "Solved" in a Firebase database.
+     * 
+     * @param anomalyId The anomalyId parameter is a string that represents the unique identifier of
+     * the anomaly that needs to be resolved.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to access the HTTP
+     * headers of the incoming request. It can be used to retrieve information such as the content
+     * type, authorization token, or any custom headers that were included in the request.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/resolve")
@@ -109,6 +175,15 @@ public class AnomalyResources {
         return Response.ok().build();
     }
 
+    /**
+     * This function deletes an anomaly from a Firebase database based on its ID.
+     * 
+     * @param anomalyId The anomalyId parameter is a string that represents the unique identifier of
+     * the anomaly that needs to be deleted.
+     * @param headers The `headers` parameter is used to access the HTTP headers of the request. It can
+     * be used to retrieve information such as authentication tokens, content type, etc.
+     * @return The method is returning a Response object with a status of "OK" (200).
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/delete")

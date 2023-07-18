@@ -1,3 +1,7 @@
+/**
+ * The RemoveResource class is a Java resource that handles the deletion of user accounts and
+ * associated data from a web application, including authentication and authorization checks.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
 
@@ -31,6 +35,20 @@ public class RemoveResource {
     public RemoveResource() {
     }
 
+    /**
+     * The deleteUser function is a Java method that handles a DELETE request to delete a user from a
+     * system, including deleting associated data from a Firebase database.
+     * 
+     * @param targetUsername The `targetUsername` parameter is used to specify the username of the user
+     * that needs to be deleted. If this parameter is empty or null, it means that the current user
+     * wants to delete their own account.
+     * @param password The `password` parameter is a String that represents the password provided by
+     * the user for authentication.
+     * @param headers The `headers` parameter is of type `HttpHeaders` and is used to retrieve the
+     * headers of the HTTP request.
+     * @return The method is returning a Response object. The response can have different status codes
+     * and entities depending on the conditions in the code. Here are the possible return values:
+     */
     @DELETE
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -145,6 +163,14 @@ public class RemoveResource {
         }
     }
 
+    /**
+     * The function checks if a user with a certain role can delete another user with a target role.
+     * 
+     * @param userRole The role of the user who wants to delete the target user's permissions.
+     * @param targetUserRole The targetUserRole parameter represents the role of the user whose
+     * permissions are being checked for deletion.
+     * @return The method is returning a boolean value.
+     */
     private boolean canDelete(String userRole, String targetUserRole) {
         return VerifyAction.canExecute(userRole, targetUserRole, "remove_permissions");
     }

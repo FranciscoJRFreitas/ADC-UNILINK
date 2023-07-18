@@ -1,3 +1,7 @@
+/**
+ * The AnomalyData class is a utility class that represents data related to an anomaly, including its
+ * ID, title, description, coordinates, and sender.
+ */
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
 import java.util.UUID;
