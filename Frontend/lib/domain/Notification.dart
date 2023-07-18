@@ -59,7 +59,7 @@ class NotificationService {
   }
 
   _initializeNotifications() async {
-    const android = AndroidInitializationSettings('@mipmap/launcher_icon');
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     // Fazer: macOs, iOS, Linux...
     await localNotificationsPlugin.initialize(
       const InitializationSettings(

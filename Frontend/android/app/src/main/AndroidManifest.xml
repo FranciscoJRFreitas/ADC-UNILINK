@@ -10,7 +10,7 @@
     <application
         android:name="androidx.multidex.MultiDexApplication"
         android:label="UniHub"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCae89QI1f9Tf_lrvsyEcKwyO2bg8ot06g" />
