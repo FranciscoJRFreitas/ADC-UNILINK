@@ -48,6 +48,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
             event.snapshot.value as Map<dynamic, dynamic>;
 
         Event currentEvent = Event(
+            id: event.snapshot.key,
             type: parseEventType(currEvent["type"]),
             title: currEvent["title"],
             description: currEvent['description'],
